@@ -1,0 +1,6 @@
+#!/bin/bash
+echo \
+  {% for container_host in hostvars[inventory_hostname].groups.container_hosts %}
+  {{ container_host }} \
+  {% endfor %}
+> /tmp/blaX

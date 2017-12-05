@@ -1,0 +1,15 @@
+---
+- hosts:
+  - hypervisors
+  roles:
+  - image_builder
+
+- hosts:
+  - container_hosts
+  roles:
+  - configure_container_hosts
+
+- hosts:
+  - container_hosts
+  roles:
+  - create_containers

@@ -1,0 +1,22 @@
+hypervisors:
+  hosts:
+    10.87.64.31:
+      bridge: br1
+      container_hosts:
+        192.168.1.100:
+    10.87.64.32:
+      bridge: br1
+      container_hosts:
+        192.168.1.101:
+    10.87.64.33:
+      bridge: br1
+      container_hosts:
+        192.168.1.102:
+container_hosts:        
+  hosts:
+    192.168.1.100:
+      ansible_ssh_pass: contrail123
+    192.168.1.101:
+      ansible_ssh_pass: contrail123
+    192.168.1.102:
+      ansible_ssh_pass: contrail123

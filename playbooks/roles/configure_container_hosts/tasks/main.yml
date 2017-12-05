@@ -1,0 +1,4 @@
+---
+- name: install software
+  include: install_software.yml
+  when: CONFIGURE_VMS is defined and CONFIGURE_VMS==true

@@ -1,0 +1,16 @@
+---
+- name: get docker version
+  shell: "docker version | grep Version: |awk '{print $2}' |head -1"
+  register: docker_version
+
+- debug:
+    msg: "Docker version should be 1.12.6 but is {{ docker_version.stdout }}"
+  when: docker_version.stdout |version_compare('1.12.6') != true
+
+- name: get docker compose version
+  shell: "docker-compose version |grep 'docker-compose version' |awk '{print $3}' |tr ',' ' '|tr -d ' '"
+  register: docker_compose_version
+
+- debug:
+    msg: "Docker-compose version should be 1.17.0 but is {{ docker_compose_version.stdout }}"
+  when: docker_compose_version.stdout |version_compare('1.17.0') != true

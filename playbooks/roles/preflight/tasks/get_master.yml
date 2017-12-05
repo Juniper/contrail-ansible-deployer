@@ -1,0 +1,8 @@
+---
+- debug:
+    msg: "I am not master, master is {{ master }}"
+  when: inventory_hostname != master
+
+- debug:
+    msg: "I am master"
+  when: inventory_hostname == master

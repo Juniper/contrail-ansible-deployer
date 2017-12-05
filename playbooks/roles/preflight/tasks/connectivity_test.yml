@@ -1,0 +1,44 @@
+---
+- name: ping 'em all (short)
+  shell: "ping -c 5 -q {{ hostvars[item].ansible_hostname}}"
+  register: ping_result_short
+
+- name: set ping success
+  set_fact:
+    ping_success: "{{ ping_result_short.stdout_lines[3] | regex_findall('[0-9]{1,3}%')| regex_replace('%') | int}}"
+
+- set_fact:
+    bad_ping_sort: "ping from {{ inventory_hostname }} to {{ hostvars[item].ansible_hostname}} is bad"
+  when: ping_success | int >= 10
+
+- name: ping 'em all (long)
+  shell: "ping -c 5 -q {{ hostvars[item].ansible_fqdn}}"
+  register: ping_result_long
+
+- name: set ping success
+  set_fact:
+    ping_success: "{{ ping_result_long.stdout_lines[3] | regex_findall('[0-9]{1,3}%')| regex_replace('%') | int}}"
+
+- set_fact:
+    bad_ping_long: "ping from {{ inventory_hostname }} to {{ hostvars[item].ansible_fqdn}} is bad"
+  when: ping_success | int >= 10
+
+- debug:
+    msg: "{{ bad_ping_long }}"
+  when: bad_ping_long is defined
+
+- name: ping the internet
+  shell: "ping -c 5 -q 8.8.8.8"
+  register: ping_result_internet
+
+- name: set ping success
+  set_fact:
+    ping_success: "{{ ping_result_internet.stdout_lines[3] | regex_findall('[0-9]{1,3}%')| regex_replace('%') | int}}"
+
+- set_fact:
+    bad_ping_long: "ping from {{ inventory_hostname }} to 8.8.8.8"
+  when: ping_success | int >= 10
+
+- debug:
+    msg: "{{ bad_ping_long }}"
+  when: bad_ping_long is defined

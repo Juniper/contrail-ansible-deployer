@@ -1,0 +1,51 @@
+---
+- name: start contrail config database
+  docker_service:
+    project_name: contrail-config-database
+    definition:
+      version: '2'
+      services:
+        network:
+          image: docker.io/kubernetes/pause
+          network_mode: "host"
+        cassandra:
+          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-database-cassandra:{{ contrail_configuration.CONTRAIL_VERSION }}"
+          environment:
+           - "CONTROLLER_NODES={{ CONTROLLER_NODES }}"
+           - "CASSANDRA_SEEDS={{ CASSANDRA_SEEDS }}"
+           - CASSANDRA_START_RPC=true
+           - CASSANDRA_CLUSTER_NAME=contrail_database
+          volumes:
+           - /var/lib/cassandra/data
+          network_mode: "service:network"
+          depends_on:
+            - network
+          restart: on-failure
+        zookeeper:
+          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-database-zookeeper:{{ contrail_configuration.CONTRAIL_VERSION }}"
+          environment:
+           - "CONTROLLER_NODES={{ CONTROLLER_NODES }}"
+          volumes:
+           - /data
+          network_mode: "service:network"
+          depends_on:
+            - network
+          restart: on-failure
+        rabbitmq:
+          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-database-rabbitmq:{{ contrail_configuration.CONTRAIL_VERSION }}"
+          environment:
+           - "CONTROLLER_NODES={{ CONTROLLER_NODES }}"
+           - RABBITMQ_ERLANG_COOKIE=abcdefg
+          network_mode: "service:network"
+          depends_on:
+            - network
+          restart: on-failure
+        redis:
+          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-database-redis:{{ contrail_configuration.CONTRAIL_VERSION }}"
+          environment:
+           - "CONTROLLER_NODES={{ CONTROLLER_NODES }}"
+          network_mode: "service:network"
+          network_mode: "host"
+          depends_on:
+            - network
+          restart: on-failure

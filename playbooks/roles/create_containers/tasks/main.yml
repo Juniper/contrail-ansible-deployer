@@ -1,0 +1,76 @@
+---
+- name: create /var/log/contrail
+  file:
+    path: /var/log/contrail
+    state: directory
+    recurse: yes
+
+- name: get /tmp/common.env stat
+  stat:
+    path: /tmp/common.env
+  register: st
+
+- name: delete /tmp/common.env if exists
+  file:
+    path: /tmp/common.env
+    state: absent
+  when: st.stat.exists is defined and st.stat.exists and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: create /tmp/common.env
+  file:
+    path: /tmp/common.env
+    state: touch
+  when: CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: populate common.env
+  lineinfile: dest=/tmp/common.env regexp='.*{{ item.key }}$' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ contrail_configuration }}"
+  when: CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: create contrail config datqbase
+  include: create_config_database.yml
+  when: roles[inventory_hostname].configdb is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: create contrail config
+  include: create_config.yml
+  when: roles[inventory_hostname].config is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: create contrail webui
+  include: create_webui.yml
+  when: roles[inventory_hostname].webui is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: create contrail control
+  include: create_control.yml
+  when: roles[inventory_hostname].control is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: create contrail analytics database
+  include: create_analytics_db.yml
+  when: roles[inventory_hostname].analyticsdb is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: create contrail analytics
+  include: create_analytics.yml
+  when: roles[inventory_hostname].analytics is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: create contrail vrouter
+  include: create_vrouter.yml
+  when: roles[inventory_hostname].vrouter is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: set master
+  include: set_master.yml
+  when: roles[inventory_hostname].k8s_master is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: create cni
+  include: create_k8s_cni.yml
+  when: roles[inventory_hostname].k8s_master is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: configure k8s master
+  include: configure_k8s_master_node.yml
+  when: roles[inventory_hostname].k8s_master is defined and master is defined and inventory_hostname == master and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: join k8s master
+  include: configure_k8s_join_node.yml
+  when: roles[inventory_hostname].k8s_master is defined and master is defined and inventory_hostname != master and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: create contrail kube manager
+  include: create_kube_manager.yml
+  when: roles[inventory_hostname].k8s_master is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true and hostvars[inventory_hostname].master == inventory_hostname

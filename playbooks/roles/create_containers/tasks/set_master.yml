@@ -1,0 +1,4 @@
+---
+- name: set master
+  set_fact:
+    master: "{{ groups['container_hosts'][0] }}"

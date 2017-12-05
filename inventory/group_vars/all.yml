@@ -1,0 +1,4 @@
+---
+BUILD_VMS: true
+CONFIGURE_VMS: true
+CREATE_CONTAINERS: true

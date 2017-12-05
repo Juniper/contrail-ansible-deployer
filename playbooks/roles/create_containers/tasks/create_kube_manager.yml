@@ -1,0 +1,8 @@
+---
+- name: create contrail kube manager yaml
+  template:
+    src: contrail-micro.yaml.j2
+    dest: /tmp/contrail-micro.yaml
+
+- name: execute yaml
+  shell: kubectl apply -f /tmp/contrail-micro.yaml

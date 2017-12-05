@@ -1,0 +1,16 @@
+#!/bin/bash
+export LIBGUESTFS_BACKEND=direct
+/usr/bin/virt-customize  -a /var/lib/libvirt/images/{{ container_vm_hostname }}.qcow2 \
+--run-command 'xfs_growfs /' \
+--root-password password:{{ CONTAINER_VM_CONFIG.root_pwd }} \
+--hostname {{ container_vm_hostname }}.{{ CONTAINER_VM_CONFIG.network.domainsuffix }} \
+--run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
+--run-command 'sed -i "s/#UseDNS yes/UseDNS no/g" /etc/ssh/sshd_config' \
+{% for host in hostvars[inventory_hostname].groups.container_hosts %}
+--run-command 'echo {{ host }} {{ host.replace('.','-') }}.{{ CONTAINER_VM_CONFIG.network.domainsuffix }} {{ host.replace('.','-') }} >> /etc/hosts' \
+{% endfor %}
+--run-command 'systemctl enable sshd' \
+--install 'ntp' \
+--run-command 'yum remove -y cloud-init' \
+--upload /tmp/ifcfg_{{ container_vm_hostname }}:/etc/sysconfig/network-scripts/ifcfg-eth0 \
+--selinux-relabel

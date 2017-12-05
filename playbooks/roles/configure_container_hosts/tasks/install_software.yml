@@ -1,0 +1,108 @@
+---
+- name: install epel
+  yum:
+    name: epel-release
+    state: latest
+
+- name: install ntpd
+  yum:
+    name: ntp
+    state: latest
+
+- name: set ntp server
+  template:
+    src: ntp.conf.j2
+    dest: /etc/ntp.conf
+
+- name: initial time sync
+  shell: "ntpdate {{ hostvars[groups['hypervisors'][0]].CONTAINER_VM_CONFIG.network.ntpserver }}"
+  ignore_errors: yes
+
+- name: start ntp service
+  service: name=ntpd state=started enabled=yes
+
+- name: install pip
+  yum:
+    name: python-pip
+    state: latest
+
+- name: install docker
+  yum:
+    name: docker
+    state: latest
+
+- name: set docker registry
+  copy:
+    content: "{\n  \"insecure-registries\": [\"{{ CONTAINER_REGISTRY }}\"]\n}"
+    dest: /etc/docker/daemon.json
+  when: CONTAINER_REGISTRY is defined
+
+- name: start docker daemon
+  service:
+    enabled: yes
+    name: docker
+    state: started
+
+- name: get docker compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/1.17.0/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: 0777
+
+- name: install python compose
+  pip:
+    name: docker-compose==1.9.0
+
+#- name: "Build hosts file"
+#  lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ item }} {{ item.replace('.','-') }}.{{ hostvars[groups['hypervisors'][0]].CONTAINER_VM_CONFIG.network.domainsuffix }} {{ item.replace('.','-') }}" state=present
+#  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+
+- name: create log file directory
+  file:
+   dest: /var/log/docker/contrail
+   state: directory
+   mode: 0777
+
+- name: create k8s repo
+  yum_repository:
+    name: Kubernetes
+    description: k8s repo
+    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+    gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    repo_gpgcheck: yes
+    gpgcheck: yes
+  when: roles[inventory_hostname].k8s_master is defined or roles[inventory_hostname].k8s_minion is defined
+
+- name: install kubelet-1.7.4-0
+  yum:
+    name: kubelet-1.7.4-0
+    state: latest
+  when: roles[inventory_hostname].k8s_master is defined or roles[inventory_hostname].k8s_minion is defined
+
+- name: install kubeadm-1.7.4-0
+  yum:
+    name: kubeadm-1.7.4-0
+    state: latest
+  when: roles[inventory_hostname].k8s_master is defined or roles[inventory_hostname].k8s_minion is defined
+
+- name: install kubectl-1.7.4-0
+  yum:
+    name: kubectl-1.7.4-0
+    state: latest
+  when: roles[inventory_hostname].k8s_master is defined or roles[inventory_hostname].k8s_minion is defined
+
+- name: set selinux to permissive
+  selinux:
+    policy: targeted
+    state: permissive
+
+- name: sysctl -w net.bridge.bridge-nf-call-iptables=1
+  shell: sysctl -w net.bridge.bridge-nf-call-iptables=1 && echo "net.bridge.bridge-nf-call-iptables=1" >> /etc/sysctl.conf
+  when: roles[inventory_hostname].k8s_master is defined or roles[inventory_hostname].k8s_minion is defined
+
+- name: sysctl -w net.bridge.bridge-nf-call-ip6tables=1
+  shell: sysctl -w net.bridge.bridge-nf-call-ip6tables=1 && echo "net.bridge.bridge-nf-call-ip6tables=1" >> /etc/sysctl.conf
+  when: roles[inventory_hostname].k8s_master is defined or roles[inventory_hostname].k8s_minion is defined
+
+- name: flush iptables
+  shell: iptables -F

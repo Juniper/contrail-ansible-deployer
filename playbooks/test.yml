@@ -1,0 +1,5 @@
+---
+- hosts:
+  - hypervisors
+  roles:
+  - test

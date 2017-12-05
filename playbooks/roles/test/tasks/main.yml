@@ -1,0 +1,13 @@
+---
+- debug:
+     msg: "{{ item.key }}"
+#    msg: "{{ hostvars[groups['hypervisors'][0]].CONTAINER_VM_CONFIG.network.ntpserver }}"
+  with_dict: "{{ hostvars[inventory_hostname].container_hosts }}"
+
+- name: create shell cmd
+  template:
+    src: test.sh.j2
+    dest: /tmp/test.sh
+
+- name: exec
+  script: /tmp/test.sh

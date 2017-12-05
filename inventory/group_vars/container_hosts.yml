@@ -1,0 +1,34 @@
+#CONTAINER_REGISTRY: michaelhenkel
+CONTAINER_REGISTRY: 10.87.64.33:5043
+contrail_configuration:
+  CONTRAIL_VERSION: 4.1.0.0-8
+  CONTROLLER_NODES: 192.168.1.100,192.168.1.101,192.168.1.102
+  CLOUD_ORCHESTRATOR: kubernetes
+roles:
+  192.168.1.100:
+    configdb:
+    config:
+    control:
+    webui:
+    analytics:
+    analyticsdb:
+    k8s_master:
+    vrouter:  
+  192.168.1.101:
+    configdb:
+    config:
+    control:
+    webui:
+    analytics:
+    analyticsdb:
+    k8s_master:
+    vrouter:
+  192.168.1.102:
+    configdb:
+    config:
+    control:
+    webui:
+    analytics:
+    analyticsdb:
+    k8s_master:
+    vrouter:
