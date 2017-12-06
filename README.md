@@ -4,7 +4,7 @@
 ### get playbook    
 
 ```
-git clone http://github.com/michaelhenkel/contrail-container-deployer
+git clone http://github.com/Juniper/contrail-ansible-deployer
 ```
 
 ### configuration    
@@ -26,15 +26,18 @@ CREATE_CONTAINERS: true #will create containers, true/false
 
 ### Prerequisites
 
-The container hosts have to have:    
-- working name resolution through either DNS or host file    
-- docker engine (1.12.6) and docker-compose installed   
-- in case of HA, the time must be in sync    
+In case the container host will not installed and configured by    
+this playbook there are some requirements to be met:    
 
-The first version only supports CentOS 7.4 for the container host    
-creation and configuration.    
+- CentOS 7.4
+- working name resolution through either DNS or host file for long and short hostnames of the cluster nodes    
+- docker engine (tested with 1.12.6)    
+- docker-compose (tested with 1.17.0) installed   
+- docker-compose python library (tested with 1.9.0)    
+- in case of k8s will be used, the tested version is 1.7.4.0    
+- for HA, the time must be in sync between the cluster nodes    
 
-The playbooks/roles/configure_container_hosts play takes care if    
+The playbooks/roles/configure_container_hosts play can take care if    
 required.    
 
 ### hosts configuration (inventory/hosts)
@@ -68,11 +71,12 @@ container_hosts:
       ansible_ssh_pass: contrail123
 ```
 
-#### Container VM configuration
+#### Container host configuration
 
 The pre-requisites for building the container VMs are:    
 - kvm    
 - a virsh network to which the VMs can be connected    
+- once the VMs are upp the used virsh network has to provide internet connectivity    
 
 The container VMs configuration is done in:    
 ```
