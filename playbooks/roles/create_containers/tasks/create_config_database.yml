@@ -53,10 +53,3 @@
           depends_on:
             - network
           restart: on-failure
-        redis:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-database-redis:{{ contrail_configuration.CONTRAIL_VERSION }}"
-          env_file: /tmp/common.env
-          network_mode: "service:network"
-          depends_on:
-            - network
-          restart: on-failure

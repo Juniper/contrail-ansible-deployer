@@ -15,7 +15,7 @@
     dest: /etc/ntp.conf
 
 - name: initial time sync
-  shell: "ntpdate {{ hostvars[groups['hypervisors'][0]].CONTAINER_VM_CONFIG.network.ntpserver }}"
+  shell: "ntpdate {{ CONTAINER_VM_CONFIG.network.ntpserver }}"
   ignore_errors: yes
 
 - name: start ntp service

@@ -5,7 +5,7 @@ restrict default kod nomodify notrap nopeer noquery
 restrict -6 default kod nomodify notrap nopeer noquery
 restrict 127.0.0.1
 restrict -6 ::1
-server {{ hostvars[groups['hypervisors'][0]].CONTAINER_VM_CONFIG.network.ntpserver }} iburst
+server {{ CONTAINER_VM_CONFIG.network.ntpserver }} iburst
 
 
 # Driftfile.

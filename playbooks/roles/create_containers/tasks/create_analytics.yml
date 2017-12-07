@@ -77,3 +77,11 @@
           depends_on:
             - network
           restart: on-failure
+        #redis-query:
+        #  image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-query:{{ contrail_configuration.CONTRAIL_VERSION }}"
+        #  env_file: /tmp/common.env
+        #  volumes:
+        #    - /var/log/contrail:/var/log/contrail
+        #  depends_on:
+        #    - network
+        #  restart: on-failure

@@ -33,7 +33,7 @@ in kubernetes.
 | |cassandra| | | |schema        | | | |named  | | | |cassandra| | | |topology | | | |server| |
 | +---------+ | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | | +------+ |
 |             | |                  | |           | |             | |             | |          |
-| configdb    | |  config          | |  control  | | analyticsdb | |  analytics  | | redis    |
+| configdb    | |  config          | |  control  | | analyticsdb | |  analytics  | | webui    |
 |             | |                  | |           | |             | |             | |          |
 +-------------+ +------------------+ +-----------+ +-------------+ +-------------+ +----------+
 ```
