@@ -161,7 +161,7 @@ contrail_configuration:
   CLOUD_ORCHESTRATOR: kubernetes
 ```
 
-The role assignment is done in the same file:    
+The assignment of roles to container hosts in done in the same file:    
 ```
 vi inventory/group_vars/container_hosts.yml
 roles:
