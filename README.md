@@ -69,22 +69,27 @@ git clone http://github.com/Juniper/contrail-ansible-deployer
 ### configuration    
 
 The playbook consists of three main plays:    
-- install virtual machines (container hosts) hosting the containers:
+- install virtual machines (container hosts) hosting the containers:    
     playbooks/roles/image_builder    
 - configure/install required software on virtual machines:    
     playbooks/roles/configure_container_hosts    
 - create containers:    
     playbooks/roles/create_containers    
 
+#### enable/disable different plays
+
 All three plays can be enabled/disabled and run individually:    
 
 ```
 vi inventory/group_vars/all.yml
 ---
-BUILD_VMS: true #will build virtual machines, true/false
-CONFIGURE_VMS: true #will configure virtual machines, true/false
+BUILD_VMS: true #will build virtual machines hosting the containers, true/false
+CONFIGURE_VMS: true #will install and configure prerequisites on the container hosts, true/false
 CREATE_CONTAINERS: true #will create containers, true/false
 ```
+
+In case the container hosts already exist and all the described prerequisites are met,    
+BUILD_VMS and CONFIGURE_VMS can be set to false.    
 
 #### hypervisor and container host configuration (inventory/hosts)
 
