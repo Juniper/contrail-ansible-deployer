@@ -1,13 +1,19 @@
 ---
 - debug:
-     msg: "{{ item.key }}"
-#    msg: "{{ hostvars[groups['hypervisors'][0]].CONTAINER_VM_CONFIG.network.ntpserver }}"
-  with_dict: "{{ hostvars[inventory_hostname].container_hosts }}"
+     msg: "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
 
-- name: create shell cmd
-  template:
-    src: test.sh.j2
-    dest: /tmp/test.sh
+- set_fact:
+    controller_list: "{{ contrail_configuration.CONTROLLER_NODES.split(',') }}"
 
-- name: exec
-  script: /tmp/test.sh
+- debug:
+     msg: "{{ controller_list }}"
+
+- set_fact:
+    listen_ip: "{{ item[0] }}"
+  when: item[0] == item[1]
+  with_nested:
+    - "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
+    - "{{ controller_list }}"
+
+- debug:
+    msg: "{{ listen_ip }}"

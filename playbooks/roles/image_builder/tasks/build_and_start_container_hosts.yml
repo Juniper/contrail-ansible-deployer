@@ -106,6 +106,7 @@
     --vcpus={{ CONTAINER_VM_CONFIG.vcpu }} \
     --ram={{ CONTAINER_VM_CONFIG.vram }} \
     --network network={{ hostvars[inventory_hostname].bridge }},model=virtio \
+    --network network=default,model=virtio \
     --virt-type kvm \
     --import \
     --os-variant rhel7 \
