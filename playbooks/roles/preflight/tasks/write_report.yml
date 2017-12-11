@@ -1,0 +1,5 @@
+---
+- template:
+    src: pre_flight_report.j2
+    dest: /tmp/report
+  delegate_to: 127.0.0.1

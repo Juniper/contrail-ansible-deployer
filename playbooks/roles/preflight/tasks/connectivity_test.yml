@@ -1,4 +1,11 @@
 ---
+#- name: get report
+#  set_fact:
+#    report: "{{ lookup('file','/tmp/report.txt') | from_yaml }}"
+
+#- debug:
+#    msg: "{{ report }}"
+
 - name: ping 'em all (short)
   shell: "ping -c 5 -q {{ hostvars[item].ansible_hostname}}"
   register: ping_result_short
@@ -11,6 +18,16 @@
     bad_ping_sort: "ping from {{ inventory_hostname }} to {{ hostvars[item].ansible_hostname}} is bad"
   when: ping_success | int >= 10
 
+- set_fact:
+    report.ping_to_long_names
+
+- lineinfile:
+    path: /tmp/report.txt
+    line: "    {{ ping_success }} lost packets from {{ inventory_hostname }} to {{ hostvars[item].ansible_hostname}}"
+    insertafter: '^  ping_to_short_names:'
+#    insertbefore: '^ping_to_long_names:'
+  delegate_to: 127.0.0.1
+
 - name: ping 'em all (long)
   shell: "ping -c 5 -q {{ hostvars[item].ansible_fqdn}}"
   register: ping_result_long
@@ -22,6 +39,18 @@
 - set_fact:
     bad_ping_long: "ping from {{ inventory_hostname }} to {{ hostvars[item].ansible_fqdn}} is bad"
   when: ping_success | int >= 10
+
+- set_fact:
+    bla:
+      - "    -from: {{ inventory_hostname }}"
+      - "     to: {{ hostvars[item].ansible_fqdn}}"
+      - "     lost: {{ ping_success }}"
+    
+- lineinfile:
+    path: /tmp/report.txt
+    line: "{{ bla }}"
+    insertafter: '^  ping_to_long_names:'
+  delegate_to: 127.0.0.1
 
 - debug:
     msg: "{{ bad_ping_long }}"
@@ -38,6 +67,12 @@
 - set_fact:
     bad_ping_long: "ping from {{ inventory_hostname }} to 8.8.8.8"
   when: ping_success | int >= 10
+
+- lineinfile:
+    path: /tmp/report.txt
+    line: "    {{ ping_success }} lost packets from {{ inventory_hostname }} to 8.8.8.8"
+    insertafter: '^  ping_to_internet:'
+  delegate_to: 127.0.0.1
 
 - debug:
     msg: "{{ bad_ping_long }}"

@@ -1,7 +1,13 @@
 ---
-#- name: test connectivity
-#  include: connectivity_test.yml
-#  with_items: "{{ groups['container_hosts'] }}"
+- name: create report template
+  include: report_template.yml
+
+- name: test connectivity
+  include: connectivity_test.yml
+  with_items: "{{ groups['container_hosts'] }}"
 
 - name: check installed software
   include: software_check.yml
+
+#- name: write report
+#  include: write_report.yml

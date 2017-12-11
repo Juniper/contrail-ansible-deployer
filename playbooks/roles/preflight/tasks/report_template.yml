@@ -1,0 +1,9 @@
+- stat:
+    path: /tmp/report.txt
+  register: sym
+
+- template:
+    src: report.txt.j2
+    dest: /tmp/report.txt
+  delegate_to: 127.0.0.1
+  when: sym.stat.path is undefined
