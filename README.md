@@ -88,6 +88,11 @@ CONFIGURE_VMS: true #will install and configure prerequisites on the container h
 CREATE_CONTAINERS: true #will create containers, true/false
 ```
 
+or by setting the variables in the CLI:    
+```
+ansible-playbook -e '{"BUILD_VMS":true}' -e '{"CONFIGURE_VMS":true}' -e '{"CREATE_CONTAINERS":true}' -i inventory/ playbooks/deploy.yml
+```
+
 In case the container hosts already exist and all the described prerequisites are met,    
 BUILD_VMS and CONFIGURE_VMS can be set to false.    
 
