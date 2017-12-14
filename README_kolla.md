@@ -94,6 +94,15 @@ cat ~/contrail-ansible/kolla-ansible/ansible/inventory/all-in-one |head -40
 
 Make sure that ssh from the deployment machine to the hosts works.    
 
+4. Enable qemu instead of kvm for nested HV (optional, only required if hosts are VMs)    
+```
+cd ~/contrail-ansible/kolla-ansible/ansible
+cat << EOF > ../etc/kolla/config/nova/nova-compute.conf
+[libvirt]
+virt_type=qemu
+EOF
+```
+
 #### Run kolla ansible bootstrap to install kolla requirements on the host
 
 ```

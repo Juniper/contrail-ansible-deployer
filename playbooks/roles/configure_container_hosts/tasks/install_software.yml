@@ -34,14 +34,14 @@
     gpgkey: https://yum.dockerproject.org/gpg
     gpgcheck: yes
 
-- name: install docker
-  yum:
-    name: docker-engine-1.12.6
-    state: latest
-
 - name: install docker selinux
   yum:
     name: docker-engine-selinux-1.12.6
+    state: latest
+
+- name: install docker
+  yum:
+    name: docker-engine-1.12.6
     state: latest
 
 - name: create /etc/systemd/system/docker.service.d directory
