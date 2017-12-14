@@ -1,3 +1,40 @@
 ---
+- stat:
+    path: /tmp/registry.conf
+  register: p
+
+- shell: cat /tmp/registry.conf
+  register: registry
+  when: p.stat.exists
+
+- set_fact:
+    insecure_registry: "--insecure-registry {{CONTAINER_REGISTRY}}"
+
+- set_fact:
+    registries: "{{ registry.stdout | regex_findall('--insecure-registry [0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}:[0-9]{1,4}')}} + [insecure_registry]"
+  when: p.stat.exists
+
+- set_fact:
+    registry_is_in: true
+  when: item == insecure_registry
+  with_items: "{{ registries }}"
+  when: p.stat.exists
+
 - debug:
-    msg: "{{ hostvars[inventory_hostname] }}"
+    msg: "[Service]\nMountFlags=shared\nExecStart=\nExecStart=/usr/bin/docker daemon {{ registries | join(' ') }}"
+  when: p.stat.exists and insecure_registry is defined
+
+- copy:
+    content: ""
+    dest: /tmp/registry.conf
+#  when: p.stat.exists and insecure_registry is defined
+
+- lineinfile:
+    path: /tmp/registry.conf
+    line: "[Service]\nMountFlags=shared\nExecStart=\nExecStart=/usr/bin/docker daemon {{ registries | join(' ') }}"
+  when: p.stat.exists and insecure_registry is defined
+
+- lineinfile:
+    path: /tmp/registry.conf
+    line: "[Service]\nMountFlags=shared\nExecStart=\nExecStart=/usr/bin/docker daemon {{ insecure_registry }}"
+  when: not p.stat.exists
