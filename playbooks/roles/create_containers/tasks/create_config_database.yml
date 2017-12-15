@@ -1,4 +1,34 @@
 ---
+- name: set cassandra seeds to CONFIGDB_NODES if defined
+  set_fact:
+    cassandra_seeds: "{{ contrail_configuration.CONFIGDB_NODES }}"
+  when: contrail_configuration.CONFIGDB_NODES is defined
+
+- name: set cassandra seeds to CONTROLLER_NODES if CONFIGDB_NODES not defined
+  set_fact:
+    cassandra_seeds: "{{ contrail_configuration.CONTROLLER_NODES }}"
+  when: contrail_configuration.CONTROLLER_NODES is defined and contrail_configuration.CONFIGDB_NODES is undefined
+
+- name: set zookeeper nodes to CONFIGDB_NODES if defined
+  set_fact:
+    zookeeper_nodes: "{{ contrail_configuration.CONFIGDB_NODES }}"
+  when: contrail_configuration.CONFIGDB_NODES is defined
+
+- name: set zookeeper nodes to CONTROLLER_NODES if CONFIGDB_NODES not defined
+  set_fact:
+    zookeeper_nodes: "{{ contrail_configuration.CONTROLLER_NODES }}"
+  when: contrail_configuration.CONTROLLER_NODES is defined and contrail_configuration.CONFIGDB_NODES is undefined
+
+- name: set rabbit nodes to CONFIGDB_NODES if defined
+  set_fact:
+    rabbitmq_nodes: "{{ contrail_configuration.CONFIGDB_NODES }}"
+  when: contrail_configuration.CONFIGDB_NODES is defined
+
+- name: set rabbit nodes to CONTROLLER_NODES if CONFIGDB_NODES not defined
+  set_fact:
+    rabbitmq_nodes: "{{ contrail_configuration.CONTROLLER_NODES }}"
+  when: contrail_configuration.CONTROLLER_NODES is defined and contrail_configuration.CONFIGDB_NODES is undefined
+
 - name: start contrail config database
   docker_service:
     project_name: contrail-config-database
@@ -24,11 +54,17 @@
             - network
           restart: on-failure
         cassandra:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-database-cassandra:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-external-cassandra:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           env_file: /tmp/common.env
           environment:
+           - CASSANDRA_SEEDS={{ cassandra_seeds }}
            - CASSANDRA_START_RPC=true
            - CASSANDRA_CLUSTER_NAME=contrail_database
+           - CASSANDRA_PORT=9161
+           - CASSANDRA_CQL_PORT=9041
+           - CASSANDRA_SSL_STORAGE_PORT=7013
+           - CASSANDRA_STORAGE_PORT=7012
+           - CASSANDRA_JMX_LOCAL_PORT=7201
           volumes:
            - /var/lib/cassandra/data
           network_mode: "service:network"
@@ -36,8 +72,12 @@
             - network
           restart: on-failure
         zookeeper:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-database-zookeeper:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-external-zookeeper:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           env_file: /tmp/common.env
+          environment:
+           - ZOOKEEPER_NODES={{ zookeeper_nodes }}
+           - ZOOKEEPER_PORTS=2888:3888
+           - ZOOKEEPER_PORT=2181
           volumes:
            - /data
           network_mode: "service:network"
@@ -45,9 +85,10 @@
             - network
           restart: on-failure
         rabbitmq:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-database-rabbitmq:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-external-rabbitmq:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           env_file: /tmp/common.env
           environment:
+           - RABBITMQ_NODES={{ rabbitmq_nodes }}
            - RABBITMQ_ERLANG_COOKIE=abcdefg
           network_mode: "service:network"
           depends_on:

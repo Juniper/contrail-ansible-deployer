@@ -1,0 +1,43 @@
+---
+- name: start contrail analyticsdb
+  docker_service:
+    project_name: contrail-analyticsdb
+    pull: yes
+    definition:
+      version: '2'
+      services:
+        network:
+          image: docker.io/kubernetes/pause
+          network_mode: "host"
+          volumes:
+           - /etc/hosts:/etc/hosts
+        kafka:
+          image: "{{ CONTAINER_REGISTRY }}/contrail-analyticsdb-kafka:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          network_mode: "service:network"
+          env_file: /tmp/common.env
+          depends_on:
+            - network
+          restart: on-failure
+          volumes:
+            - /var/log/contrail:/var/log/contrail
+        cassandra:
+          image: "{{ CONTAINER_REGISTRY }}/contrail-analyticsdb-cassandra:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          env_file: /tmp/common.env
+          environment:
+           - CASSANDRA_START_RPC=true
+           - CASSANDRA_CLUSTER_NAME=contrail_database
+          volumes:
+           - /var/lib/cassandra/data
+          network_mode: "service:network"
+          depends_on:
+            - network
+          restart: on-failure
+        zookeeper:
+          image: "{{ CONTAINER_REGISTRY }}/contrail-analyticsdb-zookeeper:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          env_file: /tmp/common.env
+          volumes:
+           - /data
+          network_mode: "service:network"
+          depends_on:
+            - network
+          restart: on-failure

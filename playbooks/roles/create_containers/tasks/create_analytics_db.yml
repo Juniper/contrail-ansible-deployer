@@ -1,4 +1,25 @@
 ---
+- name: set cassandra seeds to ANALYTICSDB_NODES if defined
+  set_fact:
+    cassandra_seeds: "{{ contrail_configuration.ANALYTICSDB_NODES }}"
+  when: contrail_configuration.ANALYTICSDB_NODES is defined
+
+- name: set cassandra seeds to CONTROLLER_NODES if ANALYTICSDB_NODES not defined
+  set_fact:
+    cassandra_seeds: "{{ contrail_configuration.CONTROLLER_NODES }}"
+  when: contrail_configuration.CONTROLLER_NODES is defined and contrail_configuration.ANALYTICSDB_NODES is undefined
+
+- name: set zookeeper nodes to ANALYTICSDB_NODES if defined
+  set_fact:
+    zookeeper_nodes: "{{ contrail_configuration.ANALYTICSDB_NODES }}"
+  when: contrail_configuration.ANALYTICSDB_NODES is defined
+
+- name: set zookeeper nodes to CONTROLLER_NODES if ANALYTICSDB_NODES not defined
+  set_fact:
+    zookeeper_nodes: "{{ contrail_configuration.CONTROLLER_NODES }}"
+  when: contrail_configuration.CONTROLLER_NODES is defined and contrail_configuration.ANALYTICSDB_NODES is undefined
+
+
 - name: start contrail analyticsdb
   docker_service:
     project_name: contrail-analyticsdb
@@ -21,11 +42,17 @@
           volumes:
             - /var/log/contrail:/var/log/contrail
         cassandra:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-analyticsdb-cassandra:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-external-cassandra:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           env_file: /tmp/common.env
           environment:
+           - CASSANDRA_SEEDS={{ cassandra_seeds }}
            - CASSANDRA_START_RPC=true
-           - CASSANDRA_CLUSTER_NAME=contrail_database
+           - CASSANDRA_CLUSTER_NAME=contrail_analytics
+           - CASSANDRA_PORT=9160
+           - CASSANDRA_CQL_PORT=9042
+           - CASSANDRA_SSL_STORAGE_PORT=7011
+           - CASSANDRA_STORAGE_PORT=7010
+           - CASSANDRA_JMX_LOCAL_PORT=7200
           volumes:
            - /var/lib/cassandra/data
           network_mode: "service:network"
@@ -33,8 +60,12 @@
             - network
           restart: on-failure
         zookeeper:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-analyticsdb-zookeeper:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-external-zookeeper:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           env_file: /tmp/common.env
+          environment:
+           - ZOOKEEPER_NODES={{ zookeeper_nodes }}
+           - ZOOKEEPER_PORTS=4888:5888
+           - ZOOKEEPER_PORT=2182
           volumes:
            - /data
           network_mode: "service:network"
