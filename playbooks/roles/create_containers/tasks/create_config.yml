@@ -15,7 +15,7 @@
           image: "{{ CONTAINER_REGISTRY }}/contrail-nodemgr:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           env_file: /tmp/common.env
           environment:
-            - NODEMGR_TYPE=contrail-config
+            - NODE_TYPE=config
           network_mode: "service:network"
           volumes:
             - /var/log/contrail:/var/log/contrail
