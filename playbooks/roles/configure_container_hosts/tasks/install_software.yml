@@ -147,6 +147,15 @@
     policy: targeted
     state: permissive
 
+- name: change the kubelet cgroup driver to match docker's
+  replace:
+    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    regexp: cgroup-driver=systemd
+    replace: cgroup-driver=cgroupfs
+
+- name: reload systemd config
+  command: systemctl daemon-reload
+
 - name: sysctl -w net.bridge.bridge-nf-call-iptables=1
   shell: sysctl -w net.bridge.bridge-nf-call-iptables=1 && echo "net.bridge.bridge-nf-call-iptables=1" >> /etc/sysctl.conf
   when: roles[inventory_hostname].k8s_master is defined or roles[inventory_hostname].k8s_minion is defined
