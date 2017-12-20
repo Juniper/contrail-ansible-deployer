@@ -37,10 +37,13 @@
           network_mode: "service:network"
           env_file: /tmp/common.env
           privileged: true
-          volumes:
-            - /var/log/contrail:/var/log/contrail
+          #volumes:
+          #  - /var/log/contrail:/var/log/contrail
+          volumes_from:
+            - dns
           depends_on:
             - network
+            - dns
           restart: on-failure
         dns:
           image: "{{ CONTAINER_REGISTRY }}/contrail-controller-control-dns:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
@@ -48,6 +51,7 @@
           env_file: /tmp/common.env
           volumes:
             - /var/log/contrail:/var/log/contrail
+            - /etc/contrail
           depends_on:
             - network
           restart: on-failure
