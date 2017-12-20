@@ -30,7 +30,7 @@
             - network
           restart: on-failure
         redis:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-webui-redis:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "redis:4.0.2"
           env_file: /tmp/common.env
           network_mode: "service:network"
           depends_on:

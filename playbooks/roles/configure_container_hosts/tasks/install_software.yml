@@ -37,62 +37,26 @@
 - name: install docker selinux
   yum:
     name: docker-engine-selinux-1.12.6
-    state: latest
+    state: installed
 
 - name: install docker
   yum:
     name: docker-engine-1.12.6
-    state: latest
+    state: installed
 
-- name: create /etc/systemd/system/docker.service.d directory
-  file:
-    path: /etc/systemd/system/docker.service.d
-    state: directory
-    mode: 0755
+- name: add insecure registry
+  include: insecure_registry.yaml
+  when: REGISTRY_PRIVATE_INSECURE is defined and REGISTRY_PRIVATE_INSECURE == true
 
-- stat:
-    path: /etc/systemd/system/docker.service.d/registry.conf
-  register: p
-
-- shell: cat /etc/systemd/system/docker.service.d/registry.conf
-  register: registry
-  when: p.stat.exists
-
-- set_fact:
-    insecure_registry: "--insecure-registry {{CONTAINER_REGISTRY}}"
-
-- set_fact:
-    registries: "{{ registry.stdout | regex_findall('--insecure-registry [0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}:[0-9]{1,4}')}} + [insecure_registry]"
-  when: p.stat.exists
-
-- set_fact:
-    registry_is_in: true
-  when: item == insecure_registry
-  with_items: "{{ registries }}"
-  when: p.stat.exists
-
-- copy:
-    content: ""
-    dest: /etc/systemd/system/docker.service.d/registry.conf
-
-- lineinfile:
-    path: /etc/systemd/system/docker.service.d/registry.conf
-    line: "[Service]\nMountFlags=shared\nExecStart=\nExecStart=/usr/bin/docker daemon {{ registries | join(' ') }}"
-  when: p.stat.exists and insecure_registry is defined
-
-- lineinfile:
-    path: /etc/systemd/system/docker.service.d/registry.conf
-    line: "[Service]\nMountFlags=shared\nExecStart=\nExecStart=/usr/bin/docker daemon {{ insecure_registry }}"
-  when: not p.stat.exists
-
-- name: reload systemd
-  shell: systemctl daemon-reload
+- name: add private registry
+  include: private_registry.yaml
+  when: REGISTRY_PRIVATE_SECURE is defined and REGISTRY_PRIVATE_SECURE == true
 
 - name: start docker daemon
   service:
     enabled: yes
     name: docker
-    state: restarted
+    state: started
 
 - name: get docker compose
   get_url:
