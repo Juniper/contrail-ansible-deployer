@@ -9,7 +9,7 @@ contrail_configuration:
   #AUTH_MODE: keystone
   #KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123
   #KEYSTONE_AUTH_HOST: 192.168.1.100
-  RABBITMQ_NODE_PORT: 5673
+  #RABBITMQ_NODE_PORT: 5673
 roles:
   192.168.1.100:
     configdb:
@@ -18,7 +18,7 @@ roles:
     webui:
     analytics:
     analyticsdb:
-#    k8s_master:
+    k8s_master:
     vrouter:  
   192.168.1.101:
     configdb:
@@ -27,7 +27,7 @@ roles:
     webui:
     analytics:
     analyticsdb:
-#    k8s_master:
+    k8s_master:
     vrouter:
   192.168.1.102:
     configdb:
@@ -36,5 +36,5 @@ roles:
     webui:
     analytics:
     analyticsdb:
-#    k8s_master:
+    k8s_master:
     vrouter:
