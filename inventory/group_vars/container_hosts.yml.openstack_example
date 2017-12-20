@@ -1,3 +1,6 @@
+# In this example the 192.168.1.x network is used for OpenStack and Contrail API
+# and 192.168.2.x and eth1 interface on the compute nodes for XMPP and encapsulated
+# data traffic
 #CONTAINER_REGISTRY: michaelhenkel
 CONTAINER_REGISTRY: satellite.englab.juniper.net:5443
 REGISTRY_PRIVATE_SECURE: true
@@ -23,7 +26,6 @@ roles:
     webui:
     analytics:
     analyticsdb:
-#    k8s_master:
     vrouter:  
   192.168.1.101:
     configdb:
@@ -32,7 +34,6 @@ roles:
     webui:
     analytics:
     analyticsdb:
-#    k8s_master:
     vrouter:
   192.168.1.102:
     configdb:
@@ -41,5 +42,4 @@ roles:
     webui:
     analytics:
     analyticsdb:
-#    k8s_master:
     vrouter:

@@ -7,14 +7,7 @@ contrail_configuration:
   CONTRAIL_VERSION: 4.1.0.0-8
   CONTROLLER_NODES: 192.168.1.100,192.168.1.101,192.168.1.102
   CONTROL_NODES: 192.168.2.100,192.168.2.101,192.168.2.102
-  #CLOUD_ORCHESTRATOR: kubernetes
-  CLOUD_ORCHESTRATOR: openstack
-  AUTH_MODE: keystone
-  KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123
-  KEYSTONE_AUTH_HOST: 192.168.1.254
-  RABBITMQ_NODE_PORT: 5673
-  PHYSICAL_INTERFACE: eth1
-  VROUTER_GATEWAY: 192.168.2.1
+  CLOUD_ORCHESTRATOR: kubernetes
 roles:
   192.168.1.100:
     configdb:
@@ -23,7 +16,7 @@ roles:
     webui:
     analytics:
     analyticsdb:
-#    k8s_master:
+    k8s_master:
     vrouter:  
   192.168.1.101:
     configdb:
@@ -32,7 +25,7 @@ roles:
     webui:
     analytics:
     analyticsdb:
-#    k8s_master:
+    k8s_master:
     vrouter:
   192.168.1.102:
     configdb:
@@ -41,5 +34,5 @@ roles:
     webui:
     analytics:
     analyticsdb:
-#    k8s_master:
+    k8s_master:
     vrouter:
