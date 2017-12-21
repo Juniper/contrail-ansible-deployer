@@ -39,7 +39,7 @@
           network_mode: host
           volumes:
             - /var/log/contrail:/var/log/contrail
-            - /var/run:/mnt
+            - /var/run/docker.sock:/var/run/docker.sock
           restart: on-failure
         vrouter-init-kernel:
           image: "{{ CONTAINER_REGISTRY }}/contrail-agent-vrouter-init-kernel:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
