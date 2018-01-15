@@ -40,7 +40,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-kube-manager
-        image: "{{ CONTAINER_REGISTRY }}/contrail-kubernetes-kube-manager:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+        image: "{{ CONTAINER_REGISTRY }}/contrail-kubernetes-kube-manager:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
         imagePullPolicy: ""
         envFrom:
         - configMapRef:

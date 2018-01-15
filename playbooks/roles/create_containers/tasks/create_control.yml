@@ -12,7 +12,7 @@
           volumes:
            - /etc/hosts:/etc/hosts
         nodemgr:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-nodemgr:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-nodemgr:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           env_file: /tmp/common.env
           environment:
             - NODE_TYPE=control
@@ -24,7 +24,7 @@
             - network
           restart: on-failure
         control:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-control-control:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-control-control:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           volumes:
@@ -33,7 +33,7 @@
             - network
           restart: on-failure
         named:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-control-named:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-control-named:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           privileged: true
@@ -46,7 +46,7 @@
             - dns
           restart: on-failure
         dns:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-control-dns:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-control-dns:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           volumes:

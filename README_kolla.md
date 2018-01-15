@@ -139,6 +139,7 @@ cat ~/contrail-ansible-deployer/inventory/group_vars/container_hosts.yml
 CONTAINER_REGISTRY: michaelhenkel
 contrail_configuration:
   OPENSTACK_VERSION: ocata
+  LINUX_DISTR: centos7
   CONTRAIL_VERSION: 4.1.0.0-8
   CONTROLLER_NODES: 192.168.1.100,192.168.1.101,192.168.1.102
   CLOUD_ORCHESTRATOR: openstack

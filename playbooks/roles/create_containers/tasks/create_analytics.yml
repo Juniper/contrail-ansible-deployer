@@ -12,7 +12,7 @@
           volumes:
            - /etc/hosts:/etc/hosts
         nodemgr:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-nodemgr:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-nodemgr:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           env_file: /tmp/common.env
           environment:
             - NODE_TYPE=analytics
@@ -24,7 +24,7 @@
             - network
           restart: on-failure
         api:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-api:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-api:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           volumes:
@@ -33,7 +33,7 @@
             - network
           restart: on-failure
         collector:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-collector:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-collector:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           volumes:
@@ -42,7 +42,7 @@
             - network
           restart: on-failure
         query-engine:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-query-engine:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-query-engine:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           volumes:
@@ -51,7 +51,7 @@
             - network
           restart: on-failure
         alarm-gen:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-alarm-gen:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-alarm-gen:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           volumes:
@@ -60,7 +60,7 @@
             - network
           restart: on-failure
         snmp-collector:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-snmp-collector:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-snmp-collector:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           volumes:
@@ -69,7 +69,7 @@
             - network
           restart: on-failure
         topology:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-topology:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-topology:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           volumes:
@@ -78,7 +78,7 @@
             - network
           restart: on-failure
         #redis-query:
-        #  image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-query:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+        #  image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-query:{{ contrail_configuration.CONTRAIL_VERSION }}>-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
         #  env_file: /tmp/common.env
         #  volumes:
         #    - /var/log/contrail:/var/log/contrail

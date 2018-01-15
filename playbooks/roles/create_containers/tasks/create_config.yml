@@ -12,7 +12,7 @@
           volumes:
            - /etc/hosts:/etc/hosts
         nodemgr:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-nodemgr:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-nodemgr:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           env_file: /tmp/common.env
           environment:
             - NODE_TYPE=config
@@ -24,7 +24,7 @@
             - network
           restart: on-failure
         api:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-config-api:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-config-api:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           env_file: /tmp/common.env
           network_mode: "service:network"
           volumes:
@@ -33,7 +33,7 @@
             - network
           restart: on-failure
         svcmonitor:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-config-svcmonitor:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-config-svcmonitor:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           volumes:
@@ -42,7 +42,7 @@
             - network
           restart: on-failure
         schema:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-config-schema:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-config-schema:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           volumes:
@@ -51,7 +51,7 @@
             - network
           restart: on-failure
         devicemgr:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-config-devicemgr:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-config-devicemgr:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           volumes:

@@ -12,7 +12,7 @@
           volumes:
            - /etc/hosts:/etc/hosts
         web:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-webui-web:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-webui-web:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           volumes:
@@ -21,7 +21,7 @@
             - network
           restart: on-failure
         job:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-webui-job:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-controller-webui-job:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           volumes:
