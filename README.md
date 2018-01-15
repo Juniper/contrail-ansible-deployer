@@ -162,7 +162,7 @@ vi inventory/group_vars/container_hosts.yml
 CONTAINER_REGISTRY: michaelhenkel
 contrail_configuration:
   CONTRAIL_VERSION: 4.1.0.0-4
-  LINUX_DISTR: centos
+  LINUX_DISTR: centos7
   CONTROLLER_NODES: 192.168.1.100,192.168.1.101,192.168.1.102
   CLOUD_ORCHESTRATOR: kubernetes
 ```
