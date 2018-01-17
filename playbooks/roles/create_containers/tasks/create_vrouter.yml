@@ -47,6 +47,8 @@
           privileged: true
           env_file: /tmp/common.env
           volumes:
+            - /usr/src:/usr/src
+            - /lib/modules:/lib/modules
             - /var/log/contrail:/var/log/contrail
         vrouter-agent:
           image: "{{ CONTAINER_REGISTRY }}/contrail-agent-vrouter:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
