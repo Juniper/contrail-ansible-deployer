@@ -1,0 +1,142 @@
+---
+- name: create vcenter servers list of dicts
+  set_fact:
+    vc_servers: "{{ vc_servers | default ([]) + item.values() }}"
+  with_items: "{{ vcenter_servers }}"
+
+- name: Create Esxi servers list
+  set_fact:
+    esxi_servers: "{{ esxi_servers | default([]) + [item] }}"
+  with_items: "{{ esxi_hosts }}"
+
+- name: "Create Datacenters {{ vc_servers }}"
+  vmware_datacenter:
+    hostname: "{{ item.hostname }}"
+    username: "{{ item.username }}"
+    password: "{{ item.password }}"
+    validate_certs: "{{ item.validate_certs }}"
+    datacenter_name: "{{ item.datacentername }}"
+    state: present
+  with_items: "{{ vc_servers }}"
+
+- name: Create Clusters in all DCs
+  include: clusters.yml vc_server={{server}}
+  with_items: "{{ vc_servers }}"
+  loop_control: 
+    loop_var: server
+
+- name: Add esxi hosts to cluster
+  include: esxi_hosts.yml esxi_host={{item}}
+  with_items: "{{ esxi_servers }}"
+
+- name: "Wait for add host task complete {{ added_hosts }}"
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ added_hosts }}"
+  register: add_host
+  until: add_host.finished
+  retries: 300
+
+- name: Remove esxi maintenance mode
+  include: maint_mode.yml esxi_host={{item}}
+  with_items: "{{ esxi_servers }}"
+
+- name: "Wait for maintenance mode task complete {{ maint_mode }}"
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ maint_mode }}"
+  register: r2
+  until: r2.finished
+  retries: 300
+
+- name: Add VM DVS in all DCs
+  include: add_dvs.yml vc_server={{item}}
+  with_items: "{{ vc_servers }}"
+
+- name: Fix VM DVS-PGs and add pvlan config
+  include: fix_dvs.yml vc_server={{item}}
+  with_items: "{{ vc_servers }}"
+
+- name: Wait for VM DVS-PG pvlan fix task
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ dvs_fixed }}"
+  register: t1
+  until: t1.finished
+  retries: 300
+
+- name: add esxi host to DVS
+  include: add_host_dvs.yml esxi_host={{item}}
+  with_items: "{{ esxi_servers }}"
+
+- name: create fabric PG in esxi host
+  include: add_fab_pg.yml esxi_host={{item}}
+  when: item.std_switch_list
+  with_items: "{{ esxi_servers }}"
+
+- name: "Wait for fabric PG completion {{ pgs_complete }}"
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ pgs_completed }}"
+  register: pg_completed
+  until: pg_completed.finished
+  retries: 300
+  when: pgs_completed
+
+- name: Create contrail compute vm in esxi host
+  include: create_contrail_vm.yml
+  with_items: "{{ esxi_servers }}"
+  loop_control:
+    loop_var: esxi_host
+
+- name: "Wait for contrailVm create completion {{ vms_created }}"
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ vms_created }}"
+  register: vm_completed
+  until: vm_completed.finished
+  retries: 300
+
+#  - name: Add ContrailVMs to VM DVS-PG
+#    include: add_vm_dvs_pg.yml esxi_host={{item}}
+#    with_items: "{{ esxi_servers }}"
+#
+#  - name: Wait for contrailVM add to DVS complete
+#    async_status: jid={{item.ansible_job_id}}
+#    with_items: "{{vms_added}}"
+#    register: t3
+#    until: t3.finished
+#    retries: 300
+
+- name: Add nics to ContrailVM
+  include: add_nic.yml esxi_host={{item}}
+  with_items: "{{ esxi_servers }}"
+
+- name: "Wait for add nic completion {{ nics_added }}"
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ nics_added }}"
+  register: nic_completed
+  until: nic_completed.finished
+  retries: 300
+
+- name: Fix contrailVM fab nic mac address
+  include: fix_mac.yml esxi_host={{item}}
+  with_items: "{{ esxi_servers }}"
+
+- name: Wait for mac address fix to complete
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ mac_changed }}"
+  register: mac_fixed
+  until: mac_fixed.finished
+  retries: 300
+
+- name: Power on ContrailVMs
+  include: power_on_vm.yml esxi_host={{item}}
+  with_items: "{{ esxi_servers }}"
+
+- name: Wait for VM power on task complete
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ powerd_on }}"
+  register: power_on
+  until: power_on.finished
+  retries: 300
+
+- name: Run preconfig to setup control-data interface on contrailVM
+  include: preconfig.yml esxi_host={{item}}
+  with_items: "{{ esxi_servers }}"
+

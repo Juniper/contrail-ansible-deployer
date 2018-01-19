@@ -1,5 +1,12 @@
 ---
 - hosts:
+  - localhost
+  tasks:
+  - include_role:
+      name: vcenter
+    when: vcenter_servers is defined
+
+- hosts:
   - hypervisors
   roles:
   - image_builder
