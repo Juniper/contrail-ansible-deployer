@@ -86,7 +86,8 @@
 - name: Install container vm {{ container_vm_hostname }} with portgroup {{ hostvars[inventory_hostname].port_group }}
   command: |
     virt-install --name {{ container_vm_hostname }} \
-    --disk /var/lib/libvirt/images/{{ container_vm_hostname }}.qcow2
+    --disk /var/lib/libvirt/images/{{ container_vm_hostname }}.qcow2 \
+    --cpu host-passthrough \
     --vcpus={{ CONTAINER_VM_CONFIG.vcpu }} \
     --ram={{ CONTAINER_VM_CONFIG.vram }} \
     --network network={{ hostvars[inventory_hostname].bridge }},model=virtio,portgroup={{ hostvars[inventory_hostname].port_group }} \
@@ -102,7 +103,8 @@
 - name: Install container vm {{ container_vm_hostname }} without portgroup
   command: |
     virt-install --name {{ container_vm_hostname }} \
-    --disk /var/lib/libvirt/images/{{ container_vm_hostname }}.qcow2
+    --disk /var/lib/libvirt/images/{{ container_vm_hostname }}.qcow2 \
+    --cpu host-passthrough \
     --vcpus={{ CONTAINER_VM_CONFIG.vcpu }} \
     --ram={{ CONTAINER_VM_CONFIG.vram }} \
     --network network={{ hostvars[inventory_hostname].bridge }},model=virtio \

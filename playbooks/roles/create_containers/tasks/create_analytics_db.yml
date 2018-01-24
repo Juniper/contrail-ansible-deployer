@@ -19,6 +19,16 @@
     zookeeper_nodes: "{{ contrail_configuration.CONTROLLER_NODES }}"
   when: contrail_configuration.CONTROLLER_NODES is defined and contrail_configuration.ANALYTICSDB_NODES is undefined
 
+- name: set kafka nodes to ANALYTICSDB_NODES if defined
+  set_fact:
+    kafka_nodes: "{{ contrail_configuration.ANALYTICSDB_NODES }}"
+  when: contrail_configuration.ANALYTICSDB_NODES is defined
+
+- name: set kafka nodes to CONTROLLER_NODES if ANALYTICSDB_NODES not defined
+  set_fact:
+    kafka_nodes: "{{ contrail_configuration.CONTROLLER_NODES }}"
+  when: contrail_configuration.CONTROLLER_NODES is defined and contrail_configuration.ANALYTICSDB_NODES is undefined
+
 
 - name: start contrail analyticsdb
   docker_service:
@@ -36,6 +46,10 @@
           image: "{{ CONTAINER_REGISTRY }}/contrail-external-kafka:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
+          environment:
+           - KAFKA_NODES={{ kafka_nodes }}
+           - ZOOKEEPER_NODES={{ zookeeper_nodes }}
+           - ZOOKEEPER_PORT=2182
           depends_on:
             - network
           restart: on-failure
