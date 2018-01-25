@@ -1,14 +1,15 @@
-CONTAINER_REGISTRY: satellite.englab.juniper.net:5443
-REGISTRY_PRIVATE_SECURE: true
+CONTAINER_REGISTRY: michaelhenkel
+REGISTRY_PRIVATE_SECURE: false
 REGISTRY_PRIVATE_INSECURE: false
 contrail_configuration:
-  OPENSTACK_VERSION: ocata
+  OPENSTACK_VERSION: pike
   LINUX_DISTR: centos7
-  CONTRAIL_VERSION: 4.1.0.0-8
-  CONTROLLER_NODES: 192.168.1.100,192.168.1.101,192.168.1.102
+  CONTRAIL_VERSION: 5.0.0-121
+  CONTROLLER_NODES: NEWIP
+  DEFAULT_IFACE: ethXXX
   CLOUD_ORCHESTRATOR: kubernetes
 roles:
-  192.168.1.100:
+  10.1.0.3:
     configdb:
     config:
     control:
@@ -17,21 +18,3 @@ roles:
     analyticsdb:
     k8s_master:
     vrouter:  
-  192.168.1.101:
-    configdb:
-    config:
-    control:
-    webui:
-    analytics:
-    analyticsdb:
-    k8s_master:
-    vrouter:
-  192.168.1.102:
-    configdb:
-    config:
-    control:
-    webui:
-    analytics:
-    analyticsdb:
-    k8s_master:
-    vrouter:
