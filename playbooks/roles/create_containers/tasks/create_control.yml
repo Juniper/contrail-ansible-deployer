@@ -1,4 +1,34 @@
 ---
+- name: "get /tmp/common_control.env stat"
+  stat:
+    path: "/tmp/common_control.env"
+  register: st
+
+- name: "delete /tmp/common_control.env if exists"
+  file:
+    path: "/tmp/common_control.env"
+    state: absent
+  when: st.stat.exists is defined and st.stat.exists and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: "create /tmp/common_control.env"
+  file:
+    path: "/tmp/common_control.env"
+    state: touch
+  when: CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: "populate cluster wide common_control.env"
+  lineinfile: dest=/tmp/common_control.env regexp='.*{{ item.key }}$' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ contrail_configuration }}"
+  when: CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: "populate pod specific common_control.env"
+  lineinfile: dest=/tmp/common_control.env regexp='.*{{ config_item.key }}$' line="{{ config_item.key }}={{ config_item.value }}" state=present
+  with_dict: "{{ roles[inventory_hostname].control }}"
+  loop_control:
+    loop_var: config_item
+  when: CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  ignore_errors: yes
+
 - name: start contrail control
   docker_service:
     project_name: contrail-control
@@ -12,8 +42,13 @@
           volumes:
            - /etc/hosts:/etc/hosts
         nodemgr:
+<<<<<<< HEAD
           image: "{{ CONTAINER_REGISTRY }}/contrail-nodemgr:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           env_file: /tmp/common.env
+=======
+          image: "{{ CONTAINER_REGISTRY }}/contrail-nodemgr:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          env_file: /tmp/common_control.env
+>>>>>>> 1877741... added support for remote compute
           environment:
             - NODE_TYPE=control
           network_mode: "service:network"
@@ -26,7 +61,7 @@
         control:
           image: "{{ CONTAINER_REGISTRY }}/contrail-controller-control-control:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
-          env_file: /tmp/common.env
+          env_file: /tmp/common_control.env
           volumes:
             - /var/log/contrail:/var/log/contrail
           depends_on:
@@ -35,7 +70,7 @@
         named:
           image: "{{ CONTAINER_REGISTRY }}/contrail-controller-control-named:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
-          env_file: /tmp/common.env
+          env_file: /tmp/common_control.env
           privileged: true
           #volumes:
           #  - /var/log/contrail:/var/log/contrail
@@ -48,7 +83,7 @@
         dns:
           image: "{{ CONTAINER_REGISTRY }}/contrail-controller-control-dns:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: "service:network"
-          env_file: /tmp/common.env
+          env_file: /tmp/common_control.env
           volumes:
             - /var/log/contrail:/var/log/contrail
             - /etc/contrail
