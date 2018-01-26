@@ -27,9 +27,18 @@
   with_dict: "{{ contrail_configuration }}"
   when: CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
 
+#- debug:
+#    msg: "{{ roles[inventory_hostname] }}"
+#- name: create roles
+#  include: "create_{{ item.key }}.yml"
+#  with_dict: "{{ roles[inventory_hostname] }}"
+
+#- name: create consul
+#  include: create_consul.yml
+
 - name: create contrail config datqbase
   include: create_config_database.yml
-  when: roles[inventory_hostname].configdb is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  when: roles[inventory_hostname].config_database is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
 
 - name: create contrail config
   include: create_config.yml
@@ -43,9 +52,13 @@
   include: create_control.yml
   when: roles[inventory_hostname].control is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
 
+- name: create contrail control_only
+  include: create_control_only.yml
+  when: roles[inventory_hostname].control_only is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
 - name: create contrail analytics database
-  include: create_analytics_db.yml
-  when: roles[inventory_hostname].analyticsdb is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  include: create_analytics_database.yml
+  when: roles[inventory_hostname].analytics_database is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
 
 - name: create contrail analytics
   include: create_analytics.yml
