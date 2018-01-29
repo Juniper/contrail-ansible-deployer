@@ -1,0 +1,60 @@
+version: '2'
+services:
+  network:
+    image: docker.io/kubernetes/pause
+    network_mode: "host"
+    volumes:
+     - /etc/hosts:/etc/hosts
+  nodemgr:
+    image: "{{ CONTAINER_REGISTRY }}/contrail-nodemgr:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+    env_file: /etc/contrail/common_config.env
+    environment:
+      - NODE_TYPE=config
+    network_mode: "service:network"
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/contrail/config:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+  api:
+    image: "{{ CONTAINER_REGISTRY }}/contrail-controller-config-api:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+    env_file: /etc/contrail/common_config.env
+    network_mode: "service:network"
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/config:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+  svcmonitor:
+    image: "{{ CONTAINER_REGISTRY }}/contrail-controller-config-svcmonitor:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+    network_mode: "service:network"
+    env_file: /etc/contrail/common_config.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/config:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+  schema:
+    image: "{{ CONTAINER_REGISTRY }}/contrail-controller-config-schema:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+    network_mode: "service:network"
+    env_file: /etc/contrail/common_config.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/config:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+  devicemgr:
+    image: "{{ CONTAINER_REGISTRY }}/contrail-controller-config-devicemgr:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+    network_mode: "service:network"
+    env_file: /etc/contrail/common_config.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/config:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure

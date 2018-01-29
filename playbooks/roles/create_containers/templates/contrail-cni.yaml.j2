@@ -1,0 +1,12 @@
+version: '2'
+services:
+  vrouter-cni:
+    image: "{{ CONTAINER_REGISTRY }}/contrail-kubernetes-vrouter-init:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+    env_file: /etc/contrail/common_cni.env
+    network_mode: "host"
+    volumes:
+      - /etc/contrail/cni:/etc/contrail
+      - /var/lib/contrail:/var/lib/contrail
+      - /etc/cni:/host/etc_cni
+      - /opt/cni/bin:/host/opt_cni_bin
+      - /var/log/contrail/cni:/var/log/contrail/cni
