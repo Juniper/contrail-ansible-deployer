@@ -1,0 +1,14 @@
+hypervisors:
+  hosts:
+    10.87.64.31:
+      bridge: br1
+      container_hosts:
+        192.168.1.100:
+    10.87.64.32:
+      bridge: br1
+      container_hosts:
+        192.168.1.101:
+    10.87.64.33:
+      bridge: br1
+      container_hosts:
+        192.168.1.102:

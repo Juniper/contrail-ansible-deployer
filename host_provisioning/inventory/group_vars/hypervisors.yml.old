@@ -1,0 +1,17 @@
+---
+#CENTOS_DOWNLOAD_URL: http://cloud.centos.org/centos/7/images/
+CENTOS_DOWNLOAD_URL: http://10.87.64.32/
+CENTOS_IMAGE_NAME: CentOS-7-x86_64-GenericCloud-1710.qcow2.xz
+CONTAINER_VM_ROOT_PWD: contrail123
+CONTAINER_VM_CONFIG:
+  root_pwd: contrail123
+  vcpu: 4
+  vram: 16384
+  vdisk: 100G
+  network:
+    subnet_prefix: 192.168.1.0
+    subnet_netmask: 255.255.255.0
+    gatway: 192.168.1.1
+    nameserver: 10.84.5.100
+    ntpserver: 192.168.1.1
+    domainsuffix: local

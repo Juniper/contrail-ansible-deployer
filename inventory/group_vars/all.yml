@@ -1,7 +1,7 @@
 ---
 BUILD_VMS: false
 CONFIGURE_VMS: false
-CREATE_CONTAINERS: true
+#CREATE_CONTAINERS: true
 #CENTOS_DOWNLOAD_URL: http://cloud.centos.org/centos/7/images/
 CENTOS_DOWNLOAD_URL: http://10.87.64.32/
 CENTOS_IMAGE_NAME: CentOS-7-x86_64-GenericCloud-1710.qcow2.xz

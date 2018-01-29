@@ -1,0 +1,48 @@
+CONTAINER_REGISTRY: satellite.englab.juniper.net:5443
+REGISTRY_PRIVATE_SECURE: true
+REGISTRY_PRIVATE_INSECURE: false
+remote_locations:
+  pop1:
+    CLUSTER_ID: 1
+  pop2:
+    CLUSTER_ID: 2
+    XMPP_SERVER_PORT: 15270
+    BGP_PORT: 11180
+contrail_configuration:
+  OPENSTACK_VERSION: pike
+  CONTRAIL_VERSION: 5.0.0-121-centos7
+  CONTROLLER_NODES: 192.168.1.100
+  CONTROL_NODES: 192.168.1.100,192.168.1.101,192.168.1.102
+  CLOUD_ORCHESTRATOR: kubernetes
+roles:
+  192.168.1.100:
+    config_database:
+    config:
+    control:
+    control_only:
+    webui:
+    analytics:
+    analytics_database:
+#    k8s_master:
+#    vrouter:  
+  192.168.1.101:
+#    configdb:
+#    config:
+#    control:
+    control_only:
+#    webui:
+#    analytics:
+#    analyticsdb:
+#    k8s_master:
+    vrouter:
+      location: pop1
+  192.168.1.102:
+#    configdb:
+#    config:
+#    control:
+    control_only:
+#    webui:
+#    analytics:
+#    analyticsdb:
+#    k8s_master:
+#    vrouter:

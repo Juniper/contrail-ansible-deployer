@@ -43,20 +43,13 @@ in kubernetes.
 
 ## Prerequisites
 
-In case the container host will not installed and configured by    
-this playbook there are some requirements to be met:    
-
 - CentOS 7.4
 - working name resolution through either DNS or host file for long and short hostnames of the cluster nodes    
-- docker engine (tested with 1.12.6)    
+- docker engine (tested with 17.03.1-ce)    
 - docker-compose (tested with 1.17.0) installed   
 - docker-compose python library (tested with 1.9.0)    
-- in case of k8s will be used, the tested version is 1.7.4.0    
+- in case of k8s will be used, the tested version is 1.9.2.0    
 - for HA, the time must be in sync between the cluster nodes    
-
-The playbooks/roles/configure_container_hosts play can take care if    
-required.    
-
 
 ## instructions
 
@@ -68,55 +61,11 @@ git clone http://github.com/Juniper/contrail-ansible-deployer
 
 ### configuration    
 
-The playbook consists of three main plays:    
-- install virtual machines (container hosts) hosting the containers:    
-    playbooks/roles/image_builder    
-- configure/install required software on virtual machines:    
-    playbooks/roles/configure_container_hosts    
-- create containers:    
-    playbooks/roles/create_containers    
+#### container host configuration (inventory/hosts)
 
-#### enable/disable different plays
-
-All three plays can be enabled/disabled and run individually:    
-
-```
-vi inventory/group_vars/all.yml
----
-BUILD_VMS: true #will build virtual machines hosting the containers, true/false
-CONFIGURE_VMS: true #will install and configure prerequisites on the container hosts, true/false
-CREATE_CONTAINERS: true #will create containers, true/false
-```
-
-or by setting the variables in the CLI:    
-```
-ansible-playbook -e '{"BUILD_VMS":true}' -e '{"CONFIGURE_VMS":true}' -e '{"CREATE_CONTAINERS":true}' -i inventory/ playbooks/deploy.yml
-```
-
-In case the container hosts already exist and all the described prerequisites are met,    
-BUILD_VMS and CONFIGURE_VMS can be set to false.    
-
-#### hypervisor and container host configuration (inventory/hosts)
-
-This file defines the hypervisors hosting the container hosts and    
-the container hosts. The hypervisors section is only required in case    
-the container host VMs will be built by the playbook:    
+This file defines the hosts hosting the containers.    
 ```
 vi inventory/hosts
-hypervisors:
-  hosts:
-    10.87.64.31:         # hypervisor 1 IP address
-      bridge: br1        # virsh network the container vms will be connected to
-      container_hosts:   # container host vms to be started on that hypervisor
-        192.168.1.100:
-    10.87.64.32:
-      bridge: br1
-      container_hosts:
-        192.168.1.101:
-    10.87.64.33:
-      bridge: br1
-      container_hosts:
-        192.168.1.102:
 container_hosts:
   hosts:
     192.168.1.100:                   # container host
@@ -126,79 +75,23 @@ container_hosts:
     192.168.1.102:
       ansible_ssh_pass: contrail123
 ```
-
-#### Container host configuration
-
-The pre-requisites for building the container VMs are:    
-- kvm    
-- a virsh network to which the VMs can be connected    
-- once the VMs are upp the used virsh network has to provide internet connectivity    
-
-The container VMs configuration is done in:    
-```
-vi inventory/group_vars/all.yml
-CENTOS_DOWNLOAD_URL: http://cloud.centos.org/centos/7/images/ #Download URL for CentOS image
-CENTOS_IMAGE_NAME: CentOS-7-x86_64-GenericCloud-1710.qcow2.xz #CentOS image name
-CONTAINER_VM_CONFIG:
-  root_pwd: contrail123
-  vcpu: 4
-  vram: 16384
-  vdisk: 100G
-  network:
-    subnet_prefix: 192.168.1.0
-    subnet_netmask: 255.255.255.0
-    gatway: 192.168.1.1
-    nameserver: 10.84.5.100
-    ntpserver: 192.168.1.1
-    domainsuffix: local
-```
-
 #### Contrail configuration
 
-The minimal configuration requires the cluster node ip addresses as a comma separated list,    
-the contrail version and docker registry:    
-```
-vi inventory/group_vars/container_hosts.yml
-CONTAINER_REGISTRY: michaelhenkel
-contrail_configuration:
-  CONTRAIL_VERSION: 4.1.0.0-4
-  LINUX_DISTR: centos7
-  CONTROLLER_NODES: 192.168.1.100,192.168.1.101,192.168.1.102
-  CLOUD_ORCHESTRATOR: kubernetes
-```
+In case no configuration is provided, the playbook will do an all in one installation    
+on all hosts specified in inventory/hosts.    
+The following roles are installed by default:    
+['analytics', 'analytics_database', 'config', 'config_database', 'control', 'k8s_master', 'vrouter', 'webui']    
+The registry defaults to opencontrailnightly and the latest tag of the container.    
 
-The assignment of roles to container hosts in done in the same file:    
-```
-vi inventory/group_vars/container_hosts.yml
-roles:
-  192.168.1.100:
-    configdb:
-    config:
-    control:
-    webui:
-    analytics:
-    analyticsdb:
-    k8s_master:
-    vrouter:
-  192.168.1.101:
-    configdb:
-    config:
-    control:
-    webui:
-    analytics:
-    analyticsdb:
-    k8s_master:
-    vrouter:
-  192.168.1.102:
-    configdb:
-    config:
-    control:
-    webui:
-    analytics:
-    analyticsdb:
-    k8s_master:
-    vrouter:
-```
+For customization the file inventory/group_vars/container_hosts.yml must be created.    
+The inventory/group_vars directory contains some examples.    
+In this file the following settings can be set:
+
+- Contrail Service configuration
+- Registry settings
+- Container versions
+- Role assignments
+
 ## Execution
 
 ```

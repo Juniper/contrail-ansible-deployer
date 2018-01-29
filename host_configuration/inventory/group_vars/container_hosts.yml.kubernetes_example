@@ -1,0 +1,30 @@
+contrail_configuration:
+  CONTROLLER_NODES: 192.168.1.100,192.168.1.101,192.168.1.102
+roles:
+  192.168.1.100:
+    config_database:
+    config:
+    control:
+    webui:
+    analytics:
+    analytics_database:
+    k8s_master:
+    vrouter:  
+  192.168.1.101:
+    config_database:
+    config:
+    control:
+    webui:
+    analytics:
+    analytics_database:
+    k8s_master:
+    vrouter:
+  192.168.1.102:
+    config_database:
+    config:
+    control:
+    webui:
+    analytics:
+    analytics_database:
+    k8s_master:
+    vrouter:

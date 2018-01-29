@@ -1,76 +1,209 @@
 ---
+- name: set contrail configuration param
+  set_fact:
+   contrail_configuration: {}
+  when: contrail_configuration is undefined
+  tags:
+   - always
+  
+- name: set container tag contrail version to master if not defined
+  set_fact:
+    contrail_version_tag: latest
+  when: contrail_configuration.CONTRAIL_VERSION is undefined
+  tags:
+   - always
+
+- name: set container tag contrail version if defined
+  set_fact:
+    contrail_version_tag: "{{ contrail_configuration.CONTRAIL_VERSION }}"
+  when: contrail_configuration.CONTRAIL_VERSION is defined
+  tags:
+   - always
+
+- name: add linux distr tag if defined
+  set_fact:
+    contrail_version_tag: "{{ contrail_version_tag }}-{{ contrail_configuration.LINUX_DISTR }}"
+  when: contrail_configuration.LINUX_DISTR is defined
+  tags:
+   - always
+
+- name: add openstack version tag if defined
+  set_fact:
+    contrail_version_tag: "{{ contrail_version_tag }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+  when: contrail_configuration.OPENSTACK_VERSION is defined
+  tags:
+   - always
+
+- name: set registry to opencontrailnightly if undefined
+  set_fact:
+    container_registry: opencontrailnightly
+  when: contrail_configuration.CONTAINER_REGISTRY is undefined
+  tags:
+   - always
+
+- name: set registry if defined
+  set_fact:
+    container_registry: "{{ contrail_configuration.CONTAINER_REGISTRY }}"
+  when: contrail_configuration.CONTAINER_REGISTRY is defined
+  tags:
+   - always
+
+- set_fact:
+    default_roles: "{{ default_roles|default({})|combine({item.0: item.1}) }}"
+  with_together:
+    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'k8s_master', 'k8s_node', 'vrouter', 'webui']
+    - []
+  tags:
+   - always
+
+- name: create roles
+  set_fact:
+    default_roles_hosts: "{{ default_roles_hosts|default({})|combine({item: default_roles}, recursive=True) }}"
+  with_items:
+    - "{{ groups['container_hosts'] }}"
+  when: roles is undefined
+  tags:
+   - always
+
+- name: set roles if not defined
+  set_fact:
+    roles: "{{ default_roles_hosts }}"
+  when: default_roles_hosts is defined
+  tags:
+   - always
+
+- name: create controller host list if not defined
+  set_fact:
+    controller: "{{ groups['container_hosts']|join(', ') }}"
+  when: contrail_configuration.CONTROLLER_NODES is undefined
+  tags:
+   - always
+
+- name: creater contrail_configuration.CONTROLLER_NODES
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'CONTROLLER_NODES': controller}) }}"
+  when: contrail_configuration.CONTROLLER_NODES is undefined
+  tags:
+   - always
+
 - name: create /var/log/contrail
   file:
     path: /var/log/contrail
     state: directory
     recurse: yes
+  tags:
+   - always
 
-- name: get /tmp/common.env stat
+- name: create /etc/contrail/compose
+  file:
+    path: /etc/contrail/compose
+    state: directory
+    recurse: yes
+  tags:
+   - always
+
+- name: get /etc/contrail/common.env stat
   stat:
-    path: /tmp/common.env
+    path: /etc/contrail/common.env
   register: st
+  tags:
+   - always
 
-- name: delete /tmp/common.env if exists
+- name: delete /etc/contrail/common.env if exists
   file:
-    path: /tmp/common.env
+    path: /etc/contrail/common.env
     state: absent
-  when: st.stat.exists is defined and st.stat.exists and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  when: st.stat.exists is defined and st.stat.exists
+  tags:
+   - always
 
-- name: create /tmp/common.env
+- name: create /etc/contrail/common.env
   file:
-    path: /tmp/common.env
+    path: /etc/contrail/common.env
     state: touch
-  when: CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  tags:
+   - always
 
 - name: populate common.env
-  lineinfile: dest=/tmp/common.env regexp='.*{{ item.key }}$' line="{{ item.key }}={{ item.value }}" state=present
+  lineinfile: dest=/etc/contrail/common.env regexp='.*{{ item.key }}$' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ contrail_configuration }}"
-  when: CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  tags:
+   - always
 
 - name: create contrail config datqbase
   include: create_config_database.yml
-  when: roles[inventory_hostname].configdb is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  when: roles[inventory_hostname].config_database is defined
+  tags:
+    - config_database
 
 - name: create contrail config
   include: create_config.yml
-  when: roles[inventory_hostname].config is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  when: roles[inventory_hostname].config is defined
+  tags:
+    - config
 
 - name: create contrail webui
   include: create_webui.yml
-  when: roles[inventory_hostname].webui is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  when: roles[inventory_hostname].webui is defined
+  tags:
+    - webui
 
 - name: create contrail control
   include: create_control.yml
-  when: roles[inventory_hostname].control is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  when: roles[inventory_hostname].control is defined
+  tags:
+   - control
+
+- name: create contrail control_only
+  include: create_control_only.yml
+  when: roles[inventory_hostname].control_only is defined
+  tags:
+    - control_only
 
 - name: create contrail analytics database
-  include: create_analytics_db.yml
-  when: roles[inventory_hostname].analyticsdb is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  include: create_analytics_database.yml
+  when: roles[inventory_hostname].analytics_database is defined
+  tags:
+    - analytics_database
 
 - name: create contrail analytics
   include: create_analytics.yml
-  when: roles[inventory_hostname].analytics is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  when: roles[inventory_hostname].analytics is defined
+  tags:
+    - analytics
 
 - name: create contrail vrouter
   include: create_vrouter.yml
-  when: roles[inventory_hostname].vrouter is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  when: roles[inventory_hostname].vrouter is defined
+  tags:
+    - vrouter
 
 - name: set master
   include: set_master.yml
-  when: roles[inventory_hostname].k8s_master is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  when: roles[inventory_hostname].k8s_master is defined or roles[inventory_hostname].k8s_node is defined
+  tags:
+    - k8s
 
 - name: create cni
   include: create_k8s_cni.yml
-  when: roles[inventory_hostname].k8s_master is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  when: roles[inventory_hostname].k8s_node is defined
+  tags:
+    - k8s
 
 - name: configure k8s master
   include: configure_k8s_master_node.yml
-  when: roles[inventory_hostname].k8s_master is defined and master is defined and inventory_hostname == master and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  when: roles[inventory_hostname].k8s_master is defined and master is defined and inventory_hostname == master
+  tags:
+    - k8s
 
 - name: join k8s master
   include: configure_k8s_join_node.yml
-  when: roles[inventory_hostname].k8s_master is defined and master is defined and inventory_hostname != master and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  when: roles[inventory_hostname].k8s_node is defined and master is defined and inventory_hostname != master
+  tags:
+    - k8s
 
 - name: create contrail kube manager
   include: create_kube_manager.yml
-  when: roles[inventory_hostname].k8s_master is defined and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true and hostvars[inventory_hostname].master == inventory_hostname
+  when: roles[inventory_hostname].k8s_master is defined and hostvars[inventory_hostname].master == inventory_hostname
+  tags:
+    - k8s

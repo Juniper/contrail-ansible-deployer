@@ -13,6 +13,13 @@
     regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
     line: 'Environment="KUBELET_CGROUP_ARGS=--cgroup-driver={{ cgroup_driver }}"'
 
+- name: enable kubelet service
+  systemd:
+    name: kubelet
+    state: restarted
+    daemon_reload: yes
+    enabled: True
+
 - name: set controller list
   set_fact:
     controller_list: "{{ contrail_configuration.CONTROLLER_NODES.split(',') }}"
@@ -25,9 +32,25 @@
     - "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
     - "{{ controller_list }}"
 
+#- name: initialize k8s master with listen ip
+#  shell: | 
+#      kubeadm init --kubernetes-version v1.7.4 --apiserver-advertise-address {{ listen_ip }} &&
+#      mkdir -p $HOME/.kube &&
+#      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
+#      chown -R $(id -u):$(id -g) $HOME/.kube
+#  when: inventory_hostname == master and listen_ip is defined
+#
+#- name: initialize k8s master without listen ip
+#  shell: |
+#      kubeadm init --kubernetes-version v1.7.4 &&
+#      mkdir -p $HOME/.kube &&
+#      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
+#      chown -R $(id -u):$(id -g) $HOME/.kube
+#  when: inventory_hostname == master and listen_ip is undefined
+
 - name: initialize k8s master with listen ip
   shell: | 
-      kubeadm init --kubernetes-version v1.7.4 --apiserver-advertise-address {{ listen_ip }} &&
+      kubeadm init --token-ttl 0 --kubernetes-version v1.9.2 --apiserver-advertise-address {{ listen_ip }} &&
       mkdir -p $HOME/.kube &&
       cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
       chown -R $(id -u):$(id -g) $HOME/.kube
@@ -35,7 +58,7 @@
 
 - name: initialize k8s master without listen ip
   shell: |
-      kubeadm init --kubernetes-version v1.7.4 &&
+      kubeadm init --token-ttl 0 --kubernetes-version v1.9.2 &&
       mkdir -p $HOME/.kube &&
       cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
       chown -R $(id -u):$(id -g) $HOME/.kube
@@ -50,9 +73,3 @@
   set_fact:
     mastertoken: "{{ output.stdout }}"
   when: inventory_hostname == master
-
-- name: enable kubelet service
-  service:
-    name: kubelet
-    state: started
-    enabled: yes

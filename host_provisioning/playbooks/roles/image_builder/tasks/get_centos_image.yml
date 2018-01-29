@@ -1,0 +1,50 @@
+---
+- name: Clean image directory path
+  file:
+    state: absent
+    path: /tmp/centos_image/
+
+- name: create image directory
+  file:
+    path: /tmp/centos_image
+    state: directory
+    mode: 0770
+
+- name: Get {{ CENTOS_IMAGE_NAME }}
+  get_url:
+    url: "{{ CENTOS_DOWNLOAD_URL }}/{{ CENTOS_IMAGE_NAME }}"
+    dest: /tmp/centos_image/{{ CENTOS_IMAGE_NAME }}
+
+- name: Figure out file type
+  stat:
+    path: /tmp/centos_image/{{ CENTOS_IMAGE_NAME }}
+    get_mime: true
+  register: centos_image_file_type
+
+- name: xz -d {{ CENTOS_IMAGE_NAME }}
+  shell: /usr/bin/xz -f -d /tmp/centos_image/{{ CENTOS_IMAGE_NAME }}
+  when: centos_image_file_type.stat.mimetype == "application/x-xz"
+
+- name: ungzip {{ CENTOS_IMAGE_NAME }}
+  unarchive:
+    src: /tmp/centos_image/{{ CENTOS_IMAGE_NAME }}
+    dest: /tmp/centos_image
+    remote_src: yes
+  register: extract_return
+  when: centos_image_file_type.stat.mimetype == "application/gzip"
+
+- name: remove compressed image
+  file:
+    state: absent
+    path: /tmp/centos_image/{{ CENTOS_IMAGE_NAME }}
+
+- name: register uncompressed image
+  find:
+    paths: /tmp/centos_image/
+    patterns: '*'
+    file_type: file
+  register: uncompressed_image_file
+
+- name: set uncompressed image name
+  set_fact:
+     uncompressed_image_name: "{{ uncompressed_image_file.files[0].path.split('/')[3] }}"
