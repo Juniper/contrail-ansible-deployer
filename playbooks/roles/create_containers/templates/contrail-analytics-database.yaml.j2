@@ -1,0 +1,55 @@
+version: '2'
+volumes:
+  analytics_database:
+services:
+  network:
+    image: docker.io/kubernetes/pause
+    network_mode: "host"
+    volumes:
+     - /etc/hosts:/etc/hosts
+  kafka:
+    image: "{{ CONTAINER_REGISTRY }}/contrail-external-kafka:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+    network_mode: "service:network"
+    env_file: /etc/contrail/common.env
+    environment:
+     - KAFKA_NODES={{ kafka_nodes }}
+     - ZOOKEEPER_NODES={{ zookeeper_nodes }}
+     - ZOOKEEPER_PORT=2182
+    depends_on:
+      - network
+    restart: on-failure
+    #volumes:
+    #  - /var/log/contrail:/var/log/contrail
+  cassandra:
+    image: "{{ CONTAINER_REGISTRY }}/contrail-external-cassandra:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+    env_file: /etc/contrail/common.env
+    environment:
+     - CASSANDRA_SEEDS={{ cassandra_seeds }}
+     - CASSANDRA_START_RPC=true
+     - CASSANDRA_CLUSTER_NAME=contrail_analytics
+     - CASSANDRA_PORT=9160
+     - CASSANDRA_CQL_PORT=9042
+     - CASSANDRA_SSL_STORAGE_PORT=7011
+     - CASSANDRA_STORAGE_PORT=7010
+     - CASSANDRA_JMX_LOCAL_PORT=7200
+    volumes:
+     - analytics_database:/var/lib/cassandra/data
+    network_mode: "service:network"
+    depends_on:
+      - network
+    restart: on-failure
+  zookeeper:
+    image: "{{ CONTAINER_REGISTRY }}/contrail-external-zookeeper:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+    env_file: /etc/contrail/common.env
+    environment:
+     - ZOOKEEPER_NODES={{ zookeeper_nodes }}
+     - ZOOKEEPER_PORTS=4888:5888
+     - ZOOKEEPER_PORT=2182
+     - ZOO_DATA_DIR=/var/lib/zookeeper/data
+     - ZOO_DATA_LOG_DIR=/var/lib/zookeeper/datalog
+    volumes:
+     - analytics_database:/var/lib/zookeeper
+    network_mode: "service:network"
+    depends_on:
+      - network
+    restart: on-failure
