@@ -1,0 +1,7 @@
+---
+- hosts:
+  - hypervisors
+  roles:
+  - image_builder
+  tags:
+  - build_vms

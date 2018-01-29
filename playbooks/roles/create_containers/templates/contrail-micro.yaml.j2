@@ -40,16 +40,16 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-kube-manager
-        image: "{{ CONTAINER_REGISTRY }}/contrail-kubernetes-kube-manager:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
-        imagePullPolicy: ""
+        image: "{{ container_registry }}/contrail-kubernetes-kube-manager:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
         envFrom:
         - configMapRef:
             name: env
         env:
         - name: K8S_TOKEN_FILE
-          value: "/tmp/serviceaccount/token"
+          value: "/etc/contrail/serviceaccount/token"
         volumeMounts:
-        - mountPath: /tmp/serviceaccount
+        - mountPath: /etc/contrail/serviceaccount
           name: pod-secret
       volumes:
 

@@ -1,0 +1,5 @@
+---
+- hosts:
+  - container_hosts
+  roles:
+  - preflight
