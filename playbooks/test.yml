@@ -3,3 +3,5 @@
   - container_hosts
   roles:
   - test
+  tags:
+  - test
