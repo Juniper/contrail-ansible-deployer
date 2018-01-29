@@ -13,12 +13,12 @@
     regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
     line: 'Environment="KUBELET_CGROUP_ARGS=--cgroup-driver={{ cgroup_driver }}"'
 
-- name: join k8s cluster
-  shell: "kubeadm join --token {{ hostvars[master].mastertoken }} {{ master }}:6443"
-
 - name: enable kubelet service
-  service:
+  systemd:
     name: kubelet
-    state: started
-    enabled: yes
+    state: restarted
+    daemon_reload: yes
+    enabled: True
 
+- name: join k8s cluster
+  shell: "kubeadm join --token {{ hostvars[master].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ master }}:6443"

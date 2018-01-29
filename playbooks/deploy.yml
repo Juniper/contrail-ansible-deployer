@@ -1,15 +1,21 @@
 ---
-- hosts:
-  - hypervisors
-  roles:
-  - image_builder
+#- hosts:
+#  - hypervisors
+#  roles:
+#  - image_builder
+#  tags:
+#  - build_vms
+#
+#- hosts:
+#  - container_hosts
+#  roles:
+#  - configure_container_hosts
+#  tags:
+#  - configure_vms
 
 - hosts:
   - container_hosts
   roles:
-  - configure_container_hosts
-
-- hosts:
-  - container_hosts
-  roles:
+  - create_containers
+  tags:
   - create_containers
