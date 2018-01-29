@@ -1,0 +1,29 @@
+version: '2'
+services:
+  network:
+    image: docker.io/kubernetes/pause
+    network_mode: "host"
+    volumes:
+     - /etc/hosts:/etc/hosts
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+      - NODE_TYPE=control
+    network_mode: "service:network"
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/contrail/common_control_only_{{ location.key }}:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+  control:
+    image: "{{ container_registry }}/contrail-controller-control-control:{{ contrail_version_tag }}"
+    network_mode: "service:network"
+    env_file: "/etc/contrail/common_control_only_{{ location.key }}.env"
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+    depends_on:
+      - network
+    restart: on-failure

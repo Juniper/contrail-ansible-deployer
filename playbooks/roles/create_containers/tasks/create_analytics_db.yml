@@ -43,7 +43,7 @@
           volumes:
            - /etc/hosts:/etc/hosts
         kafka:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-external-kafka:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ container_registry }}/contrail-external-kafka:{{ contrail_version_tag }}"
           network_mode: "service:network"
           env_file: /tmp/common.env
           environment:
@@ -56,7 +56,7 @@
           #volumes:
           #  - /var/log/contrail:/var/log/contrail
         cassandra:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-external-cassandra:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ container_registry }}/contrail-external-cassandra:{{ contrail_version_tag }}"
           env_file: /tmp/common.env
           environment:
            - CASSANDRA_SEEDS={{ cassandra_seeds }}
@@ -74,7 +74,7 @@
             - network
           restart: on-failure
         zookeeper:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-external-zookeeper:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ container_registry }}/contrail-external-zookeeper:{{ contrail_version_tag }}"
           env_file: /tmp/common.env
           environment:
            - ZOOKEEPER_NODES={{ zookeeper_nodes }}
