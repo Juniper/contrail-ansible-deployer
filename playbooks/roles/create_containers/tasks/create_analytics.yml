@@ -1,87 +1,57 @@
 ---
+- name: create /etc/contrail/analytics
+  file:
+    path: /etc/contrail/analytics
+    state: directory
+    recurse: yes
+
+- name: "get /etc/contrail/common_analytics.env stat"
+  stat:
+    path: "/etc/contrail/common_analytics.env"
+  register: st
+
+- name: "delete /etc/contrail/common_analytics.env if exists"
+  file:
+    path: "/etc/contrail/common_analytics.env"
+    state: absent
+  when: st.stat.exists is defined and st.stat.exists and CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: "create /etc/contrail/common_analytics.env"
+  file:
+    path: "/etc/contrail/common_analytics.env"
+    state: touch
+  when: CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: "populate cluster wide common_analytics.env"
+  lineinfile: dest=/etc/contrail/common_analytics.env regexp='.*{{ item.key }}$' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ contrail_configuration }}"
+  when: CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+
+- name: "populate pod specific common_analytics.env"
+  lineinfile: dest=/etc/contrail/common_analytics.env regexp='.*{{ config_item.key }}$' line="{{ config_item.key }}={{ config_item.value }}" state=present
+  with_dict: "{{ roles[inventory_hostname].analytics }}"
+  loop_control:
+    loop_var: config_item
+  when: CREATE_CONTAINERS is defined and CREATE_CONTAINERS==true
+  ignore_errors: yes
+
+- name: update image
+  shell: "docker pull {{ CONTAINER_REGISTRY }}/{{ item }}:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+  with_items:
+    - contrail-nodemgr
+    - contrail-analytics-api
+    - contrail-analytics-collector
+    - contrail-analytics-query-engine
+    - contrail-analytics-alarm-gen
+    - contrail-analytics-snmp-collector
+    - contrail-analytics-topology
+  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+
+- name: create contrail analytics file
+  template:
+    src: contrail-analytics.yaml.j2
+    dest: /etc/contrail/analytics/docker-compose.yaml
+
 - name: start contrail analytics
   docker_service:
-    project_name: contrail-analytics
-    pull: yes
-    definition:
-      version: '2'
-      services:
-        network:
-          image: docker.io/kubernetes/pause
-          network_mode: "host"
-          volumes:
-           - /etc/hosts:/etc/hosts
-        nodemgr:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-nodemgr:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
-          env_file: /tmp/common.env
-          environment:
-            - NODE_TYPE=analytics
-          network_mode: "service:network"
-          volumes:
-            - /var/log/contrail:/var/log/contrail
-            - /var/run/docker.sock:/var/run/docker.sock
-          depends_on:
-            - network
-          restart: on-failure
-        api:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-api:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
-          network_mode: "service:network"
-          env_file: /tmp/common.env
-          volumes:
-            - /var/log/contrail:/var/log/contrail
-          depends_on:
-            - network
-          restart: on-failure
-        collector:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-collector:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
-          network_mode: "service:network"
-          env_file: /tmp/common.env
-          volumes:
-            - /var/log/contrail:/var/log/contrail
-          depends_on:
-            - network
-          restart: on-failure
-        query-engine:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-query-engine:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
-          network_mode: "service:network"
-          env_file: /tmp/common.env
-          volumes:
-            - /var/log/contrail:/var/log/contrail
-          depends_on:
-            - network
-          restart: on-failure
-        alarm-gen:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-alarm-gen:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
-          network_mode: "service:network"
-          env_file: /tmp/common.env
-          volumes:
-            - /var/log/contrail:/var/log/contrail
-          depends_on:
-            - network
-          restart: on-failure
-        snmp-collector:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-snmp-collector:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
-          network_mode: "service:network"
-          env_file: /tmp/common.env
-          volumes:
-            - /var/log/contrail:/var/log/contrail
-          depends_on:
-            - network
-          restart: on-failure
-        topology:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-topology:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
-          network_mode: "service:network"
-          env_file: /tmp/common.env
-          volumes:
-            - /var/log/contrail:/var/log/contrail
-          depends_on:
-            - network
-          restart: on-failure
-        #redis-query:
-        #  image: "{{ CONTAINER_REGISTRY }}/contrail-analytics-query:{{ contrail_configuration.CONTRAIL_VERSION }}>-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
-        #  env_file: /tmp/common.env
-        #  volumes:
-        #    - /var/log/contrail:/var/log/contrail
-        #  depends_on:
-        #    - network
-        #  restart: on-failure
+    project_src: /etc/contrail/analytics
