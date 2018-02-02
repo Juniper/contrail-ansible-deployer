@@ -1,0 +1,39 @@
+ifconfig-nowarn
+
+script-security 2
+
+x509-track +subjectAltName
+
+up-delay
+up {{ PATH_OPENVPN_CONFIG }}/up-down.sh
+
+dev tap
+client
+proto tcp-client
+
+keepalive 10 120
+resolv-retry infinite
+nobind
+persist-key
+#persist-tun
+
+ca {{ PATH_SSL_CONFIG }}/CA.crt
+cert {{ PATH_SSL_CONFIG }}/HOST.crt
+key {{ PATH_SSL_CONFIG }}/HOST.key
+
+
+tls-client
+cipher AES-256-CBC
+verb 3
+
+#link-mtu 1500
+tun-mtu 9000
+#engine aesni
+mssfix 0
+fragment 0
+tcp-nodelay
+#cipher AES-256-GCM
+#sndbuf 212992
+#rcvbuf 212992
+txqueuelen 1000
+comp-lzo no

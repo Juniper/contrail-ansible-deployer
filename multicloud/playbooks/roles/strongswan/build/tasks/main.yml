@@ -1,0 +1,15 @@
+---
+- name: Ensures {{ PATH_STRONGSWAN_CONFIG }}/docker/ dir exists
+  file: path={{ PATH_STRONGSWAN_CONFIG }}/docker  state=directory
+
+- name: Copy Dockerfile Ubuntu
+  copy:
+    src: "{{ role_path }}/files/Dockerfile"
+    dest: "{{ PATH_STRONGSWAN_CONFIG }}/docker/Dockerfile"
+
+- name: Build Strongswan Image
+  docker_image: 
+    name: strongswan
+    path: "{{ PATH_STRONGSWAN_CONFIG }}/docker"
+    state: present
+

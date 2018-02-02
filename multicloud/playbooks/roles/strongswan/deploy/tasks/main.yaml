@@ -1,0 +1,46 @@
+---
+  - name: Ensures {{ PATH_STRONGSWAN_CONFIG }} dir exists
+    file:
+      path: "{{ PATH_STRONGSWAN_CONFIG }}"
+      state: directory
+
+  - name: Copy Strongswan config
+    copy:
+      src: strongswan.conf
+      dest: "{{ PATH_STRONGSWAN_CONFIG }}/strongswan.conf"
+
+  - name: Create ipsec config
+    template:
+      src: ipsec.conf.j2
+      dest: "{{ PATH_STRONGSWAN_CONFIG }}/ipsec.conf"
+
+  - name: Create ipsec secrets
+    template:
+      src: ipsec.secrets.j2
+      dest: "{{ PATH_STRONGSWAN_CONFIG }}/ipsec.secrets"
+
+  - name: Create ipsec secrets
+    copy:
+      src: stroke.conf
+      dest: "{{ PATH_STRONGSWAN_CONFIG }}/stroke.conf"
+
+  - name: Copy ipsec script
+    copy:
+      src: ipsec-vti.sh
+      dest: "{{ PATH_STRONGSWAN_CONFIG }}/ipsec-vti.sh"
+      mode: "+x"
+
+  - name: Create dir conn in {{ PATH_STRONGSWAN_CONFIG }}
+    file:
+      path: "{{ PATH_STRONGSWAN_CONFIG }}/conn"
+      state: directory
+
+  - name: Create ipsec connections
+    template:
+      src: conn.conf.j2
+      dest: "{{ PATH_STRONGSWAN_CONFIG }}/conn/conn.conf"
+    register: ipsec_connections
+  - name: Reload Ipsec
+    shell: "docker ps  | grep strong |awk '{print $1}' | xargs -I % docker exec % ipsec reload"
+    when: ipsec_connections.changed
+

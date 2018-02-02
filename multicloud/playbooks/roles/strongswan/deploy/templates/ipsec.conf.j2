@@ -1,0 +1,31 @@
+# ipsec.conf - strongSwan IPsec configuration file
+
+# basic configuration
+
+config setup
+        # strictcrlpolicy=yes
+        # uniqueids = no
+
+conn %default
+    ikelifetime=60m
+    keylife=20m
+    rekeymargin=3m
+    keyingtries=1
+    keyexchange=ikev2
+    authby=pubkey
+    leftid={{ local_ip }}
+    rightid=%any
+    leftupdown={{ PATH_STRONGSWAN_CONFIG }}/ipsec-vti.sh
+    leftcert={{ PATH_SSL_CONFIG }}/HOST.crt
+    fragmentation=yes
+    auto=start
+    mark=%unique
+    rightsubnet=0.0.0.0/0
+    leftsubnet=0.0.0.0/0
+
+ca %default
+    cacert={{ PATH_SSL_CONFIG }}/CA.crt
+
+
+include {{ PATH_STRONGSWAN_CONFIG }}/conn/*.conf
+

@@ -1,0 +1,22 @@
+---
+- name: Ensures {{ PATH_OPENVPN_CONFIG }}/docker/ dir exists
+  file: path={{ PATH_OPENVPN_CONFIG }}/docker  state=directory
+
+- name: Copy Dockerfile Ubuntu
+  copy:
+    src: "{{ role_path }}/files/Dockerfile"
+    dest: "{{ PATH_OPENVPN_CONFIG }}/docker/Dockerfile"
+#  when: ansible_distribution == "Ubuntu"
+#
+#- name: Copy Dockerfile CentOS
+#  copy:
+#    src: "{{ role_path }}/files/centos/Dockerfile"
+#    dest: "{{ PATH_OPENVPN_CONFIG }}/docker/Dockerfile"
+#  when: ansible_distribution == "CentOS"
+
+- name: Build OpenVPN Image
+  docker_image: 
+    name: openvpn
+    path: "{{ PATH_OPENVPN_CONFIG }}/docker"
+    state: present
+

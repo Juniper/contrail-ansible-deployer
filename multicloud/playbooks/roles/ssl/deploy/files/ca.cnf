@@ -1,0 +1,4 @@
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = $ENV::ALTNAME
+extendedKeyUsage = serverAuth, clientAuth

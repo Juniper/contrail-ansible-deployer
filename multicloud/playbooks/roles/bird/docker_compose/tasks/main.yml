@@ -1,0 +1,10 @@
+---
+- name: Ensures {{ PATH_BIRD_CONFIG }} dir exists
+  file: path={{ PATH_BIRD_CONFIG }}  state=directory
+
+- name: Create docker compose for BIRD
+  template:
+    src: bird-compose.yml.j2
+    dest: "{{ PATH_BIRD_CONFIG }}/bird-compose.yml"
+
+

@@ -1,0 +1,18 @@
+---
+- name: Ensures {{ PATH_CONFIG }} dir exists
+  file: path={{ PATH_CONFIG }}  state=directory
+
+- name: Copy sysctl conf
+  copy:
+    src: 77-multicloud.conf
+    dest: "{{ PATH_CONFIG }}/77-multicloud.conf"
+
+- name: Create link to loopback config
+  file:
+    src: "{{ PATH_CONFIG }}/77-multicloud.conf"
+    dest: "/etc/sysctl.d/77-multicloud.conf"
+    state: link
+    force: yes
+
+- name: Reload sysctl
+  shell: 'systemctl restart systemd-sysctl.service'

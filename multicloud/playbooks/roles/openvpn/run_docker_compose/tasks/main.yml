@@ -1,0 +1,7 @@
+---
+- name: Run docker compose OpenVPN
+  docker_service:
+    project_src: openvpn
+    files: "{{ PATH_OPENVPN_CONFIG }}/openvpn-compose.yml"
+    state: present
+

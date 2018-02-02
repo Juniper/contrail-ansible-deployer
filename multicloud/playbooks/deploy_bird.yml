@@ -1,0 +1,6 @@
+---
+ - name: Deploy BIRD
+   hosts: all
+   roles:
+     - role: bird/build
+     - role: bird/deploy

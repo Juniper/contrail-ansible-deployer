@@ -1,0 +1,76 @@
+---
+- name: Ensures {{ PATH_SSL_CONFIG }} dir exists
+  file: path={{ PATH_SSL_CONFIG }}  state=directory
+
+- name: Download pyOpenSSL
+  pip: 
+    name: pyOpenSSL
+
+- name: Create DH param
+  command: 'openssl dhparam -out {{ PATH_SSL_CONFIG }}/dh2048.pem 2048'
+
+- name: Generate CSR
+  shell: 'openssl req -newkey rsa:2048 -nodes
+  -keyout {{ PATH_SSL_CONFIG }}/HOST.key
+  -out {{ PATH_SSL_CONFIG }}/HOST.csr
+  -subj "/CN={{ inventory_hostname }}/O=multicloud"'
+
+- name: Fatch CSR
+  fetch:
+    src: '{{ PATH_SSL_CONFIG }}/HOST.csr'
+    dest: '/tmp/fetched'
+
+- name: Ensures {{ PATH_CONFIG }} dir exists
+  file: path={{ PATH_CONFIG }}  state=directory
+
+- name: Ensures {{ PATH_SSL_CONFIG }} dir exists
+  file: path={{ PATH_SSL_CONFIG }}  state=directory
+  delegate_to: localhost
+
+- name: Copy openssl config
+  copy:
+    src: ca.cnf
+    dest: "{{ PATH_SSL_CONFIG }}/ca.cnf"
+  delegate_to: localhost
+
+- name: Download pyOpenSSL
+  pip:
+    name: pyOpenSSL
+  delegate_to: localhost
+
+- name: Create CA key
+  openssl_privatekey:
+    path: '{{ PATH_SSL_CONFIG }}/CA.key'
+  delegate_to: localhost
+
+- name: Set ALTNAME
+  shell: 'export ALTNAME=IP:[$IP]'
+  delegate_to: localhost
+
+- name: Generate CSR Deploy
+  shell: 'openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048
+  -keyout {{ PATH_SSL_CONFIG }}/CA.key
+  -out {{ PATH_SSL_CONFIG }}/CA.crt
+  -subj "/CA=deploy/O=multicloud"'
+  delegate_to: localhost
+
+- name: Generate the CA trusted certificate
+  shell: " openssl x509 -req -days 375 -in /tmp/fetched/{{ inventory_hostname }}{{ PATH_SSL_CONFIG }}/HOST.csr \
+   -out /tmp/fetched/{{ inventory_hostname }}{{ PATH_SSL_CONFIG }}/HOST.crt \
+   -CA {{ PATH_SSL_CONFIG }}/CA.crt \
+   -CAkey {{ PATH_SSL_CONFIG }}/CA.key \
+   -CAcreateserial \
+   -extfile {{ PATH_SSL_CONFIG }}/ca.cnf "
+  environment:
+    ALTNAME: 'IP:{{ local_ip }}'
+  delegate_to: localhost
+
+- name: Copy CA certificate
+  copy:
+    src: '{{ PATH_SSL_CONFIG }}/CA.crt'
+    dest: '{{ PATH_SSL_CONFIG }}/CA.crt'
+
+- name: Copy HOST certificate
+  copy:
+    src: '/tmp/fetched/{{ inventory_hostname }}{{ PATH_SSL_CONFIG }}/HOST.crt'
+    dest: '{{ PATH_SSL_CONFIG }}/HOST.crt'

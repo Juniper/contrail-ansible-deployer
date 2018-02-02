@@ -1,0 +1,5 @@
+---
+ - name: Deploy Strongswan compose
+   hosts: all
+   roles:
+     - role: strongswan/docker_compose

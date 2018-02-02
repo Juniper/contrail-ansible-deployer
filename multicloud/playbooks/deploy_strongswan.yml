@@ -1,0 +1,6 @@
+---
+ - name: Deploy Strongswan
+   hosts: all
+   roles:
+     - role: strongswan/build
+     - role: strongswan/deploy

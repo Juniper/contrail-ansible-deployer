@@ -1,0 +1,36 @@
+---
+version: '2'
+
+services:
+    {% if openvpn_servers -%}
+    openvpn-server:
+        image: openvpn
+        network_mode: host
+        privileged: true
+        devices:
+            - /dev/net/tun
+        cap_add:
+            - NET_ADMIN
+        volumes:
+            - "{{ PATH_OPENVPN_CONFIG }}:{{ PATH_OPENVPN_CONFIG }}:ro"
+            - "{{ PATH_SSL_CONFIG }}:{{ PATH_SSL_CONFIG }}:ro"
+        command: "openvpn --config {{ PATH_OPENVPN_CONFIG }}/server_tap.conf --port {{ openvpn_port }}"
+
+    {% endif %}
+{% for client in openvpn_clients -%}
+    client-{{client}}:
+        image: openvpn
+        network_mode: host
+        privileged: true
+        devices:
+            - /dev/net/tun
+        cap_add:
+            - NET_ADMIN
+        volumes:
+            - "{{ PATH_OPENVPN_CONFIG }}:{{ PATH_OPENVPN_CONFIG }}:ro"
+            - "{{ PATH_SSL_CONFIG }}:{{ PATH_SSL_CONFIG }}:ro"
+        command: "openvpn --config {{ PATH_OPENVPN_CONFIG }}/conn/client_tap_{{ client }}.conf --remote {{ client }} {{ openvpn_port }} "
+
+    {% endfor %}
+
+

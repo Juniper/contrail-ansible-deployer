@@ -1,0 +1,10 @@
+---
+- name: Ensures {{ PATH_OPENVPN_CONFIG }} dir exists
+  file: path={{ PATH_OPENVPN_CONFIG }}  state=directory
+
+- name: Create docker compose for OpenVPN
+  template:
+    src: openvpn-compose.yml.j2
+    dest: "{{ PATH_OPENVPN_CONFIG }}/openvpn-compose.yml"
+
+

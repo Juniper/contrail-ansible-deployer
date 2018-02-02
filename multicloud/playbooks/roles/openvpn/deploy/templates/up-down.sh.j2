@@ -1,0 +1,35 @@
+#!/bin/bash
+
+#export | /usr/bin/logger
+#echo $1 | /usr/bin/logger
+
+case "$script_type" in
+
+    "client-connect" )
+
+	ifconfig_remote=`echo $X509_0_subjectAltName|cut -f 2 -d:`
+	echo ifconfig-push $ifconfig_remote 255.255.255.255 > $1
+
+	#echo $ifconfig_remote | logger
+	#/sbin/ip address flush dev $dev
+	/sbin/ip address add $ifconfig_local peer $ifconfig_remote dev $dev
+#	exit 0
+	;;
+    "client-disconnect" )
+
+	/sbin/ip address del $ifconfig_local peer $ifconfig_pool_remote_ip dev $dev
+	;;
+    "up" )
+
+	ifconfig_remote=`echo $X509_0_subjectAltName|cut -f 2 -d:`
+	#echo $ifconfig_remote | logger
+
+	/sbin/ip address flush dev $dev
+	/sbin/ip address add $ifconfig_local peer $ifconfig_remote dev $dev
+	;;
+
+    * )
+	exit 1
+	;;
+
+esac

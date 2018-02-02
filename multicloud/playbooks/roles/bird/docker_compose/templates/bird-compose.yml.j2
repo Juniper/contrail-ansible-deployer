@@ -1,0 +1,14 @@
+---
+version: '2'
+
+services:
+    bird:
+        image: bird
+        network_mode: host
+        cap_add:
+            - NET_ADMIN
+            - NET_BROADCAST
+            - NET_RAW
+        volumes:
+            - "{{ PATH_BIRD_CONFIG }}:{{ PATH_BIRD_CONFIG }}:ro"
+        command: "bird -c {{ PATH_BIRD_CONFIG }}/bird.conf -f "

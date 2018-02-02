@@ -1,0 +1,58 @@
+---
+
+- hosts: all
+
+  tasks:
+    - name: Install pip Ubuntu
+      apt:
+        pkg: python-pip
+        state: latest
+      register: pipinstalled
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Add epel-release CentOS
+      yum:
+        pkg: epel-release
+      when: ansible_distribution == "CentOS"
+
+    - name: Install pip CentOS
+      yum:
+        pkg:  python-pip
+        state: latest
+      register: pipinstalled
+      when: ansible_distribution == "CentOS"
+    
+    - name: Install docker.io Ubunutu
+      apt:
+        pkg: docker.io
+#        version: 1.13.1
+        state: present
+      register: dockerioinstalled
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install docker-io CentOS
+      yum:
+        pkg: docker-io
+#        version: 1.13.1
+        state: present
+      register: dockerioinstalled
+      when: ansible_distribution == "CentOS"
+    
+    - name: Pip docker-py
+      pip:
+        name: docker-py
+        version: 1.10.6
+        state: present
+      when: pipinstalled|success
+
+    - name: Pip docker-compose
+      pip:
+        name: docker-compose
+        version: 1.18.0
+        state: present
+      when: pipinstalled|success
+    
+    - name: Start docker engine
+      service:
+        name: docker
+        state: started

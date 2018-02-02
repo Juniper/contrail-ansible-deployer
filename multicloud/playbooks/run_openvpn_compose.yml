@@ -1,0 +1,7 @@
+---
+ - name: Run docker compose
+   hosts: all
+   roles:
+     - role: openvpn/run_docker_compose
+
+

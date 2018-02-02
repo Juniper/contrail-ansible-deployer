@@ -1,0 +1,41 @@
+dev tap
+proto tcp-server
+
+client-connect {{ PATH_OPENVPN_CONFIG }}/up-down.sh
+client-disconnect {{ PATH_OPENVPN_CONFIG }}/up-down.sh
+
+port {{ openvpn_port }}
+mode server
+
+ifconfig-nowarn
+
+ca {{ PATH_SSL_CONFIG }}/CA.crt
+cert {{ PATH_SSL_CONFIG }}/HOST.crt
+key {{ PATH_SSL_CONFIG }}/HOST.key
+dh {{ PATH_SSL_CONFIG }}/dh2048.pem
+
+tls-server
+
+script-security 2
+
+keepalive 10 120
+cipher AES-256-CBC
+
+persist-key
+#persist-tun
+
+x509-track +subjectAltName
+
+verb 3
+
+#link-mtu 1500
+tun-mtu 9000
+mssfix 0
+fragment 0
+tcp-nodelay
+#cipher AES-256-GCM
+#sndbuf 212992
+#rcvbuf 212992
+txqueuelen 1000
+comp-lzo no
+

@@ -1,0 +1,6 @@
+---
+- name: Run docker compose Strongswan
+  docker_service:
+    project_src: strongswan
+    files: "{{ PATH_STRONGSWAN_CONFIG }}/strongswan-compose.yml"
+    state: present

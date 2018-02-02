@@ -1,0 +1,27 @@
+---
+- name: Ensures {{ PATH_OPENVPN_CONFIG }} dir exists 
+  file: path={{ PATH_OPENVPN_CONFIG }}  state=directory
+
+- name: Copy bird_bottom.inc
+  template:
+    src: bird_bottom.inc.j2
+    dest: "{{ PATH_BIRD_CONFIG }}/bird_bottom.inc"
+  
+- name: Create BIRD config bird_top.inc
+  template:
+    src: bird_top.inc.j2
+    dest: "{{ PATH_BIRD_CONFIG }}/bird_top.inc"
+  
+- name: Create BIRD config bird.conf
+  template:
+    src: bird.conf.j2
+    dest: "{{ PATH_BIRD_CONFIG  }}/bird.conf"
+    
+#- name: Create BIRD link to config
+#  file:
+#    src: "{{ PATH_BIRD_CONFIG  }}/bird.conf"
+#    dest: "/etc/bird/bird.conf"
+#    owner: bird
+#    group: bird
+#    state: link
+#    force: yes

@@ -1,0 +1,6 @@
+---
+- name: Deploy SSL
+  hosts: all
+  roles:
+    - role: ssl/deploy
+
