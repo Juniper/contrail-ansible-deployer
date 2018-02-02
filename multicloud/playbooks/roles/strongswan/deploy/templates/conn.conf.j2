@@ -1,0 +1,10 @@
+{% for client in ipsec_clients -%}
+conn {{client}}
+        left=%any
+        right={{client}}
+{% endfor %}
+{% for server in ipsec_servers -%}
+conn {{server}}
+        left=%any
+        right={{server}}
+{% endfor %}

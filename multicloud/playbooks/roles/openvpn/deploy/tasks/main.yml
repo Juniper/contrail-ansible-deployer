@@ -1,0 +1,33 @@
+---
+- name: Ensures {{ PATH_OPENVPN_CONFIG }} dir exists
+  file: path={{ PATH_OPENVPN_CONFIG }}  state=directory
+
+- name: Create OpenVPN route script
+  template:
+    src: up-down.sh.j2
+    dest: "{{ PATH_OPENVPN_CONFIG }}/up-down.sh"
+    mode: "+x"
+- name: Create OpenVPN server inc
+  template:
+    src: server_tap.inc.j2
+    dest: "{{ PATH_OPENVPN_CONFIG }}/server_tap.inc"
+- name: Create OpenVPN client inc
+  template:
+    src: client_tap.inc.j2
+    dest: "{{ PATH_OPENVPN_CONFIG }}/client_tap.inc"
+
+- name: Create OpenVPN server config
+  template:
+    src: server_tap.conf.j2
+    dest: "{{ PATH_OPENVPN_CONFIG }}/server_tap.conf"
+
+- name: Create dir conn in {{ PATH_OPENVPN_CONFIG }}
+  file:
+    path: "{{ PATH_OPENVPN_CONFIG }}/conn"
+    state: directory
+
+- name: Create OpenVPN client config
+  template:
+    src: client_tap.conf.j2
+    dest: "{{ PATH_OPENVPN_CONFIG }}/conn/client_tap_{{item}}.conf"
+  with_items: "{{openvpn_clients}}"

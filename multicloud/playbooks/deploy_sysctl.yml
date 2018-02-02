@@ -1,0 +1,5 @@
+---
+ - name: Set sysctl
+   hosts: all
+   roles:
+     - role: sysctl

@@ -1,0 +1,6 @@
+---
+ - name: Run docker compose
+   hosts: all
+   roles:
+     - role: bird/run_docker_compose
+

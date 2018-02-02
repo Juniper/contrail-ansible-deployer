@@ -1,0 +1,5 @@
+DEVICE=lo:1
+IPADDR={{ local_lo_ip }}
+NETMASK=255.255.255.255
+ONBOOT=yes
+NAME=lo:1

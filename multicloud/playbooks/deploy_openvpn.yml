@@ -1,0 +1,6 @@
+---
+ - name: Deploy OpenVPN
+   hosts: all
+   roles:
+     - role: openvpn/build
+     - role: openvpn/deploy

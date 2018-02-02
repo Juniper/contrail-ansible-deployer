@@ -1,0 +1,19 @@
+---
+- import_playbook: install_python.yml
+- import_playbook: install_docker.yml
+- import_playbook: create_loopback.yml
+- import_playbook: deploy_openvpn.yml
+- import_playbook: deploy_strongswan.yml
+- import_playbook: deploy_bird.yml
+- import_playbook: deploy_openvpn_compose.yml
+- import_playbook: deploy_strongswan_compose.yml
+- import_playbook: deploy_bird_compose.yml
+- import_playbook: deploy_ssl.yml
+- import_playbook: deploy_sysctl.yml
+- import_playbook: run_openvpn_compose.yml
+- import_playbook: run_strongswan_compose.yml
+- import_playbook: run_bird_compose.yml 
+
+
+
+

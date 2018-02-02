@@ -1,0 +1,6 @@
+---
+ - name: Run docker compose
+   hosts: all
+   roles:
+     - role: strongswan/run_docker_compose
+

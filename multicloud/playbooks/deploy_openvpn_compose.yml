@@ -1,0 +1,5 @@
+---
+ - name: Deploy OpenVPN
+   hosts: all
+   roles:
+     - role: openvpn/docker_compose

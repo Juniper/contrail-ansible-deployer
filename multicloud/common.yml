@@ -1,0 +1,15 @@
+ansible_user: root
+PATH_CONFIG:  "/etc/multicloud"
+PATH_SSL_CONFIG: "{{ PATH_CONFIG }}/ssl"
+PATH_OPENVPN_CONFIG: "{{ PATH_CONFIG }}/openvpn"
+PATH_BIRD_CONFIG: "{{ PATH_CONFIG }}/bird"
+PATH_STRONGSWAN_CONFIG: "{{ PATH_CONFIG }}/strongswan"
+PATH_INTERFACE_CONFIG: "/etc/network/interfaces.d/"
+
+local_lo_ip: 100.65.0.{{ id }} #TODO fix it
+local_ip: 100.64.0.{{ id }} #TODO fix it
+bgp_rr_ip: 100.65.0.1 #TODO fix it
+bird_router_id_from: '100.65.0.0/16'
+openvpn_port: 443
+
+

@@ -1,0 +1,6 @@
+---
+- name: Reload Ipsec
+  command: docker ps  | grep strong |awk '{print $1}' | xargs -I % docker exec % ipsec reload
+
+- name: Update Ipsec
+  command: docker ps  | grep strong |awk '{print $1}' | xargs -I % docker exec % ipsec update

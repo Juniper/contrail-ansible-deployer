@@ -1,0 +1,13 @@
+---
+version: '2'
+
+services:
+    strongswan:
+        image: strongswan
+        network_mode: host
+        privileged: true
+        volumes:
+            - "{{ PATH_STRONGSWAN_CONFIG }}:{{ PATH_STRONGSWAN_CONFIG }}:ro"
+            - "{{ PATH_SSL_CONFIG }}:{{ PATH_SSL_CONFIG }}:ro"
+        command: "ipsec start --nofork"
+

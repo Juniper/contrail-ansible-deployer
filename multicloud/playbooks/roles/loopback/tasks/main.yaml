@@ -1,0 +1,49 @@
+---
+  - name: Ensures "{{ PATH_INTERFACE_CONFIG }}interfaces" dir exists
+    file:
+      path: "{{ PATH_INTERFACE_CONFIG }}/interfaces/"
+      state: directory
+
+  - name: Ensures "{{ PATH_CONFIG }}interfaces" dir exists
+    file:
+      path: "{{ PATH_CONFIG }}/interfaces/"
+      state: directory
+
+  - name: Create link to loopback config Ubuntu
+    file:
+      src: "{{ PATH_CONFIG }}/interfaces/99-loopback.cfg"
+      dest: "{{ PATH_INTERFACE_CONFIG }}/99-loopback.cfg"
+      state: link
+      force: yes
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Create link to loopback config CentOS
+    file:
+      src: "{{ PATH_CONFIG }}/interfaces/ifcfg-lo:1"
+      dest: "/etc/sysconfig/network-scripts/ifcfg-lo:1"
+      state: link
+      force: yes
+    when: ansible_distribution == "CentOS"
+
+  - name: Create loopback config
+    template:
+      src: 99-loopback.cfg
+      dest: "{{ PATH_CONFIG }}/interfaces/99-loopback.cfg"
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Create loopback config
+    template:
+      src: ifcfg-lo:1
+      dest: "{{ PATH_CONFIG }}/interfaces/ifcfg-lo:1"
+    when: ansible_distribution == "CentOS"
+
+  - name: Restart networking Ubuntu
+    service:
+      name: networking
+      state: restarted
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Up lo:1
+    shell: "ifup lo:1"
+    when: ansible_distribution == "CentOS"
+

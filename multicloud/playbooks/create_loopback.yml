@@ -1,0 +1,5 @@
+---
+ - name: Create loopback
+   hosts: all
+   roles:
+     - role: loopback

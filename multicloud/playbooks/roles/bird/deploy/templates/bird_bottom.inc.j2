@@ -1,0 +1,10 @@
+{% for host in  groups["all"]  -%}
+protocol bgp gw{{host.replace('.', '')}} from PEERS {
+    neighbor {{ hostvars[host]['local_lo_ip'] }} as 65000;
+    rr client;
+}
+
+{% endfor %}
+
+
+

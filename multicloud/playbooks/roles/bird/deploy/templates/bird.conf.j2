@@ -1,0 +1,68 @@
+include "{{ PATH_BIRD_CONFIG }}/bird_top.inc";
+
+filter local_net {
+    if source = RTS_BGP then accept;
+    if net = local_lan then accept;
+    reject;
+}
+
+
+protocol kernel {
+    scan time 60;
+    import none;
+    export all;
+}
+
+protocol device {
+    scan time 60;
+}
+
+protocol direct {
+     import all;
+     interface "en*", "eth*";
+}
+
+protocol bfd {
+    interface "vti*", "tun*", "tap*" {
+    interval 100 ms;
+    multiplier 3;
+    };
+};
+
+
+protocol ospf {
+        import all;
+        area 0 {
+            interface "vti*", "tun*" {
+		bfd on;
+		type pointopoint;
+		hello 5;
+		retransmit 2;
+		wait 10;
+		    dead 20;
+            };
+            interface "tap*" {
+		bfd on;
+		type pointomultipoint;
+		hello 5;
+		retransmit 2;
+		wait 10;
+		    dead 20;
+            };
+
+        interface "lo*" {
+    stub;
+        };
+    };
+}
+
+template bgp PEERS {
+    local as 65000;
+    source address local_lo;
+    export filter local_net;
+    import all;
+}
+
+include "{{ PATH_BIRD_CONFIG }}/bird_bottom.inc";
+
+

@@ -1,0 +1,6 @@
+---
+- name: Run docker compose BIRD
+  docker_service:
+    project_src: bird
+    files: "{{ PATH_BIRD_CONFIG }}/bird-compose.yml"
+    state: present
