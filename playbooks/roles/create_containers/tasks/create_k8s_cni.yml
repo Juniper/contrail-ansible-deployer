@@ -31,7 +31,7 @@
       version: '2'
       services:
         vrouter-cni:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-kubernetes-vrouter-init:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-kubernetes-cni-init:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           env_file: /tmp/common.env
           network_mode: "host"
           volumes:

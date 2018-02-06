@@ -6,15 +6,15 @@
     definition:
       version: '2'
       services:
-        vrouter-init-kernel:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-agent-vrouter-init-kernel:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+        vrouter-kernel-init:
+          image: "{{ CONTAINER_REGISTRY }}/contrail-vrouter-kernel-init:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: host
           privileged: true
           env_file: /tmp/common.env
           volumes:
             - /var/log/contrail:/var/log/contrail
         vrouter-agent:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-agent-vrouter:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+          image: "{{ CONTAINER_REGISTRY }}/contrail-vrouter-agent:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: host
           privileged: true
           env_file: /tmp/common.env
@@ -22,7 +22,7 @@
             - /var/log/contrail:/var/log/contrail
           restart: on-failure
           depends_on:
-            - vrouter-init-kernel
+            - vrouter-kernel-init
 
 - name: start contrail vrouter
   docker_service:
@@ -41,8 +41,8 @@
             - /var/log/contrail:/var/log/contrail
             - /var/run/docker.sock:/var/run/docker.sock
           restart: on-failure
-        vrouter-init-kernel:
-          image: "{{ CONTAINER_REGISTRY }}/contrail-agent-vrouter-init-kernel:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
+        vrouter-kernel-init:
+          image: "{{ CONTAINER_REGISTRY }}/contrail-vrouter-kernel-init:{{ contrail_configuration.CONTRAIL_VERSION }}-{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
           network_mode: host
           privileged: true
           env_file: /tmp/common.env
@@ -59,4 +59,4 @@
             - /var/log/contrail:/var/log/contrail
           restart: on-failure
           depends_on:
-            - vrouter-init-kernel
+            - vrouter-kernel-init
