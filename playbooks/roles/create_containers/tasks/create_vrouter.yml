@@ -62,8 +62,8 @@
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
     - contrail-nodemgr
-    - contrail-agent-vrouter-init-kernel
-    - contrail-agent-vrouter
+    - contrail-vrouter-kernel-init
+    - contrail-vrouter-agent
   when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
 
 - name: "create contrail vrouter compose file"

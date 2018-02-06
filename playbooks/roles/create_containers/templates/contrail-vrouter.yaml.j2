@@ -13,8 +13,8 @@ services:
     restart: on-failure
     stdin_open: true
     tty: true
-  vrouter-init-kernel:
-    image: "{{ container_registry }}/contrail-agent-vrouter-init-kernel:{{ contrail_version_tag }}"
+  vrouter-kernel-init:
+    image: "{{ container_registry }}/contrail-vrouter-kernel-init:{{ contrail_version_tag }}"
     network_mode: host
     privileged: true
     env_file: /etc/contrail/common_vrouter.env
@@ -26,7 +26,7 @@ services:
       - /etc/contrail/vrouter:/etc/contrail
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
   vrouter-agent:
-    image: "{{ container_registry }}/contrail-agent-vrouter:{{ contrail_version_tag }}"
+    image: "{{ container_registry }}/contrail-vrouter-agent:{{ contrail_version_tag }}"
     network_mode: host
     privileged: true
     env_file: /etc/contrail/common_vrouter.env
@@ -37,4 +37,4 @@ services:
     stdin_open: true
     tty: true
     depends_on:
-      - vrouter-init-kernel
+      - vrouter-kernel-init
