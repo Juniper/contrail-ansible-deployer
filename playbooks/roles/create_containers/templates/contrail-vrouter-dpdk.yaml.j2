@@ -13,8 +13,8 @@ services:
     restart: on-failure
     stdin_open: true
     tty: true
-  vrouter-init-kernel-dpdk:
-    image: "{{ container_registry }}/contrail-agent-vrouter-init-kernel-dpdk:{{ contrail_version_tag }}"
+  vrouter-kernel-init-dpdk:
+    image: "{{ container_registry }}/contrail-vrouter-kernel-init-dpdk:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_vrouter.env
     environment:
       - AGENT_MODE=dpdk
@@ -28,7 +28,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/vrouter:/etc/contrail
   vrouter-agent-dpdk:
-    image: "{{ container_registry }}/contrail-agent-vrouter-dpdk:{{ contrail_version_tag }}"
+    image: "{{ container_registry }}/contrail-vrouter-agent-dpdk:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_vrouter.env
     environment:
       - AGENT_MODE=dpdk
@@ -45,9 +45,9 @@ services:
     stdin_open: true
     tty: true
     depends_on:
-      - vrouter-init-kernel-dpdk
-  vrouter-agent-net-watchdog:
-    image: "{{ container_registry }}/contrail-agent-net-watchdog:{{ contrail_version_tag }}"
+      - vrouter-kernel-init-dpdk
+  vrouter-net-watchdog:
+    image: "{{ container_registry }}/contrail-vrouter-net-watchdog:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_vrouter.env
     environment:
       - AGENT_MODE=dpdk
@@ -66,7 +66,7 @@ services:
     depends_on:
       - vrouter-agent-dpdk
   vrouter-agent:
-    image: "{{ container_registry }}/contrail-agent-vrouter:{{ contrail_version_tag }}"
+    image: "{{ container_registry }}/contrail-vrouter-agent:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_vrouter.env
     environment:
       - AGENT_MODE=dpdk
@@ -82,4 +82,4 @@ services:
     stdin_open: true
     tty: true
     depends_on:
-      - vrouter-agent-net-watchdog
+      - vrouter-net-watchdog
