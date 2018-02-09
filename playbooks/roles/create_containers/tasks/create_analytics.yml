@@ -36,6 +36,7 @@
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
     - contrail-nodemgr
+    - contrail-openstack-ironicnotifmgr
     - contrail-analytics-api
     - contrail-analytics-collector
     - contrail-analytics-query-engine
