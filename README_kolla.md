@@ -136,8 +136,8 @@ container_hosts:
 Set the following parameters:    
 ```
 cat ~/contrail-ansible-deployer/inventory/group_vars/container_hosts.yml
-CONTAINER_REGISTRY: michaelhenkel
 contrail_configuration:
+  CONTAINER_REGISTRY: michaelhenkel
   OPENSTACK_VERSION: ocata
   LINUX_DISTR: centos7
   CONTRAIL_VERSION: 4.1.0.0-8
