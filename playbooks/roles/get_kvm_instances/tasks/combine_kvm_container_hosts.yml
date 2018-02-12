@@ -1,0 +1,31 @@
+- set_fact:
+    tmp_list: []
+- name: create_tmp_list
+  set_fact:
+    tmp_list: "{{ tmp_list + [ container_host_item ] }}"
+  when: container_host_item.value.host == item.key
+  with_dict: "{{ container_host_dict }}"
+  loop_control:
+    loop_var: container_host_item
+
+- set_fact:
+    tmp_dict: {}
+- name: create_tmp_dict
+  set_fact:
+#    tmp_dict: "{{ tmp_dict | combine({container_host_item.key: container_host_item.value}) }}"
+    tmp_dict: "{{ tmp_dict | combine({container_host_item.key:instances[container_host_item.key]}) }}"
+  when: container_host_item.value.host == item.key
+  with_dict: "{{ container_host_dict }}"
+  loop_control:
+    loop_var: container_host_item
+
+- debug:
+    msg: "{{ tmp_dict }}"
+
+- name: create kvm_container host list
+  set_fact:
+    kvm_host_dict: "{{ kvm_host_dict|default({})|combine({item.key: tmp_dict}) }}"  
+  when: container_host_item.value.host == item.key
+  with_dict: "{{ container_host_dict }}"
+  loop_control:
+    loop_var: container_host_item
