@@ -1,0 +1,33 @@
+- name: add kvm container hosts
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: container_hosts
+    ansible_user: "{{ provider_config.kvm.ssh_user }}"
+    ansible_ssh_pass: "{{ provider_config.kvm.ssh_pwd }}"
+    instance_name: "{{ item.key }}"
+  when: item.value.provider=='kvm' and provider_config.kvm.ssh_pwd is defined
+  with_dict: "{{ instances }}"
+  tags:
+    - configure_kvm_instances
+    - install_contrail
+
+- name: add kvm container hosts
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: container_hosts
+    ansible_user: "{{ provider_config.kvm.ssh_user }}"
+    ansible_ssh_private_key_file: "{{ provider_config.kvm.ssh_private_key }}"
+    instance_name: "{{ item.key }}"
+  when: item.value.provider=='kvm' and provider_config.kvm.ssh_private_key is defined
+  with_dict: "{{ instances }}"
+  tags:
+    - configure_kvm_instances
+    - install_contrail
+
+- name: add gce container hosts
+  include: add_gce_container_hosts.yml
+  when: item.value.provider=='gce'
+  with_dict: "{{ instances }}"
+  tags:
+    - configure_gce_instances
+    - install_contrail
