@@ -1,0 +1,6 @@
+---
+- name: install software
+  include: install_software.yml
+  tags:
+    - configure_kvm_instances
+    - configure_gce_instances

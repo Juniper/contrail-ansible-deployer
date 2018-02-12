@@ -1,0 +1,54 @@
+---
+- name: create /etc/contrail/config_database
+  file:
+    path: /etc/contrail/config_database
+    state: directory
+    recurse: yes
+
+- name: set cassandra seeds to CONFIGDB_NODES if defined
+  set_fact:
+    cassandra_seeds: "{{ contrail_configuration.CONFIGDB_NODES }}"
+  when: contrail_configuration.CONFIGDB_NODES is defined
+
+- name: set cassandra seeds to CONTROLLER_NODES if CONFIGDB_NODES not defined
+  set_fact:
+    cassandra_seeds: "{{ contrail_configuration.CONTROLLER_NODES }}"
+  when: contrail_configuration.CONTROLLER_NODES is defined and contrail_configuration.CONFIGDB_NODES is undefined
+
+- name: set zookeeper nodes to CONFIGDB_NODES if defined
+  set_fact:
+    zookeeper_nodes: "{{ contrail_configuration.CONFIGDB_NODES }}"
+  when: contrail_configuration.CONFIGDB_NODES is defined
+
+- name: set zookeeper nodes to CONTROLLER_NODES if CONFIGDB_NODES not defined
+  set_fact:
+    zookeeper_nodes: "{{ contrail_configuration.CONTROLLER_NODES }}"
+  when: contrail_configuration.CONTROLLER_NODES is defined and contrail_configuration.CONFIGDB_NODES is undefined
+
+- name: set rabbit nodes to CONFIGDB_NODES if defined
+  set_fact:
+    rabbitmq_nodes: "{{ contrail_configuration.CONFIGDB_NODES }}"
+  when: contrail_configuration.CONFIGDB_NODES is defined
+
+- name: set rabbit nodes to CONTROLLER_NODES if CONFIGDB_NODES not defined
+  set_fact:
+    rabbitmq_nodes: "{{ contrail_configuration.CONTROLLER_NODES }}"
+  when: contrail_configuration.CONTROLLER_NODES is defined and contrail_configuration.CONFIGDB_NODES is undefined
+
+- name: update image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-nodemgr
+    - contrail-external-cassandra
+    - contrail-external-zookeeper
+    - contrail-external-rabbitmq
+  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+
+- name: create contrail config database compose file
+  template:
+    src: contrail-config-database.yaml.j2
+    dest: /etc/contrail/config_database/docker-compose.yaml
+
+- name: start contrail config database
+  docker_service:
+    project_src: /etc/contrail/config_database
