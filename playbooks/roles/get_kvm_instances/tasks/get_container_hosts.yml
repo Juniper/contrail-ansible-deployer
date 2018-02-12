@@ -1,0 +1,20 @@
+- debug:
+   msg: "{{ kvm_host_dict }}"
+
+- debug:
+    msg: "{{ kvm_item.key }}"
+  with_dict: "{{ kvm_host_dict }}"
+  loop_control:
+    loop_var: kvm_item
+
+- name: create container host dicts
+  set_fact:
+    container_host_dict: "{{ container_host_dict|default({})|combine({item.key: item.value.ip}) }}"
+
+- name: add container hosts to kvm dict
+  set_fact:
+    kvm_container_host_dict: "{{ kvm_item.value + [ 'bla' ] }}"
+  when: kvm_item.key == item.value.host
+  with_dict: "{{ kvm_host_dict }}"
+  loop_control:
+    loop_var: kvm_item
