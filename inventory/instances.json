@@ -1,0 +1,49 @@
+{
+  "provider_config": {
+    "kvm": {
+      "image": "CentOS-7-x86_64-GenericCloud-1710.qcow2.xz",
+      "image_url": "http://10.87.64.32/",
+      "ssh_pwd": "contrail123",
+      "ssh_user": "root",
+      "ssh_public_key": "/user/.ssh/id_rsa.pub",
+      "ssh_private_key": "/user/.ssh/id_rsa",
+      "vcpu": 12,
+      "vram": 64000,
+      "vdisk": "100G",
+      "subnet_prefix": "192.168.1.0",
+      "subnet_netmask": "255.255.255.0",
+      "gateway": "192.168.1.1",
+      "nameserver": "192.168.1.1",
+      "ntpserver": "192.168.1.1",
+      "domainsuffix": "local"
+    },
+    "gce": {
+      "service_account_email": "your_service_account@developer.gserviceaccount.com",
+      "credentials_file": "/configs/gce.json",
+      "project_id": "your_project_id",
+      "ssh_user": "mhenkel",
+      "ssh_private_key": "/user/.ssh/id_rsa",
+      "machine_type": "n1-standard-4",
+      "image": "centos-7",
+      "network": "microservice-vn",
+      "subnetwork": "microservice-sn",
+      "zone": "us-west1-a",
+      "disk_size": 50
+    }
+  },
+  "instances": {
+    "gce1": {
+      "provider": "gce"
+    },
+    "gce2": {
+      "provider": "gce"
+    },
+    "gce3": {
+      "provider": "gce"
+    }
+  },
+  "contrail_configuration": {
+    "CONTAINER_REGISTRY": "opencontrailnightly",
+    "CONTRAIL_VERSION": "latest"
+  }
+}
