@@ -1,0 +1,67 @@
+version: '2'
+volumes:
+ config_cassandra:
+ config_zookeeper:
+services:
+  network:
+    image: docker.io/kubernetes/pause
+    network_mode: "host"
+    volumes:
+     - /etc/hosts:/etc/hosts
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+      - NODE_TYPE=database
+    network_mode: "service:network"
+    volumes:
+      - /etc/contrail/config_database:/etc/contrail
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - network
+    restart: on-failure
+  cassandra:
+    image: "{{ container_registry }}/contrail-external-cassandra:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+     - CASSANDRA_SEEDS={{ cassandra_seeds }}
+     - CASSANDRA_START_RPC=true
+     - CASSANDRA_CLUSTER_NAME=contrail_database
+     - CASSANDRA_PORT=9161
+     - CASSANDRA_CQL_PORT=9041
+     - CASSANDRA_SSL_STORAGE_PORT=7013
+     - CASSANDRA_STORAGE_PORT=7012
+     - CASSANDRA_JMX_LOCAL_PORT=7201
+    volumes:
+     - config_cassandra:/var/lib/cassandra/data
+    network_mode: "service:network"
+    depends_on:
+      - network
+    restart: on-failure
+  zookeeper:
+    image: "{{ container_registry }}/contrail-external-zookeeper:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+     - ZOOKEEPER_NODES={{ zookeeper_nodes }}
+     - ZOOKEEPER_PORTS=2888:3888
+     - ZOOKEEPER_PORT=2181
+#     - ZOO_DATA_DIR=/var/lib/zookeeper/data
+#     - ZOO_DATA_LOG_DIR=/var/lib/zookeeper/datalog
+    volumes:
+     - config_zookeeper:/data
+     - config_zookeeper:/datalog
+    network_mode: "service:network"
+    depends_on:
+      - network
+    restart: on-failure
+  rabbitmq:
+    image: "{{ container_registry }}/contrail-external-rabbitmq:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+     - RABBITMQ_NODES={{ rabbitmq_nodes }}
+     - RABBITMQ_ERLANG_COOKIE=abcdefg
+    network_mode: "service:network"
+    depends_on:
+      - network
+    restart: on-failure

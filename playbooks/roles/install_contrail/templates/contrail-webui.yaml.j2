@@ -1,0 +1,34 @@
+version: '2'
+services:
+  network:
+    image: docker.io/kubernetes/pause
+    network_mode: "host"
+    volumes:
+     - /etc/hosts:/etc/hosts
+  web:
+    image: "{{ container_registry }}/contrail-controller-webui-web:{{ contrail_version_tag }}"
+    network_mode: "service:network"
+    env_file: /etc/contrail/common_webui.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/webui:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+  job:
+    image: "{{ container_registry }}/contrail-controller-webui-job:{{ contrail_version_tag }}"
+    network_mode: "service:network"
+    env_file: /etc/contrail/common_webui.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/webui:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+  redis:
+    image: "redis:4.0.2"
+    env_file: /etc/contrail/common_webui.env
+    network_mode: "service:network"
+    depends_on:
+      - network
+    restart: on-failure

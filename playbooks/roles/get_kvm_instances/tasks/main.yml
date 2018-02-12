@@ -1,0 +1,36 @@
+- name: Build KVM host group
+  add_host:
+    hostname: "{{ item.value.host }}"
+    groupname: kvm_instances
+    ansible_ssh_pass: "{{ provider_config.kvm.ssh_pwd }}"
+    ansible_user: "{{ provider_config.kvm.ssh_user }}"
+    instance_name: "{{ item.key }}"
+  when: item.value.provider=='kvm' and provider_config.kvm.ssh_pwd is defined and provider_config.kvm.ssh_user is defined
+  with_dict: "{{ instances }}"
+
+- name: Build KVM host group
+  add_host:
+    hostname: "{{ item.value.host }}"
+    groupname: kvm_instances
+    ansible_ssh_private_key_file: "{{ provider_config.kvm.ssh_private_key }}"
+    ansible_user: "{{ provider_config.kvm.ssh_user }}"
+    instance_name: "{{ item.key }}"
+  when: item.value.provider=='kvm' and provider_config.kvm.ssh_private_key is defined
+  with_dict: "{{ instances }}"
+
+- name: create kvm host dict
+  set_fact:
+    kvm_host_dict: "{{ kvm_host_dict|default({})|combine({item.value.host: []}) }}"
+  when: item.value.provider=='kvm'
+  with_dict: "{{ instances }}"
+
+- name: create container host dict
+  set_fact:
+    container_host_dict: "{{ container_host_dict|default({})|combine({item.key: { 'host': item.value.host}}) }}"
+  when: item.value.provider=='kvm'
+  with_dict: "{{ instances }}"
+
+- name: combine kvm container hosts
+  include: combine_kvm_container_hosts.yml
+  with_dict: "{{ kvm_host_dict }}"
+  when: kvm_host_dict is defined
