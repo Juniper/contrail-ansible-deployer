@@ -1,8 +1,15 @@
-container_hosts:        
+localhost:
   hosts:
-    192.168.1.100:
-      ansible_ssh_pass: contrail123
-    192.168.1.101:
-      ansible_ssh_pass: contrail123
-    192.168.1.102:
-      ansible_ssh_pass: contrail123
+    localhost:
+      config_file: ../inventory/instances.yaml
+      connection: local
+      python_interpreter: python
+      ansible_python_interpreter: python
+#container_hosts:        
+#  hosts:
+#    192.168.1.100:
+#      ansible_ssh_pass: contrail123
+#    192.168.1.101:
+#      ansible_ssh_pass: contrail123
+#    192.168.1.102:
+#      ansible_ssh_pass: contrail123

@@ -1,0 +1,70 @@
+provider_config:
+  kvm:
+    image: CentOS-7-x86_64-GenericCloud-1710.qcow2.xz
+    image_url: https://cloud.centos.org/centos/7/images/
+    ssh_pwd: contrail123
+    ssh_user: root
+    ssh_public_key:
+    ssh_private_key:
+    vcpu: 12
+    vram: 64000
+    vdisk: 100G
+    subnet_prefix: 192.168.1.0
+    subnet_netmask: 255.255.255.0
+    gateway: 192.168.1.1
+    nameserver: 10.84.5.100
+    ntpserver: 192.168.1.1
+    domainsuffix: local
+  gce:
+    service_account_email:       # Mandatory. GCE service account email address.
+    credentials_file:            # Mandatory. Path to GCE account json file.
+    project_id:                  # Mandatory. GCE project name.
+    ssh_user:                    # Mandatory. Ssh user for GCE instances.
+    #ssh_pwd:                    # Optional.  Ssh password used by ssh user, not needed when public is used
+    ssh_private_key:             # Optional.  Path to private SSH key, used by by ssh user, not needed when ssh-agent loaded private key
+    machine_type: n1-standard-4  # Mandatory. Default is too small
+    image: centos-7              # Mandatory. For provisioning and configuration only centos-7 is currently supported.
+    network: microservice-vn     # Optional.  Defaults to default
+    subnetwork: microservice-sn  # Optional.  Defaults to default
+    zone: us-west1-aA            # Optional.  Defaults to  ?
+    disk_size: 50                # Mandatory. Default is too small
+instances:
+  gce1:                          # Mandatory. Instance name
+    provider: gce                # Mandatory. Instance runs on GCE
+      roles:                     # Optional.  If roles is not defined, all below roles will be created
+        config_database          # Optional.
+        config                   # Optional.
+        control                  # Optional.
+        analytics_database       # Optional.
+        k8s_master               # Optional.
+        k8s_node                 # Optional.
+        vrouter                  # Optional.
+  gce2:
+    provider: gce
+  gce3:
+    provider: gce
+#  kvm1:
+#    provider: kvm
+#    host: 10.87.64.31
+#    bridge: br1
+#    ip: 192.168.1.100
+#  kvm2:
+#    provider: kvm
+#    host: 10.87.64.32
+#    bridge: br1
+#    ip: 192.168.1.101
+#  kvm3:
+#    provider: kvm
+#    host: 10.87.64.33
+#    bridge: br1
+#    ip: 192.168.1.102
+#  kvm4:
+#    provider: kvm
+#    host: 10.87.64.33
+#    bridge: br1
+#    ip: 192.168.1.104
+#    roles:
+#      vrouter:
+contrail_configuration:
+  CONTAINER_REGISTRY: michaelhenkel
+  CONTRAIL_VERSION: 5.0.0-134-centos7-ocata
