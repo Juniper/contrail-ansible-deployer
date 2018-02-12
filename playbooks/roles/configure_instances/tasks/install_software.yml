@@ -1,0 +1,136 @@
+---
+- name: set instance data
+  set_fact:
+    instance_data: "{{ instances[hostvars[inventory_hostname].instance_name] }}"
+
+- name: set provider data
+  set_fact:
+    provider_data: "{{ provider_config[instance_data.provider] }}"
+  when: provider_config[instance_data.provider] is defined
+
+- name: install epel
+  yum:
+    name: epel-release
+    state: latest
+
+- name: install ntpd
+  yum:
+    name: ntp
+    state: latest
+  when: provider_data.ntpserver is defined
+
+- name: set ntp server
+  template:
+    src: ntp.conf.j2
+    dest: /etc/ntp.conf
+  when: provider_data.ntpserver is defined
+
+- name: initial time sync
+  shell: "ntpdate {{ provider_data.ntpserver }}"
+  ignore_errors: yes
+  when: provider_data.ntpserver is defined
+
+- name: start ntp service
+  service: name=ntpd state=started enabled=yes
+  when: provider_data.ntpserver is defined
+
+- name: install pip
+  yum:
+    name: python-pip
+    state: latest
+
+- name: create docker repo
+  yum_repository:
+    name: dockerrepo
+    description: Docker Repository
+    baseurl: https://yum.dockerproject.org/repo/main/centos/7
+    gpgkey: https://yum.dockerproject.org/gpg
+    gpgcheck: yes
+
+- name: install docker selinux
+  yum:
+    name: docker-engine-selinux-17.03.1.ce
+    state: installed
+
+- name: install docker
+  yum:
+    name: docker-engine-17.03.1.ce
+    state: installed
+
+- name: add insecure registry
+  include: insecure_registry.yaml
+  when: REGISTRY_PRIVATE_INSECURE is defined and REGISTRY_PRIVATE_INSECURE == true
+
+- name: add private registry
+  include: private_registry.yaml
+  when: REGISTRY_PRIVATE_SECURE is defined and REGISTRY_PRIVATE_SECURE == true
+
+- name: start docker daemon
+  service:
+    enabled: yes
+    name: docker
+    state: started
+
+- name: get docker compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/1.17.0/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: 0777
+
+- name: install python compose
+  pip:
+    name: docker-compose==1.9.0
+
+- name: "Build hosts file with domain suffix when provided"
+  lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when: instance_data.provider == 'kvm' and provider_data.domainsuffix is defined
+
+- name: "Build hosts file without domain suffix when not provided (bad bad)"
+  lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}" state=present
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when: instance_data.provider == 'kvm' and provider_data.domainsuffix is undefined
+
+- name: create log file directory
+  file:
+   dest: /var/log/docker/contrail
+   state: directory
+   mode: 0777
+
+- name: create k8s repo
+  yum_repository:
+    name: Kubernetes
+    description: k8s repo
+    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+    gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    repo_gpgcheck: yes
+    gpgcheck: yes
+
+- name: install kubelet-1.9.2-0
+  yum:
+    name: kubelet-1.9.2-0
+    state: latest
+
+- name: install kubeadm-1.9.2-0
+  yum:
+    name: kubeadm-1.9.2-0
+    state: latest
+
+- name: install kubectl-1.9.2-0
+  yum:
+    name: kubectl-1.9.2-0
+    state: latest
+
+- name: set selinux to permissive
+  selinux:
+    policy: targeted
+    state: permissive
+
+- name: sysctl -w net.bridge.bridge-nf-call-iptables=1
+  shell: sysctl -w net.bridge.bridge-nf-call-iptables=1 && echo "net.bridge.bridge-nf-call-iptables=1" >> /etc/sysctl.conf
+
+- name: sysctl -w net.bridge.bridge-nf-call-ip6tables=1
+  shell: sysctl -w net.bridge.bridge-nf-call-ip6tables=1 && echo "net.bridge.bridge-nf-call-ip6tables=1" >> /etc/sysctl.conf
+
+- name: flush iptables
+  shell: iptables -F
