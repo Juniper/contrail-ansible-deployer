@@ -1,0 +1,123 @@
+- name: set machine_typ to default if not defined
+  set_fact:
+    machine_type: n1-standard-4
+  when: provider_config.gce.machine_type is undefined and item.value.machine_type is undefined
+
+- name: set machine_typ to provider default if not defined
+  set_fact:
+    machine_type: "{{ provider_config.gce.machine_type }}"
+  when: provider_config.gce.machine_type is defined
+
+- name: set machine_typ to instance if not defined
+  set_fact:
+    machine_type: "{{ item.value.machine_type }}"
+  when: item.value.machine_type is defined
+
+- name: set image to default if not defined
+  set_fact:
+    image: centos-7
+  when: provider_config.gce.image is undefined and item.value.image is undefined
+
+- name: set image to provider default if not defined
+  set_fact:
+    image: "{{ provider_config.gce.image }}"
+  when: provider_config.gce.image is defined
+
+- name: set image to provider default if not defined
+  set_fact:
+    image: "{{ item.value.image }}"
+  when: item.value.image is defined
+
+- name: set network to default if not defined
+  set_fact:
+    network: default
+  when: provider_config.gce.network is undefined and item.value.network is undefined
+
+- name: set network to provider default if not defined
+  set_fact:
+    network: "{{ provider_config.gce.network }}"
+  when: provider_config.gce.network is defined
+
+- name: set network to provider default if not defined
+  set_fact:
+    network: "{{ item.value.network }}"
+  when: item.value.network is defined
+
+- name: set subnetwork to default if not defined
+  set_fact:
+    subnetwork: default
+  when: provider_config.gce.subnetwork is undefined and item.value.subnetwork is undefined
+
+- name: set subnetwork to provider default if not defined
+  set_fact:
+    subnetwork: "{{ provider_config.gce.subnetwork }}"
+  when: provider_config.gce.subnetwork is defined
+
+- name: set subnetwork to provider default if not defined
+  set_fact:
+    subnetwork: "{{ item.value.subnetwork }}"
+  when: item.value.subnetwork is defined
+
+- name: set zone to default if not defined
+  set_fact:
+    zone: us-west1-a
+  when: provider_config.gce.zone is undefined and item.value.zone is undefined
+
+- name: set zone to provider default if not defined
+  set_fact:
+    zone: "{{ provider_config.gce.zone }}"
+  when: provider_config.gce.zone is defined
+
+- name: set zone to provider default if not defined
+  set_fact:
+    zone: "{{ item.value.zone }}"
+  when: item.value.zone is defined
+
+- name: set disk_size to default if not defined
+  set_fact:
+    disk_size: 50
+  when: provider_config.gce.disk_size is undefined and item.value.disk_size is undefined
+
+- name: set disk_size to provider default if not defined
+  set_fact:
+    disk_size: "{{ provider_config.gce.disk_size }}"
+  when: provider_config.gce.disk_size is defined
+
+- name: set disk_size to provider default if not defined
+  set_fact:
+    disk_size: "{{ item.value.disk_size }}"
+  when: item.value.disk_size is defined
+
+- name: Launch instance
+  gce:
+      instance_names: "{{ item.key }}"
+      machine_type: "{{ machine_type }}"
+      image: "{{ image }}"
+      service_account_email: "{{ provider_config.gce.service_account_email }}"
+      credentials_file: "{{ provider_config.gce.credentials_file }}"
+      project_id: "{{ provider_config.gce.project_id }}"
+      network: "{{ network }}"
+      subnetwork: "{{ subnetwork }}"
+      zone: "{{ zone }}"
+      disk_size: "{{ disk_size }}"
+      state: active
+  register: gce
+
+- name: Wait for SSH to come up
+  wait_for: host={{ instance_data.public_ip }} port=22 delay=10 timeout=60
+  with_items: "{{ gce.instance_data }}"
+  loop_control:
+    loop_var: instance_data
+
+- name: Add host to groupname
+  add_host:
+    hostname: "{{ instance_data.public_ip }}"
+    groupname: container_hosts
+    instance_name: "{{ item.key }}"
+  with_items: "{{ gce.instance_data }}"
+  loop_control:
+    loop_var: instance_data
+
+- name: display new instance
+  debug:
+   msg: "{{ gce.instance_data }}"
