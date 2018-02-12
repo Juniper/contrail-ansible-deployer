@@ -20,9 +20,10 @@
     daemon_reload: yes
     enabled: True
 
-- name: show master token
+- name: debug join
   debug:
-    msg: "{{ hostvars[master].mastertoken }}"
+    msg: "master token: {{ hostvars[master_inventory].mastertoken }}"
 
 - name: join k8s cluster
-  shell: "kubeadm join --token {{ hostvars[master].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ master }}:6443"
+  shell: "kubeadm join --token {{ hostvars[master_inventory].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ master }}:6443"
+
