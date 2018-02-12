@@ -1,0 +1,24 @@
+---
+- name: docker info for getting cgroup driver
+  shell: docker info 2>/dev/null |grep "Cgroup Driver" |awk '{print $3}'
+  register: docker_info
+
+- name: get cgroup driver
+  set_fact:
+    cgroup_driver: "{{ docker_info.stdout }}"
+
+- name: set cgroup driver to cgroupfs
+  lineinfile:
+    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
+    line: 'Environment="KUBELET_CGROUP_ARGS=--cgroup-driver={{ cgroup_driver }}"'
+
+- name: enable kubelet service
+  systemd:
+    name: kubelet
+    state: restarted
+    daemon_reload: yes
+    enabled: True
+
+- name: join k8s cluster
+  shell: "kubeadm join --token {{ hostvars[master].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ master }}:6443"
