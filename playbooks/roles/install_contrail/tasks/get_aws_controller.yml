@@ -1,0 +1,7 @@
+- name: add aws controllers to the list
+  set_fact:
+    controller_list: "{{ controller_list + [ hostvars[aws_host]['private_ip'] ] }}"
+  when: hostvars[aws_host]['instance_name'] == item.key
+  with_items: "{{ groups['container_hosts'] }}"
+  loop_control:
+    loop_var: aws_host

@@ -1,0 +1,26 @@
+---
+- name: get registry name
+  set_fact:
+    registry_name: "{{ CONTAINER_REGISTRY.split(':') }}"
+
+- name: get fqdn
+  set_fact:
+    fqdn_name: "{{ registry_name[0] }}"
+
+- name: create docker cert directory
+  file:
+    path: "/etc/docker/certs.d/{{ CONTAINER_REGISTRY }}"
+    state: directory
+
+- name: copy cert to docker cert directory
+  copy:
+    src: "{{ fqdn_name }}.crt"
+    dest: "/etc/docker/certs.d/{{ CONTAINER_REGISTRY }}/{{ fqdn_name }}.crt"
+
+- name: copy cert to trust directory
+  copy:
+    src: "{{ fqdn_name }}.crt"
+    dest: "/etc/pki/ca-trust/source/anchors//{{ fqdn_name }}.crt"
+
+- name: update ca trust
+  shell: update-ca-trust
