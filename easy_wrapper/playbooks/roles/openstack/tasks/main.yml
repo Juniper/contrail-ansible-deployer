@@ -1,0 +1,30 @@
+---
+
+- name: Populate openstack inventory
+  template:
+    src: "{{ role_path }}/templates/inventory.j2"
+    dest: "{{ kolla_dir }}/ansible/inventory/{{ inventory_name }}"
+
+- name: Merge kolla_globals params
+  set_fact:
+    final_kolla_globals: "{{ default_kolla_globals |combine(kolla_globals) if kolla_globals is defined else default_kolla_globals }}"
+
+- name: Populate etc/kolla/globals.yml
+  template:
+    src: "{{ role_path }}/templates/globals.yml.j2"
+    dest: "{{ kolla_dir }}/etc/kolla/globals.yml"
+
+#- name: "Remove existing options {{ kolla_dir}}/etc/kolla/globals.yml"
+#  replace:
+#    dest: "{{ kolla_dir }}/etc/kolla/globals.yml"
+#    regexp: "[^#].*{{ item }}"
+#    replace: "\n#{{ item }}"
+#  with_items: "{{ final_kolla_globals.keys() }}"
+#
+#- name: Update options in globals.yml
+#  lineinfile:
+#    dest: "{{ kolla_dir }}/etc/kolla/globals.yml"
+#    insertafter: '#{{ item.key }}'
+#    line: '{{ item.key }}: {{ item.value }}'
+#  with_dict: "{{ final_kolla_globals }}"
+

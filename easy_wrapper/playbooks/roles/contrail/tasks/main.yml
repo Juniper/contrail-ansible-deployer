@@ -1,0 +1,33 @@
+---
+- name: "Remove existing options {{ contrail_dir}}/inventory/hosts"
+  file:
+    state: absent
+    path: "{{ contrail_dir }}/inventory/hosts"
+
+- name: "Create new file {{ contrail_dir}}/inventory/hosts"
+  file:
+    state: touch
+    path: "{{ contrail_dir }}/inventory/hosts"
+
+- name: Write the /etc/hosts
+  template:
+    src: "{{ role_path }}/templates/inventory_hosts.j2"
+    dest: "{{ contrail_dir }}/inventory/hosts"
+
+- name: Merge container_hosts_params
+  set_fact:
+    final_contrail_configuration: "{{ default_contrail_configuration | combine(contrail_config['container_hosts_openstack'], recursive=True) if contrail_config['container_hosts_openstack'] is defined else default_contrail_configuration }}"
+
+- name: Write inventory/group_vars/container_hosts.yml
+  template:
+    src: "{{ role_path }}/templates/container-hosts-yaml.j2"
+    dest: "{{ contrail_dir }}/inventory/group_vars/container_hosts.yml"
+
+- name: Merge contrail_all params
+  set_fact:
+    final_contrail_all_params: "{{ default_config_all |combine(contrail_config['contrail_all'],recursive=True) if contrail_config['contrail_all'] is defined else default_config_all }}"
+
+- name: Write inventory/group_vars/all.yml
+  template:
+    src: "{{ role_path }}/templates/contrail_all.yaml.j2"
+    dest: "{{ contrail_dir }}/inventory/group_vars/all.yml"

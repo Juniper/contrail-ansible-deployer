@@ -1,0 +1,11 @@
+contrail_configuration:
+{% for key, value in final_contrail_configuration['contrail_configuration'].iteritems() %}
+  {{ key }}: {{ value }}
+{% endfor %}
+roles:
+{% for key , value in final_contrail_configuration['roles'].iteritems() %}
+   {{ key }}:
+   {% for item in value %}
+   {{ item }}:
+   {% endfor %}
+{% endfor %}

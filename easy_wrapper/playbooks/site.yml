@@ -1,0 +1,9 @@
+---
+
+- hosts: deployer
+
+  roles:
+    - role: openstack
+      when: orchestrator == "openstack"
+    - { role: contrail, tags: contrail }
+
