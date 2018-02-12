@@ -119,7 +119,7 @@ git clone http://github.com/Juniper/contrail-ansible-deployer
 
 #### Configure contrail ansible deployer
 
-1. Add hosts to the inventory    
+1. Add hosts to the inventory
 ```
 cat ~/contrail-ansible-deployer/inventory/hosts
 container_hosts:
@@ -132,15 +132,15 @@ container_hosts:
       ansible_ssh_pass: contrail123
 ```
 
-2. Configure Contrail containers    
-Set the following parameters:    
+2. Configure Contrail containers
+Set the following parameters:
 ```
 cat ~/contrail-ansible-deployer/inventory/group_vars/container_hosts.yml
 contrail_configuration:
   CONTAINER_REGISTRY: michaelhenkel
   OPENSTACK_VERSION: ocata
-  LINUX_DISTR: centos7
-  CONTRAIL_VERSION: 4.1.0.0-8
+#  CONTRAIL_VERSION: 4.1.0.0-8-ocata
+  CONTRAIL_VERSION: latest
   CONTROLLER_NODES: 192.168.1.100,192.168.1.101,192.168.1.102
   CLOUD_ORCHESTRATOR: openstack
   AUTH_MODE: keystone
