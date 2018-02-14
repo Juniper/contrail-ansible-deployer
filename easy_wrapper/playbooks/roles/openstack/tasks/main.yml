@@ -1,11 +1,39 @@
 ---
+- include: inventory.yml
 
-- name: Populate openstack inventory
-  template:
-    src: "{{ role_path }}/templates/inventory.j2"
-    dest: "{{ kolla_dir }}/ansible/inventory/{{ inventory_name }}"
+- fail:
+    msg: "kolla_internal_vip_address is mandatory for a multi-node cluster"
+  when:
+    - (openstack_nodes| count) > 1
+    - kolla_config.kolla_globals is not defined or kolla_config.kolla_globals.kolla_internal_vip_address is not defined
 
-- name: Merge kolla_globals params
+- name: "Calculate openstack_network_interface for {{ openstack_node }}"
+  set_fact:
+    openstack_network_interface: "{{ item }}"
+  when: >
+    (hostvars[inventory_hostname]['ansible_%s' % item]|default({}))
+    .get('ipv4', {}).get('address') == openstack_node
+    or
+    openstack_node in ((hostvars[inventory_hostname]['ansible_%s' % item]|default({}))
+    .get('ipv4_secondaries'))|map(attribute='address')|list
+  with_items:
+    - "{{ ansible_interfaces }}"
+
+- name: Set openstack_network_interface
+  set_fact:
+    openstack_network_interface: >-
+      {%- if kolla_config.kolla_globals is defined -%}
+        {%- if kolla_config.kolla_globals.network_interface is defined -%}
+          {%- print kolla_config.kolla_globals.network_interface -%}
+        {%- else -%}
+          {%- print ansible_default_ipv4.interface -%}
+        {%- endif -%}
+      {%- else -%}
+        {%- print ansible_default_ipv4.interface -%}
+      {%- endif -%}
+  when: openstack_network_interface is not defined
+
+- name: "Merge kolla_globals params {{ openstack_network_interface }}"
   set_fact:
     final_kolla_globals: "{{ default_kolla_globals |combine(kolla_globals) if kolla_globals is defined else default_kolla_globals }}"
 
@@ -14,17 +42,6 @@
     src: "{{ role_path }}/templates/globals.yml.j2"
     dest: "{{ kolla_dir }}/etc/kolla/globals.yml"
 
-#- name: "Remove existing options {{ kolla_dir}}/etc/kolla/globals.yml"
-#  replace:
-#    dest: "{{ kolla_dir }}/etc/kolla/globals.yml"
-#    regexp: "[^#].*{{ item }}"
-#    replace: "\n#{{ item }}"
-#  with_items: "{{ final_kolla_globals.keys() }}"
-#
-#- name: Update options in globals.yml
-#  lineinfile:
-#    dest: "{{ kolla_dir }}/etc/kolla/globals.yml"
-#    insertafter: '#{{ item.key }}'
-#    line: '{{ item.key }}: {{ item.value }}'
-#  with_dict: "{{ final_kolla_globals }}"
-
+- name: Set the keystone host for contrail to pick up
+  set_fact:
+    keystone_auth_host: "{{ final_kolla_globals.kolla_internal_vip_address }}"
