@@ -1,19 +1,31 @@
 ---
 contrail_dir: "{{ inventory_dir }}/../.."
+contrail_config: {}
+
+controller_nodes: "{{ contrail_nodes | join(',') }}"
+contrail_roles:
+  - config_database
+  - config
+  - control
+  - webui
+  - analytics
+  - analytics_database
+
 
 default_contrail_configuration:
   contrail_configuration:
     CONTAINER_REGISTRY: opencontrailnightly
     CLOUD_ORCHESTRATOR: openstack
     CONTRAIL_VERSION: 5.0.0-134-centos7-ocata
-    CONTROLLER_NODES: 192.168.1.100
-    PHYSICAL_INTERFACE: eth1
-    VROUTER_GATEWAY: 192.168.1.254
+    CONTROLLER_NODES: "{{ controller_nodes }}"
+    PHYSICAL_INTERFACE: "{{ ansible_default_ipv4.interface }}"
+    VROUTER_GATEWAY: "{{ ansible_default_ipv4.gateway }}"
     AUTH_MODE: keystone
     KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123
-    KEYSTONE_AUTH_HOST: 192.168.1.100
+    KEYSTONE_AUTH_HOST: "{{ keystone_auth_host }}"
     KEYSTONE_AUTH_URL_VERSION: "/v3"
     RABBITMQ_NODE_PORT: 5673
+  roles: "{{ contrail_roles_for_nodes }}"
 
 default_config_all:
   BUILD_VMS: false
