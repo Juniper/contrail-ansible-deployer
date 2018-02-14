@@ -1,0 +1,19 @@
+---
+# Vcenter defaults
+vcenter_port: 443
+validate_certs: false
+
+# Fab switch defaults
+std_switch_name: vSwitch0
+std_pg_name: contrail-fab-pg
+
+# VM DVS defaults
+vm_dvs_mtu: 1500
+vm_dvs_uplink_qty: 8
+vm_dvs_discovery_options: listen
+vm_dvs_dic_proto: cdp
+
+# VM DVS PG defaults
+vm_dvs_vlan_id: 0
+vm_dvs_num_ports: 3
+vm_dvs_pg_type: earlyBinding
