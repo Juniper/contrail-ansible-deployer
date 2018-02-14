@@ -1,9 +1,26 @@
 ---
 
-- name: Populate openstack inventory
-  template:
-    src: "{{ role_path }}/templates/inventory.j2"
-    dest: "{{ kolla_dir }}/ansible/inventory/{{ inventory_name }}"
+- include: inventory.yml
+
+- fail: 
+    msg: "kolla_internal_vip_address is mandatory for a multi-node cluster"
+  when:
+    - (openstack_nodes| count) > 1
+    - kolla_config.kolla_globals is not defined or kolla_config.kolla_globals.kolla_internal_vip_address is not defined 
+
+- name: Calculate openstack_network_interface
+  set_fact:
+    openstack_network_interface: "{{ item[0] }}"
+  when: >
+    (hostvars[inventory_hostname]['ansible_%s' % item[0]]|default({}))
+    .get('ipv4', {}).get('address') == openstack_node
+    or
+    openstack_node in ((hostvars[inventory_hostname]['ansible_%s' % item[0]]|default({}))
+    .get('ipv4_secondaries'))|map(attribute='address')|list
+  delegate_to: "{{ item[1] }}"
+  with_nested:
+    - "{{ ansible_interfaces }}"
+    - "{{ openstack_nodes }}"
 
 - name: Merge kolla_globals params
   set_fact:
@@ -13,18 +30,4 @@
   template:
     src: "{{ role_path }}/templates/globals.yml.j2"
     dest: "{{ kolla_dir }}/etc/kolla/globals.yml"
-
-#- name: "Remove existing options {{ kolla_dir}}/etc/kolla/globals.yml"
-#  replace:
-#    dest: "{{ kolla_dir }}/etc/kolla/globals.yml"
-#    regexp: "[^#].*{{ item }}"
-#    replace: "\n#{{ item }}"
-#  with_items: "{{ final_kolla_globals.keys() }}"
-#
-#- name: Update options in globals.yml
-#  lineinfile:
-#    dest: "{{ kolla_dir }}/etc/kolla/globals.yml"
-#    insertafter: '#{{ item.key }}'
-#    line: '{{ item.key }}: {{ item.value }}'
-#  with_dict: "{{ final_kolla_globals }}"
 

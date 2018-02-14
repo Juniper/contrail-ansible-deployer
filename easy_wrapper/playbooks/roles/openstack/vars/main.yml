@@ -1,0 +1,4 @@
+---
+kolla_globals: "{{ kolla_config.kolla_globals if kolla_config.kolla_globals is defined else default_kolla_globals}}"
+openstack_roles: "{{ kolla_config.openstack_roles if kolla_config.openstack_roles is defined else default_openstack_roles }}"
+openstack_sku: "{{ common_config.openstack_sku if common_config.openstack_sku is defined else 'ocata' }}"

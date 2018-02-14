@@ -1,0 +1,50 @@
+---
+- name: Gather openstack hosts from roles
+  set_fact:
+    openstack_nodes_tmp: >-
+      {#- Use kolla_config.openstack_role if given -#}
+      {%- set os_nodes = [] -%}
+      {%- if kolla_config.openstack_roles is defined -%}
+        {%- for k,v in kolla_config.openstack_roles.iteritems() -%}
+          {%- set os_nodes = os_nodes + v -%}
+          {%- if loop.last -%}
+            {%- print os_nodes -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- elif common_config.target_nodes is defined -%}
+        {%- for v in common_config.target_nodes -%}
+          {%- set os_nodes = os_nodes + [v] -%}
+          {%- if loop.last -%}
+            {%- print os_nodes -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+
+- name: Create openstack_nodes variable
+  set_fact:
+    openstack_nodes: "{{ openstack_nodes_tmp|unique }}"
+
+  #- name: Detect contrail compute node details
+  #set_fact:
+  #  contrail_compute_nodes_tmp: >-
+  #    {%- contrail_computes = [] -%}
+  #    {%- if contrail_config.container_hosts_openstack.roles is defined -%}
+  #      {%- for k,v in contrail_config.container_hosts_openstack.roles.iteritems() -%}
+  #        {%- if 'vrouter' in v -%}
+  #          {%- set contrail_computes = contrail_computes + [k] -%}
+  #        {%- endif -%}
+  #        {%- if loop.last -%}
+  #          {%- print contrail_computes -%}
+  #        {%- endif -%}
+  #      {%- endfor -%}
+  #    {%- endif -%}
+
+- name: "Print openstack_nodes {{ openstack_nodes }}"
+  debug:
+    msg: "Openstack nodes is {{ openstack_nodes }}"
+
+- name: Populate openstack inventory
+  template:
+    src: "{{ role_path }}/templates/inventory.j2"
+    dest: "{{ kolla_dir }}/ansible/inventory/{{ inventory_name }}"
+
