@@ -1,1 +1,7 @@
-{{ contrail_config['inventory_hosts'] }}
+{% for host in contrail_nodes %}
+{{ host }}
+{% endfor %}
+[container_hosts]
+{% for host in contrail_nodes %}
+{{ host }}
+{% endfor %}
