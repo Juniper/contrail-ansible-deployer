@@ -4,8 +4,8 @@ contrail_configuration:
 {% endfor %}
 roles:
 {% for key , value in final_contrail_configuration['roles'].iteritems() %}
-   {{ key }}:
-   {% for item in value %}
-   {{ item }}:
-   {% endfor %}
+  {{ key }}:
+  {% for item in value %}
+    {{ item }}:
+  {% endfor %}
 {% endfor %}
