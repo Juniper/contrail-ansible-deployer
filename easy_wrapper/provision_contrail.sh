@@ -9,7 +9,7 @@ yum -y install python-pip
 pip install --upgrade Jinja2
 
 modprobe ip_vs
-
+export ANSIBLE_HOST_KEY_CHECKING=False
 #ansible-playbook -i inventory/hosts playbooks/prepare_kolla.yml
 ansible-playbook -i inventory/hosts playbooks/site.yml
 

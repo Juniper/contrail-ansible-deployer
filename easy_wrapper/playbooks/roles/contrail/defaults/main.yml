@@ -2,7 +2,19 @@
 contrail_dir: "{{ inventory_dir }}/../.."
 contrail_config: {}
 
-controller_nodes: "{{ contrail_nodes | join(',') }}"
+cnl: >-
+  {%- set nl = [] -%}
+  {%- for k,v in contrail_roles_for_nodes.iteritems() -%}
+    {%- if 'control' in v -%}
+      {{ nl.append(k) }}
+    {%- endif -%}
+    {%- if loop.last -%}
+      {%- print nl -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+controller_nodes: "{{ cnl | join(',') }}"
+
 contrail_roles:
   - config_database
   - config
@@ -10,13 +22,14 @@ contrail_roles:
   - webui
   - analytics
   - analytics_database
+  - vrouter
 
 
 default_contrail_configuration:
   contrail_configuration:
     CONTAINER_REGISTRY: opencontrailnightly
     CLOUD_ORCHESTRATOR: openstack
-    CONTRAIL_VERSION: 5.0.0-134-centos7-ocata
+    CONTRAIL_VERSION: "{{ common_config.contrail_build_tag }}"
     CONTROLLER_NODES: "{{ controller_nodes }}"
     PHYSICAL_INTERFACE: "{{ ansible_default_ipv4.interface }}"
     VROUTER_GATEWAY: "{{ ansible_default_ipv4.gateway }}"
