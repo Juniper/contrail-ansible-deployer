@@ -1,0 +1,36 @@
+provider_config:
+  kvm:
+    image: CentOS-7-x86_64-GenericCloud-1710.qcow2.xz
+    image_url: https://cloud.centos.org/centos/7/images/
+    ssh_pwd:
+    ssh_user:
+    ssh_public_key:
+    ssh_private_key:
+    vcpu: 12
+    vram: 64000
+    vdisk: 100G
+    subnet_prefix: 192.168.1.0
+    subnet_netmask: 255.255.255.0
+    gateway: 192.168.1.1
+    nameserver: 10.84.5.100
+    ntpserver: 192.168.1.1
+    domainsuffix: local
+instances:
+  kvm1:
+    provider: kvm
+    host: 10.87.64.31
+    bridge: br1
+    ip: 192.168.1.100
+  kvm2:
+    provider: kvm
+    host: 10.87.64.32
+    bridge: br1
+    ip: 192.168.1.101
+  kvm3:
+    provider: kvm
+    host: 10.87.64.33
+    bridge: br1
+    ip: 192.168.1.102
+contrail_configuration:
+  CONTAINER_REGISTRY: michaelhenkel
+  CONTRAIL_VERSION: 5.0.0-134-centos7-ocata

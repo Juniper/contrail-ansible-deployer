@@ -1,0 +1,80 @@
+version: '2'
+services:
+  network:
+    image: docker.io/kubernetes/pause
+    network_mode: "host"
+    volumes:
+     - /etc/hosts:/etc/hosts
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_analytics.env
+    environment:
+      - NODE_TYPE=analytics
+    network_mode: "service:network"
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/contrail/analytics:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+  api:
+    image: "{{ container_registry }}/contrail-analytics-api:{{ contrail_version_tag }}"
+    network_mode: "service:network"
+    env_file: /etc/contrail/common_analytics.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/analytics:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+  collector:
+    image: "{{ container_registry }}/contrail-analytics-collector:{{ contrail_version_tag }}"
+    network_mode: "service:network"
+    env_file: /etc/contrail/common_analytics.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/analytics:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+  query-engine:
+    image: "{{ container_registry }}/contrail-analytics-query-engine:{{ contrail_version_tag }}"
+    network_mode: "service:network"
+    env_file: /etc/contrail/common_analytics.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/analytics:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+  alarm-gen:
+    image: "{{ container_registry }}/contrail-analytics-alarm-gen:{{ contrail_version_tag }}"
+    network_mode: "service:network"
+    env_file: /etc/contrail/common_analytics.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/analytics:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+  snmp-collector:
+    image: "{{ container_registry }}/contrail-analytics-snmp-collector:{{ contrail_version_tag }}"
+    network_mode: "service:network"
+    env_file: /etc/contrail/common_analytics.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/analytics:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+  topology:
+    image: "{{ container_registry }}/contrail-analytics-topology:{{ contrail_version_tag }}"
+    network_mode: "service:network"
+    env_file: /etc/contrail/common_analytics.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/analytics:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure

@@ -1,0 +1,66 @@
+---
+- name: set master
+  set_fact:
+    master: "{{ groups['container_hosts'][0] }}"
+
+- name: get number of cluster members
+  set_fact:
+    member_count: "{{ groups['container_hosts'] | length }}"
+
+- debug:
+    msg: "member count: {{ member_count }}"
+
+- name: start consul in server mode
+  docker_service:
+    project_name: consul
+    pull: yes
+    definition:
+      version: '2'
+      services:
+        consul:
+          image: consul
+          environment:
+            - 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt": true}'
+          command: "consul agent -data-dir /consul/data -server -bind={{ hostvars[instance_name]['ansible_default_ipv4']['address'] }} -retry-join={{ master }} -bootstrap-expect={{ member_count }}"
+          network_mode: host
+          #volumes:
+          #  - /consul/data:/consul/data
+          restart: on-failure
+  when: groups['container_hosts'] | length > 1
+
+- name: start consul client mode
+  docker_service:
+    project_name: consul
+    pull: yes
+    definition:
+      version: '2'
+      services:
+        consul:
+          image: consul
+          #environment:
+          #  - 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt": true}'
+          command: "consul agent -data-dir /consul/data -bind={{ hostvars[instance_name]['ansible_default_ipv4']['address'] }}"
+          network_mode: host
+          volumes:
+           - /consul/data:/consul/data
+          restart: on-failure
+  when: groups['container_hosts'] | length == 1
+
+#- name: set k/v
+#  consul_kv:
+#    key: pop1/vrouters/1/xmpp
+#    value: 12345
+
+- name: add container to inventory
+  add_host:
+    name: consul_consul_1
+    ansible_connection: docker
+  changed_when: false
+
+#- name: run command in container
+#  command: docker exec consul_consul_1 /bin/consul kv get pop1/vrouters
+#  register: kv
+#
+#- name: get k/v
+#  debug:
+##    msg: "value is {{ kv.stdout }}"
