@@ -1,0 +1,4 @@
+- name: Create AWS instance
+  include: build_aws_instances.yml
+  when: item.value.provider=='aws'
+  with_dict: "{{ instances }}"

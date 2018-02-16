@@ -1,0 +1,36 @@
+version: '2'
+services:
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_vrouter.env
+    environment:
+      - NODE_TYPE=vrouter
+    network_mode: host
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/contrail/vrouter:/etc/contrail
+    restart: on-failure
+  vrouter-init-kernel:
+    image: "{{ container_registry }}/contrail-agent-vrouter-init-kernel:{{ contrail_version_tag }}"
+    network_mode: host
+    privileged: true
+    env_file: /etc/contrail/common_vrouter.env
+    pid: host
+    volumes:
+      - /usr/src:/usr/src
+      - /lib/modules:/lib/modules
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/vrouter:/etc/contrail
+      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+  vrouter-agent:
+    image: "{{ container_registry }}/contrail-agent-vrouter:{{ contrail_version_tag }}"
+    network_mode: host
+    privileged: true
+    env_file: /etc/contrail/common_vrouter.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/vrouter:/etc/contrail
+    restart: on-failure
+    depends_on:
+      - vrouter-init-kernel
