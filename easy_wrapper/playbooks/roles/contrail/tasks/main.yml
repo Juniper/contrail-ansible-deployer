@@ -5,10 +5,12 @@
   set_fact:
     contrail_roles_for_nodes: "{{ contrail_roles_for_nodes|default({}) | combine( {item.split()[0]: contrail_roles} ) }}"
   with_items: "{{ contrail_nodes }}"
+  when: contrail_config['container_hosts_openstack']['roles'] is not defined
 
-- name: "print contrail_roles_for_nodes {{ contrail_roles_for_nodes }}"
-  debug:
-    msg: "print contrail_roles_for_nodes {{ contrail_roles_for_nodes }}"
+- name: set roles for contrail_nodes
+  set_fact:
+    contrail_roles_for_nodes: "{{ contrail_config['container_hosts_openstack']['roles'] }}"
+  when: contrail_config['container_hosts_openstack']['roles'] is defined
 
 - name: Merge container_hosts_params
   set_fact:

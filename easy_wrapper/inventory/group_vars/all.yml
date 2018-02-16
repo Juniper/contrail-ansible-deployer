@@ -3,6 +3,7 @@
 common_config:
   orchestrator: openstack
   openstack_sku: ocata
+  contrail_build_tag: "master-20180210000007-centos7-ocata"
   # All nodes under target_nodes will be aded to all roles (both openstack and
   # contrail)
   target_nodes:

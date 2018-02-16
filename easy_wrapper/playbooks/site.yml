@@ -1,4 +1,13 @@
 ---
+- hosts: deployer
+  tasks:
+    - name: Enable logging to /var/log/ansible.log
+      ini_file:
+        path: "/etc/ansible/ansible.cfg"
+        option: "log_path"
+        value:  "/var/log/ansible.log"
+        section: "defaults"
+
 - include: prepare_kolla.yml
   vars:
     openstack_sku: "{{ common_config.openstack_sku }}"
@@ -14,22 +23,3 @@
 
     - { role: contrail, tags: contrail }
 
-- hosts: all
-  tasks:
-  - name: Import variables
-    include_vars:
-      dir: "{{ inventory_dir }}/../../contrail-kolla-ansible/etc/kolla"
-      extensions: ['yml']
-      ignore_files:
-        - passwords.yml.original
-        - globals.yml.original
-
-  #- include: "{{ inventory_dir }}/../../contrail-kolla-ansible/ansible/kolla-host.yml"
-
-#  post_tasks:
-#    - command: "ansible-playbook -i inventory/my_inventory -e@../etc/kolla/globals.yml -e@../etc/kolla/passwords.yml -e action=bootstrap-servers kolla-host.yml"
-#      environment:
-#        ANSIBLE_HOST_KEY_CHECKING: 'false'
-#        ANSIBLE_STDOUT_CALLBACK: debug
-#      args:
-#        chdir: "{{ inventory_dir }}/../../contrail-kolla-ansible/ansible"
