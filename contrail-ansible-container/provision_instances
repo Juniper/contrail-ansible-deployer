@@ -1,1 +1,0 @@
-ANSIBLE_CONFIG=/etc/ansible/ansible.cfg ansible-playbook -e config_file=/configs/instances.json -i /contrail-ansible-deployer/inventory /contrail-ansible-deployer/playbooks/provision_instances.yml

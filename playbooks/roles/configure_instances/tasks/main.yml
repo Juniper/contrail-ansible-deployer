@@ -1,3 +1,0 @@
----
-- name: install software
-  include: install_software.yml
