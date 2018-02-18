@@ -54,6 +54,18 @@
     - configure_bms
     - install_contrail
 
+- name: add bms container hosts without user/pwd/key
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: container_hosts
+    instance_name: "{{ item.key }}"
+    private_ip: "{{ item.value.ip }}"
+  when: item.value.provider=='bms' and provider_config.bms.ssh_private_key is undefined and provider_config.bms.ssh_user is undefined and provider_config.bms.ssh_private_key is undefined
+  with_dict: "{{ instances }}"
+  tags:
+    - configure_bms
+    - install_contrail
+
 - name: add gce container hosts
   include: add_gce_container_hosts.yml
   when: item.value.provider=='gce'
