@@ -6,9 +6,9 @@
     - []
 
 - name: create roles
-  set_fact: 
+  set_fact:
     default_roles_hosts: "{{ default_roles_hosts|default({})|combine({item: default_roles}, recursive=True) }}"
-  with_items: 
+  with_items:
     - "{{ groups['container_hosts'] }}"
   when: roles is undefined
 

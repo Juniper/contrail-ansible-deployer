@@ -1,0 +1,77 @@
+version: '2'
+services:
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_vrouter.env
+    environment:
+      - NODE_TYPE=vrouter
+    network_mode: host
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/contrail/vrouter:/etc/contrail
+    restart: on-failure
+  vrouter-init-kernel-dpdk:
+    image: "{{ container_registry }}/contrail-agent-vrouter-init-kernel-dpdk:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_vrouter.env
+    environment:
+      - AGENT_MODE=dpdk
+    network_mode: host
+    privileged: true
+    pid: host
+    volumes:
+      - /dev:/dev
+      - /lib/modules:/lib/modules
+      - /var/run:/var/run
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/vrouter:/etc/contrail
+  vrouter-agent-dpdk:
+    image: "{{ container_registry }}/contrail-agent-vrouter-dpdk:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_vrouter.env
+    environment:
+      - AGENT_MODE=dpdk
+    network_mode: host
+    pid: host
+    privileged: true
+    volumes:
+      - /dev:/dev
+      - /lib/modules:/lib/modules
+      - /var/run:/var/run
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/vrouter:/etc/contrail
+    restart: on-failure
+    depends_on:
+      - vrouter-init-kernel-dpdk
+  vrouter-agent-net-watchdog:
+    image: "{{ container_registry }}/contrail-agent-net-watchdog:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_vrouter.env
+    environment:
+      - AGENT_MODE=dpdk
+    network_mode: host
+    privileged: true
+    volumes:
+      - /dev:/dev
+      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+      - /lib/modules:/lib/modules
+      - /var/run:/var/run
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/vrouter:/etc/contrail
+    restart: on-failure
+    depends_on:
+      - vrouter-agent-dpdk
+  vrouter-agent:
+    image: "{{ container_registry }}/contrail-agent-vrouter:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_vrouter.env
+    environment:
+      - AGENT_MODE=dpdk
+    network_mode: host
+    privileged: true
+    volumes:
+      - /dev:/dev
+      - /lib/modules:/lib/modules
+      - /var/run:/var/run
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/vrouter:/etc/contrail
+    restart: on-failure
+    depends_on:
+      - vrouter-agent-net-watchdog
