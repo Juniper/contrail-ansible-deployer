@@ -5,7 +5,7 @@
   when: contrail_configuration is undefined
   tags:
    - always
-  
+
 - name: set container tag contrail version to master if not defined
   set_fact:
     contrail_version_tag: latest
@@ -175,6 +175,12 @@
 - name: create contrail vrouter
   include: create_vrouter.yml
   when: roles[inventory_hostname].vrouter is defined
+  tags:
+    - vrouter
+
+- name: create contrail vrouter dpdk
+  include: create_vrouter_dpdk.yml
+  when: roles[inventory_hostname].vrouter_dpdk is defined
   tags:
     - vrouter
 
