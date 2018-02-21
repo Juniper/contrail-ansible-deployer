@@ -1,15 +1,14 @@
 ---
-- name: "Create nic list - {{esxi_host.contrail_vm.networks}}"
+- name: Create nic list
   set_fact:
-    nics: "{{ nics | default('') + x.pg + '*' + x.mac + '*' + x.sw_type + '*' + x.switch_name + ','}}"
+    nics: "{{ nics | default('') + x.pg|default(std_pg_name) + '*' + x.mac + '*' + x.sw_type|default('standard') + '*' + x.switch_name|default(std_switch_name) + ','}}"
   with_items: "{{ esxi_host.contrail_vm.networks }}"
   loop_control:
     loop_var: x
 
-- name: "Fix mac address assignment type {{ nics }}"
+- name: Fix mac address assignment type
   vars: 
     vmname: "ContrailVM-{{ esxi_host.vcenter_server.datacentername }}-{{ esxi_host.name }}"
-  #shell: "python /opt/contrail/server_manager/fix_mac.py \
   shell: "python ./fix_mac.py \
           --host \"{{ esxi_host.vcenter_server.hostname }}\" \
           --port {{ esxi_host.vcenter_server.port | default(vcenter_port) }} \
@@ -23,6 +22,6 @@
   poll: 0
   register: change_mac_result
 
-- name: "Save fix_mac task results {{ change_mac_result }}"
+- name: Save fix_mac task results
   set_fact:
     mac_changed: "{{ mac_changed | default ([]) + [change_mac_result] }}"

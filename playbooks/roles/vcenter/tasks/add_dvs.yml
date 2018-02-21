@@ -13,7 +13,7 @@
     discovery_proto: "{{ vm_dvs_dic_proto }}"
     state: present
 
-- name: "Add DV-portgroup in vm dvs"
+- name: Add DV-portgroup in vm dvs
   vmware_dvs_portgroup:
     hostname: "{{ vc_server.hostname }}"
     username: "{{ vc_server.username }}"

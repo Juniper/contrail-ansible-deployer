@@ -1,5 +1,5 @@
 ---
-- name: "Create clusters in DC {{ vc_server.datacentername }}"
+- name: Create clusters in DC
   vmware_cluster:
     hostname: "{{ vc_server.hostname }}"
     username: "{{ vc_server.username }}"
