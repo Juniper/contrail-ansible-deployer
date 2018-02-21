@@ -1,8 +1,7 @@
 ---
-- name: "Create contrail vm in the esxi host {{ esxi_host }}"
+- name: Create contrail vm in the esxi host
   vars: 
     vmname: "ContrailVM-{{ esxi_host.vcenter_server.datacentername }}-{{ esxi_host.name }}"
-  #shell: "python /opt/contrail/server_manager/deploy_contrail_vm.py \
   shell: "python ./deploy_contrail_vm.py \
           --host \"{{ esxi_host.vcenter_server.hostname }}\" \
           --port {{ esxi_host.vcenter_server.port | default(vcenter_port) }} \
@@ -20,6 +19,6 @@
   poll: 0
   register: create_vm_results
 
-- name: "Save task results {{ create_vm_results }}"
+- name: Save task results
   set_fact:
     vms_created : "{{ vms_created | default ([]) + [create_vm_results] }}"

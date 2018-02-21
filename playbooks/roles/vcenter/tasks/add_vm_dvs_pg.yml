@@ -1,5 +1,5 @@
 ---
-- name: "Add ContrailVM to VM DVS {{esxi_host}}"
+- name: Add ContrailVM to VM DVS
   vars: 
     vmname: "ContrailVM-{{ esxi_host.vcenter_server.datacentername }}-{{ esxi_host.name }}"
   vmware_guest:

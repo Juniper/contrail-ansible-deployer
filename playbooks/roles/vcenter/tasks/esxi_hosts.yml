@@ -1,5 +1,5 @@
 ---
-- name: "Add esxi host to cluster --- {{ esxi_host }}"
+- name: Add esxi host to cluster
   vmware_host:
     hostname: "{{ esxi_host.vcenter_server.hostname }}"
     username: "{{ esxi_host.vcenter_server.username }}"

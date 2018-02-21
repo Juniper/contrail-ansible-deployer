@@ -1,13 +1,18 @@
 ---
 # Vcenter defaults
 vcenter_port: 443
-validate_certs: false
+validate_certs: False
 
 # Fab switch defaults
 std_switch_name: vSwitch0
-std_pg_name: contrail-fab-pg
+std_pg_name: fab-pg
 
 # VM DVS defaults
+dv_switch:
+  dv_switch_name: vm_dvs
+dv_port_group:
+  dv_portgroup_name: vm_pg
+  number_of_ports: 1800
 vm_dvs_mtu: 1500
 vm_dvs_uplink_qty: 8
 vm_dvs_discovery_options: listen
