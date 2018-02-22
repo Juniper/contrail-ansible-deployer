@@ -3,7 +3,7 @@ provider_config:
 instances:
   bms1:
     provider: bms
-    ip: localhost
+    ip: 192.168.1.100
 contrail_configuration:
   CONTAINER_REGISTRY: michaelhenkel
   CONTRAIL_VERSION: 5.0-20180219195722-centos7-ocata

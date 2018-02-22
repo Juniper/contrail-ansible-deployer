@@ -84,7 +84,7 @@ Provisions operating system instances for hosting the containers
 to the following infrastructure providers:    
 -- kvm    
 -- gce    
--- aws
+-- aws    
 -- azure (to be implemented)    
 -- openstack (to be implemented)    
 
@@ -158,16 +158,16 @@ provider_config: # the provider section contains all provider relevant configura
 instances:
   gce1:                          # Mandatory. Instance name
     provider: gce                # Mandatory. Instance runs on GCE
-      roles:                     # Optional.  If roles is not defined, all below roles will be created
-        config_database          # Optional.
-        config                   # Optional.
-        control                  # Optional.
-        analytics_database       # Optional.
-        analytics                # Optional.
-        webui                    # Optional.
-        k8s_master               # Optional.
-        k8s_node                 # Optional.
-        vrouter                  # Optional.
+    roles:                     # Optional.  If roles is not defined, all below roles will be created
+      config_database          # Optional.
+      config                   # Optional.
+      control                  # Optional.
+      analytics_database       # Optional.
+      analytics                # Optional.
+      webui                    # Optional.
+      k8s_master               # Optional.
+      k8s_node                 # Optional.
+      vrouter                  # Optional.
   gce2:
     provider: gce
   gce3:
@@ -220,8 +220,8 @@ instances:
     roles:
       vrouter:
 contrail_configuration:     # Contrail service configuration section
-  CONTAINER_REGISTRY: michaelhenkel
-  CONTRAIL_VERSION: 5.0.0-134-centos7-ocata
+  CONTAINER_REGISTRY: opencontrailnightly
+  CONTRAIL_VERSION: latest
 ```
 
 ### start the playbooks
