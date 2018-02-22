@@ -2,6 +2,21 @@
 
 This set of playbooks installs Contrail Networking using a microservices architecture.    
 
+# quick start for the impatient (requires a CentOS7 instance)...
+
+This set of commands will configure the instance and install AIO contrail with k8s on the instance:    
+```
+ssh-copy-id 192.168.1.100
+yum install -y ansible
+git clone http://github.com/Juniper/contrail-ansible-deployer
+cd contrail-ansible-deployer
+ansible-playbook -i inventory/ -e '{"instances":{"bms1":{"ip":"192.168.1.100","provider":"bms"}}}' playbooks/configure_instances.yml
+ansible-playbook -i inventory/ -e '{"instances":{"bms1":{"ip":"192.168.1.100","provider":"bms"}}}' playbooks/install_contrail.yml
+```
+The ip address 192.168.1.100 has to be replaced with the instances ip address    
+
+# the long story
+
 ## container grouping
 
 All processes are running in their own container.    
@@ -66,10 +81,10 @@ The playbook contains three plays:
 - playbooks/provision_instances.yml    
 
 Provisions operating system instances for hosting the containers    
-to the following providers:    
+to the following infrastructure providers:    
 -- kvm    
 -- gce    
--- aws (to be implemented)    
+-- aws
 -- azure (to be implemented)    
 -- openstack (to be implemented)    
 
@@ -85,7 +100,8 @@ Pulls, configures and starts Contrail containers.
 
 #### configuration
 
-Configuration for all three plays is done in a single file    
+Configuration for all three plays is done in a single file (default locataion:    
+config/instances.yaml)       
 
 ```
 provider_config: # the provider section contains all provider relevant configuration
@@ -105,6 +121,27 @@ provider_config: # the provider section contains all provider relevant configura
     nameserver: 10.84.5.100                               # Mandatory for provision play.
     ntpserver: 192.168.1.1                                # Mandatory for provision/configuration play.
     domainsuffix: local                                   # Mandatory for provision play.
+  bms:
+    ssh_pwd:
+    ssh_user:
+    ssh_public_key:
+    ssh_private_key:
+    ntpserver:
+    domainsuffix:
+  aws:
+    ec2_access_key:
+    ec2_secret_key:
+    ssh_public_key:
+    ssh_private_key:
+    ssh_user: centos
+    instance_type: t2.xlarge
+    image: ami-337be65c
+    region: eu-central-1
+    security_group:
+    vpc_subnet_id:
+    assign_public_ip: yes
+    volume_size: 50
+    key_pair:
   gce:
     service_account_email:       # Mandatory. GCE service account email address.
     credentials_file:            # Mandatory. Path to GCE account json file.
@@ -135,38 +172,53 @@ instances:
     provider: gce
   gce3:
     provider: gce
-#  kvm1:                        # Mandatory. Instance name. Provisiong play sets instance name as hostname.
-#    provider: kvm              # Mandatory. Instance runs on kvm
-#    host: 10.87.64.31          # Mandatory for provision play. KVM host.
-#    bridge: br1                # Mandatory for provision play. Bridge to which instance is connected to
-#    ip: 192.168.1.100          # Mandatory. IP address of instance
-#    roles:                     # Optional.  If roles is not defined, all below roles will be created
-#      config_database          # Optional.
-#      config                   # Optional.
-#      control                  # Optional.
-#      analytics_database       # Optional.
-#      analytics                # Optional.
-#      webui                    # Optional.
-#      k8s_master               # Optional.
-#      k8s_node                 # Optional.
-#      vrouter                  # Optional.
-#  kvm2:
-#    provider: kvm
-#    host: 10.87.64.32
-#    bridge: br1
-#    ip: 192.168.1.101
-#  kvm3:
-#    provider: kvm
-#    host: 10.87.64.33
-#    bridge: br1
-#    ip: 192.168.1.102
-#  kvm4:
-#    provider: kvm
-#    host: 10.87.64.33
-#    bridge: br1
-#    ip: 192.168.1.104
-#    roles:
-#      vrouter:
+  aws1:
+    provider: aws
+  aws2:
+    provider: aws
+  aws3:
+    provider: aws
+  bms1:
+    provider: bms
+    ip: 1.2.3.4
+  bms2:
+    provider: bms
+    ip: 1.2.3.5
+  bms3:
+    provider: bms
+    ip: 1.2.3.6
+  kvm1:                        # Mandatory. Instance name. Provisiong play sets instance name as hostname.
+    provider: kvm              # Mandatory. Instance runs on kvm
+    host: 10.87.64.31          # Mandatory for provision play. KVM host.
+    bridge: br1                # Mandatory for provision play. Bridge to which instance is connected to
+    ip: 192.168.1.100          # Mandatory. IP address of instance
+    roles:                     # Optional.  If roles is not defined, all below roles will be created
+      config_database          # Optional.
+      config                   # Optional.
+      control                  # Optional.
+      analytics_database       # Optional.
+      analytics                # Optional.
+      webui                    # Optional.
+      k8s_master               # Optional.
+      k8s_node                 # Optional.
+      vrouter                  # Optional.
+  kvm2:
+    provider: kvm
+    host: 10.87.64.32
+    bridge: br1
+    ip: 192.168.1.101
+  kvm3:
+    provider: kvm
+    host: 10.87.64.33
+    bridge: br1
+    ip: 192.168.1.102
+  kvm4:
+    provider: kvm
+    host: 10.87.64.33
+    bridge: br1
+    ip: 192.168.1.104
+    roles:
+      vrouter:
 contrail_configuration:     # Contrail service configuration section
   CONTAINER_REGISTRY: michaelhenkel
   CONTRAIL_VERSION: 5.0.0-134-centos7-ocata
@@ -189,7 +241,7 @@ Contrail installation:
 ansible-playbook -i inventory/ playbooks/install_contrail.yml
 ```
 
-The location of the configuration file (inventory/instances.yml) can be changes    
+The location of the configuration file (config/instances.yaml) can be changes    
 using the -e config_file= parameter, i.e.:    
 
 ```
