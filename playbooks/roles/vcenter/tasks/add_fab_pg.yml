@@ -1,5 +1,5 @@
 ---
-- name: "Create pg in standard switch --- {{ std_switch_name }} {{ std_pg_name }} -- {{ esxi_host }}"
+- name: Create pg in standard switch
   vmware_portgroup:
     hostname: "{{ esxi_host.name }}"
     username: "{{ esxi_host.username }}"
@@ -23,6 +23,6 @@
     vlan_id: 0
   when: esxi_host.std_switch_list | length > 1
 
-- name: "Save fab pg task results {{ res }}"
+- name: Save fab pg task results
   set_fact:
     pgs_completed: "{{ pgs_completed | default ([]) + [res] }}"

@@ -1,12 +1,78 @@
 ---
-- name: "create vcenter servers list of dicts -- {{vcenter_servers}}"
+- name: Update default validate_cert in vcenter_servers
+  set_fact:
+    vcs: >-
+      {%- for vc in vcenter_servers -%}
+        {%- if vc.values()[0]['validate_certs'] is not defined -%}
+          {{ vcs |default([]) + [{vc.keys()[0]: vc.values()[0] |combine({'validate_certs': False})}] }}
+        {%- endif -%}
+      {%- endfor -%}
+
+- name: update vcenter_servers var post validate_cert
+  set_fact:
+    vcenter_servers: "{{ vcs if vcs is defined and vcs else vcenter_servers }}"
+
+- name: substitue default VM DVS values for overlay
+  set_fact:
+    vc_servers_dvs: >-
+      {%- for vc in vcenter_servers -%}
+        {%- if vc.values()[0]['dv_switch'] is not defined -%}
+          {{ vc_servers_dvs |default([]) + [{vc.keys()[0]: vc.values()[0] |combine({'dv_switch': dv_switch})}] }}
+        {%- endif -%}
+      {%- endfor -%}
+
+- name: update vcenter_servers var post VM DVS defaults
+  set_fact:
+    vcenter_servers: "{{ vc_servers_dvs }}"
+  when: vc_servers_dvs is defined and vc_servers_dvs
+
+- name: substitue default VM DVS PG values
+  set_fact:
+    vc_servers_pg: >-
+      {%- for vc in vcenter_servers -%}
+        {%- if vc['dv_port_group'] is not defined -%}
+          {{ vc_servers_pg |default([]) + [{vc.keys()[0]: vc.values()[0] |combine({'dv_port_group': dv_port_group})}] }}
+        {%- endif -%}
+      {%- endfor -%}
+
+- name: set vcenter_servers var post VM DVS PG defaults
+  set_fact:
+    vcenter_servers: "{{ vc_servers_pg }}"
+  when: vc_servers_pg is defined and vc_servers_pg
+
+- name: create vcenter servers list of dicts
   set_fact:
     vc_servers: "{{ vc_servers | default ([]) + item.values() }}"
   with_items: "{{ vcenter_servers }}"
 
+- name: Update default validate_cert in esxihosts
+  set_fact:
+    esxihosts1: >-
+      {%- for host in esxihosts -%}
+        {%- if host['validate_certs'] is not defined -%}
+          {{ esxihosts1 | default([]) + [host | combine({'validate_certs': False})] }}
+        {%- endif -%}
+      {%- endfor -%}
+
+- name: set esxihosts var post validate_cert
+  set_fact:
+    esxihosts: "{{ esxihosts1 if esxihosts1 is defined and esxihosts1 else esxihosts }}"
+
+- name: substitute default std fabric switch and pg values in esxihosts
+  set_fact:
+    esxihosts_std: >-
+      {%- for host in esxihosts -%}
+        {%- if host['std_switch_list'] is not defined -%}
+          {{ esxihosts_std | default([]) + [host | combine({'std_switch_list': [{'pg_name': std_pg_name, 'switch_name': std_switch_name}]})] }}
+        {%- endif -%}
+      {%- endfor -%}
+
+- name: set esxihosts var post std switch defaults
+  set_fact:
+    esxihosts: "{{ esxihosts_std }}"
+  when: esxihosts_std is defined and esxihosts_std
+
 - name: substitute vcenter in the esxi host
-      # loop thru esxi hosts, loop thru vcservers, if host vc same as vc servers, sub the host and append to a list
-            #{{ esxi_servers | default([]) + host }}
   set_fact:
     esxi_servers: >-
       {%- for host in esxihosts -%}
@@ -17,12 +83,7 @@
         {%- endfor -%}
       {%- endfor -%}
 
-#- name: "Create Esxi servers list -- {{vc_servers}}"
-#  set_fact:
-#    esxi_servers: "{{ esxi_servers | default([]) + [item] }}"
-#  with_items: "{{ esxi_hosts }}"
-
-- name: "Create Datacenters --- {{ esxi_servers }}"
+- name: Create Datacenters
   vmware_datacenter:
     hostname: "{{ item.hostname }}"
     username: "{{ item.username }}"
@@ -42,7 +103,7 @@
   include: esxi_hosts.yml esxi_host={{item}}
   with_items: "{{ esxi_servers }}"
 
-- name: "Wait for add host task complete {{ added_hosts }}"
+- name: Wait for add host task complete
   async_status: jid={{ item.ansible_job_id }}
   with_items: "{{ added_hosts }}"
   register: add_host
@@ -53,7 +114,7 @@
   include: maint_mode.yml esxi_host={{item}}
   with_items: "{{ esxi_servers }}"
 
-- name: "Wait for maintenance mode task complete {{ maint_mode }}"
+- name: Wait for maintenance mode task complete
   async_status: jid={{ item.ansible_job_id }}
   with_items: "{{ maint_mode }}"
   register: r2
@@ -64,7 +125,7 @@
   include: add_dvs.yml vc_server={{item}}
   with_items: "{{ vc_servers }}"
 
-- name: "Fix VM DVS-PGs and add pvlan config -- {{role_path}}"
+- name: Fix VM DVS-PGs and add pvlan config
   include: fix_dvs.yml vc_server={{item}}
   with_items: "{{ vc_servers }}"
 
@@ -84,7 +145,7 @@
   when: item.std_switch_list
   with_items: "{{ esxi_servers }}"
 
-- name: "Wait for fabric PG completion {{ pgs_complete }}"
+- name: Wait for fabric PG completion
   async_status: jid={{ item.ansible_job_id }}
   with_items: "{{ pgs_completed }}"
   register: pg_completed
@@ -98,29 +159,18 @@
   loop_control:
     loop_var: esxi_host
 
-- name: "Wait for contrailVm create completion {{ vms_created }}"
+- name: Wait for contrailVm create completion
   async_status: jid={{ item.ansible_job_id }}
   with_items: "{{ vms_created }}"
   register: vm_completed
   until: vm_completed.finished
   retries: 300
 
-#  - name: Add ContrailVMs to VM DVS-PG
-#    include: add_vm_dvs_pg.yml esxi_host={{item}}
-#    with_items: "{{ esxi_servers }}"
-#
-#  - name: Wait for contrailVM add to DVS complete
-#    async_status: jid={{item.ansible_job_id}}
-#    with_items: "{{vms_added}}"
-#    register: t3
-#    until: t3.finished
-#    retries: 300
-
 - name: Add nics to ContrailVM
   include: add_nic.yml esxi_host={{item}}
   with_items: "{{ esxi_servers }}"
 
-- name: "Wait for add nic completion {{ nics_added }}"
+- name: Wait for add nic completion
   async_status: jid={{ item.ansible_job_id }}
   with_items: "{{ nics_added }}"
   register: nic_completed
