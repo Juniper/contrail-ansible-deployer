@@ -18,6 +18,8 @@ services:
     depends_on:
       - network
     restart: on-failure
+    stdin_open: true
+    tty: true
   control:
     image: "{{ container_registry }}/contrail-controller-control-control:{{ contrail_version_tag }}"
     network_mode: "service:network"
@@ -28,6 +30,8 @@ services:
     depends_on:
       - network
     restart: on-failure
+    stdin_open: true
+    tty: true
   named:
     image: "{{ container_registry }}/contrail-controller-control-named:{{ contrail_version_tag }}"
     network_mode: "service:network"
@@ -41,6 +45,8 @@ services:
       - network
       - dns
     restart: on-failure
+    stdin_open: true
+    tty: true
   dns:
     image: "{{ container_registry }}/contrail-controller-control-dns:{{ contrail_version_tag }}"
     network_mode: "service:network"
@@ -51,3 +57,5 @@ services:
     depends_on:
       - network
     restart: on-failure
+    stdin_open: true
+    tty: true

@@ -11,6 +11,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/contrail/vrouter:/etc/contrail
     restart: on-failure
+    stdin_open: true
+    tty: true
   vrouter-init-kernel:
     image: "{{ container_registry }}/contrail-agent-vrouter-init-kernel:{{ contrail_version_tag }}"
     network_mode: host
@@ -32,5 +34,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/vrouter:/etc/contrail
     restart: on-failure
+    stdin_open: true
+    tty: true
     depends_on:
       - vrouter-init-kernel
