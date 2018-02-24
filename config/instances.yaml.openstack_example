@@ -1,101 +1,68 @@
 provider_config:
   bms:
-    ssh_pwd:
-    ssh_user:
-    ssh_public_key:
-    ssh_private_key:
-    ntpserver: 192.168.1.1
+    ssh_pwd: c0ntrail123
+    ssh_user: root
+    ntpserver: 10.84.5.100
     domainsuffix: local
-  kvm:
-    image: CentOS-7-x86_64-GenericCloud-1710.qcow2.xz
-    image_url: https://cloud.centos.org/centos/7/images/
-    ssh_pwd:
-    ssh_user:
-    ssh_public_key:
-    ssh_private_key:
-    vcpu: 12
-    vram: 64000
-    vdisk: 100G
-    subnet_prefix: 192.168.1.0
-    subnet_netmask: 255.255.255.0
-    gateway: 192.168.1.1
-    nameserver: 10.84.5.100
-    ntpserver: 192.168.1.1
-    domainsuffix: local
-  gce:
-    service_account_email:       # Mandatory. GCE service account email address.
-    credentials_file:            # Mandatory. Path to GCE account json file.
-    project_id:                  # Mandatory. GCE project name.
-    ssh_user:                    # Mandatory. Ssh user for GCE instances.
-    #ssh_pwd:                    # Optional.  Ssh password used by ssh user, not needed when public is used
-    ssh_private_key:             # Optional.  Path to private SSH key, used by by ssh user, not needed when ssh-agent loaded private key
-    machine_type: n1-standard-4  # Mandatory. Default is too small
-    image: centos-7              # Mandatory. For provisioning and configuration only centos-7 is currently supported.
-    network: microservice-vn     # Optional.  Defaults to default
-    subnetwork: microservice-sn  # Optional.  Defaults to default
-    zone: us-west1-aA            # Optional.  Defaults to  ?
-    disk_size: 50                # Mandatory. Default is too small
-  aws:
-    ec2_access_key: 
-    ec2_secret_key: 
-    ssh_public_key: 
-    ssh_private_key: 
-    ssh_user: centos
-    instance_type: t2.xlarge
-    image:
-    region:
-    security_group:
-    vpc_subnet_id:
-    assign_public_ip: yes
-    volume_size: 50
-    key_pair:
 instances:
-  gce1:                          # Mandatory. Instance name
-    provider: gce                # Mandatory. Instance runs on GCE
-      roles:                     # Optional.  If roles is not defined, all below roles will be created
-        config_database:         # Optional.
-        config:                  # Optional.
-        control:                 # Optional.
-        analytics_database:      # Optional.
-        analytics:               # Optional.
-        webui:                   # Optional.
-        k8s_master:              # Optional.
-        k8s_node:                # Optional.
-        vrouter:                 # Optional.
-  gce2:
-    provider: gce
-  gce3:
-    provider: gce
-  aws1:
-    provider: aws
-  aws2:
-    provider: aws
-  aws3:
-    provider: aws
-  kvm1:
-    provider: kvm
-    host: 10.87.64.31
-    bridge: br1
-    ip: 192.168.1.100
-  kvm2:
-    provider: kvm
-    host: 10.87.64.32
-    bridge: br1
-    ip: 192.168.1.101
-  kvm3:
-    provider: kvm
-    host: 10.87.64.33
-    bridge: br1
-    ip: 192.168.1.102
   bms1:
     provider: bms
-    ip: 192.168.1.100
+    ip: 192.168.1.51
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+      vrouter:
+      openstack_control:
+      openstack_network:
+      openstack_storage:
+      openstack_monitoring:
+      openstack_compute:
   bms2:
     provider: bms
-    ip: 192.168.1.101
+    ip: 192.168.1.52
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+      vrouter:
+      openstack_control:
+      openstack_network:
+      openstack_storage:
+      openstack_monitoring:
+      openstack_compute:
   bms3:
     provider: bms
-    ip: 192.168.1.102
+    ip: 192.168.1.53
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+      vrouter:
+      openstack_control:
+      openstack_network:
+      openstack_storage:
+      openstack_monitoring:
+      openstack_compute:
 contrail_configuration:
-  CONTAINER_REGISTRY: michaelhenkel
-  CONTRAIL_VERSION: 5.0.0-134-centos7-ocata
+  CONTAINER_REGISTRY: opencontrailnightly
+  CONTRAIL_VERSION: master-20180210000007-centos7-ocata
+  CLOUD_ORCHESTRATOR: openstack
+  PHYSICAL_INTERFACE: eth2
+kolla_config:
+  kolla_globals:
+    kolla_internal_vip_address: 192.168.1.160
+    kolla_external_vip_address: 192.168.1.60
+    contrail_api_interface_address: 192.168.1.60
+    network_interface: "eth1"
+    kolla_external_vip_interface: "eth1"
+    enable_haproxy: "yes"

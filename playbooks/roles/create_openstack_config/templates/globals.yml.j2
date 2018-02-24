@@ -1,0 +1,9 @@
+---
+# You can use this file to override _any_ variable throughout Kolla.
+# Additional options can be found in the
+# 'kolla-ansible/ansible/group_vars/all.yml' file.
+
+{% for key, value in final_kolla_globals.iteritems() %}
+{{ key }}: {{ value }}
+{% endfor %}
+
