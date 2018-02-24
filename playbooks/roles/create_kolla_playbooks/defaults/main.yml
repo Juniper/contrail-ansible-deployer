@@ -1,0 +1,12 @@
+---
+kolla_config: {}
+openstack_sku: >-
+    {%- if kolla_config.kolla_globals is defined -%}
+      {%- if kolla_config.kolla_globals.openstack_sku is defined -%}
+        {{ kola_config.kolla_globals.openstack_sku }}
+      {%- else -%}
+      ocata
+      {%- endif -%}
+    {%- endif -%}
+
+kolla_dir: "{{ inventory_dir }}/../../contrail-kolla-ansible"
