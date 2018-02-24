@@ -1,0 +1,14 @@
+---
+kolla_config: {}
+default_openstack_sku: ocata
+openstack_sku: >-
+    {%- if kolla_config.kolla_globals is defined -%}
+      {%- if kolla_config.kolla_globals.openstack_sku is defined -%}
+        {{ kola_config.kolla_globals.openstack_sku }}
+      {%- else -%}
+        {{ default_openstack_sku }}
+      {%- endif -%}
+    {%- else -%}
+      {{ default_openstack_sku }}
+    {%- endif -%}
+
