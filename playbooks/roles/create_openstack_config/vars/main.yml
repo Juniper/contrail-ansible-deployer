@@ -1,0 +1,2 @@
+---
+kolla_globals: "{{ kolla_config.kolla_globals if kolla_config.kolla_globals is defined else default_kolla_globals}}"

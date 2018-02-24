@@ -1,6 +1,6 @@
 ---
 kolla_config: {}
-kolla_dir: "{{ inventory_dir }}/../../contrail-kolla-ansible"
+kolla_dir: "{{ playbook_dir }}/../../contrail-kolla-ansible"
 inventory_name: "my_inventory"
 openstack_node: "{{ openstack_nodes[0].split()[0] }}"
 my_num_nodes: "{{ openstack_nodes|count }}"

@@ -1,7 +1,7 @@
 ---
 - hosts: deployer
   vars:
-    kolla_dir: "{{ inventory_dir }}/../../contrail-kolla-ansible"
+    kolla_dir: "{{ playbook_dir }}/../../contrail-kolla-ansible"
   tasks:
   - name: Clone openstack git repo
     git:

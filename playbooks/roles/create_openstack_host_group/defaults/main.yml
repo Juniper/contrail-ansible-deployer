@@ -1,0 +1,42 @@
+---
+
+openstack_role_groups:
+  control:
+    - openstack_control
+  network:
+    - openstack_network
+  compute:
+    - openstack_compute
+    - vrouter
+  monitoring:
+    - openstack_monitoring
+  storage:
+    - openstack_storage
+
+openstack_role_subgroups:
+  baremetal:
+    - control
+    - network
+    - compute
+    - storage
+    - monitoring
+  collectd:
+    - compute
+  grafana:
+    - monitoring
+  etcd:
+    - control
+  influxd:
+    - monitoring
+  karbor:
+    - control
+  kibana:
+    - control
+  telegraf:
+    - compute
+    - control
+    - monitoring
+    - network
+    - storage
+  elasticsearch:
+    - control

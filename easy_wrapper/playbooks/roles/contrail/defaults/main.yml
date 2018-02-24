@@ -1,5 +1,5 @@
 ---
-contrail_dir: "{{ inventory_dir }}/../.."
+contrail_dir: "{{ playbook_dir }}/../.."
 contrail_config: {}
 
 cnl: >-
