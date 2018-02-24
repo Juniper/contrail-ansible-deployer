@@ -4,6 +4,10 @@
   gather_facts: no
   roles:
   - create_container_host_group
+  - { role: create_openstack_host_group, when: contrail_configuration.CLOUD_ORCHESTRATOR is defined and contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' }
+  - { role: create_kolla_playbooks, when: contrail_configuration.CLOUD_ORCHESTRATOR is defined and contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' }
+  - { role: install_kolla_dependencies, when: contrail_configuration.CLOUD_ORCHESTRATOR is defined and contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' }
+
   vars_files:
     - "{{ config_file }}"
 

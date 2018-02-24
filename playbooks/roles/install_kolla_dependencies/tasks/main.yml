@@ -1,0 +1,8 @@
+---
+- name: install packages required by kolla playbooks
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - python-oslo-config
+

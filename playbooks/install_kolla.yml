@@ -1,0 +1,34 @@
+---
+- hosts: openstack_nodes
+  gather_facts: yes
+  tasks:
+
+  - name: Import group variables
+    include_vars:
+      dir: "{{ inventory_dir }}/../../contrail-kolla-ansible/ansible/group_vars"
+      extensions: ['yml']
+
+  - name: Import global variables
+    include_vars:
+      dir: "{{ inventory_dir }}/../../contrail-kolla-ansible/etc/kolla"
+      extensions: ['yml']
+      ignore_files:
+        - passwords.yml.original
+        - globals.yml.original
+
+- include: "{{ inventory_dir }}/../../contrail-kolla-ansible/ansible/kolla-host.yml"
+  vars:
+    action: bootstrap-servers
+
+- include: "{{ inventory_dir }}/../../contrail-kolla-ansible/ansible/site.yml"
+  vars:
+    action: deploy
+
+- include: "{{ inventory_dir }}/../../contrail-kolla-ansible/ansible/post-deploy.yml"
+  vars:
+    action: deploy
+
+- include: "{{ inventory_dir }}/../../contrail-kolla-ansible/ansible/post-deploy-contrail.yml"
+  vars:
+    action: deploy
+
