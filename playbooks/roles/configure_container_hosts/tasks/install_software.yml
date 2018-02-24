@@ -115,3 +115,10 @@
 
 - name: flush iptables
   shell: iptables -F
+
+- name: install kolla specific packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - centos-release-openstack-

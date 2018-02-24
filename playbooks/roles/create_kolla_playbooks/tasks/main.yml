@@ -1,0 +1,7 @@
+---
+- name: Clone openstack git repo
+  git:
+    repo: https://github.com/Juniper/contrail-kolla-ansible.git
+    dest: "{{ kolla_dir }}"
+    version: "contrail/{{ openstack_sku }}"
+  ignore_errors: yes
