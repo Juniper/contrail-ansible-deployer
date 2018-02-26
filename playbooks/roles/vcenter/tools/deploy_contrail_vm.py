@@ -10,7 +10,7 @@ import urllib2
 
 from pyVim import connect
 from pyVmomi import vim
-from manage_dvs_pg import get_obj
+from manage_dvs_pg import get_obj, is_xenial_or_above
 
 def get_args():
     """
@@ -163,6 +163,25 @@ def keep_lease_alive(lease):
         except:
             return
 
+def auto_start_vm(si, args, vm_obj):
+    si_content = si.RetrieveContent()
+    objs = get_objects(si, args)
+    host = objs['host_obj']
+    vm_obj = get_obj(si_content, [vim.VirtualMachine], args.vm_name)
+    host_settings = vim.host.AutoStartManager.SystemDefaults()
+    host_settings.enabled = True
+    config = host.configManager.autoStartManager.config
+    config.defaults = host_settings
+    auto_power_info = vim.host.AutoStartManager.AutoPowerInfo()
+    auto_power_info.key = vm_obj
+    auto_power_info.startOrder = 1
+    auto_power_info.startAction = "powerOn"
+    auto_power_info.startDelay = -1
+    auto_power_info.stopAction = "powerOff"
+    auto_power_info.stopDelay = -1
+    auto_power_info.waitForHeartbeat = 'no'
+    config.powerInfo = [auto_power_info]
+    host.configManager.autoStartManager.ReconfigureAutostart(config)
 
 def main():
     args = get_args()
@@ -173,10 +192,18 @@ def main():
     ovffile.close()
 
     try:
-        si = connect.SmartConnect(host=args.host,
-                                  user=args.user,
-                                  pwd=args.password,
-                                  port=args.port)
+        if is_xenial_or_above():
+            ssl = __import__("ssl")
+            context = ssl._create_unverified_context()
+            si = connect.SmartConnect(host=args.host,
+                                      user=args.user,
+                                      pwd=args.password,
+                                      port=args.port, sslContext=context)
+        else:
+            si = connect.SmartConnect(host=args.host,
+                                      user=args.user,
+                                      pwd=args.password,
+                                      port=args.port)
     except:
         print "Unable to connect to %s" % args.host
         exit(1)
@@ -198,32 +225,41 @@ def main():
                                            objs["datastore"],
                                            spec_params)
     lease = objs["resource pool"].ImportVApp(import_spec.importSpec,
-                                             objs["datacenter"].vmFolder)
+                                             objs["datacenter"].vmFolder,
+                                             objs['host_obj'])
     while(True):
         if lease.state == vim.HttpNfcLease.State.ready:
-            # Spawn a dawmon thread to keep the lease active while POSTing
+            # Spawn a thread to keep the lease active while POSTing
             # VMDK.
             keepalive_thread = Thread(target=keep_lease_alive, args=(lease,))
+            keepalive_thread.daemon = True
             keepalive_thread.start()
-
-            for deviceUrl in lease.info.deviceUrl:
-                url = deviceUrl.url.replace('*', args.host)
-                fileItem = list(filter(lambda x: x.deviceId ==
-                                                 deviceUrl.importKey,
-                                       import_spec.fileItem))[0]
-                ovffilename = list(filter(lambda x: x == fileItem.path,
-                                          t.getnames()))[0]
-                ovffile = t.extractfile(ovffilename)
-                headers = { 'Content-length' : ovffile.size }
-                req = urllib2.Request(url, ovffile, headers)
-                response = urllib2.urlopen(req)
-            lease.HttpNfcLeaseComplete()
+            try:
+                for deviceUrl in lease.info.deviceUrl:
+                    url = deviceUrl.url.replace('*', args.host)
+                    fileItem = list(filter(lambda x: x.deviceId ==
+                                                     deviceUrl.importKey,
+                                           import_spec.fileItem))[0]
+                    ovffilename = list(filter(lambda x: x == fileItem.path,
+                                              t.getnames()))[0]
+                    ovffile = t.extractfile(ovffilename)
+                    headers = { 'Content-length' : ovffile.size }
+                    req = urllib2.Request(url, ovffile, headers)
+                    if is_xenial_or_above():
+                        response = urllib2.urlopen(req, context = context)
+                    else:
+                        response = urllib2.urlopen(req)
+                lease.HttpNfcLeaseComplete()
+            except:
+                raise
             keepalive_thread.join()
+            auto_start_vm(si, args, vm_obj)
+            connect.Disconnect(si)
             return 0
         elif lease.state == vim.HttpNfcLease.State.error:
             print "Lease error: %s" % lease.error
+            connect.Disconnect(si)
             exit(1)
-    connect.Disconnect(si)
 
 if __name__ == "__main__":
     exit(main())
