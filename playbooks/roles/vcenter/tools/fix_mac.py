@@ -52,14 +52,22 @@ def update_mac(nic, vm_obj):
 def main():
     args = get_args()
     try:
-        si = connect.SmartConnect(host=args.host,
-                                  user=args.user,
-                                  pwd=args.password,
-                                  port=args.port)
-        si_content = si.RetrieveContent()
-    except:
-        print "Unable to connect to %s" % args.host
-        exit(1)
+       ssl = __import__("ssl")
+       context = ssl._create_unverified_context()
+
+       si = connect.SmartConnect(host=args.host,
+                                 user=args.user,
+                                 pwd=args.password,
+                                 port=args.port,
+                                 sslContext=context)
+    except Exception as e:
+       si = connect.SmartConnect(host=args.host,
+                                 user=args.user,
+                                 pwd=args.password,
+                                 port=args.port)
+
+    si_content = si.RetrieveContent()
+
     # get VM object
     vm_obj = get_obj(si_content, [vim.VirtualMachine], args.vm_name)
     if not vm_obj:

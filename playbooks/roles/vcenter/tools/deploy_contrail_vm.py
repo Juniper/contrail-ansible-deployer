@@ -173,13 +173,20 @@ def main():
     ovffile.close()
 
     try:
-        si = connect.SmartConnect(host=args.host,
-                                  user=args.user,
-                                  pwd=args.password,
-                                  port=args.port)
-    except:
-        print "Unable to connect to %s" % args.host
-        exit(1)
+       ssl = __import__("ssl")
+       context = ssl._create_unverified_context()
+
+       si = connect.SmartConnect(host=args.host,
+                                 user=args.user,
+                                 pwd=args.password,
+                                 port=args.port,
+                                 sslContext=context)
+    except Exception as e:
+       si = connect.SmartConnect(host=args.host,
+                                 user=args.user,
+                                 pwd=args.password,
+                                 port=args.port)
+
     objs = get_objects(si, args)
     # if VM already exists exit right away
     si_content = si.RetrieveContent()
