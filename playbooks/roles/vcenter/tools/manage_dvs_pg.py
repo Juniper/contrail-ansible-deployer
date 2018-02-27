@@ -1,11 +1,26 @@
 #!/usr/bin/env python
+import platform
 from sys import exit
 from time import sleep
 from argparse import ArgumentParser
+from distutils.version import LooseVersion
 
 from pyVim import connect
 from pyVmomi import vim
 
+def get_linux_distro():
+    (dist, version, extra) = platform.linux_distribution()
+
+    return (dist, version, extra)
+
+def is_xenial_or_above():
+    is_xenial_or_above = False
+    (dist, version, extra) =  get_linux_distro()
+    if dist.lower() == 'ubuntu':
+       if LooseVersion(version) >= LooseVersion("16.04"):
+          is_xenial_or_above = True
+
+    return is_xenial_or_above
 
 def get_args():
     """
@@ -30,6 +45,7 @@ def get_args():
     return args
 
 def get_dvs_pg_obj(si_content, vimtype, portgroup_name, dvs_name):
+    obj = None
     container = si_content.viewManager.CreateContainerView(si_content.rootFolder, vimtype, True)
     for c in container.view:
         if c.name == portgroup_name:
@@ -111,10 +127,18 @@ def add_pvlan_config(dvs_obj):
 def main():
     args = get_args()
     try:
-        si = connect.SmartConnect(host=args.host,
-                                  user=args.user,
-                                  pwd=args.password,
-                                  port=args.port)
+        if is_xenial_or_above():
+            ssl = __import__("ssl")
+            context = ssl._create_unverified_context()
+            si = connect.SmartConnect(host=args.host,
+                                      user=args.user,
+                                      pwd=args.password,
+                                      port=args.port, sslContext=context)
+        else:
+            si = connect.SmartConnect(host=args.host,
+                                      user=args.user,
+                                      pwd=args.password,
+                                      port=args.port)
         si_content = si.RetrieveContent()
     except:
         print "Unable to connect to %s" % args.host
