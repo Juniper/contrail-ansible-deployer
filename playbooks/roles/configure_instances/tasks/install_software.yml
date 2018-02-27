@@ -8,6 +8,9 @@
     provider_data: "{{ provider_config[instance_data.provider] }}"
   when: provider_config[instance_data.provider] is defined
 
+- name: turn off swap
+  shell: swapoff -a
+
 - name: disable cloud init
   service:
     name: "{{ item }}"
