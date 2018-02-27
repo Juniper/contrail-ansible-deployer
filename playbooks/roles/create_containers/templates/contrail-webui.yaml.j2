@@ -15,6 +15,8 @@ services:
     depends_on:
       - network
     restart: on-failure
+    stdin_open: true
+    tty: true
   job:
     image: "{{ container_registry }}/contrail-controller-webui-job:{{ contrail_version_tag }}"
     network_mode: "service:network"
@@ -25,6 +27,8 @@ services:
     depends_on:
       - network
     restart: on-failure
+    stdin_open: true
+    tty: true
   redis:
     image: "redis:4.0.2"
     env_file: /etc/contrail/common_webui.env
@@ -32,3 +36,5 @@ services:
     depends_on:
       - network
     restart: on-failure
+    stdin_open: true
+    tty: true
