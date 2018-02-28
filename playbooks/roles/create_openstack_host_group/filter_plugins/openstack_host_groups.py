@@ -4,12 +4,12 @@ class FilterModule(object):
     openstack_role_groups = {
         'openstack_nodes': ['openstack_control', 'openstack_network',
             'openstack_compute', 'vrouter', 'openstack_monitoring',
-            'openstack_storage'],
-        'control': ['openstack_control'],
-        'network': ['openstack_network'],
+            'openstack_storage', 'openstack'],
+        'control': ['openstack_control', 'openstack'],
+        'network': ['openstack_network', 'openstack'],
         'compute': ['openstack_compute', 'vrouter'],
-        'monitoring': ['openstack_monitoring'],
-        'storage': ['openstack_storage']
+        'monitoring': ['openstack_monitoring', 'openstack'],
+        'storage': ['openstack_storage', 'openstack']
     }
 
     openstack_role_subgroups = {
