@@ -4,6 +4,7 @@
     groupname: container_hosts
     ansible_user: "{{ provider_config.kvm.ssh_user }}"
     ansible_ssh_pass: "{{ provider_config.kvm.ssh_pwd }}"
+    ansible_become: true
     instance_name: "{{ item.key }}"
     private_ip: "{{ item.value.ip }}"
   when: item.value.provider=='kvm' and provider_config.kvm.ssh_pwd is defined
@@ -18,6 +19,7 @@
     groupname: container_hosts
     ansible_user: "{{ provider_config.kvm.ssh_user }}"
     ansible_ssh_private_key_file: "{{ provider_config.kvm.ssh_private_key }}"
+    ansible_become: true
     instance_name: "{{ item.key }}"
     private_ip: "{{ item.value.ip }}"
   when: item.value.provider=='kvm' and provider_config.kvm.ssh_private_key is defined
@@ -32,6 +34,7 @@
     groupname: container_hosts
     ansible_user: "{{ provider_config.bms.ssh_user }}"
     ansible_ssh_pass: "{{ provider_config.bms.ssh_pwd }}"
+    ansible_become: true
     instance_name: "{{ item.key }}"
     private_ip: "{{ item.value.ip }}"
   when: item.value.provider=='bms' and provider_config.bms.ssh_pwd is defined
@@ -46,6 +49,7 @@
     groupname: container_hosts
     ansible_user: "{{ provider_config.bms.ssh_user }}"
     ansible_ssh_private_key_file: "{{ provider_config.bms.ssh_private_key }}"
+    ansible_become: true
     instance_name: "{{ item.key }}"
     private_ip: "{{ item.value.ip }}"
   when: item.value.provider=='bms' and provider_config.bms.ssh_private_key is defined
@@ -59,6 +63,7 @@
     hostname: "{{ item.value.ip }}"
     groupname: container_hosts
     instance_name: "{{ item.key }}"
+    ansible_become: true
     private_ip: "{{ item.value.ip }}"
   when: item.value.provider=='bms' and provider_config.bms.ssh_private_key is undefined and provider_config.bms.ssh_user is undefined and provider_config.bms.ssh_private_key is undefined
   with_dict: "{{ instances }}"
