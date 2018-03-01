@@ -98,13 +98,22 @@
   pip:
     name: docker-compose==1.9.0
 
+- name: "Build hosts file with ctrl-data and domain suffix when provided"
+  lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item]['ansible_' + contrail_configuration.PHYSICAL_INTERFACE]['ipv4']['address'] }}.*' line="{{ hostvars[item]['ansible_' + contrail_configuration.PHYSICAL_INTERFACE]['ipv4']['address'] }}  {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - instance_data.provider == 'bms'
+    - provider_data.domainsuffix is defined
+    - contrail_configuration.PHYSICAL_INTERFACE is defined
+    - hostvars[item]['ansible_' + contrail_configuration.PHYSICAL_INTERFACE].get('ipv4')
+
 - name: "Build hosts file with domain suffix when provided"
-  lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present
+  lineinfile: dest=/etc/hosts regexp='^{{ item }}.*' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when: instance_data.provider == 'bms' and provider_data.domainsuffix is defined
 
 - name: "Build hosts file with domain suffix"
-  lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ item }} {{ hostvars[item]['ansible_fqdn'] }} {{ hostvars[item]['ansible_hostname'] }}" state=present
+  lineinfile: dest=/etc/hosts regexp='^{{ item }}.*' line="{{ item }} {{ hostvars[item]['ansible_fqdn'] }} {{ hostvars[item]['ansible_hostname'] }}" state=present
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when: instance_data.provider == 'bms' and provider_data.domainsuffix is undefined and hostvars[item]['ansible_fqdn'] is defined
 
