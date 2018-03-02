@@ -45,4 +45,4 @@ instances:
     provider: gce
 contrail_configuration:
   CONTAINER_REGISTRY: michaelhenkel
-  CONTRAIL_VERSION: 5.0.0-134-centos7-ocata
+  CONTRAIL_VERSION: ocata-5.0.0-134

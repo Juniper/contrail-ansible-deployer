@@ -55,7 +55,7 @@ instances:
       openstack_compute:
 contrail_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
-  CONTRAIL_VERSION: master-20180210000007-centos7-ocata
+  CONTRAIL_VERSION: ocata-master-20180210000007
   CLOUD_ORCHESTRATOR: openstack
   RABBITMQ_NODE_PORT: 5673
   VROUTER_GATEWAY: 192.168.10.1
