@@ -172,12 +172,13 @@ class FilterModule(object):
         }
 
     def openstack_host_groups(self, instances, ip):
+
         for k,v in instances.iteritems():
             grp_list = []
             if v['ip'] != ip:
                 continue
 
-            for role in v['roles']:
+            for role in v.get('roles', ['openstack','vrouter']):
                 for i,j in self.openstack_role_groups.iteritems():
                     if role in j:
                         grp_list.append(i)

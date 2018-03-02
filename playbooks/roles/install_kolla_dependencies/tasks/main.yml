@@ -1,5 +1,5 @@
 ---
-- name: "install {{ oepnstack_sku }} specific repos"
+- name: "install {{ openstack_sku }} specific repos"
   yum:
     name: "centos-release-openstack-{{ openstack_sku }}"
     state: latest
@@ -10,7 +10,10 @@
     state: latest
   with_items:
     - epel-release
+    - gcc
+    - python-devel
     - python-oslo-config
+    - python-oslo-utils
     - python-pip
 
 - name: install right version of jinja2 for kolla
@@ -18,3 +21,7 @@
     name: jinja2
     extra_args: --upgrade
 
+- name: install pycrypto to generate passwords
+  pip:
+    name: pycrypto
+    state: latest

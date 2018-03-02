@@ -2,12 +2,16 @@
   hosts: localhost
   connection: local
   gather_facts: no
+  pre_tasks:
+    - name: Set orchestrator if not passed
+      set_fact:
+          contrail_configuration: "{{ contrail_configuration|default({}) | combine({'CLOUD_ORCHESTRATOR': orchestrator if orchestrator is defined else 'openstack'}) }}"
+      when: contrail_configuration is not defined or contrail_configuration.CLOUD_ORCHESTRATOR is not defined
+
   roles:
   - create_container_host_group
-  - { role: create_openstack_host_group, when: contrail_configuration.CLOUD_ORCHESTRATOR is defined and contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' }
   - { role: create_kolla_playbooks }
-  - { role: install_kolla_dependencies, when: contrail_configuration.CLOUD_ORCHESTRATOR is defined and contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' }
-
+  - { role: install_kolla_dependencies, when: contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' }
   vars_files:
     - "{{ config_file }}"
 

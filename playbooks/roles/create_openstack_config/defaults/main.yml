@@ -2,6 +2,17 @@
 kolla_config: {}
 kolla_dir: "{{ playbook_dir }}/../../contrail-kolla-ansible"
 inventory_name: "my_inventory"
+kolla_passwd: "{{ kolla_config.get('kolla_passwords', {}) }}"
+gen_passwords: yes
+
+default_openstack_sku: ocata
+openstack_sku: >-
+    {%- if contrail_configuration.OPENSTACK_VERSION is defined -%}
+      {{ contrail_configuration.OPENSTACK_VERSION }}
+    {%- else -%}
+      {{ default_openstack_sku }}
+    {%- endif %}
+
 
 # Pick first instance's IP as a default
 os_node: >-

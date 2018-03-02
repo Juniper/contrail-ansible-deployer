@@ -33,6 +33,9 @@
 
 - include: inventory.yml
 
+- include: passwords.yml
+  when: gen_passwords | bool
+
 - name: Merge kolla_globals params
   set_fact:
     final_kolla_globals: "{{ default_kolla_globals |combine(kolla_globals) if kolla_globals is defined else default_kolla_globals }}"

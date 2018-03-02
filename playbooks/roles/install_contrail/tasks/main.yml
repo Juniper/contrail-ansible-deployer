@@ -17,7 +17,27 @@
   when: contrail_configuration is undefined
   tags:
    - always
-  
+
+- name: set orchestrator param
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'CLOUD_ORCHESTRATOR': orchestrator}) }}"
+  when:
+    - orchestrator is defined
+    - contrail_configuration.CLOUD_ORCHESTRATOR is not defined
+  tags:
+   - always
+
+- name: set KEYSTONE_AUTH_ADMIN_PASSWORD
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'KEYSTONE_AUTH_ADMIN_PASSWORD': kolla_config.kolla_passwords.keystone_admin_password }) }}"
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+    - kolla_config is defined
+    - kolla_config.kolla_passwords is defined
+    - kolla_config.kolla_passwords.keystone_admin_password is defined
+  tags:
+   - always
+
 - name: set container tag contrail version to master if not defined
   set_fact:
     contrail_version_tag: latest
@@ -65,6 +85,20 @@
   with_together:
     - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'k8s_master', 'k8s_node', 'vrouter', 'webui']
     - []
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR is defined
+    - contrail_configuration.CLOUD_ORCHESTRATOR != 'openstack'
+  tags:
+   - always
+
+- set_fact:
+    default_roles: "{{ default_roles|default({})|combine({item.0: item.1}) }}"
+  with_together:
+    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'vrouter', 'webui', 'openstack']
+    - []
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR is defined
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
   tags:
    - always
 
