@@ -11,6 +11,18 @@
 - name: turn off swap
   shell: swapoff -a
 
+- name: remove interfaces from Network Manager
+  lineinfile:
+    path: "/etc/sysconfig/network-scripts/ifcfg-{{ item }}"
+    regexp: "NM_CONTROLLED=no"
+    line: "NM_CONTROLLED=no"
+  with_items: "{{ ansible_interfaces }}"
+
+- name: restart network service
+  service:
+    name: network
+    state: restarted
+
 - name: disable cloud init
   service:
     name: "{{ item }}"
