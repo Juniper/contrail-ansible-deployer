@@ -87,7 +87,7 @@
     - []
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR is defined
-    - contrail_configuration.CLOUD_ORCHESTRATOR != 'openstack'
+    - contrail_configuration.CLOUD_ORCHESTRATOR = 'kubernetes'
   tags:
    - always
 
@@ -99,6 +99,17 @@
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR is defined
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+  tags:
+   - always
+
+- set_fact:
+    default_roles: "{{ default_roles|default({})|combine({item.0: item.1}) }}"
+  with_together:
+    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'vrouter', 'webui', 'vcenter_plugin']
+    - []
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR is defined
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'vcenter'
   tags:
    - always
 
@@ -282,6 +293,14 @@
   when: roles[instance_name].vrouter is defined
   tags:
     - vrouter
+
+-- name: create contrail vcenter-plugin
+   include: create_vcenter_plugin.yml
+   when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'vcenter'
+    - roles[instance_name].vcenter_plugin is defined
+   tags:
+    - vcenter_plugin
 
 - name: init master list
   set_fact:
