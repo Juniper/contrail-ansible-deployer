@@ -45,7 +45,7 @@
 - name: add bms container hosts
   add_host:
     hostname: "{{ item.value.ip }}"
-    groupname: "{{ instances }}|openstack_host_groups({{ item.value.ip }})"
+    groupname: "{{ instances|openstack_host_groups(item.value.ip) }}"
     ansible_user: "{{ provider_config.bms.ssh_user }}"
     ansible_ssh_private_key_file: "{{ provider_config.bms.ssh_private_key }}"
     instance_name: "{{ item.key }}"
