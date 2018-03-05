@@ -1,0 +1,34 @@
+provider_config:
+  bms:
+    ssh_pwd: c0ntrail123
+    ssh_user: root
+    ntpserver: 10.84.5.100
+    domainsuffix: local
+
+instances:
+  bms1:
+    provider: bms
+    ip: 10.84.13.14
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+      vcenter_plugin:
+
+contrail_configuration:
+  CLOUD_ORCHESTRATOR: vcenter 
+  CONTAINER_REGISTRY: 10.84.23.21:6666 
+  CONTRAIL_VERSION: master-centos7-ocata-bld-13
+  CONTROLLER_NODES: 10.84.13.14
+  VROUTER_GATEWAY: 10.84.13.254
+  PHYSICAL_INTERFACE: enp2s0 
+  RABBITMQ_NODE_PORT: 5673
+  VCENTER_SERVER: 10.84.22.110
+  VCENTER_USERNAME: administrator@vsphere.local
+  VCENTER_PASSWORD: Contrail123!
+  VCENTER_DATACENTER: test-dc
+  VCENTER_DVSWITCH: test-dvs
+
