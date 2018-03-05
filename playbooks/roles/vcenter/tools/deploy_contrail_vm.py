@@ -192,21 +192,23 @@ def main():
     ovffile.close()
 
     try:
-        if is_xenial_or_above():
-            ssl = __import__("ssl")
-            context = ssl._create_unverified_context()
-            si = connect.SmartConnect(host=args.host,
-                                      user=args.user,
-                                      pwd=args.password,
-                                      port=args.port, sslContext=context)
-        else:
-            si = connect.SmartConnect(host=args.host,
-                                      user=args.user,
-                                      pwd=args.password,
-                                      port=args.port)
+       ssl = __import__("ssl")
+       context = ssl._create_unverified_context()
+
+       si = connect.SmartConnect(host=args.host,
+                                 user=args.user,
+                                 pwd=args.password,
+                                 port=args.port,
+                                 sslContext=context)
+    except Exception as e:
+       si = connect.SmartConnect(host=args.host,
+                                 user=args.user,
+                                 pwd=args.password,
+                                 port=args.port)
     except:
         print "Unable to connect to %s" % args.host
         exit(1)
+
     objs = get_objects(si, args)
     # if VM already exists exit right away
     si_content = si.RetrieveContent()
@@ -245,9 +247,9 @@ def main():
                     ovffile = t.extractfile(ovffilename)
                     headers = { 'Content-length' : ovffile.size }
                     req = urllib2.Request(url, ovffile, headers)
-                    if is_xenial_or_above():
+                    try:
                         response = urllib2.urlopen(req, context = context)
-                    else:
+                    except:
                         response = urllib2.urlopen(req)
                 lease.HttpNfcLeaseComplete()
             except:
