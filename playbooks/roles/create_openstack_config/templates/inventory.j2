@@ -1,36 +1,19 @@
 
 # These initial groups are the only groups required to be modified. The
 # additional groups are for more control of the environment.
-[control]
+#
+{% for role in ['control', 'network', 'compute', 'monitoring'] %}
+[{{ role }}]
 {% for host in groups["all"] %}
-{% if "control" in hostvars[host]['group_names'] %}
-{{ host }} ansible_ssh_pass={{ hostvars[host]['ansible_ssh_pass'] }}
+{% if role in hostvars[host]['group_names'] %}
+{% if hostvars[host]['ansible_ssh_private_key_file'] is defined %}
+{% set auth="ansible_ssh_private_key_file=" + hostvars[host]['ansible_ssh_private_key_file'] %}
+{% elif hostvars[host]['ansible_ssh_pass'] is defined %}
+{% set auth="ansible_ssh_pass=" + hostvars[host]['ansible_ssh_pass'] %}
+{% endif %}
+{{ host }} {{ auth }}
 {% endif %}
 {% endfor %}
-
-# The network nodes are where your l3-agent and loadbalancers will run
-# This can be the same as a host in the control group
-[network]
-{% for host in groups["all"] %}
-{% if "network" in hostvars[host]['group_names'] %}
-{{ host }} ansible_ssh_pass={{ hostvars[host]['ansible_ssh_pass'] }}
-{% endif %}
-{% endfor %}
-
-
-[compute]
-{% for host in groups["all"] %}
-{% if "compute" in hostvars[host]['group_names'] %}
-{{ host }} ansible_ssh_pass={{ hostvars[host]['ansible_ssh_pass'] }}
-{% endif %}
-{% endfor %}
-
-
-[monitoring]
-{% for host in groups["all"] %}
-{% if "monitoring" in hostvars[host]['group_names'] %}
-{{ host }} ansible_ssh_pass={{ hostvars[host]['ansible_ssh_pass'] }}
-{% endif %}
 {% endfor %}
 
 # When compute nodes and control nodes use different interfaces,

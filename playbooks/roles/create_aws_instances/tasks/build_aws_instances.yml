@@ -106,6 +106,7 @@
    count_tag: "{{ item.key }}"
    instance_tags:
      Name: "{{ item.key }}"
+   wait: true
   register: aws
 
 - name: Wait for SSH to come up

@@ -5,3 +5,16 @@
     dest: "{{ kolla_dir }}"
     version: "contrail/{{ openstack_sku }}"
   ignore_errors: yes
+
+- name: Create config customization directory
+  file:
+    path: "/etc/kolla/config"
+    state: directory
+    mode: 0755
+    recurse: yes
+
+- name: Upload configs custimization
+  copy:
+    dest: "/etc/kolla/config/{{ item.key }}"
+    content: "{{ item.value }}"
+  with_dict: "{{ kolla_config.customize }}"
