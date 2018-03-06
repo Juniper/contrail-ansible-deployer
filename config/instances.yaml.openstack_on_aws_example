@@ -1,0 +1,78 @@
+provider_config:
+  aws:
+    ec2_access_key: "ACCESS_KEY"
+    ec2_secret_key: "SECRET_KEY"
+    ssh_public_key: /root/.ssh/id_rsa.pub
+    ssh_private_key: /root/.ssh/id_rsa
+    ssh_user: centos
+    instance_type: t2.xlarge
+    # https://wiki.centos.org/Cloud/AWS#head-78d1e3a4e6ba5c5a3847750d88266916ffe69648
+    image: ami-6e28b517
+    # https://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region
+    region: eu-west-1
+    security_group: default
+    # console.aws.amazon.com/vpc/
+    vpc_subnet_id: subnet-ca9c4f82
+    assign_public_ip: yes
+    volume_size: 50
+    key_pair: contrail
+instances:
+  aws_control1:
+    provider: aws
+    instance_type: t2.xlarge
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+  aws_control2:
+    provider: aws
+    instance_type: t2.xlarge
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+  aws_control3:
+    provider: aws
+    instance_type: t2.xlarge
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+  aws_control_openstack:
+    provider: aws
+    instance_type: t2.xlarge
+    roles:
+      openstack:
+  aws_compute1:
+    provider: aws
+    instance_type: t2.xlarge
+    roles:
+      vrouter:
+contrail_configuration:
+  CONTAINER_REGISTRY: opencontrailnightly
+  CONTRAIL_VERSION: latest
+  CLOUD_ORCHESTRATOR: openstack
+  RABBITMQ_NODE_PORT: 5673
+  AUTH_MODE: keystone
+  KEYSTONE_AUTH_URL_VERSION: /v3
+  KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123
+kolla_config:
+  customize:
+    nova.conf: |
+      [libvirt]
+      virt_type=qemu
+      cpu_mode=none
+  kolla_globals:
+    network_interface: "eth0"
+    kolla_external_vip_interface: "eth0"
+    enable_haproxy: "no"
+    enable_ironic: "no"

@@ -38,6 +38,25 @@
   tags:
    - always
 
+- set_fact:
+    openstack_controller_list: []
+  tags:
+   - always
+
+- name: add openstack controllers to the list
+  set_fact:
+    openstack_controller_list: "{{ openstack_controller_list + [ hostvars[item]['private_ip'] ] }}"
+  when: hostvars[item]['instance_data']['roles'].openstack is defined or hostvars[item]['instance_data']['roles'].openstack_control is defined
+  with_items: "{{ groups['container_hosts'] }}"
+
+- name: set KEYSTONE_AUTH_HOST
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'KEYSTONE_AUTH_HOST': openstack_controller_list[0] }) }}"
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' and openstack_controller_list|length > 0
+  tags:
+   - always
+
 - name: set container tag contrail version to master if not defined
   set_fact:
     contrail_version_tag: latest
