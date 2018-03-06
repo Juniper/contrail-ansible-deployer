@@ -6,6 +6,7 @@ localhost:
       ansible_connection: local
       python_interpreter: python
       ansible_python_interpreter: python
+      ansible_connection: local
 #container_hosts:        
 #  hosts:
 #    192.168.1.100:
