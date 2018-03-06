@@ -2,12 +2,13 @@
   add_host:
     hostname: "{{ item.value.ip }}"
     groupname: container_hosts
-    ansible_user: "{{ provider_config.kvm.ssh_user }}"
-    ansible_ssh_pass: "{{ provider_config.kvm.ssh_pwd }}"
+    ansible_user: "{{ provider_config.kvm.ssh_user|default(item.value.ssh_user) }}"
+    ansible_ssh_pass: "{{ provider_config.kvm.ssh_pwd|default(item.value.ssh_pwd) }}"
     ansible_become: true
     instance_name: "{{ item.key }}"
     private_ip: "{{ item.value.ip }}"
-  when: item.value.provider=='kvm' and provider_config.kvm.ssh_pwd is defined
+  when: item.value.provider=='kvm' and (provider_config.kvm.ssh_pwd is defined or
+        item.value.ssh_pwd is defined)
   with_dict: "{{ instances }}"
   tags:
     - configure_kvm_instances
@@ -17,12 +18,13 @@
   add_host:
     hostname: "{{ item.value.ip }}"
     groupname: container_hosts
-    ansible_user: "{{ provider_config.kvm.ssh_user }}"
-    ansible_ssh_private_key_file: "{{ provider_config.kvm.ssh_private_key }}"
+    ansible_user: "{{ provider_config.kvm.ssh_user|default(item.value.ssh_user) }}"
+    ansible_ssh_private_key_file: "{{ provider_config.kvm.ssh_private_key|default(item.value.ssh_private_key) }}"
     ansible_become: true
     instance_name: "{{ item.key }}"
     private_ip: "{{ item.value.ip }}"
-  when: item.value.provider=='kvm' and provider_config.kvm.ssh_private_key is defined
+  when: item.value.provider=='kvm' and (provider_config.kvm.ssh_private_key is defined or
+        item.value.ssh_private_key is defined)
   with_dict: "{{ instances }}"
   tags:
     - configure_kvm_instances
@@ -32,12 +34,13 @@
   add_host:
     hostname: "{{ item.value.ip }}"
     groupname: container_hosts
-    ansible_user: "{{ provider_config.bms.ssh_user }}"
-    ansible_ssh_pass: "{{ provider_config.bms.ssh_pwd }}"
+    ansible_user: "{{ provider_config.bms.ssh_user|default(item.value.ssh_user) }}"
+    ansible_ssh_pass: "{{ provider_config.bms.ssh_pwd|default(item.value.ssh_pwd) }}"
     ansible_become: true
     instance_name: "{{ item.key }}"
     private_ip: "{{ item.value.ip }}"
-  when: item.value.provider=='bms' and provider_config.bms.ssh_pwd is defined
+  when: item.value.provider=='bms' and (provider_config.bms.ssh_pwd is defined or
+        item.value.ssh_pwd is defined)
   with_dict: "{{ instances }}"
   tags:
     - configure_bms
@@ -47,12 +50,13 @@
   add_host:
     hostname: "{{ item.value.ip }}"
     groupname: container_hosts
-    ansible_user: "{{ provider_config.bms.ssh_user }}"
-    ansible_ssh_private_key_file: "{{ provider_config.bms.ssh_private_key }}"
+    ansible_user: "{{ provider_config.bms.ssh_user|default(item.value.ssh_user) }}"
+    ansible_ssh_private_key_file: "{{ provider_config.bms.ssh_private_key|default(item.value.ssh_private_key) }}"
     ansible_become: true
     instance_name: "{{ item.key }}"
     private_ip: "{{ item.value.ip }}"
-  when: item.value.provider=='bms' and provider_config.bms.ssh_private_key is defined
+  when: item.value.provider=='bms' and (provider_config.bms.ssh_private_key is defined or
+        item.value.ssh_private_key is defined)
   with_dict: "{{ instances }}"
   tags:
     - configure_bms

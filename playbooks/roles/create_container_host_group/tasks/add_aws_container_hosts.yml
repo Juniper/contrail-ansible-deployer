@@ -106,33 +106,34 @@
   add_host:
     hostname: "{{ aws.instances[0].public_ip_address }}"
     groupname: container_hosts
-    ansible_ssh_user: "{{ provider_config.aws.ssh_user }}"
-    ansible_ssh_pass: "{{ provider_config.aws.ssh_pwd }}"
+    ansible_ssh_user: "{{ provider_config.aws.ssh_user|default(item.value.ssh_user) }}"
+    ansible_ssh_pass: "{{ provider_config.aws.ssh_pwd|default(item.value.ssh_pwd) }}"
     ansible_become: true
     private_ip: "{{ aws.instances[0].private_ip_address }}"
     instance_name: "{{ item.key }}"
     private_dns_name: "{{ aws.instances[0].private_dns_name }}"
-  when: provider_config.aws.ssh_pwd is defined and provider_config.aws.ssh_private_key is undefined
+  when: (provider_config.aws.ssh_pwd is defined or item.value.ssh_pwd is defined) and 
+        (provider_config.aws.ssh_private_key is undefined and item.value.ssh_private_key is undefined)
 
 - name: add aws container hosts with ssh key
   add_host:
     hostname: "{{ aws.instances[0].public_ip_address }}"
     groupname: container_hosts
-    ansible_ssh_user: "{{ provider_config.aws.ssh_user }}"
-    ansible_ssh_private_key_file: "{{ provider_config.aws.ssh_private_key }}"
+    ansible_ssh_user: "{{ provider_config.aws.ssh_user|default(item.value.ssh_user) }}"
+    ansible_ssh_private_key_file: "{{ provider_config.aws.ssh_private_key|default(item.value.ssh_private_key) }}"
     ansible_become: true
     private_ip: "{{ aws.instances[0].private_ip_address }}"
     instance_name: "{{ item.key }}"
     private_dns_name: "{{ aws.instances[0].private_dns_name }}"
-  when: provider_config.aws.ssh_private_key is defined
+  when: provider_config.aws.ssh_private_key is defined or item.value.ssh_private_key is defined
 
 - name: add aws container hosts with ssh key
   add_host:
     hostname: "{{ aws.instances[0].public_ip_address }}"
     groupname: container_hosts
-    ansible_ssh_user: "{{ provider_config.aws.ssh_user }}"
+    ansible_ssh_user: "{{ provider_config.aws.ssh_user|default(item.value.ssh_user) }}"
     ansible_become: true
     private_ip: "{{ aws.instances[0].private_ip_address }}"
     instance_name: "{{ item.key }}"
     private_dns_name: "{{ aws.instances[0].private_dns_name }}"
-  when: provider_config.aws.ssh_private_key is undefined and provider_config.aws.ssh_private_key is undefined
+  when: provider_config.aws.ssh_private_key is undefined and item.value.ssh_private_key is undefined and provider_config.aws.ssh_pwd is undefined and item.value.ssh_pwd is undefined

@@ -2,7 +2,9 @@
 export LIBGUESTFS_BACKEND=direct
 /usr/bin/virt-customize  -a /var/lib/libvirt/images/{{ container_vm_hostname }}.qcow2 \
 --run-command 'xfs_growfs /' \
---root-password password:{{ provider_config.kvm.ssh_pwd }} \
+{% if 'ssh_pwd' in item.value or 'ssh_pwd' in provider_config.kvm %}
+--root-password password:{{ item.value.ssh_pwd|default(provider_config.kvm.ssh_pwd) }} \
+{% endif %}
 --hostname {{ container_vm_hostname }}.{{ domainsuffix }} \
 --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
 --run-command 'sed -i "s/#UseDNS yes/UseDNS no/g" /etc/ssh/sshd_config' \

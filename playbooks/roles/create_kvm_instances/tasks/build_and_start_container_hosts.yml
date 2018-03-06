@@ -206,21 +206,22 @@
   add_host:
     name: "{{ item.value.ip }}"
     groups: container_hosts
-    ansible_ssh_pass: "{{ provider_config.kvm.ssh_pwd }}"
-    ansible_user: "{{ provider_config.kvm.ssh_user }}"
+    ansible_ssh_pass: "{{ item.value.ssh_pwd|default(provider_config.kvm.ssh_pwd) }}"
+    ansible_user: "{{ item.value.ssh_user|default(provider_config.kvm.ssh_user) }}"
     instance_name: "{{ item.key }}"
     privat_ip: "{{ item.value.ip }}"
-  when: provider_config.kvm.ssh_pwd is defined and provider_config.kvm.ssh_user is defined
+  when: (provider_config.kvm.ssh_pwd is defined or item.value.ssh_pwd) and 
+        (provider_config.kvm.ssh_user is defined or item.value.ssh_user is defined)
 
 - name: add container vm {{ container_vm_hostname }} to inventory when private key is defined
   add_host:
     name: "{{ item.value.ip }}"
     groups: container_hosts
-    ansible_user: "{{ provider_config.kvm.ssh_user }}"
-    ansible_ssh_private_key_file: "{{ provider_config.kvm.ssh_private_key }}"
+    ansible_user: "{{ item.value.ssh_user|default(provider_config.kvm.ssh_user) }}"
+    ansible_ssh_private_key_file: "{{ item.value.ssh_private_key|default(provider_config.kvm.ssh_private_key) }}"
     instance_name: "{{ item.key }}"
     privat_ip: "{{ item.value.ip }}"
-  when: provider_config.kvm.ssh_private_key is defined
+  when: provider_config.kvm.ssh_private_key is defined or item.value.ssh_private_key is defined
 
 - name: Wait for the VM be available
   local_action:
