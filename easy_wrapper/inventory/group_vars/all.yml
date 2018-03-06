@@ -3,7 +3,7 @@
 common_config:
   orchestrator: openstack
   openstack_sku: ocata
-  contrail_build_tag: "master-20180210000007-centos7-ocata"
+  contrail_build_tag: "ocata-master-20180210000007"
   # All nodes under target_nodes will be aded to all roles (both openstack and
   # contrail)
   target_nodes:
@@ -49,7 +49,7 @@ contrail_config:
           ntpserver: 10.84.5.100
   container_hosts_openstack:
     contrail_configuration:
-      CONTRAIL_VERSION: master-20180210000007-centos7-ocata
+      CONTRAIL_VERSION: ocata-master-20180210000007
 #    roles:
 #      192.168.1.60:
 #        - config_database
