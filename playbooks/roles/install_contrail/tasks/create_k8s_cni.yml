@@ -59,7 +59,7 @@
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
-    - contrail-kubernetes-vrouter-init
+    - contrail-kubernetes-cni-init
   when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
 
 - name: "create contrail cni compose file"
