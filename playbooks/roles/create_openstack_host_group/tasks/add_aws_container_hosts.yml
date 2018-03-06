@@ -88,52 +88,57 @@
     security_group: "{{ item.value.security_group }}"
   when: item.value.security_group is defined
 
-- name: Launch instance
-  ec2:
-   key_name: "{{ provider_config.aws.key_pair }}"
-   instance_type: "{{ instance_type }}"
-   image: "{{ image }}"
-   ec2_access_key: "{{ provider_config.aws.ec2_access_key }}"
-   ec2_secret_key: "{{ provider_config.aws.ec2_secret_key }}"
-   group: "{{ security_group }}"
-   vpc_subnet_id: "{{ vpc_subnet_id }}"
-   region: "{{ region }}"
-   volumes:
-   - device_name: /dev/sda1
-     volume_size: "{{ volume_size }}"
-   assign_public_ip: yes
-   exact_count: 1
-   count_tag: "{{ item.key }}"
-   instance_tags:
-     Name: "{{ item.key }}"
-   wait: true
+- name: Get aws instance
+  ec2_instance_facts:
+    region: "{{ region }}"
+    ec2_access_key: "{{ provider_config.aws.ec2_access_key }}"
+    ec2_secret_key: "{{ provider_config.aws.ec2_secret_key }}"
+    filters:
+      "tag:Name": "{{ item.key }}"
+      "image-id": "{{ image }}"
+      "instance-state-name": "running"
   register: aws
 
-- name: Wait for SSH to come up
-  wait_for: host={{ instance_data.public_ip }} port=22 delay=10 timeout=120
-  with_items: "{{ aws.instances }}"
-  loop_control:
-    loop_var: instance_data
+- debug:
+    msg: "{{ aws }}"
 
-- name: Add host to groupname
+- set_fact:
+    ip_key: "{{ {} | combine({'ip': aws.instances[0].private_ip_address}) }}"
+
+- set_fact:
+    instances: "{{ instances | combine({item.key: ip_key}, recursive=True) }}"
+
+- name: add aws container hosts with ssh pwd
   add_host:
-    hostname: "{{ instance_data.public_ip }}"
-    groupname: container_hosts
+    hostname: "{{ aws.instances[0].public_ip_address }}"
+    groupname: "{{ instances|openstack_host_groups(item.value.ip) }}"
+    ansible_ssh_user: "{{ provider_config.aws.ssh_user }}"
+    ansible_ssh_pass: "{{ provider_config.aws.ssh_pwd }}"
+    ansible_become: true
+    private_ip: "{{ aws.instances[0].private_ip_address }}"
     instance_name: "{{ item.key }}"
-  with_items: "{{ aws.instances }}"
-  loop_control:
-    loop_var: instance_data
+    private_dns_name: "{{ aws.instances[0].private_dns_name }}"
+  when: provider_config.aws.ssh_pwd is defined and provider_config.aws.ssh_private_key is undefined
 
-- name: display new instance
-  debug:
-   msg: "{{ aws.instances }}"
+- name: add aws container hosts with ssh key
+  add_host:
+    hostname: "{{ aws.instances[0].public_ip_address }}"
+    groupname: "{{ instances|openstack_host_groups(item.value.ip) }}"
+    ansible_ssh_user: "{{ provider_config.aws.ssh_user }}"
+    ansible_ssh_private_key_file: "{{ provider_config.aws.ssh_private_key }}"
+    ansible_become: true
+    private_ip: "{{ aws.instances[0].private_ip_address }}"
+    instance_name: "{{ item.key }}"
+    private_dns_name: "{{ aws.instances[0].private_dns_name }}"
+  when: provider_config.aws.ssh_private_key is defined
 
-#- name: configure new instances
-#  include: ../../../../../host_configuration/playbooks/roles/configure_container_hosts/tasks/main.yml
-#- name: Manage new instances
-#  hosts: new_instances
-#  connection: ssh
-#  sudo: True
-#  roles:
-#    - base_configuration
-#    - production_server
+- name: add aws container hosts with ssh key
+  add_host:
+    hostname: "{{ aws.instances[0].public_ip_address }}"
+    groupname: "{{ instances|openstack_host_groups(item.value.ip) }}"
+    ansible_ssh_user: "{{ provider_config.aws.ssh_user }}"
+    ansible_become: true
+    private_ip: "{{ aws.instances[0].private_ip_address }}"
+    instance_name: "{{ item.key }}"
+    private_dns_name: "{{ aws.instances[0].private_dns_name }}"
+  when: provider_config.aws.ssh_private_key is undefined and provider_config.aws.ssh_private_key is undefined

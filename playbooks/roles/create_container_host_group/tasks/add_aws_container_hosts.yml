@@ -137,3 +137,9 @@
     instance_name: "{{ item.key }}"
     private_dns_name: "{{ aws.instances[0].private_dns_name }}"
   when: provider_config.aws.ssh_private_key is undefined and item.value.ssh_private_key is undefined and provider_config.aws.ssh_pwd is undefined and item.value.ssh_pwd is undefined
+
+- set_fact:
+    ip_key: "{{ {} | combine({'ip': aws.instances[0].private_ip_address}) }}"
+
+- set_fact:
+    instances: "{{ instances | combine({item.key: ip_key}, recursive=True) }}"
