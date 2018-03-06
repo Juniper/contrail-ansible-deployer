@@ -102,10 +102,16 @@
 - debug:
     msg: "{{ aws }}"
 
+- set_fact:
+    ip_key: "{{ {} | combine({'ip': aws.instances[0].private_ip_address}) }}"
+
+- set_fact:
+    instances: "{{ instances | combine({item.key: ip_key}, recursive=True) }}"
+
 - name: add aws container hosts with ssh pwd
   add_host:
     hostname: "{{ aws.instances[0].public_ip_address }}"
-    groupname: container_hosts
+    groupname: "{{ instances|openstack_host_groups(item.value.ip) }}"
     ansible_ssh_user: "{{ provider_config.aws.ssh_user }}"
     ansible_ssh_pass: "{{ provider_config.aws.ssh_pwd }}"
     ansible_become: true
@@ -117,7 +123,7 @@
 - name: add aws container hosts with ssh key
   add_host:
     hostname: "{{ aws.instances[0].public_ip_address }}"
-    groupname: container_hosts
+    groupname: "{{ instances|openstack_host_groups(item.value.ip) }}"
     ansible_ssh_user: "{{ provider_config.aws.ssh_user }}"
     ansible_ssh_private_key_file: "{{ provider_config.aws.ssh_private_key }}"
     ansible_become: true
@@ -129,16 +135,10 @@
 - name: add aws container hosts with ssh key
   add_host:
     hostname: "{{ aws.instances[0].public_ip_address }}"
-    groupname: container_hosts
+    groupname: "{{ instances|openstack_host_groups(item.value.ip) }}"
     ansible_ssh_user: "{{ provider_config.aws.ssh_user }}"
     ansible_become: true
     private_ip: "{{ aws.instances[0].private_ip_address }}"
     instance_name: "{{ item.key }}"
     private_dns_name: "{{ aws.instances[0].private_dns_name }}"
   when: provider_config.aws.ssh_private_key is undefined and provider_config.aws.ssh_private_key is undefined
-
-- set_fact:
-    ip_key: "{{ {} | combine({'ip': aws.instances[0].private_ip_address}) }}"
-
-- set_fact:
-    instances: "{{ instances | combine({item.key: ip_key}, recursive=True) }}"

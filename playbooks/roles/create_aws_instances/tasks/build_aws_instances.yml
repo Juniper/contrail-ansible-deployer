@@ -106,10 +106,11 @@
    count_tag: "{{ item.key }}"
    instance_tags:
      Name: "{{ item.key }}"
+   wait: true
   register: aws
 
 - name: Wait for SSH to come up
-  wait_for: host={{ instance_data.public_ip }} port=22 delay=10 timeout=60
+  wait_for: host={{ instance_data.public_ip }} port=22 delay=10 timeout=120
   with_items: "{{ aws.instances }}"
   loop_control:
     loop_var: instance_data
