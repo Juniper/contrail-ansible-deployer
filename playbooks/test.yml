@@ -1,7 +1,0 @@
----
-- hosts:
-  - container_hosts
-  roles:
-  - test
-  tags:
-  - test

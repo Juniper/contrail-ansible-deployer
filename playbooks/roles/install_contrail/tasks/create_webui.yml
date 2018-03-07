@@ -22,14 +22,18 @@
     state: touch
 
 - name: "populate cluster wide common_webui.env"
-  lineinfile: dest=/etc/contrail/common_webui.env regexp='.*{{ item.key }}$' line="{{ item.key }}={{ item.value }}" state=present
+  lineinfile: dest=/etc/contrail/common_webui.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ contrail_configuration }}"
 
+- name: "populate instance specific common_webui.env"
+  lineinfile: dest=/etc/contrail/common_webui.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ instances[instance_name].contrail_configuration }}"
+  when: instances[instance_name].contrail_configuration is defined
+  ignore_errors: yes
+
 - name: "populate pod specific common_webui.env"
-  lineinfile: dest=/etc/contrail/common_webui.env regexp='.*{{ config_item.key }}$' line="{{ config_item.key }}={{ config_item.value }}" state=present
+  lineinfile: dest=/etc/contrail/common_webui.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ roles[instance_name].control }}"
-  loop_control:
-    loop_var: config_item
   ignore_errors: yes
 
 - name: update image
