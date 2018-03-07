@@ -5,7 +5,9 @@ metadata:
   name: env
   namespace: kube-system
 data:
-  CONTROLLER_NODES: {{ contrail_configuration.CONTROLLER_NODES }}
+{% for params, values in contrail_configuration.items() %}
+  {{ params }}: {{ values }}
+{% endfor %}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
