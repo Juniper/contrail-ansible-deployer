@@ -1,0 +1,11 @@
+---
+
+{%- for k,v in instances.iteritems() -%}
+  {%- if v.roles is defined and v.roles.openstack is defined and v.roles.openstack is mapping() and v.roles.openstack|length() > 0 -%}
+    {%- if hostvars[inventory_hostname].tmp_host is defined and v.ip == hostvars[inventory_hostname]['tmp_host'] -%}
+      {%- for a,b in v.roles.openstack.iteritems() -%}
+        {% print '\n' + a + ': ' + b %}
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}

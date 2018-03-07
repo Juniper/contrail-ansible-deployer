@@ -1,0 +1,24 @@
+---
+
+- name: Create host_vars directory if required
+  file:
+    path: "{{ kolla_dir }}/ansible/host_vars"
+    state: directory
+  delegate_to: localhost
+
+- name: set tmphost
+  set_fact:
+    tmp_host: "{{ inventory_hostname }}"
+
+- name: DEBUG
+  debug:
+    msg: "TMPHOST for {{ inventory_hostname }} is {{ tmp_host }}"
+
+- name: Create host variable files
+  template:
+    src: "{{ role_path }}/templates/host_vars.yml.j2"
+    dest: "{{ kolla_dir }}/ansible/host_vars/{{ inventory_hostname }}.yml"
+  with_dict: "{{ instances }}"
+  delegate_to: localhost
+  connection: local
+
