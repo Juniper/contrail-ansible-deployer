@@ -21,6 +21,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/control:/etc/contrail
     restart: always
+{% if roles[instance_name].control.location is undefined %}
   named:
     image: "{{ container_registry }}/contrail-controller-control-named:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -40,3 +41,4 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/control:/etc/contrail
     restart: always
+{% endif %}

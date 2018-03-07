@@ -21,6 +21,33 @@
     path: "/etc/contrail/common_control.env"
     state: touch
 
+- name: set location if defined
+  set_fact:
+    location: "{{ roles[instance_name].control.location }}"
+  when: roles[instance_name].control.location is defined
+
+- name: init location control peers list if location is defined
+  set_fact:
+    control_peer_list: []
+  when: roles[instance_name].control.location is defined
+
+- name: add peer control nodes to the list
+  set_fact:
+    control_peer_list: "{{ control_peer_list + [ instances[item.key].ip ] }}"
+  when: location is defined and item.value.control is defined and item.value.control.location is defined and item.value.control.location == location
+  with_dict: "{{ roles }}"
+  ignore_errors: yes
+
+- name: create controller host list if not defined
+  set_fact:
+    control_peers: "{{ control_peer_list|join(',') }}"
+  when: control_peer_list is defined
+
+- name: create contrail_configuration.CONTROL_NODES
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'CONTROL_NODES': control_peers}) }}"
+  when: control_peers is defined and roles[instance_name].control.CONTROL_NODES is undefined
+
 - name: "populate global common_control.env"
   lineinfile: dest=/etc/contrail/common_control.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ contrail_configuration }}"
@@ -35,6 +62,22 @@
   lineinfile: dest=/etc/contrail/common_control.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ roles[instance_name].control }}"
   ignore_errors: yes
+
+- name: add BGP_ASN if location is defined
+  lineinfile: dest=/etc/contrail/common_control.env regexp='^BGP_ASN=.*' line="BGP_ASN={{ remote_locations[location].BGP_ASN }}" state=present
+  when: location is defined
+
+- name: add SUBCLUSTER name if location is defined and subcluster name is defined
+  lineinfile: dest=/etc/contrail/common_control.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ remote_locations[location].SUBCLUSTER }}" state=present
+  when: location is defined and remote_locations[location].SUBCLUSTER is defined
+
+- name: add SUBCLUSTER name if location is defined and subcluster name is undefined
+  lineinfile: dest=/etc/contrail/common_control.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ location }}" state=present
+  when: location is defined and remote_locations[location].SUBCLUSTER is undefined
+
+- name: set BGP_AUTO_MESH to false if location is enabled
+  lineinfile: dest=/etc/contrail/common_control.env regexp='^BGP_AUTO_MESH=.*' line="BGP_AUTO_MESH=false" state=present
+  when: location is defined
 
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"

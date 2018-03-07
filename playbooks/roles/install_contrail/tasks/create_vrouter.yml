@@ -21,6 +21,41 @@
     path: "/etc/contrail/common_vrouter.env"
     state: touch
 
+- name: get pop
+  set_fact:
+    location: "{{ roles[instance_name].vrouter.location }}"
+  when: roles[instance_name].vrouter.location is defined
+
+- name: init pop control peer list
+  set_fact:
+    pop_control_list: []
+  when: location is defined
+
+- debug:
+    msg: "pop control list: {{ pop_control_list }}"
+
+- name: add pop control nodes to list
+  set_fact:
+    pop_control_list: "{{ pop_control_list + [ instances[item.key].ip ] }}"
+  when: location is defined and item.value.control is defined and item.value.control.location is defined and item.value.control.location == location
+  with_dict: "{{ roles }}"
+  ignore_errors: yes
+
+- name: create controler host list if not defined
+  set_fact:
+    pop_control_nodes: "{{ pop_control_list|join(',') }}"
+  when: pop_control_list is defined
+
+- name: create contrail_configuration.CONTROL_NODES
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'CONTROL_NODES': pop_control_nodes}) }}"
+  when: pop_control_nodes is defined and roles[instance_name].vrouter.CONTROL_NODES is undefined
+
+- name: set DNS servers if location is defined
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'DNS_NODES': contrail_configuration.CONTROLLER_NODES}) }}"
+  when: pop_control_nodes is defined and roles[instance_name].vrouter.DNS_NODES is undefined
+
 - name: "populate cluster wide common_vrouter.env"
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ contrail_configuration }}"
@@ -36,31 +71,18 @@
   with_dict: "{{ roles[instance_name].vrouter }}"
   ignore_errors: yes
 
-- name: get pop
-  set_fact:
-    pop: "{{ roles[instance_name].vrouter.location }}"
-  when: roles[instance_name].vrouter.location is defined
-
 - name: "populate pop settings"
-  lineinfile: dest=/etc/contrail/common_vrouter.env regexp='.*{{ pop_config.key }}$' line="{{ pop_config.key }}={{ pop_config.value }}" state=present
-  with_dict: "{{ remote_locations[pop] }}"
-  loop_control:
-    loop_var: pop_config
-  when: pop is defined
+  lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ remote_locations[location] }}"
+  when: location is defined
 
-- name: calculate XMPP port if not assigned
-  set_fact:
-    xmpp_port: "{{ remote_locations[pop].CLUSTER_ID|int + 15268 }}"
-  when: pop is defined and remote_locations[pop].XMPP_SERVER_PORT is undefined
+- name: add SUBCLUSTER name if location is defined and subcluster name is defined
+  lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ remote_locations[location].SUBCLUSTER }}" state=present
+  when: location is defined and remote_locations[location].SUBCLUSTER is defined
 
-- name: set XMPP_SERVER_PORT port if assigned
-  set_fact:
-    xmpp_port: "{{ remote_locations[pop].XMPP_SERVER_PORT }}"
-  when: pop is defined and remote_locations[pop].XMPP_SERVER_PORT is defined
-
-- name: "populate xmpp port"
-  lineinfile: dest=/etc/contrail/common_vrouter.env regexp='.*XMPP_SERVER_PORT$' line="XMPP_SERVER_PORT={{ xmpp_port }}" state=present
-  when: xmpp_port is defined
+- name: add SUBCLUSTER name if location is defined and subcluster name is undefined
+  lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ location }}" state=present
+  when: location is defined and remote_locations[location].SUBCLUSTER is undefined
 
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
