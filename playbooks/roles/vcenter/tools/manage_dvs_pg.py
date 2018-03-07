@@ -127,22 +127,24 @@ def add_pvlan_config(dvs_obj):
 def main():
     args = get_args()
     try:
-        if is_xenial_or_above():
-            ssl = __import__("ssl")
-            context = ssl._create_unverified_context()
-            si = connect.SmartConnect(host=args.host,
-                                      user=args.user,
-                                      pwd=args.password,
-                                      port=args.port, sslContext=context)
-        else:
-            si = connect.SmartConnect(host=args.host,
-                                      user=args.user,
-                                      pwd=args.password,
-                                      port=args.port)
-        si_content = si.RetrieveContent()
+       ssl = __import__("ssl")
+       context = ssl._create_unverified_context()
+
+       si = connect.SmartConnect(host=args.host,
+                                 user=args.user,
+                                 pwd=args.password,
+                                 port=args.port,
+                                 sslContext=context)
+    except Exception as e:
+       si = connect.SmartConnect(host=args.host,
+                                 user=args.user,
+                                 pwd=args.password,
+                                 port=args.port)
     except:
         print "Unable to connect to %s" % args.host
         exit(1)
+
+    si_content = si.RetrieveContent()
     # check if PG exists else return error
     dv_switch = get_obj(si_content, [vim.DistributedVirtualSwitch], args.dvs_name)
     if not dv_switch:
