@@ -3,6 +3,7 @@ localhost:
     localhost:
       config_file: ../config/instances.yaml
       connection: local
+      ansible_connection: local
       python_interpreter: python
       ansible_python_interpreter: python
 #container_hosts:        
