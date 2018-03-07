@@ -20,17 +20,17 @@
   tags:
    - always
 
-- name: add linux distr tag if defined
+- name: add openstack version tag if defined
   set_fact:
-    contrail_version_tag: "{{ contrail_version_tag }}-{{ contrail_configuration.LINUX_DISTR }}"
-  when: contrail_configuration.LINUX_DISTR is defined
+    contrail_version_tag: "{{ contrail_configuration.OPENSTACK_VERSION }}-{{ contrail_version_tag }}"
+  when: contrail_configuration.OPENSTACK_VERSION is defined
   tags:
    - always
 
-- name: add openstack version tag if defined
+- name: add linux distr tag if defined
   set_fact:
-    contrail_version_tag: "{{ contrail_version_tag }}-{{ contrail_configuration.OPENSTACK_VERSION }}"
-  when: contrail_configuration.OPENSTACK_VERSION is defined
+    contrail_version_tag: "{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_version_tag }}"
+  when: contrail_configuration.LINUX_DISTR is defined
   tags:
    - always
 
