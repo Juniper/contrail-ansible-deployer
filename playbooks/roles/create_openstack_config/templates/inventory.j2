@@ -4,7 +4,11 @@
 [control]
 {% for host in groups["all"] %}
 {% if "control" in hostvars[host]['group_names'] %}
+{% if hostvars[host]['ansible_ssh_pass'] is defined %}
 {{ host }} ansible_ssh_pass={{ hostvars[host]['ansible_ssh_pass'] }}
+{% else %}
+{{ host }}
+{% endif %}
 {% endif %}
 {% endfor %}
 
@@ -13,7 +17,11 @@
 [network]
 {% for host in groups["all"] %}
 {% if "network" in hostvars[host]['group_names'] %}
+{% if hostvars[host]['ansible_ssh_pass'] is defined %}
 {{ host }} ansible_ssh_pass={{ hostvars[host]['ansible_ssh_pass'] }}
+{% else %}
+{{ host }}
+{% endif %}
 {% endif %}
 {% endfor %}
 
@@ -21,7 +29,11 @@
 [compute]
 {% for host in groups["all"] %}
 {% if "compute" in hostvars[host]['group_names'] %}
+{% if hostvars[host]['ansible_ssh_pass'] is defined %}
 {{ host }} ansible_ssh_pass={{ hostvars[host]['ansible_ssh_pass'] }}
+{% else %}
+{{ host }}
+{% endif %}
 {% endif %}
 {% endfor %}
 
@@ -29,7 +41,11 @@
 [monitoring]
 {% for host in groups["all"] %}
 {% if "monitoring" in hostvars[host]['group_names'] %}
+{% if hostvars[host]['ansible_ssh_pass'] is defined %}
 {{ host }} ansible_ssh_pass={{ hostvars[host]['ansible_ssh_pass'] }}
+{% else %}
+{{ host }}
+{% endif %}
 {% endif %}
 {% endfor %}
 

@@ -1,7 +1,7 @@
 - name: Create container host group
   hosts: localhost
   connection: local
-  gather_facts: no
+  gather_facts: yes
   pre_tasks:
     - name: Set orchestrator if not passed
       set_fact:
