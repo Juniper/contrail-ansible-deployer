@@ -3,6 +3,10 @@
   gather_facts: yes
   tasks:
 
+  - name: Import instances from config/instances.yaml
+    include_vars:
+      file: "{{ playbook_dir }}/../config/instances.yaml"
+
   - name: Import group variables
     include_vars:
       dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/group_vars"
@@ -15,6 +19,25 @@
       ignore_files:
         - passwords.yml.original
         - globals.yml.original
+
+  - name: Generate host vars
+    include_role:
+      name: create_openstack_config
+      tasks_from: host_params
+
+  - name: set tmphost
+    set_fact:
+      tmp_host: "{{ inventory_hostname }}"
+
+  - stat:
+      path: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/host_vars/{{ tmp_host }}.yml"
+    register: st
+    delegate_to: localhost
+
+  - name: Import host variables
+    include_vars:
+      file: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/host_vars/{{ inventory_hostname }}.yml"
+    when: st.stat.exists is defined and st.stat.exists
 
 - include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/kolla-host.yml"
   vars:
