@@ -195,7 +195,7 @@
   tags:
    - always
 
-- name: creater contrail_configuration.CONTROLLER_NODES
+- name: create contrail_configuration.CONTROLLER_NODES
   set_fact:
     contrail_configuration: "{{ contrail_configuration|default({})|combine({'CONTROLLER_NODES': controller}) }}"
   when: contrail_configuration.CONTROLLER_NODES is undefined
