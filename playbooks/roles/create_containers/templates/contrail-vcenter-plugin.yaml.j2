@@ -1,0 +1,43 @@
+version: '2'
+services:
+  network:
+    image: docker.io/kubernetes/pause
+    network_mode: "host"
+    volumes:
+     - /etc/hosts:/etc/hosts
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_vcplugin.env
+    environment:
+      - NODE_TYPE=vcenter-plugin
+    network_mode: "service:network"
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/contrail/vcenter-plugin:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+    stdin_open: true
+    tty: true
+  vcenter-plugin:
+    image: "{{ container_registry }}/contrail-vcenter-plugin:{{ contrail_version_tag }}"
+    network_mode: "service:network"
+    env_file: /etc/contrail/common_vcplugin.env
+    environment:
+      - VCENTER_SERVER={{ vcenter_server }}
+      - VCENTER_USERNAME={{ vcenter_username }}
+      - VCENTER_PASSWORD={{ vcenter_password }}
+      - VCENTER_DATACENTER={{ vcenter_datacenter }}
+      - VCENTER_DVSWITCH={{ vcenter_dvswitch }}
+      - VCENTER_IPFABRIC={{ vcenter_ipfabric }}
+      - VCENTER_INTROSCPECT_PORT={{ vcenter_introspect_port }}
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/vcenter-plugin:/etc/contrail
+    depends_on:
+      - network
+    restart: on-failure
+    stdin_open: true
+    tty: true
+
