@@ -5,7 +5,7 @@
     {%- if v.roles is defined and v.roles[role] is defined and v.roles[role] is mapping() and v.roles[role]|length() > 0 -%}
       {%- if hostvars[inventory_hostname].tmp_host is defined and v.ip == hostvars[inventory_hostname]['tmp_host'] -%}
         {%- for a,b in v.roles[role].iteritems() -%}
-          {% print '\n' + a + ': ' + b %}
+          {% print '\n' + a + ': ' + b|string() %}
         {%- endfor -%}
       {%- endif -%}
     {%- endif -%}
