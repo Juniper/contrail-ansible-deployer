@@ -1,14 +1,4 @@
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: env
-  namespace: kube-system
-data:
-{% for params, values in contrail_configuration.items() %}
-  {{ params }}: {{ values }}
-{% endfor %}
----
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
