@@ -4,5 +4,8 @@
     src: contrail-micro.yaml.j2
     dest: /etc/contrail/contrail-micro.yaml
 
+- name: create config map for contrail-kube-manager
+  shell: kubectl create configmap env --from-env-file=/etc/contrail/common.env -n kube-system
+
 - name: execute yaml
   shell: kubectl apply -f /etc/contrail/contrail-micro.yaml
