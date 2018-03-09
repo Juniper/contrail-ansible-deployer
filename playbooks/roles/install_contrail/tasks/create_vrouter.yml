@@ -31,9 +31,6 @@
     pop_control_list: []
   when: location is defined
 
-- debug:
-    msg: "pop control list: {{ pop_control_list }}"
-
 - name: add pop control nodes to list
   set_fact:
     pop_control_list: "{{ pop_control_list + [ instances[item.key].ip ] }}"
