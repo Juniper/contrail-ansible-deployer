@@ -13,6 +13,7 @@ services:
      - ZOOKEEPER_PORT=2182
     labels:
       - net.juniper.contrail.pod=analytics-database
+      - net.juniper.contrail.service=kafka
     restart: always
     volumes:
      - /etc/hosts:/etc/hosts
@@ -30,6 +31,7 @@ services:
      - CASSANDRA_JMX_LOCAL_PORT=7200
     labels:
       - net.juniper.contrail.pod=analytics-database
+      - net.juniper.contrail.service=cassandra
     volumes:
      - analytics_cassandra:/var/lib/cassandra/data
      - /etc/hosts:/etc/hosts
@@ -44,6 +46,7 @@ services:
      - ZOOKEEPER_PORT=2182
     labels:
       - net.juniper.contrail.pod=analytics-database
+      - net.juniper.contrail.service=zookeeper
     volumes:
      - analytics_zookeeper:/data
      - analytics_zookeeper:/datalog
