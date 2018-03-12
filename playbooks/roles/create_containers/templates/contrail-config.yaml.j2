@@ -10,6 +10,8 @@ services:
     env_file: /etc/contrail/common_config.env
     environment:
       - NODE_TYPE=config
+      - CASSANDRA_CQL_PORT=9041
+      - CASSANDRA_JMX_LOCAL_PORT=7201
     network_mode: "service:network"
     volumes:
       - /var/log/contrail:/var/log/contrail

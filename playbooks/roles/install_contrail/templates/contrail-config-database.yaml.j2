@@ -3,18 +3,6 @@ volumes:
  config_cassandra:
  config_zookeeper:
 services:
-  nodemgr:
-    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
-    env_file: /etc/contrail/common.env
-    environment:
-      - NODE_TYPE=database
-    network_mode: "host"
-    volumes:
-      - /etc/hosts:/etc/hosts
-      - /etc/contrail/config_database:/etc/contrail
-      - /var/log/contrail:/var/log/contrail
-      - /var/run/docker.sock:/var/run/docker.sock
-    restart: always
   cassandra:
     image: "{{ container_registry }}/contrail-external-cassandra:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common.env

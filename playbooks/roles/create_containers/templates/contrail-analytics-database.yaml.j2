@@ -8,6 +8,23 @@ services:
     network_mode: "host"
     volumes:
      - /etc/hosts:/etc/hosts
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+      - NODE_TYPE=database
+      - CASSANDRA_CQL_PORT=9042
+      - CASSANDRA_JMX_LOCAL_PORT=7200
+    network_mode: "service:network"
+    volumes:
+      - /etc/contrail/analytics_database:/etc/contrail
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - network
+    restart: on-failure
+    stdin_open: true
+    tty: true
   kafka:
     image: "{{ container_registry }}/contrail-external-kafka:{{ contrail_version_tag }}"
     network_mode: "service:network"
