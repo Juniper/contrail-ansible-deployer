@@ -5,7 +5,7 @@
 
   - name: Import instances from config/instances.yaml
     include_vars:
-      file: "{{ playbook_dir }}/../config/instances.yaml"
+      file: "{{ hostvars['localhost'].config_file }}"
 
   - name: Import group variables
     include_vars:
