@@ -1,9 +1,75 @@
 provider_config:
-  bms:
+  kvm:
+    image: CentOS-7-x86_64-GenericCloud-1710.qcow2.xz
+    image_url: https://cloud.centos.org/centos/7/images/
+    ssh_pwd: c0ntrail123
+    ssh_user: root
+    ssh_public_key:
+    ssh_private_key:
+    vcpu: 4
+    vram: 16000
+    vdisk: 100G
+    subnet_prefix: 192.168.122.0
+    subnet_netmask: 255.255.255.0
+    gateway: 192.168.122.1
+    nameserver: 10.84.5.100
+    ntpserver: 192.168.122.1
+    domainsuffix: local
 instances:
-  bms1:
-    provider: bms
-    ip: 192.168.1.100
+  kvm1:
+    provider: kvm
+    host: 10.87.64.25
+    bridge: default
+    ip: 192.168.122.100
+    roles:
+        config_database:
+        config:
+        control:
+        analytics_database:
+        analytics:
+        webui:
+        k8s_master:
+        openstack_control:
+        openstack_network:
+        openstack_storage:
+        openstack_monitoring:
+  kvm2:
+    provider: kvm
+    host: 10.87.64.25
+    bridge: default
+    ip: 192.168.122.101
+    roles:
+        vrouter:
+        openstack_compute:
+        k8s_node:
+  kvm3:
+    provider: kvm
+    host: 10.87.64.25
+    bridge: default
+    ip: 192.168.122.102
+    roles:
+        vrouter:
+        openstack_compute:
+        k8s_node:
 contrail_configuration:
-  CONTAINER_REGISTRY: michaelhenkel
-  CONTRAIL_VERSION: ocata-5.0-20180219195722
+  CONTAINER_REGISTRY: opencontrailnightly
+  CONTRAIL_VERSION: latest
+  CLOUD_ORCHESTRATOR: openstack
+  RABBITMQ_NODE_PORT: 5673
+  AUTH_MODE: keystone
+  KEYSTONE_AUTH_HOST: 192.168.122.100
+  KEYSTONE_AUTH_URL_VERSION: /v3
+
+kolla_config:
+  customize:
+    nova.conf: |
+      [libvirt]
+      virt_type=qemu
+      cpu_mode=none
+  kolla_globals:
+    network_interface: eth0
+    kolla_internal_vip_address: 192.168.122.100
+    contrail_api_interface_address: 192.168.122.100
+    enable_haproxy: no
+  kolla_passwords:
+    keystone_admin_password: c0ntrail123

@@ -8,6 +8,36 @@
     provider_data: "{{ provider_config[instance_data.provider] }}"
   when: provider_config[instance_data.provider] is defined
 
+- name: upgrade kernel in compute nodes
+  yum: pkg={{item}} state=latest
+  with_items:
+   - kernel
+   - kernel-tools-libs
+   - kernel-tools
+  when: "'vrouter' in instance_data.roles"
+  tags:
+  - vrouter
+
+- name: restart compute nodes
+  shell: sleep 2 && sync && reboot
+  async: 1
+  poll: 0
+  ignore_errors: yes
+  when: "'vrouter' in instance_data.roles"
+  tags:
+  - vrouter
+
+- pause:
+    seconds: 5
+  tags:
+  - vrouter
+
+- name: wait for the compute nodes to reboot
+  wait_for_connection:
+  when: "'vrouter' in instance_data.roles"
+  tags:
+  - vrouter
+
 - name: turn off swap
   shell: swapoff -a
 
