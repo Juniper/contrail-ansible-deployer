@@ -1,0 +1,29 @@
+---
+- name: update image
+  shell: "docker pull {{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+
+- name: tag contrail-status image
+  docker_image:
+     name: "{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+     repository: contrail-status
+     tag: latest
+
+- name: run contrail-status container once
+  docker:
+    name: contrail-status
+    image: "{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    state: started
+    volumes:
+    - /etc/contrail:/etc/contrail
+    - /usr/bin:/usr/bin
+    - /var/run/docker.sock:/var/run/docker.sock
+    pid: host
+    net: host
+    privileged: yes
+
+- name: remove contrail-status stopped container
+  docker:
+    name: contrail-status
+    image: "{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    state: absent
