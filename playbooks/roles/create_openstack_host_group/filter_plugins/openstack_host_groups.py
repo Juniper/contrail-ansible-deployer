@@ -3,11 +3,11 @@ class FilterModule(object):
 
     openstack_role_groups = {
         'openstack_nodes': ['openstack_control', 'openstack_network',
-            'openstack_compute', 'vrouter', 'openstack_monitoring',
+            'openstack_compute', 'openstack_monitoring',
             'openstack_storage', 'openstack'],
         'control': ['openstack_control', 'openstack'],
         'network': ['openstack_network', 'openstack'],
-        'compute': ['openstack_compute', 'vrouter'],
+        'compute': ['openstack_compute'],
         'monitoring': ['openstack_monitoring', 'openstack'],
         'storage': ['openstack_storage', 'openstack']
     }
@@ -178,7 +178,7 @@ class FilterModule(object):
             if v['ip'] != ip:
                 continue
 
-            for role in v.get('roles', ['openstack','vrouter']):
+            for role in v.get('roles', ['openstack', 'openstack_compute']):
                 for i,j in self.openstack_role_groups.iteritems():
                     if role in j:
                         grp_list.append(i)
