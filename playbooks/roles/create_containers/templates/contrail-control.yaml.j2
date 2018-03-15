@@ -37,6 +37,7 @@ services:
     network_mode: "service:network"
     env_file: /etc/contrail/common_control.env
     privileged: true
+    pid: host
     #volumes:
     #  - /var/log/contrail:/var/log/contrail
     volumes_from:
