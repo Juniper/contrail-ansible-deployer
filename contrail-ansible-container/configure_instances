@@ -1,1 +1,4 @@
-ANSIBLE_CONFIG=/etc/ansible/ansible.cfg ansible-playbook -e config_file=/configs/instances.json -i /contrail-ansible-deployer/inventory /contrail-ansible-deployer/playbooks/configure_instances.yml
+if [[ $orchestrator != "openstack" ]]; then
+  orchestrator=none
+fi
+ANSIBLE_CONFIG=/etc/ansible/ansible.cfg ansible-playbook -e orchestrator=$orchstrator -e config_file=/configs/instances.yaml -i /contrail-ansible-deployer/inventory /contrail-ansible-deployer/playbooks/configure_instances.yml

@@ -8,6 +8,14 @@
     provider_data: "{{ provider_config[instance_data.provider] }}"
   when: provider_config[instance_data.provider] is defined
 
+- name: install latest kernel
+  yum:
+    name: 'kernel'
+    state: latest
+  register: upgrade_kernel
+  when: (contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true) or
+        (instance_data.UPGRADE_KERNEL is defined and instance_data.UPGRADE_KERNEL == true)
+
 - name: turn off swap
   shell: swapoff -a
 
@@ -198,3 +206,17 @@
 
 - name: flush iptables
   shell: iptables -F
+
+- name: restart server
+  shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+  async: 1
+  poll: 0
+  become: true
+  ignore_errors: true
+  when: upgrade_kernel is defined and upgrade_kernel.changed
+
+- name: wait for server to come back online
+  wait_for_connection:
+    delay: 30
+    timeout: 300
+  when: upgrade_kernel is defined and upgrade_kernel.changed
