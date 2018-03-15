@@ -17,10 +17,10 @@ RUN echo "===> Installing sudo to emulate normal OS behavior..."  && \
     \
     \
     echo "===> Adding Python runtime..."  && \
-    apk --update add python py-pip openssl ca-certificates jq  && \
+    apk --update add python py-pip openssl ca-certificates jq bash && \
     apk --update add --virtual build-dependencies \
                 python-dev libffi-dev openssl-dev build-base  && \
-    pip install --upgrade pip cffi                            && \
+    pip install --upgrade pip cffi boto                        && \
     \
     \
     echo "===> Installing Ansible..."  && \
@@ -44,6 +44,7 @@ COPY entrypoint.sh /
 COPY provision_instances /bin
 COPY configure_instances /bin
 COPY install_instances /bin
+COPY deploy_contrail /bin
 ENTRYPOINT ["/entrypoint.sh"]
 # default command: display Ansible version
-#CMD [ "ansible-playbook", "--version" ]
+CMD [ "/bin/deploy_contrail" ]
