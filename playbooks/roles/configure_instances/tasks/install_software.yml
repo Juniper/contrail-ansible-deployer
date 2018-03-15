@@ -8,6 +8,30 @@
     provider_data: "{{ provider_config[instance_data.provider] }}"
   when: provider_config[instance_data.provider] is defined
 
+- name: install latest kernel
+  yum:
+    name: 'kernel'
+    state: latest
+  register: upgrade_kernel
+  when: contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true
+
+- name: restart server
+  shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+  async: 1
+  poll: 0
+  become: true
+  ignore_errors: true
+  when: contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true and upgrade_kernel.changed
+
+- name: wait for server {{ instance_data.ip | default(inventory_hostname) }} to come back online
+  wait_for:
+    port: 22
+    state: started
+    host: '{{ instance_data.ip | default(inventory_hostname) }}'
+    delay: 30
+  delegate_to: localhost
+  when: contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true and upgrade_kernel.changed
+
 - name: turn off swap
   shell: swapoff -a
 
@@ -195,6 +219,7 @@
 
 - name: sysctl -w net.bridge.bridge-nf-call-ip6tables=1
   shell: sysctl -w net.bridge.bridge-nf-call-ip6tables=1 && echo "net.bridge.bridge-nf-call-ip6tables=1" >> /etc/sysctl.conf
+
 
 - name: flush iptables
   shell: iptables -F

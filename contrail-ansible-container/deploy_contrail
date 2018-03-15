@@ -1,0 +1,75 @@
+#!/bin/bash
+if [[ $orchestrator != "openstack" ]]; then
+  orchestrator=none
+fi
+function showhelp(){
+  echo "Usage:"
+  echo ""
+  echo "docker run -t michaelhenkel/contrail-deployer \ "
+  echo " -e \"config=\`cat YOURCONFIGFILE.yaml\`\" \ "
+  echo " -e action=provision|configure|install|all|1|2|12|23 \ "
+  echo " -e orchestrator=openstack"
+  echo ""
+  echo "or"
+  echo ""
+  echo "docker run -t michaelhenkel/contrail-deployer \ "
+  echo "  -v /path/to/YOURCONFIGFILE.yaml:/instances.yaml \ "
+  echo "  -e action=provision|configure|install|all|1|2|12|23"
+  echo ""
+  echo "------------------------------------------------------------"
+  echo "------------------------------------------------------------"
+  echo ""
+  echo "parameters:"
+  echo "  -e action="
+  echo "    provision or 1: provisions instances"
+  echo "    configure or 2: configures instances"
+  echo "    install or 3:   installs contrail"
+  echo "    all:            provisions, configures and installs"
+  echo "    12:             provsions and configures"
+  echo "    23:             configures and installs"
+  echo "  -e orchstrator=openstack: in case openstack kolla will be installed"
+  echo "  -e \"config=\`cat /path/to/YOURCONFIGFILE.yaml\`\": config yaml is overloaded as environment variable"
+  echo "  alternatively"
+  echo "  -v /path/to/YOURCONFIGFILE.yaml:/instances.yaml: config yaml is mounted"
+}
+
+function run_cmd(){
+  ANSIBLE_CONFIG=/etc/ansible/ansible.cfg ansible-playbook -e orchestrator=$orchstrator -e config_file=/instances.yaml -i /contrail-ansible-deployer/inventory /contrail-ansible-deployer/playbooks/$1
+}
+
+if [[ ! -e /configs/instances.yaml && -z $config ]]; then
+  if [[ -z $action ]]; then
+    showhelp
+    exit 0
+  fi
+fi
+
+if [[ -n $action ]]; then
+  case $action in
+    provision|1)
+      run_cmd provision_instances.yml
+      ;;
+    configure|2)
+      run_cmd configure_instances.yml
+      ;;
+    install|3)
+      run_cmd install_contraill.yml
+      ;;
+    12)
+      run_cmd provision_instances.yml
+      run_cmd configure_instances.yml
+      ;;
+    23)
+      run_cmd configure_instances.yml
+      run_cmd install_contraill.yml
+      ;;
+    all|123)
+      run_cmd provision_instances.yml
+      run_cmd configure_instances.yml
+      run_cmd install_contraill.yml
+      ;;
+    *) 
+      showhelp
+      ;;
+  esac
+fi

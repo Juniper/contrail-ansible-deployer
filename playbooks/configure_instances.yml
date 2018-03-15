@@ -21,4 +21,4 @@
   roles:
   - configure_instances
   vars_files:
-  - "{{ hostvars['localhost'].config_file }}"
+  - "{{ config_file }}"
