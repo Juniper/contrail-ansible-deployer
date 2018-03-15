@@ -4,7 +4,7 @@
 
 - name: set image to default if not provided
   set_fact:
-    image: CentOS-7-x86_64-GenericCloud-1710.qcow2.xz
+    image: CentOS-7-x86_64-GenericCloud-1802.qcow2.xz
 
 - name: set image to provider default if not provided
   set_fact:
