@@ -217,6 +217,7 @@
   set_fact:
     contrail_configuration: "{{ contrail_configuration|default({})|combine({'KEYSTONE_AUTH_HOST': openstack_controller_list[0] }) }}"
   when:
+    - contrail_configuration.KEYSTONE_AUTH_HOST is not defined
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' and openstack_controller_list|length > 0
   tags:
    - always
