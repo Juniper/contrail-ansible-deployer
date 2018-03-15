@@ -57,6 +57,7 @@ services:
       - /dev:/dev
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
       - /lib/modules:/lib/modules
+      - /bin:/host/bin
       - /var/run:/var/run
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/vrouter:/etc/contrail
@@ -75,6 +76,7 @@ services:
     volumes:
       - /dev:/dev
       - /lib/modules:/lib/modules
+      - /bin:/host/bin
       - /var/run:/var/run
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/vrouter:/etc/contrail
