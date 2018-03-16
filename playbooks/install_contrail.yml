@@ -31,4 +31,7 @@
   - install_contrail
   vars_files:
   - "{{ hostvars['localhost'].config_file }}"
+  environment:
+   - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
+   - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
 
