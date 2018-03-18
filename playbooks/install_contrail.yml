@@ -13,9 +13,6 @@
     - name: Generate openstack host groups
       role: create_openstack_host_group
       when: orchestrator == 'openstack'
-    - name: Generate openstack configurations
-      role: create_openstack_config
-      when: orchestrator == 'openstack'
   vars_files:
     - "{{ config_file }}"
   tags:
