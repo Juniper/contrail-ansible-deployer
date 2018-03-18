@@ -1,2 +1,63 @@
 ---
 kolla_globals: "{{ kolla_config.kolla_globals if kolla_config.kolla_globals is defined else default_kolla_globals}}"
+
+# Pick first instance's IP as a default
+os_node_control: "{{ hostvars[inventory_hostname]['ansible_' + network_interface_detected].get('ipv4',{}).get('address', 'no_ip_for_ctrl_iface') }}"
+
+os_node_mgmt: "{{ hostvars[inventory_hostname]['ansible_' + external_interface_detected].get('ipv4',{}).get('address', 'no_ip_for_mgmt_iface') }}"
+
+contrail_node_control: >-
+    {%- set node_list = [] -%}
+    {%- for k,v in instances.iteritems() -%}
+      {%- if v.roles is not defined -%}
+        {%- do node_list.append(hostvars[v.ip]['ansible_' + network_interface_detected].get('ipv4').get('address')) -%}
+      {%- elif v.roles.control is defined -%}
+        {%- do node_list.append(hostvars[v.ip]['ansible_' + network_interface_detected].get('ipv4').get('address')) -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {{ node_list | first }}
+
+container_registry: >-
+    {%- if contrail_configuration is defined and contrail_configuration['CONTAINER_REGISTRY'] is defined -%}
+      {%- print contrail_configuration['CONTAINER_REGISTRY'] -%}
+    {%- else -%}
+      {%- print 'opencontrailnightly' -%}
+    {%- endif -%}
+
+contrail_tag: >-
+    {%- if contrail_configuration is defined and contrail_configuration['CONTRAIL_VERSION'] is defined %}
+      {%- print contrail_configuration['CONTRAIL_VERSION'] -%}
+    {%- else -%}
+      {%- print 'latest' -%}
+    {%- endif -%}
+
+external_interface_detected: >-
+  {#- If PHYSICAL_INTERFACE or CTRL_DATA_NETWORK is defined, assumes external interface will be on the management network -#}
+  {%- if contrail_configuration.CTRL_DATA_NETWORK is defined -%}
+    {%- for iface in ansible_interfaces if hostvars[inventory_hostname]['ansible_' + iface].get('ipv4',{}).get('address', None) == inventory_hostname -%}
+      {{ iface }}{%- endfor -%}
+  {%- elif contrail_configuration.PHYSICAL_INTERFACE is defined -%}
+    {%- for iface in ansible_interfaces if hostvars[inventory_hostname]['ansible_' + iface].get('ipv4',{}).get('address', None) == inventory_hostname -%}
+      {{ iface }}{%- endfor -%}
+  {%- else -%}
+    {{ network_interface_detected }}
+  {%- endif -%}
+
+instance_data: "{{ instances[hostvars[inventory_hostname].instance_name] }}"
+
+network_interface_detected: >-
+    {#- if vhost0  is up, there is no way you can detect vrouter physical interface-#}
+    {%- if 'vhost0' in ansible_interfaces -%}no_physical_interface_vars_n_vhost_exists
+    {%- else -%}
+      {#- set interface of ctrl_data_network if passed -#}
+      {%- if contrail_configuration.CTRL_DATA_NETWORK is defined -%}
+        {%- set ip_in_ctrl_data_network = ansible_all_ipv4_addresses | ipaddr(contrail_configuration.CTRL_DATA_NETWORK) -%}
+        {%- if ip_in_ctrl_data_network | count > 0 -%}
+          {#- Iterate all interfaces on the host and findout the interface that have the IP address-#}
+          {%- for iface in ansible_interfaces if hostvars[inventory_hostname]['ansible_' + iface].get('ipv4',{}).get('address', None) in ip_in_ctrl_data_network -%}
+            {{ iface }}{%- endfor -%}
+        {#- No ip found on host from the network ctrl_data_network-#}
+        {%- else -%}no_ctrl_data_network_ip{%- endif -%}
+      {#- set interface with default gateway -#}
+      {%- else -%}{{ ansible_default_ipv4.interface }}{%- endif -%}
+    {%- endif -%}
