@@ -18,8 +18,10 @@ openstack_sku: >-
 os_node_control: >-
     {%- set node_list = [] -%}
     {%- for k,v in instances.iteritems() -%}
-      {%- if v.roles.openstack is defined or v.roles.openstack_control is defined -%}
-      {%- do node_list.append(v.ip) -%}
+      {%- if v.roles is not defined -%}
+        {%- do node_list.append(v.ip) -%}
+      {%- elif v.roles.openstack is defined or v.roles.openstack_control is defined -%}
+        {%- do node_list.append(v.ip) -%}
       {%- endif -%}
     {%- endfor -%}
     {{ node_list | first }}
@@ -27,8 +29,10 @@ os_node_control: >-
 contrail_node_control: >-
     {%- set node_list = [] -%}
     {%- for k,v in instances.iteritems() -%}
-      {%- if v.roles.control is defined -%}
-      {%- do node_list.append(v.ip) -%}
+      {%- if v.roles is not defined -%}
+        {%- do node_list.append(v.ip) -%}
+      {%- elif v.roles.control is defined -%}
+        {%- do node_list.append(v.ip) -%}
       {%- endif -%}
     {%- endfor -%}
     {{ node_list | first }}
