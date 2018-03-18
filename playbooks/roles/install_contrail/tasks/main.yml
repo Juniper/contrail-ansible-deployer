@@ -38,6 +38,34 @@
   tags:
    - always
 
+#- name: Derive PHYSICAL_INTERFACE
+#  set_fact:
+#    physical_interface_detected: >-
+#      {#- If vrouter_physical_interface is passed use it -#}
+#      {%- if contrail_configuration.PHYSICAL_INTERFACE is defined -%}
+#        {{ contrail_configuration.PHYSICAL_INTERFACE }}
+#      {%- elif contrail_configuration.PHYSICAL_INTERFACE is defined -%}
+#        {{ contrail_configuration.PHYSICAL_INTERFACE }}
+#      {%- else -%}
+#        {#- if vhost0  is up, there is no way you can detect vrouter physical interface-#}
+#        {%- if 'vhost0' in ansible_interfaces -%}no_physical_interface_vars_n_vhost_exists
+#        {%- else -%}
+#          {#- set interface of ctrl_data_network if passed -#}
+#          {%- if contrail_configuration.CTRL_DATA_NETWORK is defined -%}
+#            {%- set ip_in_ctrl_data_network = ansible_all_ipv4_addresses | ipaddr(contrail_configuration.CTRL_DATA_NETWORK) -%}
+#            {%- if ip_in_ctrl_data_network | count == 1 -%}
+#              {#- Iterate all interfaces on the host and findout the interface that have the IP address-#}
+#              {%- for iface in ansible_interfaces if hostvars[inventory_hostname]['ansible_' + iface].get('ipv4',{}).get('address', None) == ip_in_ctrl_data_network |first -%}
+#                {{ iface }}{%- endfor -%}
+#            {#- multiple IPs there found on the machine that are in ctrl_data_network -#}
+#            {%- elif ip_in_ctrl_data_network | count > 1 -%}multiple_ips_found
+#            {#- No ip found on host from the network ctrl_data_network-#}
+#            {%- else -%}no_ctrl_data_network_ip{%- endif -%}
+#          {#- set interface with default gateway -#}
+#          {%- else -%}{{ ansible_default_ipv4.interface }}{%- endif -%}
+#        {%- endif -%}
+#      {%- endif -%}
+
 - name: set container tag contrail version to master if not defined
   set_fact:
     contrail_version_tag: latest
@@ -212,23 +240,38 @@
   tags:
    - always
 
-- set_fact:
-    openstack_controller_list: []
+- name: get the final kolla configurations
+  set_fact:
+    final_kolla_configs: "{{ hostvars[item.value.ip].final_kolla_globals }}"
+  with_dict: "{{ instances }}"
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+    - item.value is defined
+    - item.value.ip is defined
+    - hostvars[item.value.ip].final_kolla_globals is defined
   tags:
    - always
 
-- name: add openstack controllers to the list
+- name: set KEYSTONE_AUTH_HOST from derived kolla parameters
   set_fact:
-    openstack_controller_list: "{{ openstack_controller_list + [ hostvars[item]['private_ip'] ] }}"
-  when: hostvars[item]['instance_data']['roles'].openstack is defined or hostvars[item]['instance_data']['roles'].openstack_control is defined
-  with_items: "{{ groups['container_hosts'] }}"
-
-- name: set KEYSTONE_AUTH_HOST
-  set_fact:
-    contrail_configuration: "{{ contrail_configuration|default({})|combine({'KEYSTONE_AUTH_HOST': openstack_controller_list[0] }) }}"
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'KEYSTONE_AUTH_HOST': final_kolla_globals.kolla_internal_vip_address }) }}"
   when:
     - contrail_configuration.KEYSTONE_AUTH_HOST is not defined
-    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' and openstack_controller_list|length > 0
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+    - final_kolla_configs is defined
+    - final_kolla_configs.kolla_internal_vip_address is defined
+  tags:
+   - always
+
+- name: set KEYSTONE_AUTH_HOST from kolla_config.kolla_globals
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'KEYSTONE_AUTH_HOST': kolla_config.kolla_globals.kolla_internal_vip_address }) }}"
+  when:
+    - contrail_configuration.KEYSTONE_AUTH_HOST is not defined
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+    - kolla_config is defined
+    - kolla_config.kolla_globals is defined
+    - kolla_config.kolla_globals.kolla_internal_vip_address is defined
   tags:
    - always
 
