@@ -13,22 +13,21 @@
     - name: Generate openstack host groups
       role: create_openstack_host_group
       when: orchestrator == 'openstack'
-    - name: Generate openstack configurations
-      role: create_openstack_config
-      when: orchestrator == 'openstack'
   vars_files:
     - "{{ config_file }}"
   tags:
   - k8s
 
 - include: install_kolla.yml
-  when: orchestrator == 'openstack'
+  when:
+    - orchestrator == 'openstack'
+    - skip_openstack is not defined or not skip_openstack|bool
 
 - name: Install Contrail
   hosts: container_hosts
   gather_facts: yes
   roles:
-  - install_contrail
+  - { role: install_contrail, when: skip_contrail is not defined or not skip_contrail|bool }
   vars_files:
   - "{{ hostvars['localhost'].config_file }}"
   environment:
