@@ -14,45 +14,14 @@ openstack_sku: >-
     {%- endif %}
 
 
-# Pick first instance's IP as a default
-os_node_control: >-
-    {%- set node_list = [] -%}
-    {%- for k,v in instances.iteritems() -%}
-      {%- if v.roles.openstack is defined or v.roles.openstack_control is defined -%}
-      {%- do node_list.append(v.ip) -%}
-      {%- endif -%}
-    {%- endfor -%}
-    {{ node_list | first }}
-
-contrail_node_control: >-
-    {%- set node_list = [] -%}
-    {%- for k,v in instances.iteritems() -%}
-      {%- if v.roles.control is defined -%}
-      {%- do node_list.append(v.ip) -%}
-      {%- endif -%}
-    {%- endfor -%}
-    {{ node_list | first }}
-
-container_registry: >-
-    {%- if contrail_configuration is defined and contrail_configuration['CONTAINER_REGISTRY'] is defined -%}
-      {%- print contrail_configuration['CONTAINER_REGISTRY'] -%}
-    {%- else -%}
-      {%- print 'opencontrailnightly' -%}
-    {%- endif -%}
-
-contrail_tag: >-
-    {%- if contrail_configuration is defined and contrail_configuration['CONTRAIL_VERSION'] is defined %}
-      {%- print contrail_configuration['CONTRAIL_VERSION'] -%}
-    {%- else -%}
-      {%- print 'latest' -%}
-    {%- endif -%}
-
 default_kolla_globals:
   neutron_opencontrail_init_image_full: "{{ container_registry }}/contrail-openstack-neutron-init:{{ contrail_tag }}"
   nova_compute_opencontrail_init_image_full: "{{ container_registry}}/contrail-openstack-compute-init:{{ contrail_tag }}"
   ironic_notification_manager_image_full: "{{ container_registry}}/contrail-openstack-ironic-notification-manager:{{ contrail_tag }}"
   customize_etc_hosts: no
   openstack_release: "4.0.0"
+  network_interface: "{{ network_interface_detected }}"
   kolla_internal_vip_address: "{{ os_node_control }}"
+  kolla_external_vip_interface: "{{ external_interface_detected }}"
   contrail_api_interface_address: "{{ contrail_node_control }}"
   neutron_plugin_agent: "opencontrail"
