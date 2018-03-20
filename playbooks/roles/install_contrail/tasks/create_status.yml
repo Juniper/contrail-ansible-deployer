@@ -3,12 +3,6 @@
   shell: "docker pull {{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
   when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
 
-- name: tag contrail-status image
-  docker_image:
-     name: "{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
-     repository: contrail-status
-     tag: latest
-
 - name: run contrail-status container once
   docker:
     name: contrail-status
