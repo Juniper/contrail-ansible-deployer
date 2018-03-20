@@ -1,0 +1,38 @@
+---
+- name: get container ids
+  command: docker ps -a -q
+  register: container_ids
+
+- debug: msg="{{ container_ids.stdout_lines }}"
+
+- name: stop all containers
+  command:
+    docker stop "{{ item }}"
+  with_items: "{{ container_ids.stdout_lines }}"
+
+- name: Remove all containers
+  command:
+    docker rm "{{ item }}"
+  with_items: "{{ container_ids.stdout_lines }}"
+
+- name: Cleanup controller configs
+  file:
+    path: /etc/contrail
+    state: absent
+
+- name: get all volumes ids
+  command: docker volume ls -q
+  register: vol_ids
+
+- name: Remove all volumes
+  command: docker volume rm "{{ item }}"
+  with_items: "{{ vol_ids.stdout_lines }}"
+
+- name: Get all images ids
+  command: docker images -q
+  register: img_ids
+
+- name: Remove all images
+  command: docker rmi "{{ item }}"
+  with_items: "{{ img_ids.stdout_lines }}"
+
