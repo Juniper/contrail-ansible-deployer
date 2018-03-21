@@ -10,6 +10,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/contrail/vrouter:/etc/contrail
+      - /var/crashes/vrouter:/var/crashes
     restart: on-failure
     stdin_open: true
     tty: true
@@ -35,6 +36,7 @@ services:
       - /bin:/host/bin
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/vrouter:/etc/contrail
+      - /var/crashes/vrouter:/var/crashes
     restart: on-failure
     stdin_open: true
     tty: true

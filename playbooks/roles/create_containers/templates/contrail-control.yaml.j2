@@ -15,6 +15,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/contrail/control:/etc/contrail
+      - /var/crashes/control:/var/crashes
     depends_on:
       - network
     restart: on-failure
@@ -27,6 +28,7 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/control:/etc/contrail
+      - /var/crashes/control:/var/crashes
     depends_on:
       - network
     restart: on-failure
@@ -56,6 +58,7 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/control:/etc/contrail
+      - /var/crashes/control:/var/crashes
     depends_on:
       - network
     restart: on-failure

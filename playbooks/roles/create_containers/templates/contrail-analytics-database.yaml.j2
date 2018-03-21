@@ -20,6 +20,7 @@ services:
       - /etc/contrail/analytics_database:/etc/contrail
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
+      - /var/crashes/analytics_database:/var/crashes
     depends_on:
       - network
     restart: on-failure

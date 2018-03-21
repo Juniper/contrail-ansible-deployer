@@ -16,6 +16,7 @@ services:
       - /etc/contrail/analytics_database:/etc/contrail
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
+      - /var/crashes/analytics_database:/var/crashes
     restart: always
   kafka:
     image: "{{ container_registry }}/contrail-external-kafka:{{ contrail_version_tag }}"

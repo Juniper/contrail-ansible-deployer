@@ -11,6 +11,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/contrail/analytics:/etc/contrail
       - /etc/hosts:/etc/hosts
+      - /var/crashes/analytics:/var/crashes
     restart: always
   api:
     image: "{{ container_registry }}/contrail-analytics-api:{{ contrail_version_tag }}"
@@ -20,6 +21,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/analytics:/etc/contrail
       - /etc/hosts:/etc/hosts
+      - /var/crashes/analytics:/var/crashes
     restart: always
   collector:
     image: "{{ container_registry }}/contrail-analytics-collector:{{ contrail_version_tag }}"
@@ -29,6 +31,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/analytics:/etc/contrail
       - /etc/hosts:/etc/hosts
+      - /var/crashes/analytics:/var/crashes
     restart: always
   query-engine:
     image: "{{ container_registry }}/contrail-analytics-query-engine:{{ contrail_version_tag }}"
@@ -38,6 +41,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/analytics:/etc/contrail
       - /etc/hosts:/etc/hosts
+      - /var/crashes/analytics:/var/crashes
     restart: always
   alarm-gen:
     image: "{{ container_registry }}/contrail-analytics-alarm-gen:{{ contrail_version_tag }}"
@@ -47,6 +51,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/analytics:/etc/contrail
       - /etc/hosts:/etc/hosts
+      - /var/crashes/analytics:/var/crashes
     restart: always
   snmp-collector:
     image: "{{ container_registry }}/contrail-analytics-snmp-collector:{{ contrail_version_tag }}"
@@ -56,6 +61,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/analytics:/etc/contrail
       - /etc/hosts:/etc/hosts
+      - /var/crashes/analytics:/var/crashes
     restart: always
   topology:
     image: "{{ container_registry }}/contrail-analytics-topology:{{ contrail_version_tag }}"
@@ -65,4 +71,5 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/analytics:/etc/contrail
       - /etc/hosts:/etc/hosts
+      - /var/crashes/analytics:/var/crashes
     restart: always

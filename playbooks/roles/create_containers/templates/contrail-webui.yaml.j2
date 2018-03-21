@@ -12,6 +12,7 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/webui:/etc/contrail
+      - /var/crashes/config:/var/crashes
     depends_on:
       - network
     restart: on-failure
@@ -24,6 +25,7 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/webui:/etc/contrail
+      - /var/crashes/config:/var/crashes
     depends_on:
       - network
     restart: on-failure

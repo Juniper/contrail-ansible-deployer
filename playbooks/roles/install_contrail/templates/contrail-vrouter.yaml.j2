@@ -10,6 +10,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/contrail/vrouter:/etc/contrail
+      - /var/crashes/vrouter:/var/crashes
     restart: on-failure
   vrouter-kernel-init:
     image: "{{ container_registry }}/contrail-vrouter-kernel-init:{{ contrail_version_tag }}"
@@ -48,6 +49,7 @@ services:
       - /bin:/host/bin
       - /etc/contrail/vrouter:/etc/contrail
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+      - /var/crashes/vrouter:/var/crashes
     restart: always
     depends_on:
       - vrouter-kernel-init

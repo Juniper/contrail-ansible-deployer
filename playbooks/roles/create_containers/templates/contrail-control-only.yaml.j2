@@ -15,6 +15,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/contrail/common_control_only_{{ location.key }}:/etc/contrail
+      - /var/crashes/control:/var/crashes
     depends_on:
       - network
     restart: on-failure
@@ -26,6 +27,7 @@ services:
     env_file: "/etc/contrail/common_control_only_{{ location.key }}.env"
     volumes:
       - /var/log/contrail:/var/log/contrail
+      - /var/crashes/control:/var/crashes
     depends_on:
       - network
     restart: on-failure

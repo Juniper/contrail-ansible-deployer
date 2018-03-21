@@ -6,6 +6,7 @@ services:
     env_file: /etc/contrail/common_webui.env
     volumes:
       - /var/log/contrail:/var/log/contrail
+      - /var/crashes/config:/var/crashes
     restart: always
   job:
     image: "{{ container_registry }}/contrail-controller-webui-job:{{ contrail_version_tag }}"
@@ -13,6 +14,7 @@ services:
     env_file: /etc/contrail/common_webui.env
     volumes:
       - /var/log/contrail:/var/log/contrail
+      - /var/crashes/config:/var/crashes
     restart: always
   redis:
     image: "redis:4.0.2"
