@@ -9,7 +9,7 @@
   when: provider_config[instance_data.provider] is defined
 
 - name: turn off swap
-  shell: swapoff -a
+  shell: swapoff -a && sed -i '/swap swap/d' /etc/fstab
 
 - name: remove interfaces from Network Manager
   lineinfile:
