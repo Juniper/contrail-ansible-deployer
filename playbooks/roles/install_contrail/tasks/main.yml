@@ -324,6 +324,12 @@
   tags:
     - vrouter
 
+- name: create contrail vrouter dpdk
+  include: create_vrouter_dpdk.yml
+  when: roles[instance_name].vrouter_dpdk is defined
+  tags:
+    - vrouter
+
 - name: create contrail vcenter-plugin
   include: create_vcenter_plugin.yml
   when:

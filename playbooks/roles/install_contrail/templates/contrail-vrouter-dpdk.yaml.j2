@@ -1,0 +1,88 @@
+version: '2'
+services:
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_vrouter.env
+    environment:
+      - NODE_TYPE=vrouter
+    network_mode: host
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/contrail/vrouter:/etc/contrail
+    restart: on-failure
+  vrouter-kernel-init-dpdk:
+    image: "{{ container_registry }}/contrail-vrouter-kernel-init-dpdk:{{ contrail_version_tag }}"
+    environment:
+      - AGENT_MODE=dpdk
+    network_mode: host
+    privileged: true
+    env_file: /etc/contrail/common_vrouter.env
+    pid: host
+    volumes:
+      - /lib/modules:/lib/modules
+      - /var/run:/var/run
+      - /etc/os-release:/etc/os-release
+      - /etc/lsb-release:/etc/lsb-release
+      - /hugepages:/hugepages
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/vrouter:/etc/contrail
+  vrouter-agent-dpdk:
+    image: "{{ container_registry }}/contrail-vrouter-agent-dpdk:{{ contrail_version_tag }}"
+    environment:
+      - AGENT_MODE=dpdk
+    network_mode: host
+    privileged: true
+    env_file: /etc/contrail/common_vrouter.env
+    pid: host
+    volumes:
+      - /lib/modules:/lib/modules
+      - /etc:/etc
+      - /var/run:/var/run
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail:/etc/contrail
+      - /etc/os-release:/etc/os-release
+      - /etc/lsb-release:/etc/lsb-release
+      - /hugepages:/hugepages
+      - /var/crashes:/var/crashes
+      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+    restart: always
+    depends_on:
+      - vrouter-kernel-init-dpdk
+  vrouter-net-watchdog:
+    image: "{{ container_registry }}/contrail-vrouter-net-watchdog:{{ contrail_version_tag }}"
+    environment:
+      - AGENT_MODE=dpdk
+    network_mode: host
+    privileged: true
+    pid: host
+    env_file: /etc/contrail/common_vrouter.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /bin:/host/bin
+      - /etc/contrail/vrouter:/etc/contrail
+      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+      - /lib/modules:/lib/modules/
+      - /var/run:/var/run
+    restart: always
+    depends_on:
+      - vrouter-agent-dpdk
+  vrouter-agent:
+    image: "{{ container_registry }}/contrail-vrouter-agent:{{ contrail_version_tag }}"
+    environment:
+      - AGENT_MODE=dpdk
+    network_mode: host
+    privileged: true
+    pid: host
+    env_file: /etc/contrail/common_vrouter.env
+    volumes:
+      - /var/lib/contrail:/var/lib/contrail
+      - /var/log/contrail:/var/log/contrail
+      - /var/run:/var/run
+      - /bin:/host/bin
+      - /etc/contrail:/etc/contrail
+      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+      - /hugepages:/hugepages
+    restart: always
+    depends_on:
+      - vrouter-net-watchdog
