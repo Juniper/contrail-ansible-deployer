@@ -7,6 +7,8 @@ services:
       - NODE_TYPE=config
       - CASSANDRA_CQL_PORT=9041
       - CASSANDRA_JMX_LOCAL_PORT=7201
+    labels:
+      net.juniper.contrail.pod: config
     network_mode: "host"
     volumes:
       - /etc/hosts:/etc/hosts

@@ -5,6 +5,8 @@ services:
     env_file: /etc/contrail/common_control.env
     environment:
       - NODE_TYPE=control
+    labels:
+      net.juniper.contrail.pod: control
     network_mode: "host"
     volumes:
       - /etc/hosts:/etc/hosts

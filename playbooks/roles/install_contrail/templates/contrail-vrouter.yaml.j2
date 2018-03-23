@@ -5,6 +5,8 @@ services:
     env_file: /etc/contrail/common_vrouter.env
     environment:
       - NODE_TYPE=vrouter
+    labels:
+      net.juniper.contrail.pod: vrouter
     network_mode: host
     volumes:
       - /var/log/contrail:/var/log/contrail
