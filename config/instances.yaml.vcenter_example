@@ -8,7 +8,7 @@ provider_config:
 instances:
   bms1:
     provider: bms
-    ip: 10.84.13.14
+    ip: 192.168.1.51
     roles:
       config_database:
       config:
@@ -17,18 +17,22 @@ instances:
       analytics:
       webui:
       vcenter_plugin:
-
+  bms2:
+    provider: bms
+    esxi_host: 192.168.1.52
+    ip: 192.168.1.53
+    roles:
+      vrouter:
 contrail_configuration:
   CLOUD_ORCHESTRATOR: vcenter 
-  CONTAINER_REGISTRY: 10.84.23.21:6666 
-  CONTRAIL_VERSION: master-centos7-ocata-bld-13
-  CONTROLLER_NODES: 10.84.13.14
-  VROUTER_GATEWAY: 10.84.13.254
-  PHYSICAL_INTERFACE: enp2s0 
+  CONTAINER_REGISTRY: opencontrailnightly
+  CONTRAIL_VERSION: ocata-master-20180210000007
+  CONTROLLER_NODES: 192.168.1.51
+  VROUTER_GATEWAY: 192.168.1.254
   RABBITMQ_NODE_PORT: 5673
-  VCENTER_SERVER: 10.84.22.110
-  VCENTER_USERNAME: administrator@vsphere.local
-  VCENTER_PASSWORD: Contrail123!
+  VCENTER_SERVER: 192.168.1.160
+  VCENTER_USERNAME: administrator
+  VCENTER_PASSWORD: c0ntrail123
   VCENTER_DATACENTER: test-dc
-  VCENTER_DVSWITCH: test-dvs
+  VCENTER_DVSWITCH: test_dvs
 

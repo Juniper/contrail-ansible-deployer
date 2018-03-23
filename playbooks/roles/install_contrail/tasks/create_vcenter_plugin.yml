@@ -77,6 +77,6 @@
   with_dict: "{{ instances }}"
   when: roles[item.key].vrouter is defined and instances[item.key].esxi_host is defined
  
-- name: start contrail vcenter-plugin 
+- name: start contrail vcenter-plugin
   docker_service:
     project_src: /etc/contrail/vcenter_plugin
