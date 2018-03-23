@@ -1,5 +1,6 @@
 version: '2'
 services:
+  kubemanager:
     image: "{{ container_registry }}/contrail-kubernetes-kube-manager:{{ contrail_version_tag }}"
     network_mode: host
     environment:
