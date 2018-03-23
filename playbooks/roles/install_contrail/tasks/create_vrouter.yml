@@ -57,7 +57,7 @@
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ contrail_configuration }}"
 
-- name: "populate instance specific common_config.env"
+- name: "populate instance specific common_vrouter.env"
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ instances[instance_name].contrail_configuration }}"
   when: instances[instance_name].contrail_configuration is defined
@@ -72,6 +72,10 @@
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ remote_locations[location] }}"
   when: location is defined
+
+- name: "add k8s master token to common_vrouter.env"
+  lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^K8S_TOKEN=.*' line="K8S_TOKEN={{ hostvars[master_inventory].mastertoken  }}" state=present
+  when: hostvars[master_inventory].mastertoken is defined
 
 - name: add SUBCLUSTER name if location is defined and subcluster name is defined
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ remote_locations[location].SUBCLUSTER }}" state=present
