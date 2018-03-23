@@ -75,7 +75,7 @@
 
 - name: "add k8s master token to common_vrouter.env"
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^K8S_TOKEN=.*' line="K8S_TOKEN={{ hostvars[master_inventory].mastertoken  }}" state=present
-  when: hostvars[master_inventory].mastertoken is defined
+  when: master_inventory is defined and hostvars[master_inventory].mastertoken is defined
 
 - name: add SUBCLUSTER name if location is defined and subcluster name is defined
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ remote_locations[location].SUBCLUSTER }}" state=present
