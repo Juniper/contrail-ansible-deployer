@@ -318,20 +318,6 @@
   tags:
     - analytics
 
-- name: create contrail vrouter
-  include: create_vrouter.yml
-  when: roles[instance_name].vrouter is defined
-  tags:
-    - vrouter
-
-- name: create contrail vcenter-plugin
-  include: create_vcenter_plugin.yml
-  when:
-    - contrail_configuration.CLOUD_ORCHESTRATOR == 'vcenter'
-    - roles[instance_name].vcenter_plugin is defined
-  tags:
-    - vcenter_plugin
-
 - name: create contrail status
   include: create_status.yml
   tags:
@@ -371,6 +357,12 @@
   tags:
     - k8s
 
+- name: create contrail vrouter
+  include: create_vrouter.yml
+  when: roles[instance_name].vrouter is defined
+  tags:
+    - vrouter
+
 - name: join k8s master
   include: configure_k8s_join_node.yml
   when: roles[instance_name].k8s_node is defined and master_inventory is defined and inventory_hostname != master_inventory
@@ -382,3 +374,11 @@
   when: roles[instance_name].k8s_master is defined
   tags:
     - k8s
+
+- name: create contrail vcenter-plugin
+  include: create_vcenter_plugin.yml
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'vcenter'
+    - roles[instance_name].vcenter_plugin is defined
+  tags:
+    - vcenter_plugin
