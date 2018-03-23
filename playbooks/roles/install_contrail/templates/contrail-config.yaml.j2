@@ -15,6 +15,8 @@ services:
       - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
   api:
     image: "{{ container_registry }}/contrail-controller-config-api:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_config.env
@@ -25,6 +27,8 @@ services:
       - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
   svcmonitor:
     image: "{{ container_registry }}/contrail-controller-config-svcmonitor:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -35,6 +39,8 @@ services:
       - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
   schema:
     image: "{{ container_registry }}/contrail-controller-config-schema:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -45,6 +51,8 @@ services:
       - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
   devicemgr:
     image: "{{ container_registry }}/contrail-controller-config-devicemgr:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -55,3 +63,5 @@ services:
       - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
