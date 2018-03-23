@@ -264,9 +264,9 @@ ansible-playbook -i inventory/ playbooks/configure_instances.yml
 ```
 
 Contrail installation:
-orchestrator can be openstack (installs kolla) or none (for pure k8s installations)    .   
+orchestrator can be openstack (installs kolla) or kubernetes (for pure k8s installations)    .   
 ```
-ansible-playbook -e orchestrator=none|openstack -i inventory/ playbooks/install_contrail.yml
+ansible-playbook -e orchestrator=kubernetes|openstack -i inventory/ playbooks/install_contrail.yml
 ```
 
 The location of the configuration file (config/instances.yaml) can be changes    
