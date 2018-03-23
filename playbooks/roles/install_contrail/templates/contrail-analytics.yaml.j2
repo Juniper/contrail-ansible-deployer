@@ -5,6 +5,8 @@ services:
     env_file: /etc/contrail/common_analytics.env
     environment:
       - NODE_TYPE=analytics
+    labels:
+      net.juniper.contrail.pod: analytics
     network_mode: "host"
     volumes:
       - /var/log/contrail:/var/log/contrail
