@@ -16,7 +16,7 @@ services:
      - CASSANDRA_STORAGE_PORT=7012
      - CASSANDRA_JMX_LOCAL_PORT=7201
     labels:
-      - net.juniper.contrail.pod=config-database
+      net.juniper.contrail.pod: config-database
     volumes:
       - /etc/hosts:/etc/hosts
       - config_cassandra:/var/lib/cassandra/data
@@ -34,7 +34,7 @@ services:
      - config_zookeeper:/data
      - config_zookeeper:/datalog
     labels:
-      - net.juniper.contrail.pod=config-database
+      net.juniper.contrail.pod: config-database
     network_mode: "host"
     restart: always
   rabbitmq:
@@ -44,6 +44,6 @@ services:
      - RABBITMQ_NODES={{ rabbitmq_nodes }}
      - RABBITMQ_ERLANG_COOKIE=abcdefg
     labels:
-      - net.juniper.contrail.pod=config-database
+      net.juniper.contrail.pod: config-database
     network_mode: "host"
     restart: always
