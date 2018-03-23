@@ -12,6 +12,8 @@ services:
       - /etc/contrail/vrouter:/etc/contrail
       - /var/crashes/vrouter:/var/crashes
     restart: on-failure
+    stdin_open: true
+    tty: true
   vrouter-kernel-init:
     image: "{{ container_registry }}/contrail-vrouter-kernel-init:{{ contrail_version_tag }}"
     network_mode: host
@@ -52,6 +54,8 @@ services:
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
       - /var/crashes/vrouter:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
     depends_on:
       - vrouter-kernel-init
       - vrouter-net-watchdog

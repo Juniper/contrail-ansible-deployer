@@ -13,6 +13,8 @@ services:
       - /etc/contrail/common_control_only_{{ location.key }}:/etc/contrail
       - /var/crashes/control:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
   control:
     image: "{{ container_registry }}/contrail-controller-control-control:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -22,3 +24,5 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/crashes/control:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
