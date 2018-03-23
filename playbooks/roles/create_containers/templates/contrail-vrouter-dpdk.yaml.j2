@@ -80,6 +80,7 @@ services:
       - /var/run:/var/run
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/vrouter:/etc/contrail
+      - /var/run/libvirt:/var/run/libvirt
     restart: on-failure
     stdin_open: true
     tty: true
