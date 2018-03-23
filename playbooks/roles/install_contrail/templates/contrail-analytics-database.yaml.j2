@@ -27,7 +27,7 @@ services:
      - ZOOKEEPER_NODES={{ zookeeper_nodes }}
      - ZOOKEEPER_PORT=2182
     labels:
-      - net.juniper.contrail.pod=analytics-database
+      net.juniper.contrail.pod: analytics-database
     restart: always
     volumes:
      - /etc/hosts:/etc/hosts
@@ -44,7 +44,7 @@ services:
      - CASSANDRA_STORAGE_PORT=7010
      - CASSANDRA_JMX_LOCAL_PORT=7200
     labels:
-      - net.juniper.contrail.pod=analytics-database
+      net.juniper.contrail.pod: analytics-database
     volumes:
      - analytics_cassandra:/var/lib/cassandra/data
      - /etc/hosts:/etc/hosts
@@ -58,7 +58,7 @@ services:
      - ZOOKEEPER_PORTS=4888:5888
      - ZOOKEEPER_PORT=2182
     labels:
-      - net.juniper.contrail.pod=analytics-database
+      net.juniper.contrail.pod: analytics-database
     volumes:
      - analytics_zookeeper:/data
      - analytics_zookeeper:/datalog
