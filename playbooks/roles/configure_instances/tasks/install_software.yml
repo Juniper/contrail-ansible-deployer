@@ -202,6 +202,24 @@
 - name: sysctl -w net.bridge.bridge-nf-call-ip6tables=1
   shell: sysctl -w net.bridge.bridge-nf-call-ip6tables=1 && echo "net.bridge.bridge-nf-call-ip6tables=1" >> /etc/sysctl.conf
 
+- name: configure tcp_keepalive_time
+  sysctl:
+    name: net.ipv4.tcp_keepalive_time
+    value: 15
+    sysctl_set: yes
+
+- name: configure tcp_keepalive_intvl
+  sysctl:
+    name: net.ipv4.tcp_keepalive_intvl
+    value: 15
+    sysctl_set: yes
+
+- namec: configure tcp_keepalive_probes
+  sysctl:
+    name: tcp_keepalive_probes
+    value: 5
+    sysctl_set: yes
+
 - name: flush iptables
   shell: iptables -F
 
