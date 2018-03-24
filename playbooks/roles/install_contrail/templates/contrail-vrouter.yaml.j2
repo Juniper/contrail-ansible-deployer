@@ -47,6 +47,7 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /bin:/host/bin
+      - /dev/log:/dev/log
       - /var/run/libvirt:/var/run/libvirt
       - /etc/contrail/vrouter:/etc/contrail
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
