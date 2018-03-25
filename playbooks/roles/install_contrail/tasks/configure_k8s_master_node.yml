@@ -77,3 +77,32 @@
 - name: set master token
   set_fact:
     mastertoken: "{{ output.stdout }}"
+
+- name: create /etc/contrail
+  file:
+    path: /etc/contrail
+    state: directory
+    recurse: yes
+
+- name: create contrail kubemanager serviceaccount yaml
+  template:
+    src: contrail-kubemanager-serviceaccount.yaml.j2
+    dest: /etc/contrail/contrail-kubemanager-serviceaccount.yaml
+
+- name: excute contrail kubemanager serviceaccount yaml
+  shell: kubectl apply -f /etc/contrail/contrail-kubemanager-serviceaccount.yaml
+
+- name: get kubemanager token name from serviceaccount
+  shell: kubectl describe sa contrail-kubemanager -n contrail  | grep -i 'Tokens' | awk '{print $2}'
+  register: output
+
+- name: get kubemanager token
+  shell: kubectl describe secret "{{ output.stdout }}" -n contrail  | grep -i 'token:' | awk '{print $2}'
+  register: output
+
+- name: set kubemanager token
+  set_fact:
+    kubemanagertoken: "{{ output.stdout }}"
+
+- debug:
+    msg: "{{ kubemanagertoken }}"
