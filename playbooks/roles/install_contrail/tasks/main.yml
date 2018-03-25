@@ -93,7 +93,7 @@
 - set_fact:
     default_roles: "{{ default_roles|default({})|combine({item.0: item.1}) }}"
   with_together:
-    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'k8s_master', 'k8s_node', 'vrouter', 'webui']
+    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'k8s_master', 'k8s_node', 'kubemanager', 'vrouter', 'webui']
     - []
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR is defined
@@ -371,7 +371,7 @@
 
 - name: create contrail kube manager
   include: create_kubemanager.yml
-  when: roles[instance_name].k8s_master is defined
+  when: roles[instance_name].kubemanager is defined and master_inventory is defined
   tags:
     - k8s
 
