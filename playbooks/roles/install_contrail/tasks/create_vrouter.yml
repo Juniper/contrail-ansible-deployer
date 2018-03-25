@@ -91,13 +91,41 @@
     - contrail-nodemgr
     - contrail-vrouter-kernel-init
     - contrail-vrouter-agent
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when:
+    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+    - roles[instance_name].vrouter.AGENT_MODE is undefined or roles[instance_name].vrouter.AGENT_MODE != 'dpdk'
 
 - name: "create contrail vrouter compose file"
   template:
     src: contrail-vrouter.yaml.j2
     dest: "/etc/contrail/vrouter/docker-compose.yaml"
+  when: roles[instance_name].vrouter.AGENT_MODE is undefined or roles[instance_name].vrouter.AGENT_MODE != 'dpdk'
 
 - name: "start contrail vrouter"
   docker_service:
     project_src: /etc/contrail/vrouter
+  when: roles[instance_name].vrouter.AGENT_MODE is undefined or roles[instance_name].vrouter.AGENT_MODE != 'dpdk'
+
+- name: update image for dpdk vrouter
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-nodemgr
+    - contrail-vrouter-kernel-init-dpdk
+    - contrail-vrouter-agent-dpdk
+    - contrail-vrouter-net-watchdog
+    - contrail-vrouter-agent
+  when:
+    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+    - roles[instance_name].vrouter.AGENT_MODE is defined
+    - roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
+
+- name: "create contrail dpdk vrouter compose file"
+  template:
+    src: contrail-vrouter-dpdk.yaml.j2
+    dest: "/etc/contrail/vrouter/docker-compose.yaml"
+  when: roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
+
+- name: "start contrail dpdk vrouter"
+  docker_service:
+    project_src: /etc/contrail/vrouter
+  when: roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
