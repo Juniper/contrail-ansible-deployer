@@ -214,9 +214,9 @@
     value: 15
     sysctl_set: yes
 
-- namec: configure tcp_keepalive_probes
+- name: configure tcp_keepalive_probes
   sysctl:
-    name: tcp_keepalive_probes
+    name: net.ipv4.tcp_keepalive_probes
     value: 5
     sysctl_set: yes
 
