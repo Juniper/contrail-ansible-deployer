@@ -13,6 +13,8 @@ services:
       - /etc/contrail/control:/etc/contrail
       - /var/crashes/control:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
   control:
     image: "{{ container_registry }}/contrail-controller-control-control:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -23,6 +25,8 @@ services:
       - /etc/contrail/control:/etc/contrail
       - /var/crashes/control:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
 {% if roles[instance_name].control.location is undefined %}
   named:
     image: "{{ container_registry }}/contrail-controller-control-named:{{ contrail_version_tag }}"
@@ -35,6 +39,8 @@ services:
     depends_on:
       - dns
     restart: always
+    stdin_open: true
+    tty: true
   dns:
     image: "{{ container_registry }}/contrail-controller-control-dns:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -46,4 +52,6 @@ services:
       - /etc/contrail/control:/etc/contrail
       - /var/crashes/control:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
 {% endif %}

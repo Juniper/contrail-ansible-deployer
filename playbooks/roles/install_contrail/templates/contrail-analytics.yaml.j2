@@ -13,6 +13,8 @@ services:
       - /etc/hosts:/etc/hosts
       - /var/crashes/analytics:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
   api:
     image: "{{ container_registry }}/contrail-analytics-api:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -23,6 +25,8 @@ services:
       - /etc/hosts:/etc/hosts
       - /var/crashes/analytics:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
   collector:
     image: "{{ container_registry }}/contrail-analytics-collector:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -33,6 +37,8 @@ services:
       - /etc/hosts:/etc/hosts
       - /var/crashes/analytics:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
   query-engine:
     image: "{{ container_registry }}/contrail-analytics-query-engine:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -53,6 +59,8 @@ services:
       - /etc/hosts:/etc/hosts
       - /var/crashes/analytics:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
   snmp-collector:
     image: "{{ container_registry }}/contrail-analytics-snmp-collector:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -63,6 +71,8 @@ services:
       - /etc/hosts:/etc/hosts
       - /var/crashes/analytics:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
   topology:
     image: "{{ container_registry }}/contrail-analytics-topology:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -73,3 +83,5 @@ services:
       - /etc/hosts:/etc/hosts
       - /var/crashes/analytics:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true

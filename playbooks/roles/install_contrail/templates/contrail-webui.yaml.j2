@@ -8,6 +8,8 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/crashes/config:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
   job:
     image: "{{ container_registry }}/contrail-controller-webui-job:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -16,6 +18,8 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/crashes/config:/var/crashes
     restart: always
+    stdin_open: true
+    tty: true
   redis:
     image: "redis:4.0.2"
     env_file: /etc/contrail/common_webui.env
