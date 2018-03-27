@@ -113,7 +113,7 @@
 
 - name: create host entry dict
   set_fact:
-    host_intf_dict: "{{ instances|ctrl_data_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}) }}"
+    host_intf_dict: "{{ instances|ctrl_data_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) }}"
 
 - debug:
     msg: "DEBUG HOST ENTRIES: {{ host_intf_dict }}"
