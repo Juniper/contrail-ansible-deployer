@@ -1,17 +1,13 @@
 ---
-{% for k,v in instances.iteritems() -%}
+
+{%- for k,v in instances.iteritems() -%}
   {%- for role in ['openstack_control', 'openstack_network', 'openstack_compute', 'vrouter', 'openstack_monitoring', 'openstack_storage', 'openstack'] -%}
     {%- if v.roles is defined and v.roles[role] is defined and v.roles[role] is mapping() and v.roles[role]|length() > 0 -%}
       {%- if hostvars[inventory_hostname].tmp_host is defined and v.ip == hostvars[inventory_hostname]['tmp_host'] -%}
         {%- for a,b in v.roles[role].iteritems() -%}
-          {%- if a != 'PHYSICAL_INTERFACE' and a != 'network_interface' -%}
-            {%- print a + ': ' + b|string() + '\n' -%}
-          {%- endif -%}
+          {% print '\n' + a + ': ' + b|string() %}
         {%- endfor -%}
       {%- endif -%}
     {%- endif -%}
   {%- endfor -%}
-{%- endfor %}
-
-network_interface: {{ host_internal_interface }}
-kolla_external_vip_interface: {{ host_external_interface }}
+{%- endfor -%}

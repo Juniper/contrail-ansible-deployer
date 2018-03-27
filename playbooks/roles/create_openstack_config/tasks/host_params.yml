@@ -10,51 +10,6 @@
   set_fact:
     tmp_host: "{{ inventory_hostname }}"
 
-- name: Use host specific network_interface
-  set_fact:
-    host_internal_interface: "{{ instance_data.roles[item].network_interface }}"
-  with_items: ['openstack_control', 'openstack_network', 'openstack_compute', 'vrouter', 'openstack_monitoring', 'openstack_storage', 'openstack']
-  when:
-    - instance_data.roles is defined
-    - instance_data.roles[item] is defined
-    - instance_data.roles[item] is mapping()
-    - instance_data.roles[item].network_interface is defined
-    - host_internal_interface is not defined
-
-- name: Use host specific PHYSICAL_INTERFACE
-  set_fact:
-    host_internal_interface: "{{ instance_data.roles[item].PHYSICAL_INTERFACE }}"
-  with_items: ['openstack_control', 'openstack_network', 'openstack_compute', 'vrouter', 'openstack_monitoring', 'openstack_storage', 'openstack']
-  when:
-    - instance_data.roles is defined
-    - instance_data.roles.item is defined
-    - instance_data.roles.item is mapping()
-    - instance_data.roles[item].PHYSICAL_INTERFACE is defined
-    - host_internal_interface is not defined
-
-- name: Detect host network_interface
-  set_fact:
-    host_internal_interface: "{{ network_interface_detected }}"
-  when:
-    - host_internal_interface is not defined
-
-- name: Use host specific external_interface
-  set_fact:
-    host_external_interface: "{{ instance_data.roles[item].kolla_external_vip_interface }}"
-  with_items: ['openstack_control', 'openstack_network', 'openstack_compute', 'vrouter', 'openstack_monitoring', 'openstack_storage', 'openstack']
-  when:
-    - instance_data.roles is defined
-    - instance_data.roles[item] is defined
-    - instance_data.roles[item] is mapping()
-    - instance_data.roles[item].kolla_external_vip_interface is defined
-    - host_internal_interface is not defined
-
-- name: Detect host kolla_external_vip_interface
-  set_fact:
-    host_external_interface: "{{ external_interface_detected }}"
-  when:
-    - host_external_interface is not defined
-
 - name: Create host variable files
   template:
     src: "{{ role_path }}/templates/host_vars.yml.j2"

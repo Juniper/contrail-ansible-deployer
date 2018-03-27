@@ -32,26 +32,16 @@
 #  when: openstack_network_interface is not defined
 
 - include: inventory.yml
-  delegate_to: localhost
-  run_once: yes
 
 - include: passwords.yml
   when: gen_passwords | bool
-  delegate_to: localhost
-  run_once: yes
-
-- include: host_params.yml
 
 - name: Merge kolla_globals params
   set_fact:
     final_kolla_globals: "{{ default_kolla_globals |combine(kolla_globals) if kolla_globals is defined else default_kolla_globals }}"
-  delegate_to: localhost
-  run_once: yes
 
 - name: Populate etc/kolla/globals.yml
   template:
     src: "{{ role_path }}/templates/globals.yml.j2"
     dest: "{{ kolla_dir }}/etc/kolla/globals.yml"
-  delegate_to: localhost
-  run_once: yes
 
