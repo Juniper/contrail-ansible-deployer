@@ -52,6 +52,7 @@ default_kolla_globals:
   nova_compute_opencontrail_init_image_full: "{{ container_registry}}/contrail-openstack-compute-init:{{ contrail_tag }}"
   ironic_notification_manager_image_full: "{{ container_registry}}/contrail-openstack-ironic-notification-manager:{{ contrail_tag }}"
   heat_opencontrail_init_image_full: "{{ container_registry}}/contrail-openstack-heat-init:{{ contrail_tag }}"
+  enable_barbican: yes
   customize_etc_hosts: no
   openstack_release: "4.0.0"
   kolla_internal_vip_address: "{{ os_node_control }}"
