@@ -9,10 +9,12 @@
 - name: show master list
   debug:
     msg: "{{ master_list }}"
+  when: master_list is defined
 
 - name: set master
   set_fact:
     master: "{{ master_list[0] }}"
+  when: master_list | length > 0
 
 - name: fill master inventory list
   set_fact:
@@ -24,15 +26,19 @@
 - name: show master inventory list
   debug:
     msg: "{{ master_inventory_list }}"
+  when: master_inventory_list is defined
 
 - name: set master inventory
   set_fact:
     master_inventory: "{{ master_inventory_list[0] }}"
+  when: master_inventory_list | length > 0
 
 - name: show master
   debug:
     msg: "{{ master }}"
+  when: master is defined
 
 - name: show master inventory
   debug:
     msg: "{{ master_inventory }}"
+  when: master_inventory is defined
