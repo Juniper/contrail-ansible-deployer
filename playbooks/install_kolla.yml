@@ -1,12 +1,14 @@
 ---
 - hosts: openstack_nodes
+  vars_files:
+    - "{{ hostvars['localhost'].config_file }}"
   gather_facts: yes
+
+  roles:
+    - name: Generate openstack configurations
+      role: create_openstack_config
+
   tasks:
-
-  - name: Import instances from config/instances.yaml
-    include_vars:
-      file: "{{ hostvars['localhost'].config_file }}"
-
   - name: Import group variables
     include_vars:
       dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/group_vars"
@@ -19,11 +21,6 @@
       ignore_files:
         - passwords.yml.original
         - globals.yml.original
-
-  - name: Generate host vars
-    include_role:
-      name: create_openstack_config
-      tasks_from: host_params
 
   - name: set tmphost
     set_fact:
