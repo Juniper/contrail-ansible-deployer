@@ -1,5 +1,5 @@
 ---
-- name: create /etc/contrail/vrouter
+- name: "create /etc/contrail/vrouter"
   file:
     path: /etc/contrail/vrouter
     state: directory
@@ -21,34 +21,34 @@
     path: "/etc/contrail/common_vrouter.env"
     state: touch
 
-- name: get pop
+- name: "get pop"
   set_fact:
     location: "{{ roles[instance_name].vrouter.location }}"
   when: roles[instance_name].vrouter.location is defined
 
-- name: init pop control peer list
+- name: "init pop control peer list"
   set_fact:
     pop_control_list: []
   when: location is defined
 
-- name: add pop control nodes to list
+- name: "add pop control nodes to list"
   set_fact:
     pop_control_list: "{{ pop_control_list + [ instances[item.key].ip ] }}"
   when: location is defined and item.value.control is defined and item.value.control.location is defined and item.value.control.location == location
   with_dict: "{{ roles }}"
   ignore_errors: yes
 
-- name: create controler host list if not defined
+- name: "create controler host list if not defined"
   set_fact:
     pop_control_nodes: "{{ pop_control_list|join(',') }}"
   when: pop_control_list is defined
 
-- name: create contrail_configuration.CONTROL_NODES
+- name: "create contrail_configuration.CONTROL_NODES"
   set_fact:
     contrail_configuration: "{{ contrail_configuration|default({})|combine({'CONTROL_NODES': pop_control_nodes}) }}"
   when: pop_control_nodes is defined and roles[instance_name].vrouter.CONTROL_NODES is undefined
 
-- name: set DNS servers if location is defined
+- name: "set DNS servers if location is defined"
   set_fact:
     contrail_configuration: "{{ contrail_configuration|default({})|combine({'DNS_NODES': contrail_configuration.CONTROLLER_NODES}) }}"
   when: pop_control_nodes is defined and roles[instance_name].vrouter.DNS_NODES is undefined
@@ -73,19 +73,19 @@
   with_dict: "{{ remote_locations[location] }}"
   when: location is defined
 
-- name: "add k8s master token to common_vrouter.env"
-  lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^K8S_TOKEN=.*' line="K8S_TOKEN={{ hostvars[master_inventory].mastertoken  }}" state=present
-  when: master_inventory is defined and hostvars[master_inventory].mastertoken is defined
+- name: "add kubemanager token to common_vrouter.env"
+  lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^K8S_TOKEN=.*' line="K8S_TOKEN={{ hostvars[master_inventory].kubemanagertoken }}" state=present
+  when: master_inventory is defined and hostvars[master_inventory].kubemanagertoken is defined
 
-- name: add SUBCLUSTER name if location is defined and subcluster name is defined
+- name: "add SUBCLUSTER name if location is defined and subcluster name is defined"
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ remote_locations[location].SUBCLUSTER }}" state=present
   when: location is defined and remote_locations[location].SUBCLUSTER is defined
 
-- name: add SUBCLUSTER name if location is defined and subcluster name is undefined
+- name: "add SUBCLUSTER name if location is defined and subcluster name is undefined"
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ location }}" state=present
   when: location is defined and remote_locations[location].SUBCLUSTER is undefined
 
-- name: update image
+- name: "update image"
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
     - contrail-nodemgr
