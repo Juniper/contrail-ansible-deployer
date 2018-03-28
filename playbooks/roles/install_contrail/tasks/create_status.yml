@@ -10,7 +10,7 @@
     state: started
     volumes:
     - /etc/contrail:/etc/contrail
-    - /usr/bin:/usr/bin
+    - /usr/bin:/host/usr/bin
     - /var/run/docker.sock:/var/run/docker.sock
     pid: host
     net: host
