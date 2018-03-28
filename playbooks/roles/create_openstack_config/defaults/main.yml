@@ -54,7 +54,7 @@ default_kolla_globals:
   heat_opencontrail_init_image_full: "{{ container_registry}}/contrail-openstack-heat-init:{{ contrail_tag }}"
   enable_barbican: yes
   customize_etc_hosts: no
-  openstack_release: "4.0.0"
+  openstack_release: ocata
   kolla_internal_vip_address: "{{ os_node_control }}"
   contrail_api_interface_address: "{{ contrail_node_control }}"
   neutron_plugin_agent: "opencontrail"
