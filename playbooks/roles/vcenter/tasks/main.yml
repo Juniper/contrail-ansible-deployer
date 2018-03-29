@@ -30,7 +30,7 @@
   set_fact:
     vc_servers_pg: >-
       {%- for vc in vcenter_servers -%}
-        {%- if vc['dv_port_group'] is not defined -%}
+        {%- if vc.values()[0]['dv_port_group'] is not defined -%}
           {{ vc_servers_pg |default([]) + [{vc.keys()[0]: vc.values()[0] |combine({'dv_port_group': dv_port_group})}] }}
         {%- endif -%}
       {%- endfor -%}
