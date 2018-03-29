@@ -21,8 +21,8 @@ services:
     depends_on:
       - network
     restart: on-failure
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
   api:
     image: "{{ container_registry }}/contrail-controller-config-api:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_config.env
@@ -34,8 +34,8 @@ services:
     depends_on:
       - network
     restart: on-failure
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
   svcmonitor:
     image: "{{ container_registry }}/contrail-controller-config-svcmonitor:{{ contrail_version_tag }}"
     network_mode: "service:network"
@@ -47,8 +47,8 @@ services:
     depends_on:
       - network
     restart: on-failure
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
   schema:
     image: "{{ container_registry }}/contrail-controller-config-schema:{{ contrail_version_tag }}"
     network_mode: "service:network"
@@ -60,8 +60,8 @@ services:
     depends_on:
       - network
     restart: on-failure
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
   devicemgr:
     image: "{{ container_registry }}/contrail-controller-config-devicemgr:{{ contrail_version_tag }}"
     network_mode: "service:network"
@@ -73,5 +73,5 @@ services:
     depends_on:
       - network
     restart: on-failure
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}

@@ -48,6 +48,34 @@
   tags:
    - always
 
+- name: set stdin_open to true if it's not defined
+  set_fact:
+    stdin_open: true
+  when: contrail_configuration.STDIN_OPEN is undefined
+  tags:
+   - always
+
+- name: set stdin_open to specified value if defined
+  set_fact:
+    stdin_open: "{{ contrail_configuration.STDIN_OPEN }}"
+  when: contrail_configuration.STDIN_OPEN is defined
+  tags:
+   - always
+
+- name: set tty to true if it's not defined
+  set_fact:
+    tty: true
+  when: contrail_configuration.TTY is undefined
+  tags:
+   - always
+
+- name: set tty to specified value if defined
+  set_fact:
+    tty: "{{ contrail_configuration.TTY }}"
+  when: contrail_configuration.TTY is defined
+  tags:
+   - always
+
 - set_fact:
     default_roles: "{{ default_roles|default({})|combine({item.0: item.1}) }}"
   with_together:

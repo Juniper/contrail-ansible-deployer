@@ -14,6 +14,6 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/vcenter_plugin:/etc/contrail
     restart: on-failure
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
 
