@@ -5,8 +5,8 @@ kolla_globals: "{{ kolla_config.kolla_globals if kolla_config.kolla_globals is d
 os_node_control: >-
      {%- set node_list = [] -%}
       {%- for k,v in instances.iteritems() -%}
-       {%- if v.roles.openstack is defined or v.roles.openstack_control is defined -%}
-        {%- if hostvars[inventory_hostname]['ansible_' + network_interface_detected].get('ipv4',{}).get('address') -%}
+       {%- if v.roles is not defined or v.roles.openstack is defined or v.roles.openstack_control is defined -%}
+        {%- if hostvars[inventory_hostname]['ansible_' + hostvars[inventory_hostname]['network_interface_detected']].get('ipv4',{}).get('address') -%}
          {%- do node_list.append(v.ip) -%}
         {%- endif -%}
        {%- endif -%}
@@ -15,17 +15,18 @@ os_node_control: >-
 
 os_node_mgmt: "{{ hostvars[inventory_hostname]['ansible_' + external_interface_detected].get('ipv4',{}).get('address', 'no_ip_for_mgmt_iface') }}"
 
-# This cannot be derived in all scenarios. This is because the
+# TODO: This cannot be derived in all scenarios. This is because the
 # create_openstack_config is run only on openstack_nodes. So we can not know the
 # actual ctrl-data-ip of the contrail nodes unless they are colocated with
 # openstack role. So just use mgmt IP and let user specify the ctrl-data-ip
 # This might throw an error if the contrail node did not have an interface
 # named {{ network_interface_detected }}:
 # {%- do node_list.append(hostvars[v.ip]['ansible_' + network_interface_detected].get('ipv4').get('address')) -%}
+# Need to come up with some other algorithm...
 contrail_node_control: >-
     {%- set node_list = [] -%}
     {%- for k,v in instances.iteritems() -%}
-      {%- set ctrl_if = hostvars[v.ip].get('ansible_' + network_interface_detected, {}) -%}
+      {%- set ctrl_if = hostvars[v.ip].get('ansible_' + hostvars[v.ip].get('network_interface_detected', ansible_default_ipv4.interface), {}) -%}
       {%- set ctrl_ip = v.ip -%}
       {%- if ctrl_if -%}
         {%- set ctrl_ip = ctrl_if.get('ipv4').get('address') -%}
@@ -52,18 +53,5 @@ contrail_tag: >-
       {%- print 'latest' -%}
     {%- endif -%}
 
-external_interface_detected: >-
-  {%- if kolla_config.kolla_globals is defined and kolla_config.kolla_globals.kolla_external_vip_interface is defined -%}
-      {{ kolla_config.kolla_globals.kolla_external_vip_interface }}
-  {%- elif contrail_configuration.CONTROL_DATA_NET_LIST is defined -%}
-    {%- for iface in ansible_interfaces if hostvars[inventory_hostname]['ansible_' + iface].get('ipv4',{}).get('address', None) == inventory_hostname -%}
-      {{ iface }}{%- endfor -%}
-  {%- else -%}
-    {{ network_interface_detected }}
-  {%- endif -%}
-
 instance_data: "{{ instances[hostvars[inventory_hostname].instance_name] }}"
 
-network_interface_detected: >-
-    {%- set int_dict = instances|ctrl_data_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) -%}
-    {{ int_dict.get(inventory_hostname, ansible_default_ipv4.interface) }}
