@@ -129,3 +129,6 @@
   docker_service:
     project_src: /etc/contrail/vrouter
   when: roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
+
+- name: "create rsyslogd listen conf for lbaas haproxy unix sock"
+    shell: "mkdir -p /var/log/contrail/lbaas/;echo '$AddUnixListenSocket /var/log/contrail/lbaas/haproxy.log.sock' > /etc/rsyslog.d/contrail-lbaas-haproxy.conf; systemctl restart rsyslog"
