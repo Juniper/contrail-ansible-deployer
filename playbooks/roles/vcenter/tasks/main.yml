@@ -2,11 +2,15 @@
 - name: Update default validate_cert in vcenter_servers
   set_fact:
     vcs: >-
+      {%- set vc1 = [] -%}
       {%- for vc in vcenter_servers -%}
         {%- if vc.values()[0]['validate_certs'] is not defined -%}
-          {{ vcs |default([]) + [{vc.keys()[0]: vc.values()[0] |combine({'validate_certs': False})}] }}
+          {%- do vc1.append({vc.keys()[0]: vc.values()[0] |combine({'validate_certs': False})}) -%}
+        {%- else -%}
+          {%- do vc1.append(vc) -%}
         {%- endif -%}
       {%- endfor -%}
+      {{vc1}}
 
 - name: update vcenter_servers var post validate_cert
   set_fact:
@@ -15,11 +19,15 @@
 - name: substitue default VM DVS values for overlay
   set_fact:
     vc_servers_dvs: >-
+      {%- set vc1 = [] -%}
       {%- for vc in vcenter_servers -%}
         {%- if vc.values()[0]['dv_switch'] is not defined -%}
-          {{ vc_servers_dvs |default([]) + [{vc.keys()[0]: vc.values()[0] |combine({'dv_switch': dv_switch})}] }}
+          {%- do vc1.append({vc.keys()[0]: vc.values()[0] |combine({'dv_switch': dv_switch})}) -%}
+        {%- else -%}
+          {%- do vc1.append(vc) -%}
         {%- endif -%}
       {%- endfor -%}
+      {{vc1}}
 
 - name: update vcenter_servers var post VM DVS defaults
   set_fact:
@@ -29,11 +37,15 @@
 - name: substitue default VM DVS PG values
   set_fact:
     vc_servers_pg: >-
+      {%- set vc1 = [] -%}
       {%- for vc in vcenter_servers -%}
         {%- if vc.values()[0]['dv_port_group'] is not defined -%}
-          {{ vc_servers_pg |default([]) + [{vc.keys()[0]: vc.values()[0] |combine({'dv_port_group': dv_port_group})}] }}
+          {%- do vc1.append({vc.keys()[0]: vc.values()[0] |combine({'dv_port_group': dv_port_group})}) -%}
+        {%- else -%}
+          {%- do vc1.append(vc) -%}
         {%- endif -%}
       {%- endfor -%}
+      {{vc1}}
 
 - name: set vcenter_servers var post VM DVS PG defaults
   set_fact:
@@ -48,11 +60,15 @@
 - name: Update default validate_cert in esxihosts
   set_fact:
     esxihosts1: >-
+      {%- set ip1 = [] -%}
       {%- for host in esxihosts -%}
         {%- if host['validate_certs'] is not defined -%}
-          {{ esxihosts1 | default([]) + [host | combine({'validate_certs': False})] }}
+          {%- do ip1.append(host | combine({'validate_certs': False})) -%}
+        {%- else -%}
+          {%- do ip1.append(host) -%}
         {%- endif -%}
       {%- endfor -%}
+      {{ip1}}
 
 - name: set esxihosts var post validate_cert
   set_fact:
@@ -61,11 +77,15 @@
 - name: substitute default std fabric switch and pg values in esxihosts
   set_fact:
     esxihosts_std: >-
+      {%- set ip1 = [] -%}
       {%- for host in esxihosts -%}
         {%- if host['std_switch_list'] is not defined -%}
-          {{ esxihosts_std | default([]) + [host | combine({'std_switch_list': [{'pg_name': std_pg_name, 'switch_name': std_switch_name}]})] }}
+          {%- do ip1.append(host | combine({'std_switch_list': [{'pg_name': std_pg_name, 'switch_name': std_switch_name}]})) -%}
+        {%- else -%}
+          {%- do ip1.append(host) -%}
         {%- endif -%}
       {%- endfor -%}
+      {{ip1}}
 
 - name: set esxihosts var post std switch defaults
   set_fact:
@@ -75,13 +95,15 @@
 - name: substitute vcenter in the esxi host
   set_fact:
     esxi_servers: >-
+      {%- set ip1 = [] -%}
       {%- for host in esxihosts -%}
         {%- for vcsrv in vcenter_servers -%}
           {%- if host['vcenter_server'] == vcsrv.keys()[0] -%}
-            {{ esxi_servers | default ([]) + [host | combine({'vcenter_server': vcsrv.values()[0]})] }}
+            {%- do ip1.append(host | combine({'vcenter_server': vcsrv.values()[0]})) -%}
           {%- endif -%}
         {%- endfor -%}
       {%- endfor -%}
+      {{ip1}}
 
 - name: Create Datacenters
   vmware_datacenter:
