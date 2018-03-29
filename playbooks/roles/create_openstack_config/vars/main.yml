@@ -6,7 +6,7 @@ os_node_control: >-
      {%- set node_list = [] -%}
       {%- for k,v in instances.iteritems() -%}
        {%- if v.roles.openstack is defined or v.roles.openstack_control is defined -%}
-        {%- if hostvars[inventory_hostname]['ansible_' + network_interface_detected].get('ipv4',{}).get('address') -%}
+        {%- if hostvars[inventory_hostname]['ansible_' + hostvars[inventory_hostname]['network_interface_detected']].get('ipv4',{}).get('address') -%}
          {%- do node_list.append(v.ip) -%}
         {%- endif -%}
        {%- endif -%}
@@ -25,7 +25,7 @@ os_node_mgmt: "{{ hostvars[inventory_hostname]['ansible_' + external_interface_d
 contrail_node_control: >-
     {%- set node_list = [] -%}
     {%- for k,v in instances.iteritems() -%}
-      {%- set ctrl_if = hostvars[v.ip].get('ansible_' + network_interface_detected, {}) -%}
+      {%- set ctrl_if = hostvars[v.ip].get('ansible_' + hostvars[v.ip]['network_interface_detected'], {}) -%}
       {%- set ctrl_ip = v.ip -%}
       {%- if ctrl_if -%}
         {%- set ctrl_ip = ctrl_if.get('ipv4').get('address') -%}
@@ -52,18 +52,5 @@ contrail_tag: >-
       {%- print 'latest' -%}
     {%- endif -%}
 
-external_interface_detected: >-
-  {%- if kolla_config.kolla_globals is defined and kolla_config.kolla_globals.kolla_external_vip_interface is defined -%}
-      {{ kolla_config.kolla_globals.kolla_external_vip_interface }}
-  {%- elif contrail_configuration.CONTROL_DATA_NET_LIST is defined -%}
-    {%- for iface in ansible_interfaces if hostvars[inventory_hostname]['ansible_' + iface].get('ipv4',{}).get('address', None) == inventory_hostname -%}
-      {{ iface }}{%- endfor -%}
-  {%- else -%}
-    {{ network_interface_detected }}
-  {%- endif -%}
-
 instance_data: "{{ instances[hostvars[inventory_hostname].instance_name] }}"
 
-network_interface_detected: >-
-    {%- set int_dict = instances|ctrl_data_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) -%}
-    {{ int_dict.get(inventory_hostname, ansible_default_ipv4.interface) }}

@@ -1,35 +1,21 @@
 ---
-#- fail:
-#    msg: "kolla_internal_vip_address is mandatory for a multi-node cluster"
-#  when:
-#    - (openstack_nodes| count) > 1
-#    - kolla_config.kolla_globals is not defined or kolla_config.kolla_globals.kolla_internal_vip_address is not defined
+- name: Detect default value for network_interface
+  set_fact:
+    network_interface_detected: >-
+      {%- set int_dict = instances|ctrl_data_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) -%}
+      {{ int_dict.get(inventory_hostname, ansible_default_ipv4.interface) }}
 
-#- name: Calculate default openstack_network_interface
-#  set_fact:
-#    os_interface: "{{ item }}"
-#  when: >
-#    (hostvars[inventory_hostname]['ansible_%s' % item]|default({}))
-#    .get('ipv4', {}).get('address') == os_node
-#    or
-#    os_node in ((hostvars[inventory_hostname]['ansible_%s' % item]|default({}))
-#    .get('ipv4_secondaries'))|map(attribute='address')|list
-#  with_items:
-#    - "{{ ansible_interfaces }}"
+- name: Detect default value for mgmt_interface
+  set_fact:
+    external_interface_detected: >-
+      {%- set int_dict = instances|mgmt_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) - %}
+      {{ int_dict.get(inventory_hostname, ansible_default_ipv4.interface) }}
 
-#- name: Set openstack_network_interface
-#  set_fact:
-#    openstack_network_interface: >-
-#      {%- if kolla_config.kolla_globals is defined -%}
-#        {%- if kolla_config.kolla_globals.network_interface is defined -%}
-#          {%- print kolla_config.kolla_globals.network_interface -%}
-#        {%- else -%}
-#          {%- print ansible_default_ipv4.interface -%}
-#        {%- endif -%}
-#      {%- else -%}
-#        {%- print ansible_default_ipv4.interface -%}
-#      {%- endif -%}
-#  when: openstack_network_interface is not defined
+- debug:
+    msg: "DEBUG {{ network_interface_detected }}"
+
+- debug:
+    msg: "DEBUG {{ external_interface_detected }}"
 
 - include: inventory.yml
   delegate_to: localhost
