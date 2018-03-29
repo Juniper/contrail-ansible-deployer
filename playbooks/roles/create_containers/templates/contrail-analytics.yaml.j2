@@ -14,7 +14,6 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/contrail/analytics:/etc/contrail
       - /var/crashes/analytics:/var/crashes
     depends_on:
       - network
@@ -27,7 +26,6 @@ services:
     env_file: /etc/contrail/common_analytics.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/analytics:/etc/contrail
       - /var/crashes/analytics:/var/crashes
     depends_on:
       - network
@@ -40,7 +38,6 @@ services:
     env_file: /etc/contrail/common_analytics.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/analytics:/etc/contrail
       - /var/crashes/analytics:/var/crashes
     depends_on:
       - network
@@ -53,7 +50,6 @@ services:
     env_file: /etc/contrail/common_analytics.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/analytics:/etc/contrail
       - /var/crashes/analytics:/var/crashes
     depends_on:
       - network
@@ -66,7 +62,6 @@ services:
     env_file: /etc/contrail/common_analytics.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/analytics:/etc/contrail
       - /var/crashes/analytics:/var/crashes
     depends_on:
       - network
@@ -79,7 +74,6 @@ services:
     env_file: /etc/contrail/common_analytics.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/analytics:/etc/contrail
       - /var/crashes/analytics:/var/crashes
     depends_on:
       - network
@@ -92,7 +86,6 @@ services:
     env_file: /etc/contrail/common_analytics.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/analytics:/etc/contrail
       - /var/crashes/analytics:/var/crashes
     depends_on:
       - network

@@ -13,7 +13,6 @@ services:
     network_mode: "host"
     volumes:
       - /etc/hosts:/etc/hosts
-      - /etc/contrail/analytics_database:/etc/contrail
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/crashes/analytics_database:/var/crashes

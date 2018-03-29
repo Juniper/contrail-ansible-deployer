@@ -16,7 +16,6 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     depends_on:
       - network
@@ -29,7 +28,6 @@ services:
     network_mode: "service:network"
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     depends_on:
       - network
@@ -42,7 +40,6 @@ services:
     env_file: /etc/contrail/common_config.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     depends_on:
       - network
@@ -55,7 +52,6 @@ services:
     env_file: /etc/contrail/common_config.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     depends_on:
       - network
@@ -68,7 +64,6 @@ services:
     env_file: /etc/contrail/common_config.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     depends_on:
       - network

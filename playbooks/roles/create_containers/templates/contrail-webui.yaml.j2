@@ -11,7 +11,6 @@ services:
     env_file: /etc/contrail/common_webui.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/webui:/etc/contrail
       - /var/crashes/config:/var/crashes
     depends_on:
       - network
@@ -24,7 +23,6 @@ services:
     env_file: /etc/contrail/common_webui.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/webui:/etc/contrail
       - /var/crashes/config:/var/crashes
     depends_on:
       - network

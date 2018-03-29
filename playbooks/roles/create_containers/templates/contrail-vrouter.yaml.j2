@@ -9,7 +9,6 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/contrail/vrouter:/etc/contrail
       - /var/crashes/vrouter:/var/crashes
     restart: on-failure
     stdin_open: {{ stdin_open }}
@@ -25,7 +24,6 @@ services:
       - /lib/modules:/lib/modules
       - /bin:/host/bin
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/vrouter:/etc/contrail
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
   vrouter-agent:
     image: "{{ container_registry }}/contrail-vrouter-agent:{{ contrail_version_tag }}"
@@ -36,7 +34,6 @@ services:
       - /bin:/host/bin
       - /var/run/libvirt:/var/run/libvirt
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/vrouter:/etc/contrail
       - /var/crashes/vrouter:/var/crashes
     restart: on-failure
     stdin_open: {{ stdin_open }}

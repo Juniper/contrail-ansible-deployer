@@ -12,7 +12,6 @@ services:
       - /etc/hosts:/etc/hosts
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}
@@ -24,7 +23,6 @@ services:
     volumes:
       - /etc/hosts:/etc/hosts
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}
@@ -36,7 +34,6 @@ services:
     volumes:
       - /etc/hosts:/etc/hosts
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}
@@ -48,7 +45,6 @@ services:
     volumes:
       - /etc/hosts:/etc/hosts
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}
@@ -60,7 +56,6 @@ services:
     volumes:
       - /etc/hosts:/etc/hosts
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/config:/etc/contrail
       - /var/crashes/config:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}

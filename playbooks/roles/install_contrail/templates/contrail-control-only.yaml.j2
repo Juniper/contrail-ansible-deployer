@@ -10,7 +10,6 @@ services:
       - /etc/hosts:/etc/hosts
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/contrail/common_control_only_{{ location.key }}:/etc/contrail
       - /var/crashes/control:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}
