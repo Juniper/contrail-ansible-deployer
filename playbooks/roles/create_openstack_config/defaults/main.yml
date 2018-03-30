@@ -15,6 +15,7 @@ openstack_sku: >-
 
 
 default_kolla_globals:
+  ironic_conductor_tag: 4.0.0
   neutron_opencontrail_init_image_full: "{{ container_registry }}/contrail-openstack-neutron-init:{{ contrail_tag }}"
   nova_compute_opencontrail_init_image_full: "{{ container_registry}}/contrail-openstack-compute-init:{{ contrail_tag }}"
   ironic_notification_manager_image_full: "{{ container_registry}}/contrail-openstack-ironic-notification-manager:{{ contrail_tag }}"
