@@ -1,4 +1,6 @@
 version: '2'
+volumes:
+  contrail_control_dns:
 services:
   nodemgr:
     image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
@@ -10,7 +12,6 @@ services:
       - /etc/hosts:/etc/hosts
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/contrail/control:/etc/contrail
       - /var/crashes/control:/var/crashes
     restart: always
     stdin_open: true
@@ -22,7 +23,6 @@ services:
     volumes:
       - /etc/hosts:/etc/hosts
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/control:/etc/contrail
       - /var/crashes/control:/var/crashes
     restart: always
     stdin_open: true
@@ -49,7 +49,7 @@ services:
     volumes:
       - /etc/hosts:/etc/hosts
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/control:/etc/contrail
+      - contrail_control_dns:/etc/contrail/dns
       - /var/crashes/control:/var/crashes
     restart: always
     stdin_open: true

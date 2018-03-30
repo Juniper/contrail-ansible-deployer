@@ -17,7 +17,6 @@ services:
       - CASSANDRA_JMX_LOCAL_PORT=7200
     network_mode: "service:network"
     volumes:
-      - /etc/contrail/analytics_database:/etc/contrail
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/crashes/analytics_database:/var/crashes

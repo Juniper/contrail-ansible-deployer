@@ -12,7 +12,6 @@ services:
       - VCENTER_DVSWITCH={{ vcenter_dvswitch }}
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/vcenter_plugin:/etc/contrail
     restart: on-failure
     stdin_open: true
     tty: true

@@ -9,7 +9,6 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/contrail/vrouter:/etc/contrail
       - /var/crashes/vrouter:/var/crashes
     restart: on-failure
     stdin_open: true
@@ -27,7 +26,6 @@ services:
       - /lib/modules:/lib/modules
       - /var/run:/var/run
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/vrouter:/etc/contrail
   vrouter-agent-dpdk:
     image: "{{ container_registry }}/contrail-vrouter-agent-dpdk:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_vrouter.env
@@ -41,7 +39,6 @@ services:
       - /lib/modules:/lib/modules
       - /var/run:/var/run
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/vrouter:/etc/contrail
       - /var/crashes/vrouter:/var/crashes
     restart: on-failure
     stdin_open: true
@@ -62,7 +59,6 @@ services:
       - /bin:/host/bin
       - /var/run:/var/run
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/vrouter:/etc/contrail
     restart: on-failure
     stdin_open: true
     tty: true
@@ -81,7 +77,6 @@ services:
       - /bin:/host/bin
       - /var/run:/var/run
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/vrouter:/etc/contrail
       - /var/crashes/vrouter:/var/crashes
     restart: on-failure
     stdin_open: true
