@@ -38,6 +38,8 @@
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
+    - contrail-node-init
+    - contrail-nodemgr
     - contrail-external-kafka
     - contrail-external-cassandra
     - contrail-external-zookeeper
