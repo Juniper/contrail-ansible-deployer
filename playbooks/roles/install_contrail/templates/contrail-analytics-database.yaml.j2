@@ -17,8 +17,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/crashes/analytics_database:/var/crashes
     restart: always
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
   kafka:
     image: "{{ container_registry }}/contrail-external-kafka:{{ contrail_version_tag }}"
     network_mode: "host"

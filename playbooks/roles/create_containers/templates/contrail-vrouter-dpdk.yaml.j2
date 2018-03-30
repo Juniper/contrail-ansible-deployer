@@ -11,8 +11,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/crashes/vrouter:/var/crashes
     restart: on-failure
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
   vrouter-kernel-init-dpdk:
     image: "{{ container_registry }}/contrail-vrouter-kernel-init-dpdk:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_vrouter.env
@@ -41,8 +41,8 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/crashes/vrouter:/var/crashes
     restart: on-failure
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
     depends_on:
       - vrouter-kernel-init-dpdk
   vrouter-net-watchdog:
@@ -60,8 +60,8 @@ services:
       - /var/run:/var/run
       - /var/log/contrail:/var/log/contrail
     restart: on-failure
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
     depends_on:
       - vrouter-agent-dpdk
   vrouter-agent:
@@ -79,7 +79,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/crashes/vrouter:/var/crashes
     restart: on-failure
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
     depends_on:
       - vrouter-net-watchdog

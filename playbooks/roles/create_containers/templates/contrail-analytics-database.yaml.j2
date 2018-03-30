@@ -23,8 +23,8 @@ services:
     depends_on:
       - network
     restart: on-failure
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
   kafka:
     image: "{{ container_registry }}/contrail-external-kafka:{{ contrail_version_tag }}"
     network_mode: "service:network"

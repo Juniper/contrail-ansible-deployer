@@ -12,8 +12,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/crashes/control:/var/crashes
     restart: always
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
   control:
     image: "{{ container_registry }}/contrail-controller-control-control:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -23,5 +23,5 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/crashes/control:/var/crashes
     restart: always
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}

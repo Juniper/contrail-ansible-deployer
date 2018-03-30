@@ -14,8 +14,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/crashes/control:/var/crashes
     restart: always
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
   control:
     image: "{{ container_registry }}/contrail-controller-control-control:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -25,8 +25,8 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/crashes/control:/var/crashes
     restart: always
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
 {% if roles[instance_name].control.location is undefined %}
   named:
     image: "{{ container_registry }}/contrail-controller-control-named:{{ contrail_version_tag }}"
@@ -39,8 +39,8 @@ services:
     depends_on:
       - dns
     restart: always
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
   dns:
     image: "{{ container_registry }}/contrail-controller-control-dns:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -52,6 +52,6 @@ services:
       - contrail_control_dns:/etc/contrail/dns
       - /var/crashes/control:/var/crashes
     restart: always
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
 {% endif %}

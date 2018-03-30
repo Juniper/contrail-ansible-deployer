@@ -9,5 +9,5 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
     restart: always
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}

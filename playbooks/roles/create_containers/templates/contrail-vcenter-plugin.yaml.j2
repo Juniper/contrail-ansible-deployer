@@ -13,6 +13,6 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
     restart: on-failure
-    stdin_open: true
-    tty: true
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
 
