@@ -1,0 +1,35 @@
+---
+- name: create container hostgroups for destroyer
+  hosts: localhost
+  roles:
+    - name: Generate container_host group
+      role: create_container_host_group
+    - name: Generate openstack host groups
+      role: create_openstack_host_group
+      when: orchestrator == 'openstack'
+  vars_files:
+    - "{{ config_file }}"
+
+- name: Apply destroy role for openstack
+  hosts: openstack_nodes
+  tasks:
+  - name: Import global variables
+    include_vars:
+      dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/etc/kolla"
+      extensions: ['yml']
+      ignore_files:
+        - passwords.yml.original
+        - globals.yml.original
+
+  - name: include kolla ansisble destroy directly
+    include_role:
+      name: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/roles/destroy"
+    vars:
+      dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/etc/kolla"
+      extensions: ['yml']
+    when: orchestrator == 'openstack'
+
+- name: Apply role destroy to contrail
+  hosts: container_hosts
+  roles:
+  - destroy

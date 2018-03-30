@@ -85,6 +85,39 @@
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ location }}" state=present
   when: location is defined and remote_locations[location].SUBCLUSTER is undefined
 
+- name: create a file to save network intf
+  file: path="{{ phy_intf_file }}" state=touch
+
+- name : read contrail env file
+  command: cat /etc/contrail/common_vrouter.env
+  register: data
+
+- name : parse data
+  set_fact:
+    phyintf: "{{ item.split('=')[1] }}"
+  when:
+    - "{{ item.split('=')[0] | search('PHYSICAL_INTERFACE') }}"
+  with_items: "{{ data.stdout_lines }}"
+
+- debug: msg="{{ phyintf }}"
+
+- name: check for null phyintf
+  fail: msg="Physical interface not given, Aborting"
+  when: phyintf == ""
+
+- name: write interface filename
+  set_fact: file_data=ifcfg-{{ phyintf }}
+
+- name: copy the above interface filename
+  copy: content="{{ file_data }}" dest="{{ phy_intf_file }}"
+
+- name: backup the  ifcfg network_intf  file
+  copy:
+    src: /etc/sysconfig/network-scripts/ifcfg-{{ phyintf }}
+    dest: /etc/sysconfig/network-scripts/ifcfg-ons-net-bkup
+  tags:
+    - always
+
 - name: "update image"
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
