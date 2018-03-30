@@ -5,6 +5,18 @@ services:
     network_mode: "host"
     volumes:
      - /etc/hosts:/etc/hosts
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_analytics.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    pid: host
+    network_mode: "service:network"
+    volumes:
+      - /usr/bin:/host/usr/bin
+    depends_on:
+      - network
   nodemgr:
     image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_analytics.env
@@ -14,9 +26,10 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
-      - /var/crashes/analytics:/var/crashes
+      - /var/crashes:/var/crashes
     depends_on:
       - network
+      - node-init
     restart: on-failure
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
@@ -26,7 +39,7 @@ services:
     env_file: /etc/contrail/common_analytics.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /var/crashes/analytics:/var/crashes
+      - /var/crashes:/var/crashes
     depends_on:
       - network
     restart: on-failure
@@ -38,7 +51,7 @@ services:
     env_file: /etc/contrail/common_analytics.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /var/crashes/analytics:/var/crashes
+      - /var/crashes:/var/crashes
     depends_on:
       - network
     restart: on-failure
@@ -50,7 +63,7 @@ services:
     env_file: /etc/contrail/common_analytics.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /var/crashes/analytics:/var/crashes
+      - /var/crashes:/var/crashes
     depends_on:
       - network
     restart: on-failure
@@ -62,7 +75,7 @@ services:
     env_file: /etc/contrail/common_analytics.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /var/crashes/analytics:/var/crashes
+      - /var/crashes:/var/crashes
     depends_on:
       - network
     restart: on-failure
@@ -74,7 +87,7 @@ services:
     env_file: /etc/contrail/common_analytics.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /var/crashes/analytics:/var/crashes
+      - /var/crashes:/var/crashes
     depends_on:
       - network
     restart: on-failure
@@ -86,7 +99,7 @@ services:
     env_file: /etc/contrail/common_analytics.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /var/crashes/analytics:/var/crashes
+      - /var/crashes:/var/crashes
     depends_on:
       - network
     restart: on-failure

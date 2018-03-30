@@ -11,7 +11,7 @@ services:
     env_file: /etc/contrail/common_webui.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /var/crashes/config:/var/crashes
+      - /var/crashes:/var/crashes
     depends_on:
       - network
     restart: on-failure
@@ -23,7 +23,7 @@ services:
     env_file: /etc/contrail/common_webui.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /var/crashes/config:/var/crashes
+      - /var/crashes:/var/crashes
     depends_on:
       - network
     restart: on-failure
