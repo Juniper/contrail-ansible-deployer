@@ -9,7 +9,6 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/contrail/vrouter:/etc/contrail
       - /var/crashes/vrouter:/var/crashes
     restart: on-failure
   vrouter-kernel-init-dpdk:
@@ -25,7 +24,6 @@ services:
       - /etc/lsb-release:/etc/lsb-release
       - /dev:/dev
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/vrouter:/etc/contrail
   vrouter-agent-dpdk:
     image: "{{ container_registry }}/contrail-vrouter-agent-dpdk:{{ contrail_version_tag }}"
     network_mode: host
@@ -36,7 +34,6 @@ services:
       - /lib/modules:/lib/modules
       - /var/run:/var/run
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail:/etc/contrail
       - /etc/os-release:/etc/os-release
       - /etc/lsb-release:/etc/lsb-release
       - /dev:/dev
@@ -71,7 +68,6 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/run:/var/run
       - /bin:/host/bin
-      - /etc/contrail/vrouter:/etc/contrail
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
       - /dev:/dev
       - /var/crashes/vrouter:/var/crashes

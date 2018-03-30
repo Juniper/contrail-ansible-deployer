@@ -1,4 +1,6 @@
 version: '2'
+volumes:
+  contrail_control_dns:
 services:
   network:
     image: docker.io/kubernetes/pause
@@ -14,7 +16,6 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/contrail/control:/etc/contrail
       - /var/crashes/control:/var/crashes
     depends_on:
       - network
@@ -27,7 +28,6 @@ services:
     env_file: /etc/contrail/common_control.env
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/control:/etc/contrail
       - /var/crashes/control:/var/crashes
     depends_on:
       - network
@@ -40,8 +40,6 @@ services:
     env_file: /etc/contrail/common_control.env
     privileged: true
     pid: host
-    #volumes:
-    #  - /var/log/contrail:/var/log/contrail
     volumes_from:
       - dns
     depends_on:
@@ -57,7 +55,7 @@ services:
     pid: host
     volumes:
       - /var/log/contrail:/var/log/contrail
-      - /etc/contrail/control:/etc/contrail
+      - contrail_control_dns:/etc/contrail/dns
       - /var/crashes/control:/var/crashes
     depends_on:
       - network
