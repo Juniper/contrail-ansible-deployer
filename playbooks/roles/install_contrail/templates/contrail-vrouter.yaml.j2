@@ -27,19 +27,6 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/vrouter:/etc/contrail
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
-  vrouter-net-watchdog:
-    image: "{{ container_registry }}/contrail-vrouter-net-watchdog:{{ contrail_version_tag }}"
-    network_mode: host
-    privileged: true
-    env_file: /etc/contrail/common_vrouter.env
-    pid: host
-    volumes:
-      - /lib/modules:/lib/modules
-      - /bin:/host/bin
-      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
-    depends_on:
-      - vrouter-kernel-init
-    restart: always
   vrouter-agent:
     image: "{{ container_registry }}/contrail-vrouter-agent:{{ contrail_version_tag }}"
     network_mode: host
@@ -58,4 +45,3 @@ services:
     tty: true
     depends_on:
       - vrouter-kernel-init
-      - vrouter-net-watchdog
