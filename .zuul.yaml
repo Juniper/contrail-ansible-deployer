@@ -1,0 +1,11 @@
+- project:
+    name: Juniper/contrail-ansible-deployer
+    templates:
+      - systests
+    check:
+      jobs:
+        - contrail-sanity-centos7-k8s:
+            dependencies:
+              - contrail-vnc-build-containers-centos74
+              - contrail-vnc-build-test-container
+            voting: false
