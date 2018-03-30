@@ -64,7 +64,6 @@
     - contrail-nodemgr
     - contrail-vrouter-kernel-init-dpdk
     - contrail-vrouter-agent-dpdk
-    - contrail-vrouter-net-watchdog
     - contrail-vrouter-agent
   when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
 
