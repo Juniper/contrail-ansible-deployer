@@ -1,0 +1,74 @@
+---
+- name: set phy intf file
+  set_fact: phy_intf_file=/etc/sysconfig/network-scripts/saved_vrouter_intf.txt
+
+- stat: path="{{ phy_intf_file }}"
+  register: file_st
+
+- debug: msg="saved router file exists"
+  when: file_st.stat.exists == true
+
+- name: Read saved file name
+  set_fact:
+    file_nm: "{{ item }}"
+  when: 
+    file_st.stat.exists == true
+  with_lines:
+    - cat "{{ phy_intf_file }}"
+
+- debug: msg="{{ file_nm }}"
+  when: file_st.stat.exists == true
+
+- name: check if vhost file exists
+  stat: 
+    path: /etc/sysconfig/network-scripts/ifcfg-{{ file_nm }}
+  register: rc
+  when: file_st.stat.exists == true
+
+- name: copy vhost back to  net intf file
+  copy:
+    src: /etc/sysconfig/network-scripts/ifcfg-vhost0
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{ file_nm }}
+  when: rc == true
+
+- name: get container ids
+  command: docker ps -a -q
+  register: container_ids
+
+- debug: msg="{{ container_ids.stdout_lines }}"
+
+- name: stop all containers
+  command:
+    docker stop "{{ item }}"
+  with_items: "{{ container_ids.stdout_lines }}"
+
+- name: Remove all containers
+  command:
+    docker rm -f -v "{{ item }}"
+  with_items: "{{ container_ids.stdout_lines }}"
+
+- name: Cleanup controller configs
+  file:
+    path: /etc/contrail
+    state: absent
+
+- name: get all volumes ids
+  command: docker volume ls -q
+  register: vol_ids
+
+- name: Remove all volumes
+  command: docker volume rm "{{ item }}"
+  with_items: "{{ vol_ids.stdout_lines }}"
+
+- name: Get all images ids
+  command: docker images -q
+  register: img_ids
+
+- name: Remove all images
+  command: docker rmi "{{ item }}"
+  with_items: "{{ img_ids.stdout_lines }}"
+
+- name: restart network service
+  service:
+    name: network
+    state: restarted
