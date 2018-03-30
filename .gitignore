@@ -1,3 +1,4 @@
 playbooks/*.retry
 playbooks/roles/create_openstack_host_group/filter_plugins/openstack_host_groups.pyc
 playbooks/test.yml
+.project

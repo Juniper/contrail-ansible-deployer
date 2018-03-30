@@ -388,11 +388,6 @@
   tags:
     - analytics
 
-- name: create contrail status
-  include: create_status.yml
-  tags:
-    - status
-
 - name: init master list
   set_fact:
     master_list: []

@@ -33,7 +33,7 @@
 
 - name: calculate XMPP port if not assigned
   set_fact:
-    xmpp_port: "{{ location.value.CLUSTER_ID|int + 15268 }}" 
+    xmpp_port: "{{ location.value.CLUSTER_ID|int + 15268 }}"
   when: location.value.XMPP_SERVER_PORT is undefined
 
 - name: set XMPP_SERVER_PORT port if assigned
@@ -67,6 +67,7 @@
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
+    - contrail-node-init
     - contrail-nodemgr
     - contrail-controller-control-control
   when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
