@@ -42,21 +42,6 @@ services:
     restart: always
     depends_on:
       - vrouter-kernel-init-dpdk
-  vrouter-net-watchdog:
-    image: "{{ container_registry }}/contrail-vrouter-net-watchdog:{{ contrail_version_tag }}"
-    network_mode: host
-    privileged: true
-    pid: host
-    env_file: /etc/contrail/common_vrouter.env
-    volumes:
-      - /bin:/host/bin
-      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
-      - /lib/modules:/lib/modules/
-      - /var/run:/var/run
-      - /dev:/dev
-    restart: always
-    depends_on:
-      - vrouter-agent-dpdk
   vrouter-agent:
     image: "{{ container_registry }}/contrail-vrouter-agent:{{ contrail_version_tag }}"
     network_mode: host
@@ -73,4 +58,4 @@ services:
       - /var/crashes/vrouter:/var/crashes
     restart: always
     depends_on:
-      - vrouter-net-watchdog
+      - vrouter-agent-dpdk
