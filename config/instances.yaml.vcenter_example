@@ -35,4 +35,6 @@ contrail_configuration:
   VCENTER_PASSWORD: c0ntrail123
   VCENTER_DATACENTER: test-dc
   VCENTER_DVSWITCH: test_dvs
+  VCENTER_WSDL_PATH: /usr/src/contrail/contrail-web-core/webroot/js/vim.wsdl
+  VCENTER_AUTH_PROTOCOL: https
 
