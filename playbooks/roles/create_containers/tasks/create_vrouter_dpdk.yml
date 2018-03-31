@@ -61,6 +61,7 @@
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
+    - contrail-node-init
     - contrail-nodemgr
     - contrail-vrouter-kernel-init-dpdk
     - contrail-vrouter-agent-dpdk

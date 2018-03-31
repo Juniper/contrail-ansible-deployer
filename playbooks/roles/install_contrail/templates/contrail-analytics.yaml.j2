@@ -1,5 +1,15 @@
 version: '2'
 services:
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_analytics.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    pid: host
+    network_mode: "host"
+    volumes:
+      - /usr/bin:/host/usr/bin
   nodemgr:
     image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_analytics.env
@@ -10,10 +20,12 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/hosts:/etc/hosts
-      - /var/crashes/analytics:/var/crashes
+      - /var/crashes:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
+    depends_on:
+      - node-init
   api:
     image: "{{ container_registry }}/contrail-analytics-api:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -21,7 +33,7 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
-      - /var/crashes/analytics:/var/crashes
+      - /var/crashes:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
@@ -32,7 +44,7 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
-      - /var/crashes/analytics:/var/crashes
+      - /var/crashes:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
@@ -43,7 +55,7 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
-      - /var/crashes/analytics:/var/crashes
+      - /var/crashes:/var/crashes
     restart: always
   alarm-gen:
     image: "{{ container_registry }}/contrail-analytics-alarm-gen:{{ contrail_version_tag }}"
@@ -52,7 +64,7 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
-      - /var/crashes/analytics:/var/crashes
+      - /var/crashes:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
@@ -63,7 +75,7 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
-      - /var/crashes/analytics:/var/crashes
+      - /var/crashes:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
@@ -74,7 +86,7 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
-      - /var/crashes/analytics:/var/crashes
+      - /var/crashes:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
