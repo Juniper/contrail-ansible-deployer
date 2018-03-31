@@ -130,5 +130,21 @@
     project_src: /etc/contrail/vrouter
   when: roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
 
-- name: "create rsyslogd listen conf for lbaas haproxy unix sock"
-  shell: "mkdir -p /var/log/contrail/lbaas/;echo '$AddUnixListenSocket /var/log/contrail/lbaas/haproxy.log.sock' > /etc/rsyslog.d/contrail-lbaas-haproxy.conf; systemctl restart rsyslog"
+- name: "create /var/log/contrail/lbaas"
+  file:
+    path: /var/log/contrail/lbaas
+    state: directory
+    recurse: yes
+
+- name: "install rsyslogd"
+  yum:
+    name: rsyslog
+    state: present
+
+- name: "configure rsyslogd"
+  shell: "echo '$AddUnixListenSocket /var/log/contrail/lbaas/haproxy.log.sock' > /etc/rsyslog.d/contrail-lbaas-haproxy.conf"
+
+- name: "restart rsyslogd"
+  service:
+    name: rsyslog
+    state: restarted
