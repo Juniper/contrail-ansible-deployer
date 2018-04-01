@@ -64,7 +64,7 @@ class FilterModule(object):
         for k,v in instances.iteritems():
             for i in hostvars.get(v['ip'], {}).get('ansible_interfaces', []):
                 if_str = 'ansible_' + i
-                if_ipv4 = hostvars[v['ip']].get(if_str).get('ipv4', None)
+                if_ipv4 = hostvars[v['ip']].get(if_str, {}).get('ipv4', None)
                 if if_ipv4 and if_ipv4.get('address', None) == v['ip']:
                     host_intf[v['ip']] = i
 
