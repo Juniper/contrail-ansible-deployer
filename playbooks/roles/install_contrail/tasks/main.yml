@@ -191,7 +191,7 @@
 
 - name: create host entry dict
   set_fact:
-    host_intf_dict: "{{ instances|ctrl_data_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) }}"
+    host_intf_dict: "{{ hostvars['localhost']['instances']|ctrl_data_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) }}"
   when:
     - contrail_configuration.CONTROL_DATA_NET_LIST is defined
 
@@ -268,7 +268,7 @@
 - name: get the final kolla configurations
   set_fact:
     final_kolla_configs: "{{ hostvars[item.value.ip].final_kolla_globals }}"
-  with_dict: "{{ instances }}"
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
     - item.value is defined
