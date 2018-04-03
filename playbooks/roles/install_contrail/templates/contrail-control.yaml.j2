@@ -39,7 +39,7 @@ services:
     restart: always
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
-{% if roles[instance_name].control.location is undefined %}
+{% if instances[instance_name].roles.control.location is undefined %}
   named:
     image: "{{ container_registry }}/contrail-controller-control-named:{{ contrail_version_tag }}"
     network_mode: "host"

@@ -1,0 +1,19 @@
+---
+- name: create per role host groups
+  add_host: hostname={{ instances[item.1]['ip'] }} groups={{ item.0 + '_instances' }}
+  when: item.1 in role_to_instance_dict[item.0]
+  with_nested:
+    - "{{ role_list }}"
+    - "{{ instance_list }}"
+
+- name: create per role host groups
+  debug:
+    msg: "{{ groups[item + '_instances'] }}"
+  with_items:
+    - "{{ role_list }}"
+
+- name: select first k8s master
+  add_host: hostname={{ groups['k8s_master_instances'][0] }} groups='k8s_first_master'
+  when:
+    - groups['k8s_master_instances'] is defined
+    - groups['k8s_master_instances'][0] is defined

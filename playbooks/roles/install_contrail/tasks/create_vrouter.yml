@@ -23,35 +23,40 @@
 
 - name: "get pop"
   set_fact:
-    location: "{{ roles[instance_name].vrouter.location }}"
-  when: roles[instance_name].vrouter.location is defined
+    location: "{{ instances[instance_name]['roles'].vrouter.location }}"
+  when:
+    - instances[instance_name]['roles'] is defined
+    - instances[instance_name]['roles'].vrouter is defined
+    - instances[instance_name]['roles'].vrouter.location is defined
 
 - name: "init pop control peer list"
   set_fact:
     pop_control_list: []
   when: location is defined
 
-- name: "add pop control nodes to list"
-  set_fact:
-    pop_control_list: "{{ pop_control_list + [ instances[item.key].ip ] }}"
-  when: location is defined and item.value.control is defined and item.value.control.location is defined and item.value.control.location == location
-  with_dict: "{{ roles }}"
-  ignore_errors: yes
+# TODO: rework this with new data structures
+
+#- name: "add pop control nodes to list"
+#  set_fact:
+#    pop_control_list: "{{ pop_control_list + [ instances[item.key].ip ] }}"
+#  when: location is defined and item.value.control is defined and item.value.control.location is defined and item.value.control.location == location
+#  with_dict: "{{ roles }}"
+#  ignore_errors: yes
 
 - name: "create controler host list if not defined"
   set_fact:
     pop_control_nodes: "{{ pop_control_list|join(',') }}"
   when: pop_control_list is defined
 
-- name: "create contrail_configuration.CONTROL_NODES"
+- name: "create hostvars['localhost'].CONTROL_NODES"
   set_fact:
     contrail_configuration: "{{ contrail_configuration|default({})|combine({'CONTROL_NODES': pop_control_nodes}) }}"
-  when: pop_control_nodes is defined and roles[instance_name].vrouter.CONTROL_NODES is undefined
+  when: pop_control_nodes is defined and instances[instance_name]['roles'].vrouter.CONTROL_NODES is undefined
 
 - name: "set DNS servers if location is defined"
   set_fact:
-    contrail_configuration: "{{ contrail_configuration|default({})|combine({'DNS_NODES': contrail_configuration.CONTROLLER_NODES}) }}"
-  when: pop_control_nodes is defined and roles[instance_name].vrouter.DNS_NODES is undefined
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'DNS_NODES': hostvars['localhost'].CONTROLLER_NODES}) }}"
+  when: pop_control_nodes is defined and instances[instance_name]['roles'].vrouter.DNS_NODES is undefined
 
 - name: "populate cluster wide common_vrouter.env"
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
@@ -65,7 +70,7 @@
 
 - name: "populate pod specific common_vrouter.env"
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
-  with_dict: "{{ roles[instance_name].vrouter }}"
+  with_dict: "{{ instances[instance_name]['roles'].vrouter }}"
   ignore_errors: yes
 
 - name: "populate pop settings"
@@ -86,28 +91,28 @@
   when: location is defined and remote_locations[location].SUBCLUSTER is undefined
 
 - name: "update image"
-  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  shell: "docker pull {{ hostvars['localhost'].CONTAINER_REGISTRY }}/{{ item }}:{{ hostvars['localhost'].CONTRAIL_VERSION_TAG }}"
   with_items:
     - contrail-nodemgr
     - contrail-vrouter-kernel-init
     - contrail-vrouter-agent
   when:
     - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
-    - roles[instance_name].vrouter.AGENT_MODE is undefined or roles[instance_name].vrouter.AGENT_MODE != 'dpdk'
+    - instances[instance_name]['roles'].vrouter.AGENT_MODE is undefined or instances[instance_name]['roles'].vrouter.AGENT_MODE != 'dpdk'
 
 - name: "create contrail vrouter compose file"
   template:
     src: contrail-vrouter.yaml.j2
     dest: "/etc/contrail/vrouter/docker-compose.yaml"
-  when: roles[instance_name].vrouter.AGENT_MODE is undefined or roles[instance_name].vrouter.AGENT_MODE != 'dpdk'
+  when: instances[instance_name]['roles'].vrouter.AGENT_MODE is undefined or instances[instance_name]['roles'].vrouter.AGENT_MODE != 'dpdk'
 
 - name: "start contrail vrouter"
   docker_service:
     project_src: /etc/contrail/vrouter
-  when: roles[instance_name].vrouter.AGENT_MODE is undefined or roles[instance_name].vrouter.AGENT_MODE != 'dpdk'
+  when: instances[instance_name]['roles'].vrouter.AGENT_MODE is undefined or instances[instance_name]['roles'].vrouter.AGENT_MODE != 'dpdk'
 
 - name: update image for dpdk vrouter
-  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  shell: "docker pull {{ hostvars['localhost'].CONTAINER_REGISTRY }}/{{ item }}:{{ hostvars['localhost'].CONTRAIL_VERSION_TAG }}"
   with_items:
     - contrail-node-init
     - contrail-nodemgr
@@ -116,19 +121,19 @@
     - contrail-vrouter-agent
   when:
     - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
-    - roles[instance_name].vrouter.AGENT_MODE is defined
-    - roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
+    - instances[instance_name]['roles'].vrouter.AGENT_MODE is defined
+    - instances[instance_name]['roles'].vrouter.AGENT_MODE == 'dpdk'
 
 - name: "create contrail dpdk vrouter compose file"
   template:
     src: contrail-vrouter-dpdk.yaml.j2
     dest: "/etc/contrail/vrouter/docker-compose.yaml"
-  when: roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
+  when: instances[instance_name]['roles'].vrouter.AGENT_MODE is defined and instances[instance_name]['roles'].vrouter.AGENT_MODE == 'dpdk'
 
 - name: "start contrail dpdk vrouter"
   docker_service:
     project_src: /etc/contrail/vrouter
-  when: roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
+  when: instances[instance_name]['roles'].vrouter.AGENT_MODE is defined and instances[instance_name]['roles'].vrouter.AGENT_MODE == 'dpdk'
 
 - name: "create /var/log/contrail/lbaas"
   file:

@@ -1,0 +1,12 @@
+---
+- name: configure k8s master
+  include: configure_k8s_master_node.yml
+  when: inventory_hostname in groups['k8s_master_instances']
+  tags:
+    - k8s
+
+- name: join k8s master
+  include: configure_k8s_join_node.yml
+  when: inventory_hostname in groups['k8s_node_instances']
+  tags:
+    - k8s

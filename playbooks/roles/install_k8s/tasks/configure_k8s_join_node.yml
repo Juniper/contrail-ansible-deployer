@@ -13,6 +13,11 @@
     regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
     line: 'Environment="KUBELET_CGROUP_ARGS=--cgroup-driver={{ cgroup_driver }}"'
 
+- name: reset k8s node
+  shell: |
+      kubeadm reset &&
+      rm -rf $HOME/.kube
+
 - name: enable kubelet service
   systemd:
     name: kubelet
@@ -20,9 +25,13 @@
     daemon_reload: yes
     enabled: True
 
+- name: set k8s master
+  set_fact:
+    k8s_master: "{{ groups['k8s_master_instances'][0] }}"
 - name: debug join
   debug:
-    msg: "master token: {{ hostvars[master_inventory].mastertoken }}"
+    msg: "master token: {{ hostvars[k8s_master].mastertoken }}"
 
 - name: join k8s cluster
-  shell: "kubeadm join --token {{ hostvars[master_inventory].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ master }}:6443"
+  shell: "kubeadm join --token {{ hostvars[k8s_master].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ k8s_master }}:6443"
+  when: "{{ inventory_hostname not in groups['k8s_master_instances'] }}"

@@ -65,7 +65,7 @@
   lineinfile: dest=/etc/contrail/common_control_only_{{ location.key }}.env regexp='.*CONTROL_INTROSPECT_LISTEN_PORT$' line="CONTROL_INTROSPECT_LISTEN_PORT={{ introspect_port }}" state=present
 
 - name: update image
-  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  shell: "docker pull {{ hostvars['localhost'].CONTAINER_REGISTRY }}/{{ item }}:{{ hostvars['localhost'].CONTRAIL_VERSION_TAG }}"
   with_items:
     - contrail-node-init
     - contrail-nodemgr

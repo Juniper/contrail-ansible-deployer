@@ -23,30 +23,27 @@
 
 - name: set location if defined
   set_fact:
-    location: "{{ roles[instance_name].control.location }}"
-  when: roles[instance_name].control.location is defined
+    location: "{{ instances[instance_name]['roles'].control.location }}"
+  ignore_errors: yes
 
 - name: init location control peers list if location is defined
   set_fact:
     control_peer_list: []
-  when: roles[instance_name].control.location is defined
+  when: location is defined
 
-- name: add peer control nodes to the list
-  set_fact:
-    control_peer_list: "{{ control_peer_list + [ instances[item.key].ip ] }}"
-  when: location is defined and item.value.control is defined and item.value.control.location is defined and item.value.control.location == location
-  with_dict: "{{ roles }}"
-  ignore_errors: yes
+# TODO: rework this with the new data structures
 
-- name: create controller host list if not defined
-  set_fact:
-    control_peers: "{{ control_peer_list|join(',') }}"
-  when: control_peer_list is defined
+#- name: add peer control nodes to the list
+#  set_fact:
+#    control_peer_list: "{{ control_peer_list + [ item ] }}"
+#  when: location is defined and item.value.control is defined and item.value.control.location is defined and item.value.control.location == location
+#  with_items: "{{ hostvars['localhost']['role_to_ip_dict']['control'] }}"
+#  ignore_errors: yes
 
-- name: create contrail_configuration.CONTROL_NODES
-  set_fact:
-    contrail_configuration: "{{ contrail_configuration|default({})|combine({'CONTROL_NODES': control_peers}) }}"
-  when: control_peers is defined and roles[instance_name].control.CONTROL_NODES is undefined
+#- name: create controller host list if not defined
+#  set_fact:
+#    control_peers: "{{ control_peer_list|join(',') }}"
+#  when: control_peer_list is defined
 
 - name: "populate global common_control.env"
   lineinfile: dest=/etc/contrail/common_control.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
@@ -60,7 +57,7 @@
 
 - name: "populate pod specific common_control.env"
   lineinfile: dest=/etc/contrail/common_control.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
-  with_dict: "{{ roles[instance_name].control }}"
+  with_dict: "{{ instances[instance_name]['roles'].control }}"
   ignore_errors: yes
 
 - name: add BGP_ASN if location is defined
@@ -80,7 +77,7 @@
   when: location is defined
 
 - name: update image
-  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  shell: "docker pull {{ hostvars['localhost'].CONTAINER_REGISTRY }}/{{ item }}:{{ hostvars['localhost'].CONTRAIL_VERSION_TAG }}"
   with_items:
     - contrail-node-init
     - contrail-nodemgr

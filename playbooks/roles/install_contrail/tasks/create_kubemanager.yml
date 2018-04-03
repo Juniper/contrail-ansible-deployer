@@ -21,11 +21,6 @@
     path: "/etc/contrail/common_kubemanager.env"
     state: touch
 
-- name: "create contrail_configuration.KUBERNETES_API_SERVER"
-  set_fact:
-    contrail_configuration: "{{ contrail_configuration|default({})|combine({'KUBERNETES_API_SERVER': master_inventory}) }}"
-  when: master_inventory is defined and roles[instance_name].kubemanager.KUBERNETES_API_SERVER is undefined
-
 - name: "populate global common_kubemanager.env"
   lineinfile: dest=/etc/contrail/common_kubemanager.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ contrail_configuration }}"
@@ -39,11 +34,11 @@
 - name: "populate pod specific common_kubemanager.env"
   lineinfile: dest=/etc/contrail/common_kubemanager.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ roles[instance_name].kubemanager }} | default ({})"
-  when: roles[instance_name].kubemanager is defined
+  when: instances[instance_name]['roles'].kubemanager is defined
   ignore_errors: yes
 
 - name: update image
-  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  shell: "docker pull {{ hostvars['localhost'].CONTAINER_REGISTRY }}/{{ item }}:{{ hostvars['localhost'].CONTRAIL_VERSION_TAG }}"
   with_items:
     - contrail-kubernetes-kube-manager
   when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false

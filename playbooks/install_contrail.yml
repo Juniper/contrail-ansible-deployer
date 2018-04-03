@@ -3,16 +3,28 @@
 # ansible-playbook -i inventory/ -e orchestrator=openstack playbook/install_contrail.yml
 #
 #
-- name: Create container host group
+- name: Set Contrail global variables according to environment and configuration
   hosts: localhost
   connection: local
   gather_facts: no
   roles:
-    - name: Generate container_host group
+    - name: Map global variables to localhost hostvars
+      role: set_contrail_global_variables
+  vars_files:
+    - "{{ config_file }}"
+
+- name: Create host groups
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+    - name: Generate container_hosts group
       role: create_container_host_group
     - name: Generate openstack host groups
       role: create_openstack_host_group
       when: orchestrator == 'openstack'
+    - name: Generate per role host groups
+      role: create_role_host_groups
   vars_files:
     - "{{ config_file }}"
   tags:
@@ -22,15 +34,33 @@
   when:
     - orchestrator == 'openstack'
     - skip_openstack is not defined or not skip_openstack|bool
+  environment:
+   - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
+   - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
 
-- name: Install Contrail
-  hosts: container_hosts
+- name: Install k8s
+  hosts: k8s_master_instances:k8s_node_instances
   gather_facts: yes
   roles:
-  - { role: install_contrail, when: skip_contrail is not defined or not skip_contrail|bool }
+  - { role: install_k8s }
   vars_files:
   - "{{ hostvars['localhost'].config_file }}"
   environment:
    - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
    - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
+  
+- name: Schedule Contrail with docker compose
+  hosts: container_hosts
+  gather_facts: yes
+  roles:
+    - role: install_contrail
+      when:
+        - hostvars['localhost'].CONTRAIL_SCHEDULER == 'compose'
+        - skip_contrail is not defined or not skip_contrail|bool
+  vars_files:
+  - "{{ hostvars['localhost'].config_file }}"
+  environment:
+   - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
+   - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
+
 

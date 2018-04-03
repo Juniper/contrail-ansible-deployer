@@ -33,12 +33,14 @@
 
 - name: "populate pod specific common_config.env"
   lineinfile: dest=/etc/contrail/common_config.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
-  with_dict: "{{ roles[instance_name].config }} | default ({})"
-  when: roles[instance_name].config is defined
+  with_dict: "{{ instances[instance_name]['roles'].config }} | default ({})"
+  when:
+    - instances[instance_name]['roles'] is defined
+    - instances[instance_name].config is defined 
   ignore_errors: yes
 
 - name: update image
-  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  shell: "docker pull {{ hostvars['localhost'].CONTAINER_REGISTRY }}/{{ item }}:{{ hostvars['localhost'].CONTRAIL_VERSION_TAG }}"
   with_items:
     - contrail-node-init
     - contrail-nodemgr
