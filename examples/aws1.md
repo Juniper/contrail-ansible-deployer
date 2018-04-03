@@ -116,6 +116,7 @@ instances:
     instance_type: t2.xlarge
     roles:
       vrouter:
+      openstack_compute:
 contrail_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
   CONTRAIL_VERSION: latest
@@ -123,7 +124,8 @@ contrail_configuration:
   RABBITMQ_NODE_PORT: 5673
   AUTH_MODE: keystone
   KEYSTONE_AUTH_URL_VERSION: /v3
-  KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123
+  KEYSTONE_AUTH_ADMIN_PASSWORD: contrail123
+  UPGRADE_KERNEL: true
 kolla_config:
   customize:
     nova.conf: |
@@ -135,6 +137,7 @@ kolla_config:
     kolla_external_vip_interface: "eth0"
     enable_haproxy: "no"
     enable_ironic: "no"
+    enable_swift: "no"
 ```
 
 ## Deploying the Cluster
