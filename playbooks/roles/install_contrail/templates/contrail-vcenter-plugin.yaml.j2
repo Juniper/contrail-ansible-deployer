@@ -10,6 +10,8 @@ services:
       - VCENTER_PASSWORD={{ vcenter_password }}
       - VCENTER_DATACENTER={{ vcenter_datacenter }}
       - VCENTER_DVSWITCH={{ vcenter_dvswitch }}
+      - VCENTER_WSDL_PATH={{ vcenter_wsdl_path }}
+      - VCENTER_AUTH_PROTOCOL={{ vcenter_auth_protocol }}
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/vcenter_plugin/ESXiToVRouterIp.map:/etc/contrail/ESXiToVRouterIp.map
