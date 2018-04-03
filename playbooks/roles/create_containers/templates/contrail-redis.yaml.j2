@@ -1,0 +1,15 @@
+version: '2'
+services:
+  network:
+    image: docker.io/kubernetes/pause
+    network_mode: "host"
+    volumes:
+     - /etc/hosts:/etc/hosts
+  redis:
+    image: "redis:4.0.2"
+    network_mode: "service:network"
+    depends_on:
+      - network
+    restart: on-failure
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}

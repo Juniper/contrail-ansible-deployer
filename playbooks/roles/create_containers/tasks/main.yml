@@ -158,6 +158,13 @@
   tags:
    - always
 
+- name: create redis
+  include: create_redis.yml
+  when: roles[inventory_hostname].webui is defined or roles[inventory_hostname].analytics is defined
+  tags:
+    - webui
+    - analytics
+
 - name: create contrail config datqbase
   include: create_config_database.yml
   when: roles[inventory_hostname].config_database is defined
