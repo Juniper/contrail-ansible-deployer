@@ -12,6 +12,7 @@ services:
       - VCENTER_DVSWITCH={{ vcenter_dvswitch }}
     volumes:
       - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/vcenter_plugin/ESXiToVRouterIp.map:/etc/contrail/ESXiToVRouterIp.map
     restart: on-failure
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
