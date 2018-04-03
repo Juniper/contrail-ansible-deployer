@@ -61,7 +61,7 @@
     recurse: yes
 
 - name: update image
-  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  shell: "docker pull {{ hostvars['localhost'].CONTAINER_REGISTRY }}/{{ item }}:{{ hostvars['localhost'].CONTRAIL_VERSION_TAG }}"
   with_items:
     - contrail-kubernetes-cni-init
   when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false

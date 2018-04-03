@@ -20,12 +20,8 @@
     daemon_reload: yes
     enabled: True
 
-- name: set controller list
-  set_fact:
-    controller_list: "{{ contrail_configuration.CONTROLLER_NODES.split(',') }}"
-
 - debug:
-    msg: "c list {{ controller_list }}"
+    msg: "c list {{ groups['config_instances'] }}"
 
 - debug:
     msg: "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
@@ -36,7 +32,7 @@
   when: item[0] == item[1]
   with_nested:
     - "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
-    - "{{ controller_list }}"
+    - "{{ groups['config_instances'] }}"
 
 #- name: initialize k8s master with listen ip
 #  shell: | 
@@ -53,6 +49,11 @@
 #      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
 #      chown -R $(id -u):$(id -g) $HOME/.kube
 #  when: inventory_hostname == master and listen_ip is undefined
+
+- name: reset k8s master
+  shell: | 
+      kubeadm reset &&
+      rm -rf $HOME/.kube
 
 - name: initialize k8s master with listen ip
   shell: | 
@@ -89,7 +90,7 @@
     src: contrail-kubemanager-serviceaccount.yaml.j2
     dest: /etc/contrail/contrail-kubemanager-serviceaccount.yaml
 
-- name: excute contrail kubemanager serviceaccount yaml
+- name: execute contrail kubemanager serviceaccount yaml
   shell: kubectl apply -f /etc/contrail/contrail-kubemanager-serviceaccount.yaml
 
 - name: get kubemanager token name from serviceaccount
