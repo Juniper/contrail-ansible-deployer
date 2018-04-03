@@ -29,12 +29,3 @@ services:
     restart: on-failure
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
-  redis:
-    image: "redis:4.0.2"
-    env_file: /etc/contrail/common_webui.env
-    network_mode: "service:network"
-    depends_on:
-      - network
-    restart: on-failure
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
