@@ -43,7 +43,7 @@ in kubernetes.
 
 ## Prerequisites
 
-- CentOS 7.4
+- CentOS 7.4 (kernel >= 3.10.0-693.17.1)
 - working name resolution through either DNS or host file for long and short hostnames of the cluster nodes
 - docker engine (tested with 17.03.1-ce)
 - docker-compose (tested with 1.17.0) installed
@@ -61,19 +61,21 @@ git clone http://github.com/Juniper/contrail-ansible-deployer
 
 ### configuration
 
-#### container host configuration (inventory/hosts)
+#### container host configuration (config/instances.yaml)
 
 This file defines the hosts hosting the containers.
 ```
-vi inventory/hosts
-container_hosts:
-  hosts:
-    192.168.1.100:                   # container host
-      ansible_ssh_pass: contrail123  # container host password
-    192.168.1.101:
-      ansible_ssh_pass: contrail123
-    192.168.1.102:
-      ansible_ssh_pass: contrail123
+vi config/instances.yaml
+provider_config:
+  bms:
+instances:
+  bms1:
+    provider: bms
+    ip: 192.168.1.100
+contrail_configuration:
+  CONTAINER_REGISTRY: opencontrailnightly
+  CONTRAIL_VERSION: latest
+  UPGRADE_KERNEL: true
 ```
 #### Contrail configuration
 
@@ -83,17 +85,14 @@ The following roles are installed by default:
 ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'k8s_master', 'vrouter', 'webui']
 The registry defaults to opencontrailnightly and the latest tag of the container.
 
-For customization the file inventory/group_vars/container_hosts.yml must be created.
-The inventory/group_vars directory contains some examples.
-In this file the following settings can be set:
+For customization use `config/instances.yaml`.
 
-- Contrail Service configuration
-- Registry settings
-- Container versions
-- Role assignments
+The `examples` directory contains `instances.yaml` for different setups.
 
 ## Execution
 
 ```
-ansible-playbook -i inventory/ playbooks/deploy.yml
+ansible-playbook -i inventory/ playbooks/provision_instances.yml
+ansible-playbook -i inventory/ playbooks/configure_instances.yml
+ansible-playbook -i inventory/ -e orchestrator=kubernetes playbooks/install_contrail.yml
 ```
