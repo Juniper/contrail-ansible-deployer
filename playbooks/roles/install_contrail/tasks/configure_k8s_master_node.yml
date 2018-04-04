@@ -89,7 +89,7 @@
     src: contrail-kubemanager-serviceaccount.yaml.j2
     dest: /etc/contrail/contrail-kubemanager-serviceaccount.yaml
 
-- name: excute contrail kubemanager serviceaccount yaml
+- name: execute contrail kubemanager serviceaccount yaml
   shell: kubectl apply -f /etc/contrail/contrail-kubemanager-serviceaccount.yaml
 
 - name: get kubemanager token name from serviceaccount
