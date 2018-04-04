@@ -30,12 +30,12 @@
     vcenter_dvswitch: "{{ contrail_configuration.VCENTER_DVSWITCH }}"
   when: contrail_configuration.VCENTER_DVSWITCH is defined
 
-  name: set vcenter wsdl path if defined
+- name: set vcenter wsdl path if defined
   set_fact:
     vcenter_wsdl_path: "{{ contrail_configuration.VCENTER_WSDL_PATH }}"
   when: contrail_configuration.VCENTER_WSDL_PATH is defined
 
-  name: set vcenter auth protocol if defined
+- name: set vcenter auth protocol if defined
   set_fact:
     vcenter_auth_protocol: "{{ contrail_configuration.VCENTER_AUTH_PROTOCOL }}"
   when: contrail_configuration.VCENTER_AUTH_PROTOCOL is defined
