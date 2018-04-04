@@ -1,0 +1,46 @@
+---
+- hosts: openstack_nodes
+  vars_files:
+    - "{{ hostvars['localhost'].config_file }}"
+  gather_facts: yes
+
+  roles:
+    - name: Generate openstack configurations
+      role: create_openstack_config
+
+  tasks:
+  - name: Import group variables
+    include_vars:
+      dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/group_vars"
+      extensions: ['yml']
+
+  - name: Import global variables
+    include_vars:
+      dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/etc/kolla"
+      extensions: ['yml']
+      ignore_files:
+        - passwords.yml.original
+        - globals.yml.original
+
+  - name: set tmphost
+    set_fact:
+      tmp_host: "{{ inventory_hostname }}"
+
+  - stat:
+      path: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/host_vars/{{ tmp_host }}.yml"
+    register: st
+    delegate_to: localhost
+
+  - name: Import host variables
+    include_vars:
+      file: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/host_vars/{{ inventory_hostname }}.yml"
+    when: st.stat.exists is defined and st.stat.exists
+
+- include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/contrail-networking.yml"
+  vars:
+    action: deploy
+
+- include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/post-deploy-contrail-networking.yml"
+  vars:
+    action: deploy
+
