@@ -26,7 +26,7 @@ services:
     depends_on:
       - node-init
   vrouter-kernel-init:
-    image: "{{ container_registry }}/contrail-vrouter-kernel-init:{{ contrail_version_tag }}"
+    image: "{{ container_registry }}/{{ vrouter_kernel_init_img_name }}:{{ contrail_version_tag }}"
     network_mode: host
     privileged: true
     env_file: /etc/contrail/common_vrouter.env
@@ -36,7 +36,9 @@ services:
       - /lib/modules:/lib/modules
       - /bin:/host/bin
       - /var/log/contrail:/var/log/contrail
+{% if ansible_distribution == 'CentOS' %}
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+{% endif %}
   vrouter-agent:
     image: "{{ container_registry }}/contrail-vrouter-agent:{{ contrail_version_tag }}"
     network_mode: host
@@ -47,7 +49,9 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /bin:/host/bin
       - /var/run/libvirt:/var/run/libvirt
+{% if ansible_distribution == 'CentOS' %}
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+{% endif %}
       - /var/crashes:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}

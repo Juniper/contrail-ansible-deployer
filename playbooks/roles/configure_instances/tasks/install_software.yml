@@ -18,11 +18,19 @@
     line: "NM_CONTROLLED=no"
   with_items: "{{ ansible_interfaces }}"
   ignore_errors: yes
+  when: ansible_distribution == 'CentOS'
 
 - name: restart network service
   service:
     name: network
     state: restarted
+  when: ansible_distribution == 'CentOS'
+
+- name: restart network service
+  service:
+    name: networking
+    state: restarted
+  when: ansible_os_family == 'Debian'
 
 - name: disable cloud init
   service:
@@ -42,12 +50,19 @@
   yum:
     name: epel-release
     state: latest
+  when: ansible_distribution == 'CentOS'
 
-- name: install ntpd
+- name: install ntpd centos
   yum:
     name: ntp
     state: latest
-  when: provider_data.ntpserver is defined
+  when: provider_data.ntpserver is defined and ansible_distribution == 'CentOS'
+
+- name: install ntpd deb
+  apt:
+    name: ntp
+    state: latest
+  when: provider_data.ntpserver is defined and ansible_os_family == 'Debian'
 
 - name: set ntp server
   template:
@@ -62,30 +77,51 @@
 
 - name: start ntp service
   service: name=ntpd state=started enabled=yes
-  when: provider_data.ntpserver is defined
+  when: provider_data.ntpserver is defined and ansible_distribution == 'CentOS'
+
+- name: start ntp service
+  service: name=ntp state=started enabled=yes
+  when: provider_data.ntpserver is defined and ansible_os_family == 'Debian'
 
 - name: install pip
   yum:
     name: python-pip
     state: latest
+  when: ansible_distribution == 'CentOS'
 
-- name: create docker repo
+- name: create docker repo centos
   yum_repository:
     name: dockerrepo
     description: Docker Repository
     baseurl: https://yum.dockerproject.org/repo/main/centos/7
     gpgkey: https://yum.dockerproject.org/gpg
     gpgcheck: yes
+  when: ansible_distribution == 'CentOS'
 
-- name: install docker selinux
+- name: create docker repo deb
+  apt_repository:
+    repo: deb https://apt.dockerproject.org/repo ubuntu-xenial main
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: install docker selinux centos
   yum:
     name: docker-engine-selinux-17.03.1.ce
     state: installed
+  when: ansible_distribution == 'CentOS'
 
-- name: install docker
+- name: install docker centos
   yum:
     name: docker-engine-17.03.1.ce
     state: installed
+  when: ansible_distribution == 'CentOS'
+
+- name: install docker deb
+  apt:
+    name: docker-engine
+    force: yes
+    state: present
+  when: ansible_os_family == 'Debian'
 
 - name: add insecure registry
   include: insecure_registry.yaml
@@ -167,7 +203,7 @@
    state: directory
    mode: 0777
 
-- name: create k8s repo
+- name: create k8s repo centos
   yum_repository:
     name: Kubernetes
     description: k8s repo
@@ -175,26 +211,58 @@
     gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
     repo_gpgcheck: yes
     gpgcheck: yes
+  when: ansible_distribution == 'CentOS'
+
+- name: create k8s repo deb
+  apt_repository:
+    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+  when: ansible_os_family == 'Debian'
 
 - name: install kubelet-1.9.2-0
   yum:
     name: kubelet-1.9.2-0
     state: latest
+  when: ansible_distribution == 'CentOS'
+
+- name: install kubelet-1.9.2-0
+  apt:
+    name: kubelet
+    state: latest
+    force: yes
+  when: ansible_os_family == 'Debian'
 
 - name: install kubeadm-1.9.2-0
   yum:
     name: kubeadm-1.9.2-0
     state: latest
+  when: ansible_distribution == 'CentOS'
+
+- name: install kubeadm-1.9.2-0
+  apt:
+    name: kubeadm
+    state: latest
+    force: yes
+  when: ansible_os_family == 'Debian'
 
 - name: install kubectl-1.9.2-0
   yum:
     name: kubectl-1.9.2-0
     state: latest
+  when: ansible_distribution == 'CentOS'
+
+- name: install kubectl-1.9.2-0
+  apt:
+    name: kubectl
+    state: latest
+    force: yes
+  when: ansible_os_family == 'Debian'
 
 - name: set selinux to permissive
   selinux:
     policy: targeted
     state: permissive
+  when: ansible_distribution == 'CentOS'
 
 - name: sysctl -w net.bridge.bridge-nf-call-iptables=1
   shell: sysctl -w net.bridge.bridge-nf-call-iptables=1 && echo "net.bridge.bridge-nf-call-iptables=1" >> /etc/sysctl.conf
