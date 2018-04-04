@@ -85,17 +85,27 @@
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ location }}" state=present
   when: location is defined and remote_locations[location].SUBCLUSTER is undefined
 
-- name: "update image"
+- name: set vrouter kernel init image name
+  set_fact:
+    vrouter_kernel_init_img_name: contrail-vrouter-kernel-build-init
+  when: ansible_os_family == 'Debian'
+
+- name: set vrouter kernel init image name
+  set_fact:
+    vrouter_kernel_init_img_name: contrail-vrouter-kernel-init
+  when: ansible_distribution == 'CentOS'
+
+- name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
     - contrail-nodemgr
-    - contrail-vrouter-kernel-init
+    - "{{ vrouter_kernel_init_img_name }}"
     - contrail-vrouter-agent
   when:
     - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
     - roles[instance_name].vrouter.AGENT_MODE is undefined or roles[instance_name].vrouter.AGENT_MODE != 'dpdk'
 
-- name: "create contrail vrouter compose file"
+- name: create contrail vrouter compose file
   template:
     src: contrail-vrouter.yaml.j2
     dest: "/etc/contrail/vrouter/docker-compose.yaml"
@@ -135,11 +145,6 @@
     path: /var/log/contrail/lbaas
     state: directory
     recurse: yes
-
-- name: "install rsyslogd"
-  yum:
-    name: rsyslog
-    state: present
 
 - name: "configure rsyslogd"
   shell: "echo '$AddUnixListenSocket /var/log/contrail/lbaas/haproxy.log.sock' > /etc/rsyslog.d/contrail-lbaas-haproxy.conf"
