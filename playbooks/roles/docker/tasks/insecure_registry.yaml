@@ -66,6 +66,7 @@
 
 - name: reload systemd
   shell: systemctl daemon-reload
+  when: ansible_distribution == 'CentOS'
 
 - name: start docker daemon
   service:
