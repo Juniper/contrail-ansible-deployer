@@ -11,18 +11,8 @@
 - name: turn off swap
   shell: swapoff -a && sed -i '/swap[ \t]\+swap/d' /etc/fstab
 
-- name: remove interfaces from Network Manager
-  lineinfile:
-    path: "/etc/sysconfig/network-scripts/ifcfg-{{ item }}"
-    regexp: "NM_CONTROLLED=no"
-    line: "NM_CONTROLLED=no"
-  with_items: "{{ ansible_interfaces }}"
-  ignore_errors: yes
-
-- name: restart network service
-  service:
-    name: network
-    state: restarted
+- name: OS specific package install
+  include: "{{ ansible_os_family }}.yml"
 
 - name: disable cloud init
   service:
@@ -38,16 +28,9 @@
   - NetworkManager
   ignore_errors: yes
 
-- name: install epel
-  yum:
-    name: epel-release
-    state: latest
-
-- name: install ntpd
-  yum:
-    name: ntp
-    state: latest
-  when: provider_data.ntpserver is defined
+- name: set ntp service name
+  set_fact:
+    ntp_svc_name: "{{ 'ntp' if ansible_os_family == 'Debian' else 'ntpd' }}"
 
 - name: set ntp server
   template:
@@ -61,26 +44,8 @@
   when: provider_data.ntpserver is defined
 
 - name: start ntp service
-  service: name=ntpd state=started enabled=yes
+  service: name={{ ntp_svc_name }} state=started enabled=yes
   when: provider_data.ntpserver is defined
-
-- name: enable service ntp
-  systemd:
-    name: ntpd
-    enabled: yes
-
-# centos uses chronyd by default and run it after restart instead of ntpd
-# service can be absent - so ignore it
-- name: disable service chronyd
-  systemd:
-    name: chronyd
-    enabled: no
-  ignore_errors: yes
-
-- name: install pip
-  yum:
-    name: python-pip
-    state: latest
 
 - name: get docker compose
   get_url:
@@ -148,43 +113,6 @@
    state: directory
    mode: 0777
 
-- name: create k8s repo
-  yum_repository:
-    name: Kubernetes
-    description: k8s repo
-    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
-    gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-    repo_gpgcheck: yes
-    gpgcheck: yes
-  when: instance_data.roles is defined and 
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
-
-- name: install kubelet-1.9.2-0
-  yum:
-    name: kubelet-1.9.2-0
-    state: latest
-  when: instance_data.roles is defined and 
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
-
-- name: install kubeadm-1.9.2-0
-  yum:
-    name: kubeadm-1.9.2-0
-    state: latest
-  when: instance_data.roles is defined and 
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
-
-- name: install kubectl-1.9.2-0
-  yum:
-    name: kubectl-1.9.2-0
-    state: latest
-  when: instance_data.roles is defined and 
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
-
-- name: set selinux to permissive
-  selinux:
-    policy: targeted
-    state: permissive
-
 - name: sysctl -w net.bridge.bridge-nf-call-iptables=1
   shell: sysctl -w net.bridge.bridge-nf-call-iptables=1 && echo "net.bridge.bridge-nf-call-iptables=1" >> /etc/sysctl.conf
 
@@ -212,24 +140,3 @@
 - name: flush iptables
   shell: iptables -F
 
-- name: install latest kernel
-  yum:
-    name: 'kernel'
-    state: latest
-  register: upgrade_kernel
-  when: (contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true) or
-        (instance_data.UPGRADE_KERNEL is defined and instance_data.UPGRADE_KERNEL == true)
-
-- name: restart server
-  shell: sleep 2 && shutdown -r now "Ansible updates triggered"
-  async: 1
-  poll: 0
-  become: true
-  ignore_errors: true
-  when: upgrade_kernel is defined and upgrade_kernel.changed
-
-- name: wait for server to come back online
-  wait_for_connection:
-    delay: 30
-    timeout: 300
-  when: upgrade_kernel is defined and upgrade_kernel.changed
