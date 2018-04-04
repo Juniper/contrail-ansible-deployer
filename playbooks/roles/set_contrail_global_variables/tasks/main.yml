@@ -1,0 +1,208 @@
+---
+- name: set empty contrail_configuration if not defined
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({}) }}"
+
+- name: set Contrail scheduler
+  set_fact:
+    CONTRAIL_SCHEDULER: "{{ contrail_configuration.CONTRAIL_SCHEDULER if contrail_configuration.CONTRAIL_SCHEDULER is defined else 'compose' }}"
+  when: CONTRAIL_SCHEDULER is undefined
+
+- name: check valid CONTRAIL_SCHEDULER settings
+  fail:
+    msg: "CONTRAIL_SCHEDULER can only be set to 'compose' or 'k8s'"
+  when: CONTRAIL_SCHEDULER not in ['compose', 'k8s']
+
+- name: set Contrail container repository
+  set_fact:
+    CONTAINER_REGISTRY: "{{ contrail_configuration.CONTAINER_REGISTRY if contrail_configuration.CONTAINER_REGISTRY is defined else 'opencontrailnightly' }}"
+  when: CONTAINER_REGISTRY is undefined
+
+- name: set Contrail container tag
+  set_fact:
+    CONTRAIL_VERSION_TAG: "{{ contrail_configuration.CONTRAIL_VERSION if contrail_configuration.CONTRAIL_VERSION is defined else 'latest' }}"
+  when: CONTRAIL_VERSION_TAG is undefined
+
+- name: set Contrail container tag considering openstack version
+  set_fact:
+    CONTRAIL_VERSION_TAG: "{{ contrail_configuration.OPENSTACK_VERSION }}-{{ CONTRAIL_VERSION_TAG }}"
+  when:
+    - contrail_configuration.OPENSTACK_VERSION is defined
+    - CONTRAIL_VERSION_TAG is undefined
+
+- name: set Contrail container tag considering linux distribution
+  set_fact:
+    CONTRAIL_VERSION_TAG: "{{ contrail_configuration.LINUX_DISTR }}-{{ CONTRAIL_VERSION_TAG }}"
+  when:
+    - contrail_configuration.LINUX_DISTR is defined
+    - CONTRAIL_VERSION_TAG is undefined
+
+- name: set main cloud orchestrator (first notation)
+  set_fact:
+    orchestrator: "{{ contrail_configuration.orchestrator if contrail_configuration.CLOUD_ORCHESTRATOR is defined else 'openstack' }}"
+  when: orchestrator is undefined
+
+#TODO: Unify notation
+
+- name: Set main cloud orchestrator (second notation)
+  set_fact:
+    CLOUD_ORCHESTRATOR: "{{ orchestrator }}"
+
+- name: Set keystone auth admin password
+  set_fact:
+    KEYSTONE_AUTH_ADMIN_PASSWORD: "{{ contrail_configuration.KEYSTONE_AUTH_ADMIN_PASSWORD if contrail_configuration.KEYSTONE_AUTH_ADMIN_PASSWORD is defined }}"
+  when:
+    - CLOUD_ORCHESTRATOR == 'openstack'
+    - kolla_config is defined
+    - kolla_config.kolla_passwords is defined
+    - kolla_config.kolla_passwords.keystone_admin_password is defined
+
+- name: set STDIN_OPEN to true if it's not defined
+  set_fact:
+    STDIN_OPEN: "{{ contrail_configuration.STDIN_OPEN if contrail_configuration.STDIN_OPEN is defined else 'true' }}"
+  when: STDIN_OPEN is undefined
+
+- name: set TTY to true if it's not defined
+  set_fact:
+    TTY: "{{ contrail_configuration.TTY if contrail_configuration.TTY is defined else 'true' }}"
+  when: TTY is undefined
+
+- name: create list with all instances
+  set_fact:
+    instance_list: "{{ instance_list | default ([]) + [ item.key ] }}"
+  with_dict: "{{ instances }}"
+
+- name: initialize list of default roles
+  set_fact:
+    default_roles: "{{ ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'vrouter', 'webui'] }}"
+
+- name: add openstack default roles
+  set_fact:
+    default_roles: "{{ default_roles + ['openstack'] }}"
+  when: CLOUD_ORCHESTRATOR == 'openstack'
+
+- name: add kubernetes default roles
+  set_fact:
+    default_roles: "{{ default_roles + ['k8s_master', 'k8s_node', 'kubemanager'] }}"
+  when: CLOUD_ORCHESTRATOR == 'k8s'
+
+- name: add openstack default roles
+  set_fact:
+    default_roles: "{{ default_roles + ['vcenter_plugin'] }}"
+  when: CLOUD_ORCHESTRATOR == 'vcenter'
+
+- name: create list with all roles
+  set_fact:
+    role_list: "{{ role_list|default([]) }} + {{ item.value.roles.keys() }}"
+  with_dict: "{{ instances }}" 
+
+- name: add default roles to the role list
+  set_fact:
+    role_list: "{{ role_list + default_roles }}"
+  with_dict: "{{ instances }}"
+
+- name: create list with all, unique, roles
+  set_fact:
+    role_list: "{{ role_list | list | unique }}"
+
+- name: add openstack default roles
+  set_fact:
+    default_roles: "{{ default_roles + ['vcenter_plugin'] }}"
+  when: CLOUD_ORCHESTRATOR == 'vcenter'
+
+- name: initialize dict to be populated with the list of roles for each instance
+  set_fact:
+    instance_to_role_dict: "{{ instance_to_role_dict | default({}) | combine({item: []}) }}"
+  with_items: "{{ instance_list }}"
+
+- name: create dict with the list of roles for each instance
+  set_fact:
+     instance_to_role_dict: "{{ instance_to_role_dict | combine ({item.1: instance_to_role_dict[item.1] + [item.0]}) }}"
+  when: instances[item.1]['roles'][item.0] is defined or instances[item.1]['roles'] is not defined
+  with_nested:
+    - "{{ role_list }}"
+    - "{{ instance_list }}"
+
+- name: initialize dict to be populated with the list of instances for each role
+  set_fact:
+    role_to_instance_dict: "{{ role_to_instance_dict | default({}) | combine({item: []}) }}"
+  with_items: "{{ role_list }}"
+
+- name: create dict with the list of instances for each role
+  set_fact:
+     role_to_instance_dict: "{{ role_to_instance_dict | combine ({item.0: role_to_instance_dict[item.0] + [item.1]}) }}"
+  when: instances[item.1]['roles'][item.0] is defined or instances[item.1]['roles'] is not defined
+  with_nested:
+    - "{{ role_list }}"
+    - "{{ instance_list }}"
+
+- name: initialize dict to be populated with the list of ip for each role
+  set_fact:
+    role_to_ip_dict: "{{ role_to_ip_dict | default({}) | combine({item: []}) }}"
+  with_items: "{{ role_list }}"
+
+- name: create dict with the list of ip for each role
+  set_fact:
+     role_to_ip_dict: "{{ role_to_ip_dict | combine ({item.0: role_to_ip_dict[item.0] + [instances[item.1]['ip']]}) }}"
+  when: instances[item.1]['roles'][item.0] is defined or instances[item.1]['roles'] is not defined
+  with_nested:
+    - "{{ role_list }}"
+    - "{{ instance_list }}"
+
+- set_fact:
+    contrail_roles: "['analytics', 'analytics_database', 'config', 'config_database', 'control', 'vrouter', 'webui', 'vcenter_plugin']"
+
+- set_fact:
+    k8s_roles: "['k8s_master', 'k8s_node']"
+
+- name: make sure every contrail node is k8s capable when CONTRAIL_SCHEDULER is 'k8s'
+  fail:
+    msg: "A node with contrail roles must have kubernetes roles"
+  when: 
+    - "{{ instance_to_role_dict[item] | intersect (contrail_roles) | length > 0 }}"
+    - not "{{ instance_to_role_dict[item] | intersect (k8s_roles) | length > 0 }}"
+    - CONTRAIL_SCHEDULER == 'k8s'
+  with_items:
+    - "{{ instance_list }}"
+
+- fail:
+    msg: "CONTRAIL_SCHEDULER 'k8s' requires at least one k8s_master"
+  when:
+    - CONTRAIL_SCHEDULER == 'k8s'
+    - "{{ role_to_instance_dict['k8s_master'] | length == 0 }}"
+
+- set_fact:
+    CONFIGDB_NODES: "{{ role_to_ip_dict['config_database'] | join(',') }}"
+    CONTROLLER_NODES: "{{ role_to_ip_dict['config'] | join(',') }}"
+    CONTROL_NODES: "{{ role_to_ip_dict['control'] | join(',') }}"
+    KUBERNETES_API_SERVER: "{{ role_to_ip_dict['k8s_master'] | join(',') }}"
+
+-  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'CONFIGDB_NODES': CONFIGDB_NODES}) }}"
+
+-  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'CONTROLLER_NODES': CONTROLLER_NODES}) }}"
+
+-  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'CONTROL_NODES': CONTROL_NODES}) }}"
+
+-  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'CONTRAIL_SCHEDULER': CONTRAIL_SCHEDULER}) }}"
+
+-  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'CONTAINER_REGISTRY': CONTAINER_REGISTRY}) }}"
+
+-  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'CONTRAIL_VERSION_TAG': CONTRAIL_VERSION_TAG}) }}"
+
+-  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'CLOUD_ORCHESTRATOR': CLOUD_ORCHESTRATOR}) }}"
+
+-  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'STDIN_OPEN': STDIN_OPEN}) }}"
+
+-  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'TTY': TTY}) }}"
+
+-  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'KUBERNETES_API_SERVER': KUBERNETES_API_SERVER}) }}"

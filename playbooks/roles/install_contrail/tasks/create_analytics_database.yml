@@ -43,13 +43,27 @@
     - contrail-external-kafka
     - contrail-external-cassandra
     - contrail-external-zookeeper
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when: 
+    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+    - CONTRAIL_SCHEDULER == 'compose'
 
 - name: create contrail analytics database compose file
   template:
     src: contrail-analytics-database.yaml.j2
     dest: /etc/contrail/analytics_database/docker-compose.yaml
+  when: CONTRAIL_SCHEDULER == 'compose'
 
-- name: start contrail analyticsdb
+- name: start contrail analyticsdb with compose
   docker_service:
     project_src: /etc/contrail/analytics_database
+  when: CONTRAIL_SCHEDULER == 'compose'
+
+- name: create contrail analytics_database k8s manifest
+  template:
+    src: contrail-analytics-database-k8s.yaml.j2
+    dest: /etc/contrail/analytics_database/kubernetes-manifest.yaml
+  when: CONTRAIL_SCHEDULER == 'k8s'
+
+- name: start contrail analytics database with k8s
+  shell: kubectl apply -f /etc/contrail/analytics_database/kubernetes-manifest.yaml
+  when: CONTRAIL_SCHEDULER == 'k8s'
