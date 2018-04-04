@@ -1,0 +1,82 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: contrail-control
+  namespace: kube-system
+  labels:
+    app: contrail-control
+spec:
+  selector:
+    matchLabels:
+      name: contrail-control
+  template:
+    metadata:
+      labels:
+        name: contrail-control
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "opencontrail.org/config"
+                operator: In
+                values:
+                - "true"
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      hostNetwork: true
+      containers:
+      - name: nodemgr
+        image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: control-env
+        env:
+        - name: NODE_TYPE
+          value: "control"
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+        - mountPath: /var/run/docker.sock
+          name: docker
+        - mountPath: /var/crashes
+          name: crashes
+      - name: control
+        image: "{{ container_registry }}/contrail-controller-control-control:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: control-env
+        env:
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+        - mountPath: /var/crashes
+          name: crashes
+      volumes:
+      - name: hosts
+        hostPath:
+          path: /etc/hosts
+          type: File
+      - name: logs
+        hostPath:
+          path: /var/log/contrail/control_only
+          type: DirectoryOrCreate
+      - name: docker
+        hostPath:
+          path: /var/run/docker.sock
+          type: File
+      - name: crashes
+        hostPath:
+          path: /var/crashes
+          type: DirectoryOrCreate

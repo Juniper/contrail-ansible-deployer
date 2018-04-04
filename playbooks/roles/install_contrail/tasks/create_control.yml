@@ -79,6 +79,11 @@
   lineinfile: dest=/etc/contrail/common_control.env regexp='^BGP_AUTO_MESH=.*' line="BGP_AUTO_MESH=false" state=present
   when: location is defined
 
+- name: create control-env configmap
+  shell: kubectl create configmap control-env --from-env-file=/etc/contrail/common_control.env -n kube-system
+  when:
+    - CONTRAIL_SCHEDULER == 'k8s'
+
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
@@ -87,13 +92,27 @@
     - contrail-controller-control-control
     - contrail-controller-control-named
     - contrail-controller-control-dns
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when:
+    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+    - CONTRAIL_SCHEDULER == 'compose'
 
 - name: "create contrail control compose file"
   template:
     src: contrail-control.yaml.j2
     dest: "/etc/contrail/control/docker-compose.yaml"
+  when: CONTRAIL_SCHEDULER == 'compose'
 
-- name: "start contrail control"
+- name: "start contrail control with compose"
   docker_service:
     project_src: /etc/contrail/control
+  when: CONTRAIL_SCHEDULER == 'compose'
+
+- name: create contrail control k8s manifest
+  template:
+    src: contrail-control-k8s.yaml.j2
+    dest: /etc/contrail/control/kubernetes-manifest.yaml
+  when: CONTRAIL_SCHEDULER == 'k8s'
+
+- name: start contrail control with k8s
+  shell: kubectl apply -f /etc/contrail/control/kubernetes-manifest.yaml
+  when: CONTRAIL_SCHEDULER == 'k8s'

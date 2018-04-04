@@ -1,0 +1,142 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: contrail-analytics-database
+  namespace: kube-system
+  labels:
+    app: contrail-analytics-database
+spec:
+  selector:
+    matchLabels:
+      name: contrail-analytics-database
+  template:
+    metadata:
+      labels:
+        name: contrail-analytics-database
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "opencontrail.org/analytics_database"
+                operator: In
+                values:
+                - "true"
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      hostNetwork: true
+      containers:
+      - name: nodemgr
+        image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: common-env
+        env:
+        - name: NODE_TYPE
+          value: "database"
+        - name: CASSANDRA_CQL_PORT
+          value: "9042"
+        - name: CASSANDRA_JMX_LOCAL_PORT
+          value: "7200"
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+        - mountPath: /var/run/docker.sock
+          name: docker
+      - name: kafka
+        image: "{{ container_registry }}/contrail-external-kafka:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: common-env
+        env:
+        - name: KAFKA_NODES
+          value: "{{ kafka_nodes }}"
+        - name: ZOOKEEPER_NODES
+          value: "{{ zookeeper_nodes }}"
+        - name: ZOOKEEPER_PORT
+          value: "2182"
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+      - name: cassandra
+        image: "{{ container_registry }}/contrail-external-cassandra:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: common-env
+        env:
+        - name: CASSANDRA_SEEDS
+          value: "{{ cassandra_seeds }}"
+        - name: CASSANDRA_START_RPC
+          value: "true"
+        - name: CASSANDRA_CLUSTER_NAME
+          value: "contrail_database"
+        - name: CASSANDRA_PORT
+          value: "9160"
+        - name: CASSANDRA_CQL_PORT
+          value: "9042"
+        - name: CASSANDRA_SSL_STORAGE_PORT
+          value: "7011"
+        - name: CASSANDRA_STORAGE_PORT
+          value: "7010"
+        - name: CASSANDRA_JMX_LOCAL_PORT
+          value: "7200"
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/lib/cassandra/data
+          name: db
+      - name: zookeeper
+        image: "{{ container_registry }}/contrail-external-zookeeper:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: common-env
+        env:
+        - name: ZOOKEEPER_NODES
+          value: "{{ zookeeper_nodes }}"
+        - name: ZOOKEEPER_PORTS
+          value: "4888:5888"
+        - name: ZOOKEEPER_PORT
+          value: "2182"
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /data
+          name: zkdata
+        - mountPath: /datalog
+          name: zklogs
+      volumes:
+      - name: hosts
+        hostPath:
+          path: /etc/hosts
+          type: File
+      - name: logs
+        hostPath:
+          path: /var/log/contrail/analytics_database
+          type: DirectoryOrCreate
+      - name: docker
+        hostPath:
+          path: /var/run/docker.sock
+          type: File
+      - name: db
+        hostPath:
+          path: /var/lib/analytics_database/cassandra
+          type: DirectoryOrCreate
+      - name: zkdata
+        hostPath:
+          path: /var/lib/analytics_database/zookeeper/data
+          type: DirectoryOrCreate
+      - name: zklogs
+        hostPath:
+          path: /var/lib/analytics_database/zookeeper/datalog
+          type: DirectoryOrCreate
