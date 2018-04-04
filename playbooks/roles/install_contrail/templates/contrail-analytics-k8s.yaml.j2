@@ -1,0 +1,134 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: contrail-analytics
+  namespace: kube-system
+  labels:
+    app: contrail-analytics
+spec:
+  selector:
+    matchLabels:
+      name: contrail-analytics
+  template:
+    metadata:
+      labels:
+        name: contrail-analytics
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "opencontrail.org/analytics"
+                operator: In
+                values:
+                - "true"
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      hostNetwork: true
+      containers:
+      - name: nodemgr
+        image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: analytics-env
+        env:
+        - name: NODE_TYPE
+          value: "analytics"
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+        - mountPath: /var/run/docker.sock
+          name: docker
+      - name: api
+        image: "{{ container_registry }}/contrail-analytics-api:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: analytics-env
+        env:
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+      - name: collector
+        image: "{{ container_registry }}/contrail-analytics-collector:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: analytics-env
+        env:
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+      - name: query-engine
+        image: "{{ container_registry }}/contrail-analytics-query-engine:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: analytics-env
+        env:
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+      - name: alarm-gen
+        image: "{{ container_registry }}/contrail-analytics-alarm-gen:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: analytics-env
+        env:
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+      - name: snmp-collector
+        image: "{{ container_registry }}/contrail-analytics-snmp-collector:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: analytics-env
+        env:
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+      - name: topology
+        image: "{{ container_registry }}/contrail-analytics-topology:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: analytics-env
+        env:
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+      volumes:
+      - name: hosts
+        hostPath:
+          path: /etc/hosts
+          type: File
+      - name: logs
+        hostPath:
+          path: /var/log/contrail/analytics
+          type: DirectoryOrCreate
+      - name: docker
+        hostPath:
+          path: /var/run/docker.sock
+          type: File

@@ -1,0 +1,115 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: contrail-config-database
+  namespace: kube-system
+  labels:
+    app: contrail-config-database
+spec:
+  selector:
+    matchLabels:
+      name: contrail-config-database
+  template:
+    metadata:
+      labels:
+        name: contrail-config-database
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "opencontrail.org/config_database"
+                operator: In
+                values:
+                - "true"
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      hostNetwork: true
+      containers:
+      - name: cassandra
+        image: "{{ container_registry }}/contrail-external-cassandra:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: common-env
+        env:
+        - name: CASSANDRA_SEEDS
+          value: "{{ cassandra_seeds }}"
+        - name: CASSANDRA_START_RPC
+          value: "true"
+        - name: CASSANDRA_CLUSTER_NAME
+          value: "contrail_database"
+        - name: CASSANDRA_PORT
+          value: "9161"
+        - name: CASSANDRA_CQL_PORT
+          value: "9041"
+        - name: CASSANDRA_SSL_STORAGE_PORT
+          value: "7013"
+        - name: CASSANDRA_STORAGE_PORT
+          value: "7012"
+        - name: CASSANDRA_JMX_LOCAL_PORT
+          value: "7201"
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+        - mountPath: /var/lib/cassandra/data
+          name: db
+      - name: zookeeper
+        image: "{{ container_registry }}/contrail-external-zookeeper:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: common-env
+        env:
+        - name: ZOOKEEPER_NODES
+          value: "{{ zookeeper_nodes }}"
+        - name: ZOOKEEPER_PORTS
+          value: "2888:3888"
+        - name: ZOOKEEPER_PORT
+          value: "2181"
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /data
+          name: zkdata
+        - mountPath: /datalog
+          name: zklogs
+      - name: rabbitmq
+        image: "{{ container_registry }}/contrail-external-rabbitmq:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: common-env
+        env:
+        - name: RABBITMQ_NODES
+          value: "{{ rabbitmq_nodes }}"
+        - name: RABBITMQ_ERLANG_COOKIE
+          value: "abcdefg"
+      volumes:
+      - name: logs
+        hostPath:
+          path: /var/log/contrail/config_database
+          type: DirectoryOrCreate
+      - name: hosts
+        hostPath:
+          path: /etc/hosts
+          type: File
+      - name: db
+        hostPath:
+          path: /var/lib/config_database/cassandra
+          type: DirectoryOrCreate
+      - name: zkdata
+        hostPath:
+          path: /var/lib/config_database/zookeeper/data
+          type: DirectoryOrCreate
+      - name: zklogs
+        hostPath:
+          path: /var/lib/config_database/zookeeper/datalog
+          type: DirectoryOrCreate

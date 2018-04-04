@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: contrail-kubemanager
+  namespace: kube-system
+  labels:
+    app: contrail-kubemanager
+spec:
+  selector:
+    matchLabels:
+      name: contrail-kubemanager
+  template:
+    metadata:
+      labels:
+        name: contrail-kubemanager
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "opencontrail.org/kubemanager"
+                operator: In
+                values:
+                - "true"
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      hostNetwork: true
+      containers:
+      - name: kubemanager
+        image: "{{ container_registry }}/contrail-kubernetes-kube-manager:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: kubemanager-env
+        env:
+        - name: K8S_TOKEN
+          value: "{{ hostvars[master_inventory].kubemanagertoken }}"
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: logs
+        - mountPath: /var/crashes
+          name: crashes
+      volumes:
+      - name: logs
+        hostPath:
+          path: /var/log/contrail/kubemanager
+          type: DirectoryOrCreate
+      - name: crashes
+        hostPath:
+          path: /var/crashes
+          type: DirectoryOrCreate

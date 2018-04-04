@@ -3,6 +3,16 @@
 # ansible-playbook -i inventory/ -e orchestrator=openstack playbook/install_contrail.yml
 #
 #
+- name: Set Contrail global variables according to environment and configuration
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+    - name: Map global variables to localhost hostvars
+      role: set_contrail_global_variables
+  vars_files:
+    - "{{ config_file }}"
+
 - name: Create container host group
   hosts: localhost
   connection: local
