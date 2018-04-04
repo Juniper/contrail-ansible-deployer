@@ -42,17 +42,36 @@
   when: roles[instance_name].kubemanager is defined
   ignore_errors: yes
 
+- name: create kubemanager-env configmap
+  shell: kubectl create configmap kubemanager-env --from-env-file=/etc/contrail/common_kubemanager.env -n kube-system
+  when:
+    - CONTRAIL_SCHEDULER == 'k8s'
+
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
     - contrail-kubernetes-kube-manager
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when:
+    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+    - CONTRAIL_SCHEDULER == 'compose'
 
 - name: create contrail kubemanager compose file
   template:
     src: contrail-kubemanager.yaml.j2
     dest: /etc/contrail/kubemanager/docker-compose.yaml
+  when: CONTRAIL_SCHEDULER == 'compose'
 
 - name: start contrail kubemanager
   docker_service:
     project_src: /etc/contrail/kubemanager
+  when: CONTRAIL_SCHEDULER == 'compose'
+
+- name: create contrail kubemanager k8s manifest
+  template:
+    src: contrail-kubemanager-k8s.yaml.j2
+    dest: /etc/contrail/kubemanager/kubernetes-manifest.yaml
+  when: CONTRAIL_SCHEDULER == 'k8s'
+
+- name: start contrail kubemanager with k8s
+  shell: kubectl apply -f /etc/contrail/kubemanager/kubernetes-manifest.yaml
+  when: CONTRAIL_SCHEDULER == 'k8s'

@@ -36,6 +36,11 @@
   with_dict: "{{ roles[instance_name].analytics }}"
   ignore_errors: yes
 
+- name: create analytics-env configmap
+  shell: kubectl create configmap analytics-env --from-env-file=/etc/contrail/common_analytics.env -n kube-system
+  when:
+    - CONTRAIL_SCHEDULER == 'k8s'
+
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
@@ -47,13 +52,27 @@
     - contrail-analytics-alarm-gen
     - contrail-analytics-snmp-collector
     - contrail-analytics-topology
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when:
+    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+    - CONTRAIL_SCHEDULER == 'compose'
 
-- name: create contrail analytics file
+- name: create contrail analytics compose file
   template:
     src: contrail-analytics.yaml.j2
     dest: /etc/contrail/analytics/docker-compose.yaml
+  when: CONTRAIL_SCHEDULER == 'compose'
 
-- name: start contrail analytics
+- name: start contrail analytics with compose
   docker_service:
     project_src: /etc/contrail/analytics
+  when: CONTRAIL_SCHEDULER == 'compose'
+
+- name: create contrail analytics k8s manifest
+  template:
+    src: contrail-analytics-k8s.yaml.j2
+    dest: /etc/contrail/analytics/kubernetes-manifest.yaml
+  when: CONTRAIL_SCHEDULER == 'k8s'
+
+- name: start contrail analytics with k8s
+  shell: kubectl apply -f /etc/contrail/analytics/kubernetes-manifest.yaml
+  when: CONTRAIL_SCHEDULER == 'k8s'
