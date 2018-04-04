@@ -1,13 +1,4 @@
 ---
-- name: Remove old installations of docker
-  apt:
-    name: "{{ item }}"
-    state: absent
-  with_items:
-    - docker
-    - docker-engine
-    - docker.io
-
 - name: Install pre-requisites
   apt:
     name: "{{ item }}"
@@ -17,16 +8,14 @@
     - curl
     - software-properties-common
 
-- name: Add docker GPG key
-  shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
-- name: Add apt repo for docker
+- name: create docker repo
   apt_repository:
-    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
+    repo: deb https://apt.dockerproject.org/repo ubuntu-xenial main
     state: present
-    filename: docker_ce
 
-- name: Install docker-ce
+- name: install docker
   apt:
-    name: docker-ce
-    state: latest
+    name: docker-engine
+    force: yes
+    state: present
+
