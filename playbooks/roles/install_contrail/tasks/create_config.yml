@@ -37,6 +37,11 @@
   when: roles[instance_name].config is defined
   ignore_errors: yes
 
+- name: create config-env configmap
+  shell: kubectl create configmap config-env --from-env-file=/etc/contrail/common_config.env -n kube-system
+  when:
+    - CONTRAIL_SCHEDULER == 'k8s'
+
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
@@ -46,13 +51,27 @@
     - contrail-controller-config-svcmonitor
     - contrail-controller-config-schema
     - contrail-controller-config-devicemgr
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when:
+    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+    - CONTRAIL_SCHEDULER == 'compose'
 
 - name: create contrail config compose file
   template:
     src: contrail-config.yaml.j2
     dest: /etc/contrail/config/docker-compose.yaml
+  when: CONTRAIL_SCHEDULER == 'compose'
 
-- name: start contrail config
+- name: start contrail config with compose
   docker_service:
     project_src: /etc/contrail/config
+  when: CONTRAIL_SCHEDULER == 'compose'
+
+- name: create contrail config k8s manifest
+  template:
+    src: contrail-config-k8s.yaml.j2
+    dest: /etc/contrail/config/kubernetes-manifest.yaml
+  when: CONTRAIL_SCHEDULER == 'k8s'
+
+- name: start contrail config with k8s
+  shell: kubectl apply -f /etc/contrail/config/kubernetes-manifest.yaml
+  when: CONTRAIL_SCHEDULER == 'k8s'

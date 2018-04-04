@@ -1,0 +1,71 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: contrail-webui
+  namespace: kube-system
+  labels:
+    app: contrail-webui
+spec:
+  selector:
+    matchLabels:
+      name: contrail-webui
+  template:
+    metadata:
+      labels:
+        name: contrail-webui
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "opencontrail.org/webui"
+                operator: In
+                values:
+                - "true"
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      hostNetwork: true
+      containers:
+      - name: web
+        image: "{{ container_registry }}/contrail-controller-webui-web:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: webui-env
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: logs
+        - mountPath: /var/crashes
+          name: crashes
+      - name: job
+        image: "{{ container_registry }}/contrail-controller-webui-job:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: webui-env
+        env:
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: logs
+        - mountPath: /var/crashes
+          name: crashes
+      - name: redis
+        image: "redis:4.0.2"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: webui-env
+      volumes:
+      - name: logs
+        hostPath:
+          path: /var/log/contrail/webui
+          type: DirectoryOrCreate
+      - name: crashes
+        hostPath:
+          path: /var/crashes
+          type: DirectoryOrCreate
