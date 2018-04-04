@@ -43,13 +43,14 @@
     - contrail-external-kafka
     - contrail-external-cassandra
     - contrail-external-zookeeper
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when: 
+    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
 
 - name: create contrail analytics database compose file
   template:
     src: contrail-analytics-database.yaml.j2
     dest: /etc/contrail/analytics_database/docker-compose.yaml
 
-- name: start contrail analyticsdb
+- name: start contrail analyticsdb with compose
   docker_service:
     project_src: /etc/contrail/analytics_database

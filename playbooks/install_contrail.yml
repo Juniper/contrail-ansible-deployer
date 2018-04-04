@@ -3,6 +3,16 @@
 # ansible-playbook -i inventory/ -e orchestrator=openstack playbook/install_contrail.yml
 #
 #
+- name: Set Contrail global variables according to environment and configuration
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+    - name: Map global variables to localhost hostvars
+      role: set_contrail_global_variables
+  vars_files:
+    - "{{ config_file }}"
+
 - name: Create container host group
   hosts: localhost
   connection: local
@@ -26,8 +36,25 @@
 - name: Install Contrail
   hosts: container_hosts
   gather_facts: yes
+  pre_tasks:
+    - set_fact: 
   roles:
-  - { role: install_contrail, when: skip_contrail is not defined or not skip_contrail|bool }
+  - name: prepare contrail installation
+    role: install_contrail
+    when: skip_contrail is not defined or not skip_contrail|bool
+  - name: install k8s
+    role: install_k8s
+    when: hostvars['localhost'].INSTALL_K8S | bool
+  - name: schedule contrail with docker compose
+    role: schedule_contrail_by_compose
+    when: 
+      - skip_contrail is not defined or not skip_contrail|bool
+      - CONTRAIL_SCHEDULER == 'compose'
+  - name: schedule contrail with k8s
+    role: schedule_contrail_by_k8s
+    when: 
+      - skip_contrail is not defined or not skip_contrail|bool
+      - CONTRAIL_SCHEDULER == 'k8s'
   vars_files:
   - "{{ hostvars['localhost'].config_file }}"
   environment:

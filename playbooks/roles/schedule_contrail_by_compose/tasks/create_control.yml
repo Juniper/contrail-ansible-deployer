@@ -87,13 +87,14 @@
     - contrail-controller-control-control
     - contrail-controller-control-named
     - contrail-controller-control-dns
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when:
+    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
 
 - name: "create contrail control compose file"
   template:
     src: contrail-control.yaml.j2
     dest: "/etc/contrail/control/docker-compose.yaml"
 
-- name: "start contrail control"
+- name: "start contrail control with compose"
   docker_service:
     project_src: /etc/contrail/control

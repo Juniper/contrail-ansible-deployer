@@ -41,13 +41,14 @@
   with_items:
     - contrail-controller-webui-web
     - contrail-controller-webui-job
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when: 
+    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
 
 - name: "create contrail webui compose file"
   template:
     src: contrail-webui.yaml.j2
     dest: "/etc/contrail/webui/docker-compose.yaml"
 
-- name: "start contrail webui"
+- name: "start contrail webui with compose"
   docker_service:
     project_src: /etc/contrail/webui

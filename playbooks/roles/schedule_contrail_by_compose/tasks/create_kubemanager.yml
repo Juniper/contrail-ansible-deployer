@@ -46,7 +46,8 @@
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
     - contrail-kubernetes-kube-manager
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when:
+    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
 
 - name: create contrail kubemanager compose file
   template:

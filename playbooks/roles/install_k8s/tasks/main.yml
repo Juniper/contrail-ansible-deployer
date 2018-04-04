@@ -1,0 +1,47 @@
+---
+- name: init master list
+  set_fact:
+    master_list: []
+  tags:
+    - k8s
+
+- name: init master inventory list
+  set_fact:
+    master_inventory_list: []
+  tags:
+    - k8s
+
+- name: set master
+  include: set_master.yml
+  with_items:
+    - "{{ controller_list }}"
+  loop_control:
+    loop_var: controller_item
+  when: roles[instance_name].k8s_master is defined or roles[instance_name].k8s_node is defined
+  tags:
+    - k8s
+
+- name: configure k8s master
+  include: configure_k8s_master_node.yml
+  when: roles[instance_name].k8s_master is defined and master_inventory is defined and inventory_hostname == master_inventory
+  tags:
+    - k8s
+
+- name: join k8s master
+  include: configure_k8s_join_node.yml
+  when: roles[instance_name].k8s_node is defined and master_inventory is defined and inventory_hostname != master_inventory
+  tags:
+    - k8s
+
+- name: give time for the nodes to join
+  pause:
+    seconds: 30
+
+- name: label k8s nodes according to contrail roles
+  shell: "{{ 'kubectl label nodes ' + item.1 + ' opencontrail.org/' + item.0 + '=true' }}"
+  when: 
+    - roles[instance_name].k8s_master is defined and master_inventory is defined and inventory_hostname == master_inventory
+    - item.1 in hostvars['localhost'].role_to_instance_dict[item.0]
+  with_nested:
+    - "{{ hostvars['localhost'].role_list }}"
+    - "{{ hostvars['localhost'].instance_list }}"

@@ -18,6 +18,16 @@
   tags:
    - always
 
+- name: set Contrail scheduler
+  set_fact:
+    CONTRAIL_SCHEDULER: "{{ contrail_configuration.CONTRAIL_SCHEDULER if contrail_configuration.CONTRAIL_SCHEDULER is defined else 'compose' }}"
+  when: CONTRAIL_SCHEDULER is undefined
+
+- name: check valid CONTRAIL_SCHEDULER settings
+  fail:
+    msg: "CONTRAIL_SCHEDULER can only be set to 'compose' or 'k8s'"
+  when: CONTRAIL_SCHEDULER not in ['compose', 'k8s']
+
 - name: set orchestrator param
   set_fact:
     contrail_configuration: "{{ contrail_configuration|default({})|combine({'CLOUD_ORCHESTRATOR': orchestrator}) }}"
@@ -308,9 +318,9 @@
   tags:
    - always
 
-- name: create /etc/contrail/compose
+- name: create /etc/contrail
   file:
-    path: /etc/contrail/compose
+    path: /etc/contrail
     state: directory
     recurse: yes
   tags:
@@ -344,6 +354,8 @@
   tags:
    - always
 
+# TODO: make following PODs supported by both k8s and compose
+
 - name: create redis
   include: create_redis.yml
   when: roles[instance_name].webui is defined or roles[instance_name].analytics is defined
@@ -351,79 +363,24 @@
     - webui
     - analytics
 
+# Next four lines have to be removed, they are there to prevent a conflict
+
 - name: create contrail config datqbase
-  include: create_config_database.yml
-  when: roles[instance_name].config_database is defined
-  tags:
-    - config_database
+  debug:
+    msg: "delete-me"
+ 
+# TODO: make following PODs supported by both k8s and compose
 
-- name: create contrail config
-  include: create_config.yml
-  when: roles[instance_name].config is defined
-  tags:
-    - config
-
-- name: create contrail webui
-  include: create_webui.yml
-  when: roles[instance_name].webui is defined
-  tags:
-    - webui
-
-- name: create contrail control
-  include: create_control.yml
-  when: roles[instance_name].control is defined
-  tags:
-   - control
-
-- name: create contrail control_only
+- name: create contrail control_only 
   include: create_control_only.yml
-  when: roles[instance_name].control_only is defined
+  when:
+    - roles[instance_name].control_only is defined
   tags:
     - control_only
-
-- name: create contrail analytics database
-  include: create_analytics_database.yml
-  when: roles[instance_name].analytics_database is defined
-  tags:
-    - analytics_database
-
-- name: create contrail analytics
-  include: create_analytics.yml
-  when: roles[instance_name].analytics is defined
-  tags:
-    - analytics
-
-- name: init master list
-  set_fact:
-    master_list: []
-  tags:
-    - k8s
-
-- name: init master inventory list
-  set_fact:
-    master_inventory_list: []
-  tags:
-    - k8s
-
-- name: set master
-  include: set_master.yml
-  with_items:
-    - "{{ controller_list }}"
-  loop_control:
-    loop_var: controller_item
-  when: roles[instance_name].k8s_master is defined or roles[instance_name].k8s_node is defined
-  tags:
-    - k8s
 
 - name: create cni
   include: create_k8s_cni.yml
   when: roles[instance_name].k8s_node is defined
-  tags:
-    - k8s
-
-- name: configure k8s master
-  include: configure_k8s_master_node.yml
-  when: roles[instance_name].k8s_master is defined and master_inventory is defined and inventory_hostname == master_inventory
   tags:
     - k8s
 
@@ -432,18 +389,6 @@
   when: roles[instance_name].vrouter is defined
   tags:
     - vrouter
-
-- name: join k8s master
-  include: configure_k8s_join_node.yml
-  when: roles[instance_name].k8s_node is defined and master_inventory is defined and inventory_hostname != master_inventory
-  tags:
-    - k8s
-
-- name: create contrail kube manager
-  include: create_kubemanager.yml
-  when: roles[instance_name].kubemanager is defined and master_inventory is defined
-  tags:
-    - k8s
 
 - name: create contrail vcenter-plugin
   include: create_vcenter_plugin.yml

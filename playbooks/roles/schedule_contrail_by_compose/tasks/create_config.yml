@@ -46,13 +46,14 @@
     - contrail-controller-config-svcmonitor
     - contrail-controller-config-schema
     - contrail-controller-config-devicemgr
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when:
+    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
 
 - name: create contrail config compose file
   template:
     src: contrail-config.yaml.j2
     dest: /etc/contrail/config/docker-compose.yaml
 
-- name: start contrail config
+- name: start contrail config with compose
   docker_service:
     project_src: /etc/contrail/config

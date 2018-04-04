@@ -1,10 +1,8 @@
 version: '2'
-volumes:
-  contrail_control_dns:
 services:
   node-init:
     image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
-    env_file: /etc/contrail/common_control.env
+    env_file: /etc/contrail/common.env
     environment:
       - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
     privileged: true
@@ -14,7 +12,7 @@ services:
       - /usr/bin:/host/usr/bin
   nodemgr:
     image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
-    env_file: /etc/contrail/common_control.env
+    env_file: /etc/contrail/common.env
     environment:
       - NODE_TYPE=control
     network_mode: "host"
@@ -31,7 +29,7 @@ services:
   control:
     image: "{{ container_registry }}/contrail-controller-control-control:{{ contrail_version_tag }}"
     network_mode: "host"
-    env_file: /etc/contrail/common_control.env
+    env_file: "/etc/contrail/common_control_only_{{ location.key }}.env"
     volumes:
       - /etc/hosts:/etc/hosts
       - /var/log/contrail:/var/log/contrail
@@ -39,31 +37,3 @@ services:
     restart: always
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
-{% if roles[instance_name].control.location is undefined %}
-  named:
-    image: "{{ container_registry }}/contrail-controller-control-named:{{ contrail_version_tag }}"
-    network_mode: "host"
-    env_file: /etc/contrail/common_control.env
-    privileged: true
-    pid: host
-    volumes_from:
-      - dns
-    depends_on:
-      - dns
-    restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
-  dns:
-    image: "{{ container_registry }}/contrail-controller-control-dns:{{ contrail_version_tag }}"
-    network_mode: "host"
-    env_file: /etc/contrail/common_control.env
-    pid: host
-    volumes:
-      - /etc/hosts:/etc/hosts
-      - /var/log/contrail:/var/log/contrail
-      - contrail_control_dns:/etc/contrail/dns
-      - /var/crashes:/var/crashes
-    restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
-{% endif %}

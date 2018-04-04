@@ -1,0 +1,147 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: contrail-config
+  namespace: kube-system
+  labels:
+    app: contrail-config
+spec:
+  selector:
+    matchLabels:
+      name: contrail-config
+  template:
+    metadata:
+      labels:
+        name: contrail-config
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "opencontrail.org/config"
+                operator: In
+                values:
+                - "true"
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      hostNetwork: true
+      containers:
+# TODO: ADD NODE INIT AS AN INIT CONTAINER
+#      - name: node-init
+#        image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+#        imagePullPolicy: Always
+#        securityContext:
+#          privileged: true
+#        envFrom:
+#        - configMapRef:
+#            name: config-env
+#        env:
+#        - name: CONTRAIL_STATUS_IMAGE
+#          value: "{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+#        volumeMounts:
+#        - mountPath: /host/usr/bin
+#          name: usrbin
+      - name: nodemgr
+        image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: config-env
+        env:
+        - name: NODE_TYPE
+          value: "config"
+        - name: CASSANDRA_CQL_PORT
+          value: "9041"
+        - name: CASSANDRA_JMX_LOCAL_PORT
+          value: "7201"
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+        - mountPath: /var/run/docker.sock
+          name: docker
+        - mountPath: /var/crashes
+          name: crashes
+      - name: api
+        image: "{{ container_registry }}/contrail-controller-config-api:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: config-env
+        env:
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+        - mountPath: /var/crashes
+          name: crashes
+      - name: svcmonitor
+        image: "{{ container_registry }}/contrail-controller-config-svcmonitor:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: config-env
+        env:
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+        - mountPath: /var/crashes
+          name: crashes
+      - name: schema
+        image: "{{ container_registry }}/contrail-controller-config-schema:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: config-env
+        env:
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+        - mountPath: /var/crashes
+          name: crashes
+      - name: devicemgr
+        image: "{{ container_registry }}/contrail-controller-config-devicemgr:{{ contrail_version_tag }}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: config-env
+        env:
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: hosts
+        - mountPath: /var/log/contrail
+          name: logs
+        - mountPath: /var/crashes
+          name: crashes
+      volumes:
+#      - name: usrbin
+#        hostPath:
+#          path: /usr/bin
+#          type: Directory
+      - name: hosts
+        hostPath:
+          path: /etc/hosts
+          type: File
+      - name: logs
+        hostPath:
+          path: /var/log/contrail/config
+          type: DirectoryOrCreate
+      - name: docker
+        hostPath:
+          path: /var/run/docker.sock
+          type: File
+      - name: crashes
+        hostPath:
+          path: /var/crashes
+          type: DirectoryOrCreate

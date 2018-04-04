@@ -1,0 +1,64 @@
+---
+- name: create /etc/contrail/compose
+  file:
+    path: /etc/contrail/compose
+    state: directory
+    recurse: yes
+  tags:
+   - always
+
+- name: create contrail config database with compose
+  include: create_config_database.yml
+  when: 
+    - roles[instance_name].config_database is defined
+  tags:
+    - config_database
+
+- name: create contrail config with compose
+  include: create_config.yml
+  when:
+    - roles[instance_name].config is defined
+  tags:
+    - config
+
+- name: create contrail webui with compose
+  include: create_webui.yml
+  when:
+    - roles[instance_name].webui is defined
+  tags:
+    - webui
+
+- name: create contrail control with compose
+  include: create_control.yml
+  when:
+    - roles[instance_name].control is defined
+  tags:
+   - control
+
+- name: create contrail control_only with compose
+  include: create_control_only.yml
+  when:
+    - roles[instance_name].control_only is defined
+  tags:
+    - control_only
+
+- name: create contrail analytics database with compose
+  include: create_analytics_database.yml
+  when:
+    - roles[instance_name].analytics_database is defined
+  tags:
+    - analytics_database
+
+- name: create contrail analytics with compose
+  include: create_analytics.yml
+  when: 
+    - roles[instance_name].analytics is defined
+  tags:
+    - analytics
+
+- name: create contrail kube manager with compose
+  include: create_kubemanager.yml
+  when: roles[instance_name].kubemanager is defined
+  tags:
+    - k8s
+

@@ -1,0 +1,21 @@
+version: '2'
+services:
+  vcenter-plugin:
+    image: "{{ container_registry }}/contrail-vcenter-plugin:{{ contrail_version_tag }}"
+    network_mode: "host"
+    env_file: /etc/contrail/common_vcplugin.env
+    environment:
+      - VCENTER_SERVER={{ vcenter_server }}
+      - VCENTER_USERNAME={{ vcenter_username }}
+      - VCENTER_PASSWORD={{ vcenter_password }}
+      - VCENTER_DATACENTER={{ vcenter_datacenter }}
+      - VCENTER_DVSWITCH={{ vcenter_dvswitch }}
+      - VCENTER_WSDL_PATH={{ vcenter_wsdl_path }}
+      - VCENTER_AUTH_PROTOCOL={{ vcenter_auth_protocol }}
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/contrail/vcenter_plugin/ESXiToVRouterIp.map:/etc/contrail/ESXiToVRouterIp.map
+    restart: on-failure
+    stdin_open: {{ stdin_open }}
+    tty: {{ tty }}
+
