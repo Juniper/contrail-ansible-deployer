@@ -36,18 +36,37 @@
   with_dict: "{{ roles[instance_name].control }}"
   ignore_errors: yes
 
+- name: create webui-env configmap
+  shell: kubectl create configmap webui-env --from-env-file=/etc/contrail/common_webui.env -n kube-system
+  when:
+    - CONTRAIL_SCHEDULER == 'k8s'
+
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
     - contrail-controller-webui-web
     - contrail-controller-webui-job
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when: 
+    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+    - CONTRAIL_SCHEDULER == 'compose'
 
 - name: "create contrail webui compose file"
   template:
     src: contrail-webui.yaml.j2
     dest: "/etc/contrail/webui/docker-compose.yaml"
+  when: CONTRAIL_SCHEDULER == 'compose'
 
-- name: "start contrail webui"
+- name: "start contrail webui with compose"
   docker_service:
     project_src: /etc/contrail/webui
+  when: CONTRAIL_SCHEDULER == 'compose'
+
+- name: create contrail webui k8s manifest
+  template:
+    src: contrail-webui-k8s.yaml.j2
+    dest: /etc/contrail/webui/kubernetes-manifest.yaml
+  when: CONTRAIL_SCHEDULER == 'k8s'
+
+- name: start contrail webui with k8s
+  shell: kubectl apply -f /etc/contrail/webui/kubernetes-manifest.yaml
+  when: CONTRAIL_SCHEDULER == 'k8s'
