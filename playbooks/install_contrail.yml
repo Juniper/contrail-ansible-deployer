@@ -15,6 +15,11 @@
       when: orchestrator == 'openstack'
   vars_files:
     - "{{ config_file }}"
+  tasks:
+    - set_fact:
+        cnetworking: "{{ contrail_configuration.CONTRAIL_NETWORKING }}"
+      when:
+        - contrail_configuration.CONTRAIL_NETWORKING is defined
   tags:
   - k8s
 
@@ -22,6 +27,14 @@
   when:
     - orchestrator == 'openstack'
     - skip_openstack is not defined or not skip_openstack|bool
+    - hostvars['localhost'].cnetworking is not defined or not hostvars['localhost'].cnetworking|bool
+
+- name: Install Contrail Networking
+  include: install_contrail_networking.yml
+  when:
+    - orchestrator == 'openstack'
+    - skip_openstack is not defined or not skip_openstack|bool
+    - hostvars['localhost'].cnetworking is defined and hostvars['localhost'].cnetworking|bool
 
 - name: Install Contrail
   hosts: container_hosts
