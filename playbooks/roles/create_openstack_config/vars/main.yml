@@ -4,7 +4,7 @@ kolla_globals: "{{ kolla_config.kolla_globals if kolla_config.kolla_globals is d
 # Pick first instance's IP as a default
 os_node_control: >-
      {%- set node_list = [] -%}
-      {%- for k,v in instances.iteritems() -%}
+      {%- for k,v in hostvars['localhost']['instances'].iteritems() -%}
        {%- if v.roles is not defined or v.roles.openstack is defined or v.roles.openstack_control is defined -%}
         {%- if hostvars[inventory_hostname]['ansible_' + hostvars[inventory_hostname]['network_interface_detected']].get('ipv4',{}).get('address') -%}
          {%- do node_list.append(v.ip) -%}
@@ -25,7 +25,7 @@ os_node_mgmt: "{{ hostvars[inventory_hostname]['ansible_' + external_interface_d
 # Need to come up with some other algorithm...
 contrail_node_control: >-
     {%- set node_list = [] -%}
-    {%- for k,v in instances.iteritems() -%}
+    {%- for k,v in hostvars['localhost']['instances'].iteritems() -%}
       {%- set ctrl_if = hostvars[v.ip].get('ansible_' + hostvars[v.ip].get('network_interface_detected', ansible_default_ipv4.interface), {}) -%}
       {%- set ctrl_ip = v.ip -%}
       {%- if ctrl_if -%}
