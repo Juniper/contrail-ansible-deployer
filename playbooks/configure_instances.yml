@@ -25,3 +25,23 @@
   environment:
    - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
    - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
+
+- name: Setup contrail_configuration for localhost
+  hosts: container_hosts
+  gather_facts: yes
+  pre_tasks:
+    - name: Import contrail_configuration
+      set_fact:
+          contrail_configuration: "{{ contrail_configuration|default({}) }}"
+  vars_files:
+  - "{{ hostvars['localhost'].config_file }}"
+
+- name: Configure SSL
+  hosts: container_hosts
+  gather_facts: yes
+  tasks:
+    - name: Generate and Copy SSL Certs for all hosts
+      include_role:
+        name: configure_instances
+        tasks_from: configure_ssl_certs.yml
+      when: contrail_configuration.SSL_ENABLE is defined
