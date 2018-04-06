@@ -1,0 +1,76 @@
+provider_config:
+  aws:
+    ec2_access_key: "${ACCESS_KEY}"
+    ec2_secret_key: "${SECRET_KEY}"
+    ssh_public_key: /root/.ssh/id_rsa.pub
+    ssh_private_key: /root/.ssh/id_rsa
+    ssh_user: centos
+    instance_type: "${INSTANCE_TYPE}"
+    image: "${IMAGE_ID}"
+    region: "${REGION}"
+    security_group: "${SECURITY_GROUP}"
+    vpc_subnet_id: "${SUBNET}"
+    assign_public_ip: yes
+    volume_size: 50
+    key_pair: "contrail-${STACK_NAME}"
+instances:
+  ${STACK_NAME}_contrail_control1:
+    provider: aws
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+  ${STACK_NAME}_contrail_control2:
+    provider: aws
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+  ${STACK_NAME}_contrail_control3:
+    provider: aws
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+  ${STACK_NAME}_openstack_control:
+    provider: aws
+    roles:
+      openstack:
+  ${STACK_NAME}_openstack_compute1:
+    provider: aws
+    roles:
+      vrouter:
+      openstack_compute:
+  ${STACK_NAME}_openstack_compute2:
+    provider: aws
+    roles:
+      vrouter:
+      openstack_compute:
+contrail_configuration:
+  CONTAINER_REGISTRY: opencontrailnightly
+  CONTRAIL_VERSION: latest
+  RABBITMQ_NODE_PORT: 5673
+  AUTH_MODE: keystone
+  KEYSTONE_AUTH_URL_VERSION: /v3
+  KEYSTONE_AUTH_ADMIN_PASSWORD: contrail123
+  UPGRADE_KERNEL: true
+kolla_config:
+  customize:
+    nova.conf: |
+      [libvirt]
+      virt_type=qemu
+      cpu_mode=none
+  kolla_globals:
+    network_interface: "eth0"
+    enable_haproxy: "no"
+    enable_ironic: "no"
+    enable_swift: "no"
