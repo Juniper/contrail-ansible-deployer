@@ -21,6 +21,105 @@
     path: "/etc/contrail/common_vrouter.env"
     state: touch
 
+- name: "Parse qos niantic configuration"
+  set_fact:
+    priority_id_list: "{{ priority_id_list|default([]) + [ item.value.get('priority_id') ] }}"
+    priority_scheduling_list: "{{ priority_scheduling_list|default([]) + [ item.value.get('scheduling') ] }}"
+    priority_bandwidth_list: "{{ priority_bandwidth_list|default([]) + [ item.value.get('bandwidth') ] }}"
+  with_dict: "{{ roles[instance_name].vrouter.qos_niantic }}"
+  when:  roles[instance_name].vrouter.qos_niantic is defined
+
+- name: "construct priority, scheduling and bandwidth dict"
+  set_fact:
+    priority_id_dict: "{{ priority_id_dict|default({})|combine({'PRIORITY_ID': priority_id_list|join(',')}) }}"
+    priority_scheduling_dict: "{{ priority_scheduling_dict|default({})|combine({'PRIORITY_SCHEDULING': priority_scheduling_list|join(',')}) }}"
+    priority_bandwidth_dict: "{{ priority_bandwidth_dict|default({})|combine({'PRIORITY_BANDWIDTH': priority_bandwidth_list|join(',') }) }}"
+  when:
+   - priority_id_list is defined
+   - priority_scheduling_list is defined
+   - priority_bandwidth_list is defined
+
+- name: "construct qos niantic configuration dict"
+  set_fact:
+    qos_niantic_dict: "{{ qos_niantic_dict|default({})|combine(priority_id_dict, priority_scheduling_dict, priority_bandwidth_dict) }}"
+  when:
+    - priority_id_dict is defined
+    - priority_scheduling_dict is defined
+    - priority_bandwidth_dict is defined
+
+- name: "Write qos niantic configuration to common_vrouter.env"
+  lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ qos_niantic_dict }}"
+  when: qos_niantic_dict is defined
+  ignore_errors: yes
+
+- name: "Set priority tagging option for qos "
+  set_fact:
+    priority_tagging_dict: "{{ priority_tagging_dict|default({})|combine({'PRIORITY_TAGGING': roles[instance_name].vrouter.qos.priority_tagging }) }}"
+  when:
+    roles[instance_name].vrouter.qos.priority_tagging is defined
+
+- name: "Parse qos queueing configuration"
+  set_fact:
+    qos_queue_id_list: "{{ qos_queue_id_list|default([]) + [ item.value.get('hardware_q_id') ] }}"
+    qos_logical_queue_list: "{{ qos_logical_queue_list|default([]) + [ item.value.get('logical_queue') ] }}"
+  with_dict: "{{ roles[instance_name].vrouter.qos }}"
+  when:
+    - roles[instance_name].vrouter.qos is defined
+    - " item.key  != 'default'"
+    - " item.key != 'priority_tagging' "
+
+- name: "Parse default queue qos configuration"
+  set_fact:
+    default_nic_queue: "{{ default_nic_queue|default({})|combine(item.value) }}"
+    qos_queue_id_list: "{{ qos_queue_id_list + [ item.value.get('hardware_q_id') ] }}"
+    default_hw_queue: True
+  with_dict: "{{ roles[instance_name].vrouter.qos }}"
+  when:
+    - roles[instance_name].vrouter.qos is defined
+    - " item.key == 'default'"
+    - " item.key != 'priority_tagging' "
+
+- name: "Parse logical queue mapping for default queue"
+  set_fact:
+    qos_logical_queue_list: "{{ qos_logical_queue_list + [ item.value ] }}"
+  with_dict: "{{ default_nic_queue }}"
+  when:
+    - default_nic_queue is defined
+    - "item.key == 'logical_queue'"
+
+- name: "construct dict for qos queue id"
+  set_fact:
+    queue_id_dict: "{{ queue_id_dict|default({})|combine({'QOS_QUEUE_ID': qos_queue_id_list | join(',')}) }}"
+  when:
+   - qos_queue_id_list is defined
+
+- name: "construct dict for qos logical queues"
+  set_fact:
+    logical_queue_dict: "{{ logical_queue_dict|default({})|combine({'QOS_LOGICAL_QUEUES': qos_logical_queue_list | join(';')}) }}"
+  when:
+   - qos_logical_queue_list is defined
+
+- name: "construct dict for qos queueing configuration"
+  set_fact:
+    qos_dict: "{{ qos_dict|default({})|combine(queue_id_dict, logical_queue_dict, priority_tagging_dict) }}"
+  when:
+   - queue_id_dict is defined
+   - logical_queue_dict is defined
+
+- name: "Set flag for qos default hardware queue"
+  set_fact:
+    qos_dict: "{{ qos_dict|combine({'QOS_DEF_HW_QUEUE': default_hw_queue} ) }}"
+  when:
+    - qos_dict is defined
+    - default_hw_queue is defined
+
+- name: "Write qos queueing configuration to common_vrouter.env"
+  lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ qos_dict }}"
+  when: qos_dict is defined
+  ignore_errors: yes
+
 - name: "get pop"
   set_fact:
     location: "{{ roles[instance_name].vrouter.location }}"
@@ -66,6 +165,9 @@
 - name: "populate pod specific common_vrouter.env"
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ roles[instance_name].vrouter }}"
+  when:
+   - item.key != 'qos'
+   - item.key != 'qos_niantic'
   ignore_errors: yes
 
 - name: "populate pop settings"
