@@ -1,0 +1,69 @@
+CONTAINER_REGISTRY: 192.204.217.152:5000
+REGISTRY_PRIVATE_INSECURE: True
+provider_config:
+  bms:
+    ssh_pwd: c0ntrail123
+    ssh_user: root
+    ntpserver: 192.84.5.100
+    domainsuffix: local
+instances:
+  bms1:
+    provider: bms
+    ip: 192.204.216.66
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+      openstack:
+      openstack_compute:
+      vrouter:
+        qos:
+          priority_tagging: True
+          qos_nic1:
+            hardware_q_id: 2
+            logical_queue: ['1', '3-8', '10-15']
+          default:
+            hardware_q_id: 6
+            logical_queue: ['17-20'] 
+  bms2:
+    provider: bms
+    ip: 192.204.217.1
+    roles:
+      openstack_compute:
+      vrouter:
+        VROUTER_GATEWAY: 192.204.217.254
+        qos_niantic:
+          qos_nic1:
+            priority_id: 2
+            scheduling: strict
+            bandwidth: 0
+          qos_nic2:
+            priority_id: 4
+            scheduling: rr
+            bandwidth: 40
+        qos:
+          priority_tagging: False
+          qos_nic1:
+            hardware_q_id: 3
+            logical_queue: ['1', '6-10', '12-15']
+          qos_nic2:
+            hardware_q_id: 5
+            logical_queue: ['2']
+          qos_nic3:
+            hardware_q_id: 8
+            logical_queue: ['3-5']
+          default:
+            hardware_q_id: 1 
+
+contrail_configuration:
+  CONTRAIL_VERSION: latest
+  CLOUD_ORCHESTRATOR: openstack
+  VROUTER_GATEWAY: 192.204.216.254
+  RABBITMQ_NODE_PORT: 5673
+  PHYSICAL_INTERFACE: enp1s0f0
+  AUTH_MODE: keystone
+  KEYSTONE_AUTH_HOST: 192.204.216.66
+  KEYSTONE_AUTH_URL_VERSION: /v3
