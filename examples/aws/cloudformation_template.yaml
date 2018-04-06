@@ -1,0 +1,266 @@
+---
+# Author: Bartosz kupidura
+# Contact: bartosz.kupidura at gmail dot com
+# Copyright (c) 2018 Juniper Networks, Inc. All rights reserved
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Stack to deploy Contrail with Openstack
+  CONTACT: Bartosz Kupidura <bartosz.kupidura@gmail.com>
+
+Parameters:
+  InstanceType:
+    Description: EC2 instance type (Default = t2.xlarge)
+    Type: String
+    Default: t2.xlarge
+    AllowedValues:
+    - t2.xlarge
+    - t2.2xlarge
+    - m1.xlarge
+    ConstraintDescription: must be a valid EC2 instance type
+
+  VpcCIDR:
+    Description: CIDR block for the VPC (Default = 10.10.0.0/16)
+    Type: String
+    Default: 10.10.0.0/16
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x
+
+  SubnetCIDR:
+    Description: CIDR block for the VPC subnet (Default = 10.10.10.0/24)
+    Type: String
+    Default: 10.10.10.0/24
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x
+
+  InstancePassword:
+    Description: Password for the instances
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 20
+    AllowedPattern: ^[a-zA-Z0-9]*$
+
+  AnsibleDeployerCommit:
+    Description: Ansible deployer commit ID (Default = master)
+    Type: String
+    Default: master
+
+  AWSAccessKey:
+    Description: AWS API access key
+    Type: String
+    NoEcho: true
+
+  AWSSecretKey:
+    Description: AWS API secret key
+    Type: String
+    NoEcho: true
+
+  AnsibleDeployerConfigUrl:
+    Description: URL to ansible deployer config file
+    Type: String
+    Default: https://github.com/Juniper/contrail-ansible-deployer/tree/master/examples/aws/all_in_one_with_openstack.yaml
+
+Mappings:
+  AWSInstanceType2Arch:
+    t2.micro:
+      Arch: HVM64
+    t2.large:
+      Arch: HVM64
+    t2.xlarge:
+      Arch: HVM64
+    m1.xlarge:
+      Arch: PV64
+
+  AWSInstanceType2NATArch:
+    t2.micro:
+      Arch: NATHVM64
+    t2.large:
+      Arch: NATHVM64
+    t2.xlarge:
+      Arch: NATHVM64
+    m1.xlarge:
+      Arch: NATPV64
+
+  AWSRegionArch2AMI:
+    us-east-1:
+      HVM64: ami-4bf3d731
+    us-east-2:
+      HVM64: ami-e1496384
+    us-west-1:
+      HVM64: ami-65e0e305
+    us-west-2:
+      HVM64: ami-a042f4d8
+    eu-west-1:
+      HVM64: ami-6e28b517
+    eu-west-2:
+      HVM64: ami-ee6a718a
+    eu-west-3:
+      HVM64: ami-bfff49c2
+    eu-central-1:
+      HVM64: ami-337be65c
+    ap-northeast-1:
+      HVM64: ami-25bd2743
+    ap-northeast-2:
+      HVM64: ami-7248e81c
+    ap-southeast-1:
+      HVM64: ami-d2fa88ae
+    ap-southeast-2:
+      HVM64: ami-b6bb47d4
+    ap-south-1:
+      HVM64: ami-5d99ce32
+    ca-central-1:
+      HVM64: ami-dcad28b8
+    sa-east-1:
+      HVM64: ami-f9adef95
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock:
+        Ref: VpcCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+        -
+          Key: Name
+          Value: !Sub vpc-${AWS::StackName}
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        -
+          Key: Name
+          Value: !Sub gw-${AWS::StackName}
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock:
+        Ref: SubnetCIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        -
+          Key: Name
+          Value: !Sub subnet-${AWS::StackName}
+
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        -
+          Key: Name
+          Value: !Sub rt-internet-${AWS::StackName}
+
+  InternetRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGateway
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref RouteTable
+
+  SubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref Subnet
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: SecurityGroup
+      GroupDescription: Allow all in/out
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        -
+          Key: Name
+          Value: !Sub sec-grp-${AWS::StackName}
+
+  EC2InstanceMaster:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet:
+             - Ref: "SecurityGroup"
+          SubnetId: !Ref Subnet
+      ImageId: !FindInMap [AWSRegionArch2AMI, !Ref 'AWS::Region', !FindInMap [AWSInstanceType2Arch,
+          !Ref 'InstanceType', Arch]]
+      UserData:
+        Fn::Base64:
+          Fn::Sub:
+            - |
+              #!/bin/bash
+              export IMAGE_ID=${IMAGE_ID}
+              export ACCESS_KEY=${ACCESS_KEY}
+              export SECRET_KEY=${SECRET_KEY}
+              export REGION=${REGION}
+              export SUBNET=${SUBNET}
+              export SECURITY_GROUP=${SECURITY_GROUP}
+              export STACK_NAME=${STACK_NAME}
+              export INSTANCE_TYPE=${INSTANCE_TYPE}
+
+              sed -i -e 's/#PermitRootLogin yes/PermitRootLogin yes/g' -e 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+              service sshd restart
+              echo root:${InstancePassword} | chpasswd
+
+              ssh-keygen -t rsa -C "" -P "" -f "/root/.ssh/id_rsa" -q
+
+              yum install -y epel-release
+              yum install -y python-urllib3 wget git ansible python-pip python-boto python2-boto3
+              pip install awscli
+
+              aws configure set aws_access_key_id ${ACCESS_KEY}
+              aws configure set aws_secret_access_key ${SECRET_KEY}
+              aws configure set default.region ${REGION}
+              aws ec2 delete-key-pair --key-name contrail
+              aws ec2 import-key-pair --public-key-material file:///root/.ssh/id_rsa.pub --key-name contrail
+
+              cd /root
+              git clone https://github.com/Juniper/contrail-ansible-deployer
+              cd contrail-ansible-deployer
+              git reset ${CONTRAIL_DEPLOYER_COMMIT}
+
+              wget ${CONFIG_URL} -O /tmp/instances.yaml
+              envsubst < /tmp/instances.yaml > config/instances.yaml
+            - IMAGE_ID: !FindInMap [AWSRegionArch2AMI, !Ref 'AWS::Region', !FindInMap [AWSInstanceType2Arch, !Ref 'InstanceType', Arch]]
+              ACCESS_KEY: !Ref AWSAccessKey
+              SECRET_KEY: !Ref AWSSecretKey
+              REGION: !Ref AWS::Region
+              SUBNET: !Ref Subnet
+              SECURITY_GROUP: SecurityGroup
+              STACK_NAME: !Ref AWS::StackName
+              INSTANCE_TYPE: !Ref InstanceType
+              CONTRAIL_DEPLOYER_COMMIT: !Ref AnsibleDeployerCommit
+              CONFIG_URL: !Ref AnsibleDeployerConfigUrl
+
+
+      Tags:
+        -
+          Key: Name
+          Value: !Sub master-${AWS::StackName}
+
+Outputs:
+  SSHAccess:
+    Description: Access shell using this address
+    Value: !Sub "ssh root@${EC2InstanceMaster.PublicDnsName}"
