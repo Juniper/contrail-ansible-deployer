@@ -1,0 +1,44 @@
+provider_config:
+  aws:
+    ec2_access_key: "${ACCESS_KEY}"
+    ec2_secret_key: "${SECRET_KEY}"
+    ssh_public_key: /root/.ssh/id_rsa.pub
+    ssh_private_key: /root/.ssh/id_rsa
+    ssh_user: centos
+    instance_type: "${INSTANCE_TYPE}"
+    image: "${IMAGE_ID}"
+    region: "${REGION}"
+    security_group: "${SECURITY_GROUP}"
+    vpc_subnet_id: "${SUBNET}"
+    assign_public_ip: yes
+    volume_size: 50
+    key_pair: "contrail-${STACK_NAME}"
+instances:
+  ${STACK_NAME}_contrail_control1:
+    provider: aws
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+      kubemanager:
+  ${STACK_NAME}_k8s_control:
+    provider: aws
+    roles:
+      k8s_master:
+  ${STACK_NAME}_k8s_compute1:
+    provider: aws
+    roles:
+      vrouter:
+      k8s_node:
+  ${STACK_NAME}_k8s_compute2:
+    provider: aws
+    roles:
+      vrouter:
+      k8s_node:
+contrail_configuration:
+  CONTAINER_REGISTRY: opencontrailnightly
+  CONTRAIL_VERSION: latest
+  UPGRADE_KERNEL: true
