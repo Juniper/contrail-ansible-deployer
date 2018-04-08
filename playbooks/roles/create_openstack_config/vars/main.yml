@@ -13,7 +13,17 @@ os_node_control: >-
       {%- endfor -%}
       {{ node_list | first }}
 
-os_node_mgmt: "{{ hostvars[inventory_hostname]['ansible_' + external_interface_detected].get('ipv4',{}).get('address', 'no_ip_for_mgmt_iface') }}"
+os_node_mgmt: >-
+     {%- set node_list = [] -%}
+      {%- for k,v in hostvars['localhost']['instances'].iteritems() -%}
+       {%- if v.roles is not defined or v.roles.openstack is defined or v.roles.openstack_control is defined -%}
+        {%- if hostvars[inventory_hostname]['ansible_' + hostvars[inventory_hostname]['external_interface_detected']].get('ipv4',{}).get('address') -%}
+         {%- do node_list.append(v.ip) -%}
+        {%- endif -%}
+       {%- endif -%}
+      {%- endfor -%}
+      {{ node_list | first }}
+
 
 # TODO: This cannot be derived in all scenarios. This is because the
 # create_openstack_config is run only on openstack_nodes. So we can not know the
