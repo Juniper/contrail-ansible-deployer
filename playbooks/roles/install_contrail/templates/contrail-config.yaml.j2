@@ -10,6 +10,7 @@ services:
     network_mode: "host"
     volumes:
       - /usr/bin:/host/usr/bin
+      - /etc/contrail/ssl:/etc/contrail/ssl
   nodemgr:
     image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_config.env
@@ -23,6 +24,8 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
     restart: always
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
@@ -36,6 +39,10 @@ services:
       - /etc/hosts:/etc/hosts
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
     restart: always
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
@@ -47,6 +54,10 @@ services:
       - /etc/hosts:/etc/hosts
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
     restart: always
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
@@ -58,6 +69,10 @@ services:
       - /etc/hosts:/etc/hosts
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
     restart: always
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
@@ -69,6 +84,10 @@ services:
       - /etc/hosts:/etc/hosts
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
     restart: always
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
