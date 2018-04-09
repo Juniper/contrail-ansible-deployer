@@ -300,6 +300,21 @@
   tags:
    - always
 
+- name: set Common SSL Enable flag for cert creation
+  set_fact:
+    ssl_cert_create: true
+  when: 
+    - (( contrail_configuration.SSL_ENABLE is defined ) and
+      ( contrail_configuration.SSL_ENABLE|bool )) or
+      (( contrail_configuration.XMPP_SSL_ENABLE is defined ) and
+      ( contrail_configuration.XMPP_SSL_ENABLE|bool )) or
+      (( contrail_configuration.INTROSPECT_SSL_ENABLE is defined ) and
+      ( contrail_configuration.INTROSPECT_SSL_ENABLE|bool )) or
+      (( contrail_configuration.SANDESH_SSL_ENABLE is defined ) and
+      ( contrail_configuration.SANDESH_SSL_ENABLE|bool ))
+  tags:
+   - always
+
 - name: create /var/log/contrail
   file:
     path: /var/log/contrail

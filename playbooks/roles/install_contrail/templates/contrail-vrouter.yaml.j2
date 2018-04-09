@@ -10,6 +10,7 @@ services:
     network_mode: "host"
     volumes:
       - /usr/bin:/host/usr/bin
+      - /etc/contrail/ssl:/etc/contrail/ssl
   nodemgr:
     image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_vrouter.env
@@ -20,6 +21,10 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/crashes:/var/crashes
+{% if ssl_cert_create %}
+    volumes_from:
+      - node-init
+{% endif %}
     restart: on-failure
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
@@ -37,6 +42,12 @@ services:
       - /bin:/host/bin
       - /var/log/contrail:/var/log/contrail
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+{% if ssl_cert_create %}
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+{% endif %}
   vrouter-agent:
     image: "{{ container_registry }}/contrail-vrouter-agent:{{ contrail_version_tag }}"
     network_mode: host
@@ -49,8 +60,15 @@ services:
       - /var/run/libvirt:/var/run/libvirt
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
       - /var/crashes:/var/crashes
+{% if ssl_cert_create %}
+    volumes_from:
+      - node-init
+{% endif %}
     restart: always
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
     depends_on:
       - vrouter-kernel-init
+{% if ssl_cert_create %}
+      - node-init
+{% endif %}
