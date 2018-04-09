@@ -25,4 +25,4 @@
     msg: "{{ hostvars[master].mastertoken }}"
 
 - name: join k8s cluster
-  shell: "kubeadm join --token {{ hostvars[master].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ master }}:6443"
+  shell: "kubeadm join --token {{ hostvars[master].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ hostvars[master]['private_ip'] }}:6443"
