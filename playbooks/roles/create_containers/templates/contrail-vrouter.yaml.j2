@@ -43,7 +43,10 @@ services:
     privileged: true
     env_file: /etc/contrail/common_vrouter.env
     volumes:
+      - /usr/src:/usr/src
+      - /lib/modules:/lib/modules
       - /bin:/host/bin
+      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
       - /var/run/libvirt:/var/run/libvirt
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes

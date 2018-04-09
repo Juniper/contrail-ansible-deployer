@@ -44,8 +44,10 @@ services:
     pid: host
     env_file: /etc/contrail/common_vrouter.env
     volumes:
-      - /var/log/contrail:/var/log/contrail
+      - /usr/src:/usr/src
+      - /lib/modules:/lib/modules
       - /bin:/host/bin
+      - /var/log/contrail:/var/log/contrail
       - /var/run/libvirt:/var/run/libvirt
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
       - /var/crashes:/var/crashes
