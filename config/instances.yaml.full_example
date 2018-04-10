@@ -99,3 +99,4 @@ instances:
 contrail_configuration:
   CONTAINER_REGISTRY: michaelhenkel
   CONTRAIL_VERSION: ocata-5.0.0-134
+  EXTERNAL_ROUTERS: mx1:10.10.20.20,mx2:40.40.30.20
