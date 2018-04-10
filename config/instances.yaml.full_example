@@ -96,6 +96,9 @@ instances:
   bms3:
     provider: bms
     ip: 192.168.1.102
+external_routers:
+  mx1:
+    ip: 10.204.216.253
 contrail_configuration:
   CONTAINER_REGISTRY: michaelhenkel
   CONTRAIL_VERSION: ocata-5.0.0-134

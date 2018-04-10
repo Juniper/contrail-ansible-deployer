@@ -114,6 +114,33 @@
   tags:
    - always
 
+- name: Calculate external_router_name_list and external_router_ip_list
+  set_fact:
+    external_router_name_list: "{{ external_router_name_list|default([])|combine(item.key) }}"
+    external_router_ip_list: "{{ external_router_ip_list|default([])|combine(item.value.ip) }}"
+  when: external_routers is defined
+  with_dict: "{{ external_routers }}"
+  tags:
+    - always
+
+- name: create contrail_configuration.EXTERNAL_ROUTER_NAME_LIST
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'EXTERNAL_ROUTER_NAME_LIST': external_router_name_list}) }}"
+  when:
+    - contrail_configuration.EXTERNAL_ROUTER_NAME_LIST is undefined
+    - external_router_name_list is defined
+  tags:
+   - always
+
+- name: create contrail_configuration.EXTERNAL_ROUTER_IP_LIST
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'EXTERNAL_ROUTER_IP_LIST': external_router_ip_list}) }}"
+  when:
+    - contrail_configuration.EXTERNAL_ROUTER_IP_LIST is undefined
+    - external_router_ip_list is defined
+  tags:
+   - always
+
 - name: create /var/log/contrail
   file:
     path: /var/log/contrail
