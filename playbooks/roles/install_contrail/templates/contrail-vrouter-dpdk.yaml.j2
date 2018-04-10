@@ -17,6 +17,8 @@ services:
       - NODE_TYPE=vrouter
     network_mode: host
     volumes:
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/crashes:/var/crashes
@@ -50,6 +52,8 @@ services:
       - /etc/os-release:/etc/os-release
       - /etc/lsb-release:/etc/lsb-release
       - /dev:/dev
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
     restart: always
@@ -69,6 +73,8 @@ services:
       - /bin:/host/bin
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
       - /dev:/dev
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     restart: always
     depends_on:
