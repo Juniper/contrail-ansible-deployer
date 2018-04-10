@@ -36,6 +36,7 @@ services:
       - /etc/lsb-release:/etc/lsb-release
       - /dev:/dev
       - /var/log/contrail:/var/log/contrail
+      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
   vrouter-agent-dpdk:
     image: "{{ container_registry }}/contrail-vrouter-agent-dpdk:{{ contrail_version_tag }}"
     network_mode: host
@@ -61,6 +62,7 @@ services:
     pid: host
     env_file: /etc/contrail/common_vrouter.env
     volumes:
+      - /lib/modules:/lib/modules
       - /var/lib/contrail:/var/lib/contrail
       - /var/log/contrail:/var/log/contrail
       - /var/run:/var/run
