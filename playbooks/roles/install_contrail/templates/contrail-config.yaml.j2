@@ -20,6 +20,8 @@ services:
     network_mode: "host"
     volumes:
       - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/crashes:/var/crashes
@@ -34,6 +36,8 @@ services:
     network_mode: "host"
     volumes:
       - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
     restart: always
@@ -45,6 +49,8 @@ services:
     env_file: /etc/contrail/common_config.env
     volumes:
       - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
     restart: always
@@ -56,6 +62,8 @@ services:
     env_file: /etc/contrail/common_config.env
     volumes:
       - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
     restart: always
@@ -67,6 +75,8 @@ services:
     env_file: /etc/contrail/common_config.env
     volumes:
       - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
     restart: always
