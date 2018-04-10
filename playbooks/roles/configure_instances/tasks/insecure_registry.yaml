@@ -18,7 +18,7 @@
 
 - name: set registry string if it is the first one
   set_fact:
-    new_reg: "{% raw %}{{% endraw %}\n \"insecure-registries\": [\"{{CONTAINER_REGISTRY}}\"]\n{% raw %}}{% endraw %}\n"
+    new_reg: "{% raw %}{{% endraw %}\n \"insecure-registries\": [\"{{contrail_configuration.CONTAINER_REGISTRY}}\"]\n{% raw %}}{% endraw %}\n"
   when: not p.stat.exists
 
 - name: add 1st registry entry to file
@@ -38,12 +38,12 @@
 - name: check if registry is already in
   set_fact:
     is_registry_in: True
-  when: CONTAINER_REGISTRY in item.value and p.stat.exists
+  when: contrail_configuration.CONTAINER_REGISTRY in item.value and p.stat.exists
   with_dict: "{{ docker_daemon }}"
 
 - name: add registry to list
   set_fact:
-    new_docker_registries: "{{ item.value }} + [ '{{ CONTAINER_REGISTRY }}' ]"
+    new_docker_registries: "{{ item.value }} + [ '{{ contrail_configuration.CONTAINER_REGISTRY }}' ]"
   when: item.key == "insecure-registries" and is_registry_in is undefined
   with_dict: "{{ docker_daemon }}"
 
