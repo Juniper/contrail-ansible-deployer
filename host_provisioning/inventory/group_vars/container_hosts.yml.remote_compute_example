@@ -1,6 +1,3 @@
-CONTAINER_REGISTRY: satellite.englab.juniper.net:5443
-REGISTRY_PRIVATE_SECURE: true
-REGISTRY_PRIVATE_INSECURE: false
 remote_locations:
   pop1:
     CLUSTER_ID: 1
@@ -9,6 +6,9 @@ remote_locations:
     XMPP_SERVER_PORT: 15270
     BGP_PORT: 11180
 contrail_configuration:
+  CONTAINER_REGISTRY: satellite.englab.juniper.net:5443
+  REGISTRY_PRIVATE_SECURE: true
+  REGISTRY_PRIVATE_INSECURE: false
   OPENSTACK_VERSION: pike
   CONTRAIL_VERSION: 5.0.0-121
   CONTROLLER_NODES: 192.168.1.100
