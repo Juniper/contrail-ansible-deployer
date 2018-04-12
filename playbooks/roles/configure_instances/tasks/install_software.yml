@@ -69,38 +69,6 @@
     name: python-pip
     state: latest
 
-- name: create docker repo
-  yum_repository:
-    name: dockerrepo
-    description: Docker Repository
-    baseurl: https://yum.dockerproject.org/repo/main/centos/7
-    gpgkey: https://yum.dockerproject.org/gpg
-    gpgcheck: yes
-
-- name: install docker selinux
-  yum:
-    name: docker-engine-selinux-17.03.1.ce
-    state: installed
-
-- name: install docker
-  yum:
-    name: docker-engine-17.03.1.ce
-    state: installed
-
-- name: add insecure registry
-  include: insecure_registry.yaml
-  when: REGISTRY_PRIVATE_INSECURE is defined and REGISTRY_PRIVATE_INSECURE == true
-
-- name: add private registry
-  include: private_registry.yaml
-  when: REGISTRY_PRIVATE_SECURE is defined and REGISTRY_PRIVATE_SECURE == true
-
-- name: start docker daemon
-  service:
-    enabled: yes
-    name: docker
-    state: started
-
 - name: get docker compose
   get_url:
     url: https://github.com/docker/compose/releases/download/1.17.0/docker-compose-Linux-x86_64

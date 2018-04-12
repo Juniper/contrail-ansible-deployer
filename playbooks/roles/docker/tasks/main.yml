@@ -1,0 +1,18 @@
+---
+
+- include: "{{ ansible_os_family }}.yml"
+
+- name: add insecure registry
+  include: insecure_registry.yaml
+  when: REGISTRY_PRIVATE_INSECURE is defined and REGISTRY_PRIVATE_INSECURE == true
+
+- name: add private registry
+  include: private_registry.yaml
+  when: REGISTRY_PRIVATE_SECURE is defined and REGISTRY_PRIVATE_SECURE == true
+
+- name: start docker daemon
+  service:
+    enabled: yes
+    name: docker
+    state: started
+
