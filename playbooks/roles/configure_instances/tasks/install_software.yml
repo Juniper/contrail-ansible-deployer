@@ -64,6 +64,11 @@
   service: name=ntpd state=started enabled=yes
   when: provider_data.ntpserver is defined
 
+- name: enable service ntp
+  systemd:
+    name: ntp
+    enabled: yes
+
 - name: install pip
   yum:
     name: python-pip
