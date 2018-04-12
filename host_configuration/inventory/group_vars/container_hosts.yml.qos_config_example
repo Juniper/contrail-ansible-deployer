@@ -1,0 +1,54 @@
+provider_config:
+  bms:
+    ssh_pwd: passwd
+    ssh_user: root
+    ntpserver: 192.84.5.100
+    domainsuffix: local
+instances:
+  bms1:
+    provider: bms
+    ip: 192.204.216.44
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+      openstack:
+      openstack_compute:
+      vrouter:
+        # comma separated list of hardwarwe queue ids, default queue is put at last 
+        QOS_QUEUE_ID: 2,6
+        # Defines the logical queues mapping for corresponding hardware queue in qos_queue_id above 
+        QOS_LOGICAL_QUEUES: "[ 1, 3-8, 10-15];[17-20]"
+        # When set to True defines the last queue in qos_queue_id list as default hardware queue for Qos
+        QOS_DEF_HW_QUEUE: True
+        # Knob to configure priority tagging when in DCB mode. Default value is true 
+        PRIORITY_TAGGING: False
+  bms2:
+    provider: bms
+    ip: 192.204.216.22
+    roles:
+      openstack_compute:
+      vrouter:
+        PHYSICAL_INTERFACE: enp2s0
+        # List of priority group ids for qos
+        PRIORITY_ID: 2,4
+        # Total hardware queue bandwidth used by corresponding priority group in priority_id list above
+        PRIORITY_BANDWIDTH: 0,40
+        # Defines the scheduling algorithm used for corresponding priority group, strict or roundrobin (rr).
+        PRIORITY_SCHEDULING: strict,rr
+        QOS_QUEUE_ID: 3,5,8
+        QOS_LOGICAL_QUEUES: "[1, 6-10, 12-15];[2];[3-5]"
+        PRIORITY_TAGGING: False
+        QOS_DEF_HW_QUEUE: True
+contrail_configuration:
+  CONTRAIL_VERSION: latest
+  CLOUD_ORCHESTRATOR: openstack
+  VROUTER_GATEWAY: 192.204.216.254
+  RABBITMQ_NODE_PORT: 5673
+  PHYSICAL_INTERFACE: eno1
+  AUTH_MODE: keystone
+  KEYSTONE_AUTH_HOST: 192.204.216.44
+  KEYSTONE_AUTH_URL_VERSION: /v3
