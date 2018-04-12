@@ -2,8 +2,8 @@
 kolla_config: {}
 default_openstack_sku: ocata
 openstack_sku: >-
-    {%- if contrail_configuration.OPENSTACK_VERSION is defined -%}
-      {{ contrail_configuration.OPENSTACK_VERSION }}
+    {%- if global_configuration.OPENSTACK_VERSION is defined -%}
+      {{ global_configuration.OPENSTACK_VERSION }}
     {%- else -%}
       {{ default_openstack_sku }}
     {%- endif -%}

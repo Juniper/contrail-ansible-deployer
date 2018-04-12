@@ -41,21 +41,21 @@
 - name: set container tag contrail version to master if not defined
   set_fact:
     contrail_version_tag: latest
-  when: contrail_configuration.CONTRAIL_VERSION is undefined
+  when: global_configuration.CONTRAIL_VERSION is undefined
   tags:
    - always
 
 - name: set container tag contrail version if defined
   set_fact:
-    contrail_version_tag: "{{ contrail_configuration.CONTRAIL_VERSION }}"
-  when: contrail_configuration.CONTRAIL_VERSION is defined
+    contrail_version_tag: "{{ global_configuration.CONTRAIL_VERSION }}"
+  when: global_configuration.CONTRAIL_VERSION is defined
   tags:
    - always
 
 - name: add openstack version tag if defined
   set_fact:
-    contrail_version_tag: "{{ contrail_configuration.OPENSTACK_VERSION }}-{{ contrail_version_tag }}"
-  when: contrail_configuration.OPENSTACK_VERSION is defined
+    contrail_version_tag: "{{ global_configuration.OPENSTACK_VERSION }}-{{ contrail_version_tag }}"
+  when: global_configuration.OPENSTACK_VERSION is defined
   tags:
    - always
 
@@ -69,14 +69,14 @@
 - name: set registry to opencontrailnightly if undefined
   set_fact:
     container_registry: opencontrailnightly
-  when: contrail_configuration.CONTAINER_REGISTRY is undefined
+  when: global_configuration.CONTAINER_REGISTRY is undefined
   tags:
    - always
 
 - name: set registry if defined
   set_fact:
-    container_registry: "{{ contrail_configuration.CONTAINER_REGISTRY }}"
-  when: contrail_configuration.CONTAINER_REGISTRY is defined
+    container_registry: "{{ global_configuration.CONTAINER_REGISTRY }}"
+  when: global_configuration.CONTAINER_REGISTRY is defined
   tags:
    - always
 

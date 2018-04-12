@@ -183,13 +183,22 @@ provider_config:
     zone: us-west1-aA            # Optional.  Defaults to  ?
     disk_size: 50                # Mandatory. Default is too small
 ```
+
+### Global services configuration
+This section sets global service parameters. All parameters are optional.
+
+```
+global_configuration:
+  CONTAINER_REGISTRY: opencontrailnightly
+  CONTRAIL_VERSION: latest
+  REGISTRY_PRIVATE_INSECURE: True
+```
+
 ### Contrail services configuration
 This section sets global contrail service parameters. All parameters are optional.
 
 ```
 contrail_configuration:     # Contrail service configuration section
-  CONTAINER_REGISTRY: opencontrailnightly
-  CONTRAIL_VERSION: latest
   UPGRADE_KERNEL: true
 ```
 
