@@ -50,8 +50,8 @@ contrail_node_control: >-
     {{ node_list | first }}
 
 container_registry: >-
-    {%- if contrail_configuration is defined and contrail_configuration['CONTAINER_REGISTRY'] is defined -%}
-      {%- print contrail_configuration['CONTAINER_REGISTRY'] -%}
+    {%- if CONTAINER_REGISTRY is defined -%}
+      {%- print CONTAINER_REGISTRY -%}
     {%- else -%}
       {%- print 'opencontrailnightly' -%}
     {%- endif -%}
