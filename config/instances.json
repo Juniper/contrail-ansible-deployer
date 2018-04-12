@@ -43,7 +43,9 @@
     }
   },
   "contrail_configuration": {
-    "CONTAINER_REGISTRY": "opencontrailnightly",
     "CONTRAIL_VERSION": "latest"
+  },
+  "global_configuration": {
+    "CONTAINER_REGISTRY": "opencontrailnightly"
   }
 }
