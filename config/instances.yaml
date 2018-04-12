@@ -4,6 +4,6 @@ instances:
   bms1:
     provider: bms
     ip: 192.168.1.100
-contrail_configuration:
+global_configuration:
   CONTAINER_REGISTRY: michaelhenkel
   CONTRAIL_VERSION: ocata-5.0-20180219195722
