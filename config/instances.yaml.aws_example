@@ -20,6 +20,7 @@ instances:
     provider: aws
   aws3:
     provider: aws
-contrail_configuration:
+global_configuration:
   CONTAINER_REGISTRY: michaelhenkel
+contrail_configuration:
   CONTRAIL_VERSION: ocata-5.0.0-134
