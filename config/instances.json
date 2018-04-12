@@ -42,7 +42,7 @@
       "provider": "gce"
     }
   },
-  "contrail_configuration": {
+  "global_configuration": {
     "CONTAINER_REGISTRY": "opencontrailnightly",
     "CONTRAIL_VERSION": "latest"
   }
