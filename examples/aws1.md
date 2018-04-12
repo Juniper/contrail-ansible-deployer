@@ -117,8 +117,9 @@ instances:
     roles:
       vrouter:
       openstack_compute:
-contrail_configuration:
+global_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
+contrail_configuration:
   CONTRAIL_VERSION: latest
   CLOUD_ORCHESTRATOR: openstack
   RABBITMQ_NODE_PORT: 5673

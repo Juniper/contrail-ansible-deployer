@@ -1,0 +1,8 @@
+---
+dependencies:
+  - role: docker
+    when:
+      - ansible_os_family != 'Darwin'
+      - kolla_config is defined
+      - kolla_config.kolla_globals is defined
+      - kolla_config.kolla_globals.enable_swift is not defined or kolla_config.kolla_globals.enable_swift|bool
