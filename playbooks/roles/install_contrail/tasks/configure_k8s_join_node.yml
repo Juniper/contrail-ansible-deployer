@@ -1,4 +1,13 @@
 ---
+- name: initialize node_exists with false
+  set_fact:
+    node_exists: false
+
+- name: check if node already exists
+  set_fact:
+    node_exists: true
+  when: ansible_hostname in hostvars[master_inventory].node_list
+
 - name: docker info for getting cgroup driver
   shell: docker info 2>/dev/null |grep "Cgroup Driver" |awk '{print $3}'
   register: docker_info
@@ -19,6 +28,7 @@
     state: restarted
     daemon_reload: yes
     enabled: True
+  when: node_exists == false
 
 - name: debug join
   debug:
@@ -26,3 +36,4 @@
 
 - name: join k8s cluster
   shell: "kubeadm join --token {{ hostvars[master_inventory].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ master }}:6443"
+  when: node_exists == false
