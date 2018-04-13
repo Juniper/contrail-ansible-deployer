@@ -175,21 +175,29 @@
     gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
     repo_gpgcheck: yes
     gpgcheck: yes
+  when: instance_data.roles is defined and 
+        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
 
 - name: install kubelet-1.9.2-0
   yum:
     name: kubelet-1.9.2-0
     state: latest
+  when: instance_data.roles is defined and 
+        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
 
 - name: install kubeadm-1.9.2-0
   yum:
     name: kubeadm-1.9.2-0
     state: latest
+  when: instance_data.roles is defined and 
+        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
 
 - name: install kubectl-1.9.2-0
   yum:
     name: kubectl-1.9.2-0
     state: latest
+  when: instance_data.roles is defined and 
+        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
 
 - name: set selinux to permissive
   selinux:
