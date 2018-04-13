@@ -130,6 +130,11 @@
     project_src: /etc/contrail/vrouter
   when: roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
 
+- name: "Restart nova-compute"
+  shell: "docker restart nova_compute"
+  when: roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
+  ignore_errors: yes
+
 - name: "create /var/log/contrail/lbaas"
   file:
     path: /var/log/contrail/lbaas
