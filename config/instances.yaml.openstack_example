@@ -53,8 +53,9 @@ instances:
       openstack_storage:
       openstack_monitoring:
       openstack_compute:
-contrail_configuration:
+global_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
+contrail_configuration:
   CONTRAIL_VERSION: ocata-master-20180210000007
   CLOUD_ORCHESTRATOR: openstack
   RABBITMQ_NODE_PORT: 5673

@@ -43,6 +43,7 @@ instances:
     provider: gce
   gce3:
     provider: gce
-contrail_configuration:
+global_configuration:
   CONTAINER_REGISTRY: michaelhenkel
+contrail_configuration:
   CONTRAIL_VERSION: ocata-5.0.0-134
