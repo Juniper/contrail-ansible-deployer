@@ -50,6 +50,7 @@ services:
       - /var/run/libvirt:/var/run/libvirt
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
+      - /dev/log:/dev/log
     restart: on-failure
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
