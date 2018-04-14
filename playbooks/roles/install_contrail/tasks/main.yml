@@ -69,14 +69,16 @@
 - name: set registry to opencontrailnightly if undefined
   set_fact:
     container_registry: opencontrailnightly
-  when: contrail_configuration.CONTAINER_REGISTRY is undefined
+  when: global_configuration is not defined or (global_configuration is defined and global_configuration.CONTAINER_REGISTRY is undefined)
   tags:
    - always
 
 - name: set registry if defined
   set_fact:
     container_registry: "{{ global_configuration.CONTAINER_REGISTRY }}"
-  when: global_configuration.CONTAINER_REGISTRY is defined
+  when:
+    - global_configuration is defined
+    - global_configuration.CONTAINER_REGISTRY is defined
   tags:
    - always
 
