@@ -250,7 +250,7 @@
     msg: "{{ controller_list }}"
   tags:
    - always
-  
+
 - name: create controller host list if not defined
   set_fact:
     controller: "{{ controller_list|join(',') }}"
@@ -297,21 +297,6 @@
     - kolla_config is defined
     - kolla_config.kolla_globals is defined
     - kolla_config.kolla_globals.kolla_internal_vip_address is defined
-  tags:
-   - always
-
-- name: set Common SSL Enable flag for cert creation
-  set_fact:
-    ssl_cert_create: true
-  when:
-    - (( contrail_configuration.SSL_ENABLE is defined ) and
-      ( contrail_configuration.SSL_ENABLE|bool )) or
-      (( contrail_configuration.XMPP_SSL_ENABLE is defined ) and
-      ( contrail_configuration.XMPP_SSL_ENABLE|bool )) or
-      (( contrail_configuration.INTROSPECT_SSL_ENABLE is defined ) and
-      ( contrail_configuration.INTROSPECT_SSL_ENABLE|bool )) or
-      (( contrail_configuration.SANDESH_SSL_ENABLE is defined ) and
-      ( contrail_configuration.SANDESH_SSL_ENABLE|bool ))
   tags:
    - always
 
