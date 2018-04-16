@@ -1,0 +1,10 @@
+---
+- name: Generate SSL Certs
+  include: generate_ssl_certs.yml
+  when: contrail_configuration.SSL_CERT_DIR is not defined
+  delegate_to: localhost
+  delegate_facts: True
+
+- name: Copy SSL Certs
+  include: copy_ssl_certs.yml
+  when: contrail_configuration.SSL_ENABLE
