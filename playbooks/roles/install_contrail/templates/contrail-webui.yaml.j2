@@ -6,6 +6,8 @@ services:
     env_file: /etc/contrail/common_webui.env
     volumes:
       - /var/log/contrail:/var/log/contrail
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}
@@ -16,6 +18,8 @@ services:
     env_file: /etc/contrail/common_webui.env
     volumes:
       - /var/log/contrail:/var/log/contrail
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     restart: always
     stdin_open: {{ stdin_open }}

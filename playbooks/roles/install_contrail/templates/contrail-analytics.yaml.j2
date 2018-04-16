@@ -21,6 +21,8 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     volumes_from:
       - node-init
@@ -36,6 +38,8 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     volumes_from:
       - node-init
@@ -51,6 +55,8 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     volumes_from:
       - node-init
@@ -66,6 +72,8 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     volumes_from:
       - node-init
@@ -79,6 +87,8 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     volumes_from:
       - node-init
@@ -94,6 +104,8 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     volumes_from:
       - node-init
@@ -109,6 +121,8 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     volumes_from:
       - node-init

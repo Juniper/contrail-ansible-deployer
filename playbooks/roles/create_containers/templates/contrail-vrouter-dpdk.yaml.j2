@@ -19,6 +19,8 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     restart: on-failure
     stdin_open: {{ stdin_open }}
@@ -51,6 +53,8 @@ services:
       - /lib/modules:/lib/modules
       - /var/run:/var/run
       - /var/log/contrail:/var/log/contrail
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     restart: on-failure
     stdin_open: {{ stdin_open }}
@@ -70,6 +74,8 @@ services:
       - /bin:/host/bin
       - /var/run:/var/run
       - /var/log/contrail:/var/log/contrail
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     restart: on-failure
     stdin_open: {{ stdin_open }}
