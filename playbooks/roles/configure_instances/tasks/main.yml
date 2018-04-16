@@ -1,3 +1,16 @@
 ---
 - name: install software
   include: install_software.yml
+
+- name: generate ssl certs
+  include: configure_ssl_certs.yml
+  when:
+    - (( contrail_configuration.SSL_ENABLE is defined ) and
+      ( contrail_configuration.SSL_ENABLE|bool )) or
+      (( contrail_configuration.XMPP_SSL_ENABLE is defined ) and
+      ( contrail_configuration.XMPP_SSL_ENABLE|bool )) or
+      (( contrail_configuration.INTROSPECT_SSL_ENABLE is defined ) and
+      ( contrail_configuration.INTROSPECT_SSL_ENABLE|bool )) or
+      (( contrail_configuration.SANDESH_SSL_ENABLE is defined ) and
+      ( contrail_configuration.SANDESH_SSL_ENABLE|bool ))
+
