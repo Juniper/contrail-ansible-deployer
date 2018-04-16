@@ -1,0 +1,5 @@
+---
+- name: install openssl tools
+  pip:
+    name: pyopenssl
+    state: latest
