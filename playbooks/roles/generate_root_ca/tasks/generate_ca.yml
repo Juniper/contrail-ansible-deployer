@@ -1,0 +1,32 @@
+---
+- name: create certs directories
+  become: yes
+  file:
+    state: directory
+    path: "{{ item.dir }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - dir: "{{ certs_dir }}"
+      mode: "0755"
+    - dir: "{{ private_keys_dir }}"
+      mode: "0700"
+
+- name: generate CA private key
+  openssl_privatekey:
+    path: "{{ root_ca_key }}"
+    size: 4096
+
+- name: generate CA csr
+  openssl_csr:
+    path: "{{ root_ca_csr }}"
+    privatekey_path: "{{ root_ca_key }}"
+    common_name: "{{ hostvars['localhost'].ansible_hostname }}"
+
+- name: generate a self signed CA cert
+  openssl_certificate:
+    path: "{{ root_ca }}"
+    privatekey_path: "{{ root_ca_key }}"
+    csr_path: "{{ root_ca_csr }}"
+    provider: selfsigned
+    issuer:
+      CN: "{{ hostvars['localhost'].ansible_hostname }}"
