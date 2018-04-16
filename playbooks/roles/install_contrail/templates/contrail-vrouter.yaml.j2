@@ -20,6 +20,8 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     volumes_from:
       - node-init
@@ -57,6 +59,8 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/run/libvirt:/var/run/libvirt
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
     volumes_from:
       - node-init
