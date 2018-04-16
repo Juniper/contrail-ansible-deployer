@@ -3,6 +3,9 @@
   connection: local
   gather_facts: yes
   pre_tasks:
+    - name: Import contrail_configuration
+      set_fact:
+          contrail_configuration: "{{ contrail_configuration|default({}) }}"
     - name: Set orchestrator if not passed
       set_fact:
           contrail_configuration: "{{ contrail_configuration|default({}) | combine({'CLOUD_ORCHESTRATOR': orchestrator if orchestrator is defined else 'openstack'}) }}"
@@ -25,7 +28,7 @@
   roles:
   - configure_instances
   vars_files:
-  - "{{ hostvars['localhost'].config_file }}"
+  - "{{ config_file }}"
   environment:
    - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
    - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
