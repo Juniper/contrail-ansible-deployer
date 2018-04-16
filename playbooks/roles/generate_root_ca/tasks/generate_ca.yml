@@ -1,0 +1,30 @@
+---
+- name: create certs directories
+  become: yes
+  file:
+    state: directory
+    path: "{{ item.dir }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - dir: "{{ certs_dir }}"
+      mode: "0755"
+    - dir: "{{ private_keys_dir }}"
+      mode: "0700"
+
+- name: set openssl config file path
+  set_fact:
+    contrail_openssl_config: "{{ ssl_dir }}/contrail_openssl.cfg"
+
+- name: "create contrail openssl config file"
+  template:
+    src: contrail_openssl.cfg.j2
+    dest: "{{ contrail_openssl_config }}"
+
+- name: prepare working files for cert generation
+  shell: "touch {{ ssl_dir }}/index.txt {{ ssl_dir }}/index.txt.attr && echo 01 > {{ ssl_dir }}/serial.txt"
+
+- name: generate CA private key
+  shell: "openssl genrsa -out {{ root_ca_key }} 4096 && chmod 0600 {{ root_ca_key }}"
+
+- name: generate CA
+  shell: "openssl req -config {{ contrail_openssl_config }} -new -x509 -extensions v3_ca -key {{ root_ca_key }} -out {{ root_ca }}"

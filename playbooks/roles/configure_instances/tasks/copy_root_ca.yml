@@ -1,0 +1,72 @@
+---
+- name: set default ca & ca_key paths
+  set_fact:
+    server_root_ca: "/etc/contrail/ssl/certs/ca-cert.pem"
+    server_root_ca_key: "/etc/contrail/ssl/private/ca-key.pem"
+
+- name: set ca path if set
+  set_fact:
+    server_root_ca: "{{ contrail_configuration.SERVER_CA_CERTFILE }}"
+  when: contrail_configuration.SERVER_CA_CERTFILE is defined
+
+- name: set ca key path if set
+  set_fact:
+    server_root_ca_key: "{{ contrail_configuration.SERVER_CA_KEYFILE }}"
+  when: contrail_configuration.SERVER_CA_KEYFILE is defined
+
+- name: set default ssl dir path
+  set_fact:
+    ssl_dir: "/etc/contrail/ssl"
+
+- name: set ssl dir path if defined
+  set_fact:
+    ssl_dir: "{{ hostvars['localhost'].ssl_dir }}"
+  when: hostvars['localhost'].ssl_dir is undefined
+
+- name: set certs & key dir paths
+  set_fact:
+    certs_dir: "{{ ssl_dir }}/certs"
+
+- name: set certs & key dir paths
+  set_fact:
+    private_keys_dir: "{{ ssl_dir }}/private"
+
+- name: default root CA & Key paths
+  set_fact:
+    root_ca: "{{ certs_dir }}/ca-cert.pem"
+    root_ca_csr: "{{ certs_dir }}/ca-cert.csr"
+    root_ca_key: "{{ private_keys_dir }}/ca-key.pem"
+
+- name: root CA path if defined
+  set_fact:
+    root_ca: "{{ hostvars['localhost'].root_ca }}"
+  when: hostvars['localhost'].root_ca is defined
+
+- name: root CA Key path if defined
+  set_fact:
+    root_ca_key: "{{ hostvars['localhost'].root_ca_key }}"
+  when: hostvars['localhost'].root_ca_key is defined
+
+- name: create certs directories on host
+  become: yes
+  file:
+    state: directory
+    path: "{{ item.dir.split('/')[0:-1]|join('/') }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - dir: "{{ server_root_ca }}"
+      mode: "0755"
+    - dir: "{{ server_root_ca_key }}"
+      mode: "0700"
+
+- name: copy root ca to host
+  copy: src={{ item.src}} dest={{ item.dest }} mode={{ item.mode }}
+  with_items:
+    - src: "{{ root_ca_key }}"
+      dest: "{{ server_root_ca_key }}"
+      mode: "0600"
+    - src: "{{ root_ca }}"
+      dest: "{{ server_root_ca }}"
+      mode: "0644"
+  when:
+    - root_ca_key is defined and root_ca is defined
