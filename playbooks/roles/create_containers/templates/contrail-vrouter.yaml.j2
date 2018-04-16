@@ -54,6 +54,7 @@ services:
       - /etc/timezone:/etc/timezone
       - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
+      - /dev/log:/dev/log
     restart: on-failure
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}

@@ -62,6 +62,7 @@ services:
       - /etc/timezone:/etc/timezone
       - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
+      - /dev/log:/dev/log
     volumes_from:
       - node-init
     restart: always
