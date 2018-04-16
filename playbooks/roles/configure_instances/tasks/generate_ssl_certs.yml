@@ -1,0 +1,132 @@
+---
+- name: install openssl
+  pip:
+    name: pyopenssl
+    state: latest
+
+- name: Set default server SSL dir
+  set_fact:
+    server_cert_dir: "{{ contrail_configuration.SERVER_CERT_DIR | default('/etc/contrail/ssl') }}"
+    ssl_cert_dir: "{{ contrail_configuration.SERVER_CERT_DIR | default('/etc/contrail/ssl') }}"
+
+- name: Set default server certfile
+  set_fact:
+    server_certfile : "{{ contrail_configuration.SERVER_CERTFILE | default('/etc/contrail/ssl/certs/server.pem') }}"
+
+- name: Set default server keyfile
+  set_fact:
+    server_keyfile : "{{ contrail_configuration.SERVER_KEYFILE | default('/etc/contrail/ssl/private/server-privkey.pem') }}"
+
+- name: Set default server ca certfile
+  set_fact:
+    server_ca_certfile : "{{ contrail_configuration.SERVER_CA_CERTFILE | default('/etc/contrail/ssl/certs/ca_cert.pem') }}"
+
+- name: set subject alt name list for DNS
+  set_fact: list_item="DNS:{{ item }}"
+  with_items:
+    - "{{ hostvars[inventory_hostname].ansible_fqdn }}"
+    - "{{ hostvars[inventory_hostname].ansible_hostname }}"
+  register: dns_list_reg
+
+- name: Make list for DNS
+  set_fact: dns_list="{{ dns_list_reg.results | map(attribute='ansible_facts.list_item') | list }}"
+
+- name: set subject alt name list for IP
+  set_fact: ip_list_item="IP:{{ item }}"
+  with_items: "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
+  register: ip_list_reg
+
+- name: Make list for IP
+  set_fact: ip_list="{{ ip_list_reg.results | map(attribute='ansible_facts.ip_list_item') | list }}"
+
+- name: set subject alt name list
+  set_fact:
+    san_list: "{{ dns_list  +  ip_list }}"
+
+- name: Create certificate directories for Generation
+  become: yes
+  file:
+    state: directory
+    path: "{{ ssl_cert_dir }}/{{ item.dir }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - dir: certs
+      mode: "0755"
+    - dir: private
+      mode: "0700"
+
+- name: Check for existing OpenSSL CA certificate file.
+  stat:
+    path: "{{ ssl_cert_dir }}/certs/ca_cert.pem"
+  register: ca_cert_exists
+
+- name: Check for existing OpenSSL certificate file.
+  stat:
+    path: "{{ ssl_cert_dir }}/certs/{{ ansible_hostname }}.pem"
+  register: cert_exists
+
+- name: Generate a CA PrivKey
+  openssl_privatekey:
+    path: "{{ ssl_cert_dir }}/private/ca_cert.pem"
+    size: 2048
+  when: ca_cert_exists.stat.exists == False
+
+- name: Generate a CA Cert CSR
+  openssl_csr:
+    path: "{{ ssl_cert_dir }}/certs/ca_cert.csr"
+    privatekey_path: "{{ ssl_cert_dir }}/private/ca_cert.pem"
+    common_name: "{{ hostvars['localhost'].ansible_hostname }}"
+  when: ca_cert_exists.stat.exists == False
+
+- name: Generate a self signed CA Cert
+  openssl_certificate:
+    path: "{{ ssl_cert_dir }}/certs/ca_cert.pem"
+    privatekey_path: "{{ ssl_cert_dir }}/private/ca_cert.pem"
+    csr_path: "{{ ssl_cert_dir }}/certs/ca_cert.csr"
+    provider: selfsigned
+    issuer:
+      CN: "{{ hostvars['localhost'].ansible_hostname }}"
+  when: ca_cert_exists.stat.exists == False
+
+- name: set SERVER_CA_CERTFILE as Generated CA file
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'SERVER_CA_CERTFILE': ssl_cert_dir+'/certs/ca_cert.pem' }) }}"
+  when:
+    - contrail_configuration.SERVER_CA_CERTFILE is not defined
+
+- name: Generate a Server PrivKey
+  openssl_privatekey:
+    path: "{{ ssl_cert_dir }}/private/{{ ansible_hostname }}.pem"
+    size: 2048
+  when: cert_exists.stat.exists == False and contrail_configuration.SERVER_KEYFILE is not defined
+
+- name: Generate a Server Cert CSR
+  openssl_csr:
+    path: "{{ ssl_cert_dir }}/certs/{{ ansible_hostname }}.csr"
+    privatekey_path: "{{ ssl_cert_dir }}/private/{{ ansible_hostname }}.pem"
+    common_name: "{{ ansible_hostname }}"
+    subject_alt_name: "{{ san_list }}"
+    organization_name: Contrail
+  when: cert_exists.stat.exists == False and contrail_configuration.SERVER_CERTFILE is not defined
+
+- name: Generate a Server Cert
+  openssl_certificate:
+    path: "{{ ssl_cert_dir }}/certs/{{ ansible_hostname }}.pem"
+    privatekey_path: "{{ ssl_cert_dir }}/private/ca_cert.pem"
+    csr_path: "{{ ssl_cert_dir }}/certs/{{ ansible_hostname }}.csr"
+    issuer:
+      CN: "{{ ansible_hostname }}"
+    provider: selfsigned
+  when: contrail_configuration.SERVER_CERTFILE is not defined
+
+- name: set SERVER_CERTFILE as Generated file
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'SERVER_CERTFILE': ssl_cert_dir+'/certs/'+ ansible_hostname + '.pem' }) }}"
+  when:
+    - contrail_configuration.SERVER_CERTFILE is not defined
+
+- name: set SERVER_KEYFILE as Generated file
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'SERVER_KEYFILE': ssl_cert_dir+'/private/'+ ansible_hostname + '.pem' }) }}"
+  when:
+    - contrail_configuration.SERVER_KEYFILE is not defined
