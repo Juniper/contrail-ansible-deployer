@@ -106,6 +106,12 @@
 - debug:
     msg: "{{ gce.instance_data }}"
 
+- set_fact:
+    ip_key: "{{ {} | combine({'ip': gce.instance_data[0].public_ip, 'private_ip': gce.instance_data[0].private_ip}) }}"
+
+- set_fact:
+    instances: "{{ instances | combine({item.key: ip_key}, recursive=True) }}"
+
 - name: add gce container hosts with ssh pwd
   add_host:
     hostname: "{{ gce.instance_data[0].public_ip }}"

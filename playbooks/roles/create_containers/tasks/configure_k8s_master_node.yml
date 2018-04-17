@@ -20,17 +20,13 @@
     daemon_reload: yes
     enabled: True
 
-- name: set controller list
-  set_fact:
-    controller_list: "{{ contrail_configuration.CONTROLLER_NODES.split(',') }}"
-
 - name: get controller ip from all ips
   set_fact:
     listen_ip: "{{ item[0] }}"
   when: item[0] == item[1]
   with_nested:
     - "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
-    - "{{ controller_list }}"
+    - "{{ k8s_master_nodes_list }}"
 
 #- name: initialize k8s master with listen ip
 #  shell: | 

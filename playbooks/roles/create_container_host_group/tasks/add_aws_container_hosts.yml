@@ -103,7 +103,7 @@
     msg: "{{ aws }}"
 
 - set_fact:
-    ip_key: "{{ {} | combine({'ip': aws.instances[0].public_ip_address}) }}"
+    ip_key: "{{ {} | combine({'ip': aws.instances[0].public_ip_address, 'private_ip': aws.instances[0].private_ip_address}) }}"
 
 - set_fact:
     instances: "{{ instances | combine({item.key: ip_key}, recursive=True) }}"

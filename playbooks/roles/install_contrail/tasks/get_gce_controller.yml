@@ -1,7 +1,0 @@
-- name: add gce controllers to the list
-  set_fact:
-    controller_list: "{{ controller_list + [ hostvars[gce_host]['private_ip'] ] }}"
-  when: hostvars[gce_host]['instance_name'] == item.key
-  with_items: "{{ groups['container_hosts'] }}"
-  loop_control:
-    loop_var: gce_host
