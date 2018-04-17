@@ -1,10 +1,66 @@
+global_configuration:
+   REGISTRY_PRIVATE_INSECURE: True
+   CONTAINER_REGISTRY: ci-repo.englab.juniper.net:5000
 provider_config:
   bms:
+    domainsuffix: local
+    ntpserver: 10.84.5.100
+    ssh_pwd: c0ntrail123
+    ssh_user: root
+
 instances:
-  bms1:
-    provider: bms
-    ip: 192.168.1.100
-global_configuration:
-  CONTAINER_REGISTRY: michaelhenkel
+  5c3s1-node1:
+      ip: 10.87.74.129
+      provider: bms
+      roles:
+          analytics: null
+          analytics_database: null
+          config: null
+          config_database: null
+          control: null
+          openstack: null
+          webui: null
+  5c3s1-node2:
+      ip: 10.87.74.130
+      provider: bms
+      roles:
+          openstack_compute: null
+          vrouter: null
+  5c3s1-node3:
+      ip: 10.87.74.131
+      provider: bms
+      roles:
+          openstack_compute: null
+          vrouter: null
+  5c3s1-node4:
+      ip: 10.87.74.132
+      provider: bms
+      roles:
+          openstack_compute: null
+          vrouter: null
+
+
 contrail_configuration:
-  CONTRAIL_VERSION: ocata-5.0-20180219195722
+  CONTRAIL_VERSION: ocata-master-5.0-16
+  CLOUD_ORCHESTRATOR: openstack 
+  METADATA_PROXY_SECRET: c0ntrail123
+  AUTH_MODE: keystone
+  KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123
+  KEYSTONE_AUTH_URL_VERSION: "/v3"
+  RABBITMQ_NODE_PORT: 5673
+  AAA_MODE: no-auth
+  CONTROL_DATA_NET_LIST: 192.168.1.0/24
+  RABBITMQ_NODE_PORT: 5673
+  VROUTER_GATEWAY: 192.168.1.254
+
+
+kolla_config:
+  kolla_globals:
+    enable_haproxy: yes
+    docker_registry: ci-repo.englab.juniper.net:5000
+    docker_namespace: kolla
+    enable_ironic: "no"
+    enable_swift: "no"
+  kolla_passwords:
+    metadata_secret: c0ntrail123
+    keystone_admin_password: c0ntrail123
