@@ -5,6 +5,42 @@ This document contains instructions to deploy a Contrail cluster with OpenStack 
 ## Requirements
 
 To start working on AWS You will need AWS account with API key/secret access.
+This account should have this inline policy attached:
+
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:*",
+                "aws-marketplace:*",
+                "sns:*",
+                "s3:*",
+                "ec2:*",
+                "elasticloadbalancing:*",
+                "cloudwatch:*",
+                "autoscaling:*",
+                "iam:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+Go to AWS console:
+
+- Click services
+- Find IAM service
+- Click Users
+- Find Yours user, and click on it
+- Click "Add inline policy"
+- Use JSON editor, and paste above policy
+- Review policy
+- Add policy name
+- Click "Create policy"
 
 ## Deploying the Cluster
 
