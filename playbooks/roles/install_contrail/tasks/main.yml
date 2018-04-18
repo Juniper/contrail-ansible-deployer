@@ -403,7 +403,7 @@
     - "{{ k8s_master_nodes_list }}"
   loop_control:
     loop_var: controller_item
-  when: roles[instance_name].k8s_master is defined or roles[instance_name].k8s_node is defined
+  when: roles[instance_name].k8s_master is defined or roles[instance_name].k8s_node is defined or roles[instance_name].kubemanager is defined
   tags:
     - k8s
 
@@ -433,7 +433,7 @@
 
 - name: create contrail kube manager
   include: create_kubemanager.yml
-  when: roles[instance_name].kubemanager is defined and master_inventory is defined
+  when: roles[instance_name].kubemanager is defined and master is defined and master_inventory is defined
   tags:
     - k8s
 
