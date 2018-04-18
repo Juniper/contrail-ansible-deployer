@@ -6,8 +6,8 @@ os_node_control: >-
      {%- set node_list = [] -%}
       {%- for k,v in hostvars['localhost']['instances'].iteritems() -%}
        {%- if v.roles is not defined or v.roles.openstack is defined or v.roles.openstack_control is defined -%}
-        {%- if hostvars[inventory_hostname]['ansible_' + hostvars[inventory_hostname]['network_interface_detected']].get('ipv4',{}).get('address') -%}
-         {%- do node_list.append(v.ip) -%}
+        {%- if hostvars[v.ip]['ansible_' + hostvars[v.ip]['network_interface_detected']].get('ipv4',{}).get('address') -%}
+         {%- do node_list.append(hostvars[v.ip]['ansible_' + hostvars[v.ip]['network_interface_detected']].get('ipv4',{}).get('address')) -%}
         {%- endif -%}
        {%- endif -%}
       {%- endfor -%}
@@ -24,6 +24,16 @@ os_node_mgmt: >-
       {%- endfor -%}
       {{ node_list | first }}
 
+os_nodes_storage: >-
+     {%- set node_list = [] -%}
+      {%- for k,v in hostvars['localhost']['instances'].iteritems() -%}
+       {%- if v.roles is not defined or v.roles.openstack is defined or v.roles.openstack_control is defined or v.roles.openstack_storage is defined -%}
+        {%- if hostvars[v.ip]['ansible_' + hostvars[v.ip]['network_interface_detected']].get('ipv4',{}).get('address') -%}
+         {%- do node_list.append(hostvars[v.ip]['ansible_' + hostvars[v.ip]['network_interface_detected']].get('ipv4',{}).get('address')) -%}
+        {%- endif -%}
+       {%- endif -%}
+      {%- endfor -%}
+      {{ node_list|join(',') }}
 
 # TODO: This cannot be derived in all scenarios. This is because the
 # create_openstack_config is run only on openstack_nodes. So we can not know the
