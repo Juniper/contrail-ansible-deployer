@@ -36,7 +36,7 @@ Parameters:
     ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x
 
   InstancePassword:
-    Description: Password for the base instance (Default = contrail123)
+    Description: Password for the ansible instance (Default = contrail123)
     Type: String
     Default: contrail123
     MinLength: 8
@@ -73,9 +73,13 @@ Mappings:
   AWSInstanceType2Arch:
     t2.micro:
       Arch: HVM64
+    t2.medium:
+      Arch: HVM64
     t2.large:
       Arch: HVM64
     t2.xlarge:
+      Arch: HVM64
+    t2.2xlarge:
       Arch: HVM64
     m1.xlarge:
       Arch: PV64
@@ -83,9 +87,13 @@ Mappings:
   AWSInstanceType2NATArch:
     t2.micro:
       Arch: NATHVM64
+    t2.medium:
+      Arch: NATHVM64
     t2.large:
       Arch: NATHVM64
     t2.xlarge:
+      Arch: NATHVM64
+    t2.2xlarge:
       Arch: NATHVM64
     m1.xlarge:
       Arch: NATPV64
@@ -231,7 +239,7 @@ Resources:
     Properties:
       UserName: !Ref IAMUser
 
-  EC2InstanceMaster:
+  EC2InstanceAnsible:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: !Ref InstanceType
@@ -301,12 +309,12 @@ Resources:
       Tags:
         -
           Key: Name
-          Value: !Sub master-${AWS::StackName}
+          Value: !Sub ansible-${AWS::StackName}
 
 Outputs:
   SSHAccess:
     Description: Access shell using this address
-    Value: !Sub "ssh root@${EC2InstanceMaster.PublicDnsName}"
+    Value: !Sub "ssh root@${EC2InstanceAnsible.PublicDnsName}"
   SSHPassword:
-    Description: SSH Password for master host
+    Description: SSH Password for ansible host
     Value: !Ref InstancePassword
