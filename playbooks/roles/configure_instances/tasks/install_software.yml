@@ -3,6 +3,12 @@
   set_fact:
     instance_data: "{{ instances[hostvars[inventory_hostname].instance_name] }}"
 
+- name: set vrouter data
+  set_fact:
+    vrouter_data: "{{ hostvars[inventory_hostname].instance_data.roles.vrouter }}"
+
+- debug: msg="{{ vrouter_data }}"
+
 - name: set provider data
   set_fact:
     provider_data: "{{ provider_config[instance_data.provider] }}"
@@ -220,16 +226,37 @@
   when: (contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true) or
         (instance_data.UPGRADE_KERNEL is defined and instance_data.UPGRADE_KERNEL == true)
 
+# enable IOMMU if sriov is enabled
+
+- name: set grub file name.
+  stat:
+    path: "/etc/default/grub"
+  register: file_rc
+
+- name: Turn on IOMMU
+  lineinfile:
+    path: "/etc/default/grub"
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="nomdmonddf nomdmonisw intel_iommu=on"'
+    insertbefore: BOF
+  when: (vrouter_data.sriov is defined and vrouter_data.sriov == true) and file_rc.stat.exists == true
+
+- name: execute update-grub/sys
+  command: grub2-mkconfig -o /boot/grub2/grub.cfg
+  register: gstat
+  when: (vrouter_data.sriov is defined and vrouter_data.sriov == true) and file_rc.stat.exists == true
+
 - name: restart server
   shell: sleep 2 && shutdown -r now "Ansible updates triggered"
   async: 1
   poll: 0
   become: true
-  ignore_errors: true
-  when: upgrade_kernel is defined and upgrade_kernel.changed
+  when: (upgrade_kernel is defined and upgrade_kernel.changed) or
+        (vrouter_data.sriov is defined and vrouter_data.sriov == true and gstat is defined and gstat.changed)
 
 - name: wait for server to come back online
   wait_for_connection:
     delay: 30
-    timeout: 300
-  when: upgrade_kernel is defined and upgrade_kernel.changed
+    timeout: 2400
+  when: (upgrade_kernel is defined and upgrade_kernel.changed) or
+        (vrouter_data.sriov is defined and vrouter_data.sriov == true and gstat is defined and gstat.changed)
+
