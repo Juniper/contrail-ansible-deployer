@@ -64,6 +64,14 @@
   service: name=ntpd state=started enabled=yes
   when: provider_data.ntpserver is defined
 
+# centos uses chronyd by default and run it after restart instead of ntpd
+# service can be absent - so ignore it
+- name: disable service chronyd
+  systemd:
+    name: chronyd
+    enabled: no
+  ignore_errors: yes
+
 - name: install pip
   yum:
     name: python-pip
