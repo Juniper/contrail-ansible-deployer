@@ -432,7 +432,7 @@
 
 - name: create contrail kube manager
   include: create_kubemanager.yml
-  when: roles[instance_name].kubemanager is defined and master_inventory is defined
+  when: roles[instance_name].kubemanager is defined and master is defined
   tags:
     - k8s
 
