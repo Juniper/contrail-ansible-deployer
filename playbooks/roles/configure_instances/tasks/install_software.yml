@@ -70,11 +70,6 @@
   service: name=ntpd state=started enabled=yes
   when: provider_data.ntpserver is defined
 
-- name: enable service ntp
-  systemd:
-    name: ntpd
-    enabled: yes
-
 # centos uses chronyd by default and run it after restart instead of ntpd
 # service can be absent - so ignore it
 - name: disable service chronyd
