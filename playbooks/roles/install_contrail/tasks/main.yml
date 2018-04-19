@@ -159,9 +159,12 @@
   tags:
    - always
 
+- set_fact:
+    role_key: "{{ {} | combine({'roles': default_roles}) }}"
+
 - name: add roles if not defined
   set_fact:
-     default_roles_hosts: "{{ default_roles_hosts|combine({item.key: default_roles}, recursive=True) }}"
+     default_roles_hosts: "{{ default_roles_hosts|combine({item.key: role_key}, recursive=True) }}"
   when: item.value.roles is undefined
   with_dict: "{{ instances }}"
   tags:
@@ -186,6 +189,12 @@
   when: default_roles_hosts is defined
   tags:
    - always
+
+- name: set roles if not defined for instance
+  set_fact:
+    instances: "{{ hostvars['localhost']['instances'] | combine(default_roles_hosts, recursive=True) }}"
+  delegate_to: 'localhost'
+  delegate_facts: True
 
 - name: create host entry dict
   set_fact:
