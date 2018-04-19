@@ -91,31 +91,3 @@ services:
     restart: on-failure
     stdin_open: {{ stdin_open }}
     tty: {{ tty }}
-  snmp-collector:
-    image: "{{ container_registry }}/contrail-analytics-snmp-collector:{{ contrail_version_tag }}"
-    network_mode: "service:network"
-    env_file: /etc/contrail/common_analytics.env
-    volumes:
-      - /var/log/contrail:/var/log/contrail
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-      - /var/crashes:/var/crashes
-    depends_on:
-      - network
-    restart: on-failure
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
-  topology:
-    image: "{{ container_registry }}/contrail-analytics-topology:{{ contrail_version_tag }}"
-    network_mode: "service:network"
-    env_file: /etc/contrail/common_analytics.env
-    volumes:
-      - /var/log/contrail:/var/log/contrail
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-      - /var/crashes:/var/crashes
-    depends_on:
-      - network
-    restart: on-failure
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
