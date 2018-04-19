@@ -6,11 +6,8 @@
 - name: set vrouter data
   set_fact:
     vrouter_data: "{{ hostvars[inventory_hostname].instance_data.roles.vrouter }}"
-  when: hostvars[inventory_hostname].instance_data.roles.vrouter is defined
-
-- debug:
-    msg: "{{ vrouter_data }}"
-  when: vrouter_data is defined
+  when: hostvars[inventory_hostname].instance_data.roles is defined and
+        hostvars[inventory_hostname].instance_data.roles.vrouter is defined
 
 - name: set provider data
   set_fact:
@@ -98,7 +95,7 @@
 
 - name: create host entry dict
   set_fact:
-    host_intf_dict: "{{ hostvars['localhost']['instances']|ctrl_data_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) }}"
+    host_intf_dict: "{{ hostvars['localhost']['instances']|ctrl_data_intf_dict(contrail_configuration if contrail_configuration is defined else {}, kolla_config if kolla_config is defined else {}, hostvars) }}"
 
 - debug:
     msg: "DEBUG HOST ENTRIES: {{ host_intf_dict }}"
@@ -257,4 +254,3 @@
     timeout: 2400
   when: (upgrade_kernel is defined and upgrade_kernel.changed) or
         (vrouter_data is defined and vrouter_data.sriov is defined and vrouter_data.sriov == true and gstat is defined and gstat.changed)
-
