@@ -196,6 +196,15 @@
   tags:
    - always
 
+- set_fact:
+    role_key: "{{ {} | combine({'roles': default_roles_hosts[instance_name]}) }}"
+
+- name: set roles if not defined for instance
+  set_fact:
+    instances: "{{ hostvars['localhost']['instances'] | combine({instance_name: role_key}, recursive=True) }}"
+  delegate_to: 'localhost'
+  delegate_facts: True
+
 - name: create host entry dict
   set_fact:
     host_intf_dict: "{{ hostvars['localhost']['instances']|ctrl_data_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) }}"

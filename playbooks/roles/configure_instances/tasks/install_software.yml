@@ -17,6 +17,17 @@
 - name: turn off swap
   shell: swapoff -a && sed -i '/swap[ \t]\+swap/d' /etc/fstab
 
+- name: initialize install_k8s
+  set_fact:
+    install_k8s: false
+
+- name: set install_k8s to true
+  set_fact:
+    install_k8s: true
+  when: (instance_data.roles is defined and
+        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )) or
+        ( instance_data.roles is undefined and orchestrator == "kubernetes" )
+
 - name: OS specific package install
   include: "{{ ansible_os_family }}.yml"
 

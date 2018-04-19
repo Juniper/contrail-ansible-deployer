@@ -9,32 +9,28 @@
   apt_repository:
     repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
     state: present
-  when: instance_data.roles is defined and
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
+  when: install_k8s == true
 
 - name: install kubelet-1.9.2-0
   apt:
     name: kubelet
     state: latest
     force: yes
-  when: instance_data.roles is defined and
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
+  when: install_k8s == true
 
 - name: install kubeadm-1.9.2-0
   apt:
     name: kubeadm
     state: latest
     force: yes
-  when: instance_data.roles is defined and
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
+  when: install_k8s == true
 
 - name: install kubectl-1.9.2-0
   apt:
     name: kubectl
     state: latest
     force: yes
-  when: instance_data.roles is defined and
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
+  when: install_k8s == true
 
 - name: install rsyslogd
   apt:
