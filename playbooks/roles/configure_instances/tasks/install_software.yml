@@ -149,6 +149,17 @@
    state: directory
    mode: 0777
 
+- name: initialize install_k8s
+  set_fact:
+    install_k8s: false
+
+- name: set install_k8s to true
+  set_fact:
+    install_k8s: true
+  when: (instance_data.roles is defined and
+        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )) or
+        ( instance_data.roles is undefined and orchestrator == "kubernetes" )
+
 - name: create k8s repo
   yum_repository:
     name: Kubernetes
@@ -157,29 +168,25 @@
     gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
     repo_gpgcheck: yes
     gpgcheck: yes
-  when: instance_data.roles is defined and 
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
+  when: install_k8s == true
 
 - name: install kubelet-1.9.2-0
   yum:
     name: kubelet-1.9.2-0
     state: latest
-  when: instance_data.roles is defined and 
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
+  when: install_k8s == true
 
 - name: install kubeadm-1.9.2-0
   yum:
     name: kubeadm-1.9.2-0
     state: latest
-  when: instance_data.roles is defined and 
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
+  when: install_k8s == true
 
 - name: install kubectl-1.9.2-0
   yum:
     name: kubectl-1.9.2-0
     state: latest
-  when: instance_data.roles is defined and 
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
+  when: install_k8s == true
 
 - name: set selinux to permissive
   selinux:
@@ -218,7 +225,7 @@
     name: 'kernel'
     state: latest
   register: upgrade_kernel
-  when: (contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true) or
+  when: (contrail_configuration is defined and contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true) or
         (instance_data.UPGRADE_KERNEL is defined and instance_data.UPGRADE_KERNEL == true)
 
 # enable IOMMU if sriov is enabled
