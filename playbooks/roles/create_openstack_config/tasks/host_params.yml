@@ -27,8 +27,8 @@
   with_items: ['openstack_control', 'openstack_network', 'openstack_compute', 'vrouter', 'openstack_monitoring', 'openstack_storage', 'openstack']
   when:
     - instance_data.roles is defined
-    - instance_data.roles.item is defined
-    - instance_data.roles.item is mapping()
+    - instance_data.roles[item] is defined
+    - instance_data.roles[item] is mapping()
     - instance_data.roles[item].PHYSICAL_INTERFACE is defined
     - host_internal_interface is not defined
 
