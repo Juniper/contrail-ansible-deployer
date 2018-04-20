@@ -28,3 +28,4 @@ default_kolla_globals:
   kolla_external_vip_address: "{{ os_node_mgmt }}"
   contrail_api_interface_address: "{{ contrail_node_control }}"
   neutron_plugin_agent: opencontrail
+  storage_nodes: "{{ os_nodes_storage }}"
