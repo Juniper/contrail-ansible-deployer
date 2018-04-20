@@ -217,3 +217,29 @@
     - item.value.roles.vcenter_plugin is defined
     - contrail_configuration.CONTROL_DATA_NET_LIST is defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
+    tsn_nodes_list: []
+  when: tsn_nodes_list is not defined
+
+- name: add TSN nodes to the list
+  set_fact:
+    tsn_nodes_list: "{{ tsn_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.vrouter is defined
+    - item.value.roles.vrouter.TSN_EVPN_MODE is defined
+    - item.value.roles.vrouter.TSN_EVPN_MODE | bool
+    - contrail_configuration.CONTROL_DATA_NET_LIST is undefined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- name: add TSN nodes to the list with CONTROL_DATA_NET_LIST
+  set_fact:
+    tsn_nodes_list: "{{ tsn_nodes_list + [ hostvars[item.value.ip]['ansible_' + host_intf_dict[item.value.ip]]['ipv4']['address'] ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.vrouter is defined
+    - item.value.roles.vrouter.TSN_EVPN_MODE is defined
+    - item.value.roles.vrouter.TSN_EVPN_MODE | bool
+    - contrail_configuration.CONTROL_DATA_NET_LIST is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
