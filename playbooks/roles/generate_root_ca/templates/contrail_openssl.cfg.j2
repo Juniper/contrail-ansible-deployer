@@ -1,0 +1,69 @@
+[req]
+default_bits = 2048
+prompt = no
+default_md = sha256
+default_days = 3750
+req_extensions = v3_req
+distinguished_name = req_distinguished_name
+x509_extensions = v3_ca
+
+[ req_distinguished_name ]
+0.organizationName = Contrail
+commonName = contrail-ansible
+
+[ v3_req ]
+basicConstraints = CA:false
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = {{ hostvars['localhost'].ansible_hostname }}
+
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+
+# Directory and file locations.
+dir               = {{ ssl_dir }}
+crl_dir           = {{ ssl_dir }}/crl
+new_certs_dir     = {{ ssl_dir }}/certs
+database          = {{ ssl_dir }}/index.txt
+serial            = {{ ssl_dir }}/serial.txt
+RANDFILE          = {{ ssl_dir }}/.rand
+
+# For certificate revocation lists.
+crlnumber         = {{ ssl_dir }}/crlnumber
+crl               = {{ ssl_dir }}/crl/crl.pem
+crl_extensions    = crl_ext
+default_crl_days  = 30
+
+# The root key and root certificate.
+private_key       = {{ root_ca_key }}
+certificate       = {{ root_ca }}
+
+# SHA-1 is deprecated, so use SHA-2 instead.
+default_md        = sha256
+name_opt          = ca_default
+cert_opt          = ca_default
+default_days      = 375
+preserve          = no
+policy            = policy_optional
+
+[ policy_optional ]
+countryName            = optional
+stateOrProvinceName    = optional
+organizationName       = optional
+organizationalUnitName = optional
+commonName             = supplied
+emailAddress           = optional
+
+[ v3_ca]
+# Extensions for a typical CA
+# PKIX recommendation.
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints = CA:true
+
+[ crl_ext ]
+authorityKeyIdentifier=keyid:always,issuer:always
