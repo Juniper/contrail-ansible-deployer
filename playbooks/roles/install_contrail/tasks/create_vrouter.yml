@@ -93,7 +93,7 @@
 - name: set vrouter kernel init image name
   set_fact:
     vrouter_kernel_init_img_name: contrail-vrouter-kernel-init
-  when: ansible_distribution == 'CentOS'
+  when: ansible_os_family == 'RedHat'
 
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
