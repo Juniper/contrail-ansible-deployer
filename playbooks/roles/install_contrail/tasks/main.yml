@@ -217,6 +217,7 @@
     - {'name': 'ANALYTICS_NODES', 'nodes': "{{analytics_nodes_list}}"}
     - {'name': 'ANALYTICSDB_NODES', 'nodes': "{{analyticsdb_nodes_list}}"}
     - {'name': 'WEBUI_NODES', 'nodes': "{{webui_nodes_list}}"}
+    - {'name': 'TSN_NODES', 'nodes': "{{tsn_nodes_list}}"}
 
 - name: get the final kolla configurations
   set_fact:
