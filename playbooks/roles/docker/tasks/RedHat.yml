@@ -16,3 +16,17 @@
   yum:
     name: docker-engine-17.03.1.ce
     state: installed
+
+- name: install epel-release if required
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - epel-release
+
+- name: install pip if required
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - python-pip
