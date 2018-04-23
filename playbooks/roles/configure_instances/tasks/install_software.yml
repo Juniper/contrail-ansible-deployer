@@ -3,6 +3,12 @@
   set_fact:
     instance_data: "{{ instances[hostvars[inventory_hostname].instance_name] }}"
 
+- name: set vrouter data
+  set_fact:
+    vrouter_data: "{{ hostvars[inventory_hostname].instance_data.roles.vrouter }}"
+  when: hostvars[inventory_hostname].instance_data.roles is defined and
+        hostvars[inventory_hostname].instance_data.roles.vrouter is defined
+
 - name: set provider data
   set_fact:
     provider_data: "{{ provider_config[instance_data.provider] }}"
