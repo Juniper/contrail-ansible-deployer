@@ -23,3 +23,11 @@
     enabled: yes
     name: docker
     state: started
+
+- name: add private registry authentication
+  include: auth_registry.yaml
+  when:
+    - global_configuration is defined
+    - global_configuration.CONTAINER_REGISTRY is defined
+    - global_configuration.CONTAINER_REGISTRY_USERNAME is defined
+    - global_configuration.CONTAINER_REGISTRY_PASSWORD is defined
