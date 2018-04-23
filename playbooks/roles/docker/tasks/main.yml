@@ -2,6 +2,10 @@
 
 - include: "{{ ansible_os_family }}.yml"
 
+- name: install docker-py if required
+  pip:
+    name: docker-py
+
 - name: add insecure registry
   include: insecure_registry.yaml
   when:
@@ -17,6 +21,13 @@
     - global_configuration.CONTAINER_REGISTRY is defined
     - global_configuration.REGISTRY_PRIVATE_SECURE is defined
     - global_configuration.REGISTRY_PRIVATE_SECURE == true
+
+- name: add private registry authentication
+  include: auth_registry.yaml
+  when:
+    - global_configuration is defined
+    - global_configuration.CONTAINER_REGISTRY_USERNAME is defined
+    - global_configuration.CONTAINER_REGISTRY_PASSWORD is defined
 
 - name: start docker daemon
   service:
