@@ -1,0 +1,5 @@
+---
+- name: docker login
+  docker_login:
+    username: "{{ global_configuration.CONTAINER_REGISTRY_USERNAME }}"
+    password: "{{ global_configuration.CONTAINER_REGISTRY_PASSWORD }}"
