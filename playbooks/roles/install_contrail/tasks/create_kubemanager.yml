@@ -23,7 +23,7 @@
 
 - name: "create contrail_configuration.KUBERNETES_API_SERVER"
   set_fact:
-    contrail_configuration: "{{ contrail_configuration|default({})|combine({'KUBERNETES_API_SERVER': master}) }}"
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'KUBERNETES_API_SERVER': master_inventory}) }}"
   when: master_inventory is defined and roles[instance_name].kubemanager.KUBERNETES_API_SERVER is undefined
 
 - name: "populate global common_kubemanager.env"
