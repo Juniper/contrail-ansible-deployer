@@ -82,6 +82,15 @@
   tags:
    - always
 
+- name: activate docker login
+  shell: "docker login --username {{ global_configuration.CONTAINER_REGISTRY_USERNAME }} --password {{ global_configuration.CONTAINER_REGISTRY_PASSWORD }} {{ container_registry }}"
+  when:
+    - global_configuration is defined
+    - global_configuration.CONTAINER_REGISTRY_USERNAME is defined
+    - global_configuration.CONTAINER_REGISTRY_PASSWORD is defined
+  tags:
+   - always
+
 - name: set stdin_open to true if it's not defined
   set_fact:
     stdin_open: true
