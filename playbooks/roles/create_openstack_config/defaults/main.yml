@@ -30,3 +30,4 @@ default_kolla_globals:
   contrail_api_interface_address: "{{ contrail_node_control }}"
   neutron_plugin_agent: opencontrail
   storage_nodes: "{{ os_nodes_storage }}"
+  metadata_ssl_enable: no
