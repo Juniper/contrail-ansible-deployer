@@ -41,3 +41,10 @@
   delegate_to: localhost
   run_once: yes
 
+- name: debug - read globals.yaml
+  script: "cat {{ kolla_dir }}/etc/kolla/globals.yml"
+  register: script
+
+- name: debug - print globals.yaml
+  debug: msg={{ script.stdout }}
+  when: script is defined
