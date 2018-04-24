@@ -40,6 +40,10 @@
   vars:
     action: bootstrap-servers
 
+- include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/certificates.yml"
+  vars:
+    action: deploy
+
 - include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/site.yml"
   vars:
     action: deploy
