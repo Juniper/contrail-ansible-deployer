@@ -42,7 +42,7 @@ The server is installed with Centos 7.4. Here are some preparation steps:
 
 ```
 yum install -y epel-release
-yum install -y python-urllib3 git ansible python-pip python-boto python2-boto3
+yum install -y python-urllib3 git ansible-2.4.2.0 python-pip python-boto python2-boto3
 ```
 
 Next, clone the contrail-ansible-deployer repo and populate the configuration:
