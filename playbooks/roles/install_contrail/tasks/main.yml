@@ -433,3 +433,17 @@
     - roles[instance_name].vcenter_plugin is defined
   tags:
     - vcenter_plugin
+
+- name: untaint node
+  shell: "kubectl taint nodes {{ hostvars[instance.value.ip]['ansible_fqdn'] }} node-role.kubernetes.io/master-"
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+  loop_control:
+    loop_var: instance
+  when:
+    - roles[instance_name].k8s_master is defined
+    - master_inventory is defined
+    - inventory_hostname == master_inventory
+    - instance.value.roles is defined
+    - instance.value.roles.k8s_node is defined
+    - instance.value.roles.k8s_master is defined
+  ignore_errors: yes
