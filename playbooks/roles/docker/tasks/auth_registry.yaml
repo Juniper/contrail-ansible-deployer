@@ -1,0 +1,5 @@
+---
+- name: activate docker login
+  shell: "docker login --username {{ global_configuration.CONTAINER_REGISTRY_USERNAME }} --password {{ global_configuration.CONTAINER_REGISTRY_PASSWORD }} {{ global_configuration.CONTAINER_REGISTRY }}"
+  tags:
+   - always
