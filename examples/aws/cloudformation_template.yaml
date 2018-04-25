@@ -251,6 +251,10 @@ Resources:
           SubnetId: !Ref Subnet
       ImageId: !FindInMap [AWSRegionArch2AMI, !Ref 'AWS::Region', !FindInMap [AWSInstanceType2Arch,
           !Ref 'InstanceType', Arch]]
+      BlockDeviceMappings:
+        - DeviceName : "/dev/sda1"
+          Ebs:
+            DeleteOnTermination: "true"
       UserData:
         Fn::Base64:
           Fn::Sub:
