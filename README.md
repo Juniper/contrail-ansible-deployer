@@ -10,8 +10,8 @@ ssh-copy-id 192.168.1.100
 yum install -y ansible-2.4.2.0
 git clone http://github.com/Juniper/contrail-ansible-deployer
 cd contrail-ansible-deployer
-ansible-playbook -i inventory/ -e orchestrator -e '{"instances":{"bms1":{"ip":"192.168.1.100","provider":"bms"}}}' playbooks/configure_instances.yml
-ansible-playbook -i inventory/ -e orchestrator=none -e '{"instances":{"bms1":{"ip":"192.168.1.100","provider":"bms"}}}' playbooks/install_contrail.yml
+ansible-playbook -i inventory/ -e orchestrator=kubernetes -e '{"instances":{"bms1":{"ip":"192.168.1.100","provider":"bms"}}}' playbooks/configure_instances.yml
+ansible-playbook -i inventory/ -e orchestrator=kubernetes -e '{"instances":{"bms1":{"ip":"192.168.1.100","provider":"bms"}}}' playbooks/install_contrail.yml
 ```
 The ip address 192.168.1.100 has to be replaced with the instances ip address
 
@@ -81,10 +81,10 @@ git clone http://github.com/Juniper/contrail-ansible-deployer
 ### Providers
 
 The playbooks support installing Contrail on these providers:
--- bms - Baremetal Server
--- kvm - KVM hosted Virtual Machines
--- gce - GCE hosted Virtual Machines
--- aws - AWS hosted Virtual Machines
+-- bms - Baremetal Server    
+-- kvm - KVM hosted Virtual Machines    
+-- gce - GCE hosted Virtual Machines    
+-- aws - AWS hosted Virtual Machines    
 
 ### The plays
 
@@ -95,13 +95,13 @@ The playbook contains three plays:
 Provisions operating system instances for hosting the containers
 to the following infrastructure providers:
 
--- kvm
--- gce
--- aws
--- azure (to be implemented)
--- openstack (to be implemented)
+-- kvm    
+-- gce     
+-- aws    
+-- azure (to be implemented)    
+-- openstack (to be implemented)    
 
-- playbooks/configure_instances.yml
+- playbooks/configure_instances.yml    
 
 Configures provisioned instances. Applicable to all providers.
 Installs software, configures operating system as outlined under
@@ -195,6 +195,8 @@ This section sets global service parameters. All parameters are optional.
 global_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
   REGISTRY_PRIVATE_INSECURE: True
+  CONTAINER_REGISTRY_USERNAME: YourRegistryUser
+  CONTAINER_REGISTRY_PASSWORD: YourRegistryPassword
 ```
 
 ### Contrail services configuration
@@ -205,6 +207,8 @@ contrail_configuration:     # Contrail service configuration section
   CONTRAIL_VERSION: latest
   UPGRADE_KERNEL: true
 ```
+
+[Complete list of contrail_configuration](contrail_configuration.md)    
 
 ### Kolla services configuration
 In case kolla openstack is deployed, this section defines the paramters for it.
@@ -249,6 +253,9 @@ A KVM based instance only installing contrail control plane containers.
 instances:
   kvm1:
     provider: kvm
+    ip: 10.0.0.1
+    host: 1.1.1.1
+    bridge: br1
     roles:
       config_database:
       config:
@@ -259,11 +266,11 @@ instances:
       k8s_master:
 ```
 ### more examples
-[GCE k8s HA with separate control and data plane instaces](examples/gce1.md)
-[AWS Kolla HA with separate control and data plane instaces](examples/aws1.md)
-[KVM Kolla per instance and role configuration](examples/kvm1.md)
-[KVM Kolla and k8s](examples/bms2.md)
-[BMS remote compute configuration](examples/bms1.md)
+[GCE k8s HA with separate control and data plane instaces](examples/gce1.md)    
+[AWS Kolla HA with separate control and data plane instaces](examples/aws1.md)    
+[KVM Kolla per instance and role configuration](examples/kvm1.md)    
+[KVM Kolla and k8s](examples/bms2.md)    
+[BMS remote compute configuration](examples/bms1.md)    
 
 ### start the playbooks
 
@@ -278,13 +285,13 @@ ansible-playbook -i inventory/ playbooks/configure_instances.yml
 ```
 
 Contrail installation:
-orchestrator can be openstack (installs kolla) or none (for pure k8s installations).
+orchestrator can be openstack (installs kolla) or none or kubernetes (for pure k8s installations).
 ```
-ansible-playbook -e orchestrator=none|openstack -i inventory/ playbooks/install_contrail.yml
+ansible-playbook -e orchestrator=none|openstack|kubernetes -i inventory/ playbooks/install_contrail.yml
 ```
 
-The location of the configuration file (config/instances.yaml) can be changes
-using the -e config_file= parameter, i.e.:
+The location of the configuration file (config/instances.yaml) can be changed    
+using the -e config_file= parameter, i.e.:    
 
 ```
 ansible-playbook -i inventory/ -e config_file=/config/instances_gce.yml playbooks/install_contrail.yml
