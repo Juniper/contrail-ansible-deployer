@@ -143,7 +143,7 @@
 - name: "Restart nova-compute"
   shell: "docker restart nova_compute"
   when: (roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk') or
-        (roles[instance_name].vrouter.SRIOV is defined and roles[instance_name].vrouter.SRIOV == 'true')
+        (roles[instance_name].vrouter.SRIOV is defined and roles[instance_name].vrouter.SRIOV == true)
   ignore_errors: yes
 
 - name: "create /var/log/contrail/lbaas"
