@@ -1,44 +1,12 @@
 ---
-- name: install ntpd
-  apt:
-    name: ntp
-    state: latest
-  when: provider_data.ntpserver is defined
+- name: add k8s repo key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+  when: k8s_version is defined
 
 - name: create k8s repo
   apt_repository:
     repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
     state: present
-  when: instance_data.roles is defined and
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
-
-- name: install kubelet-1.9.2-0
-  apt:
-    name: kubelet
-    state: latest
-    force: yes
-  when: instance_data.roles is defined and
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
-
-- name: install kubeadm-1.9.2-0
-  apt:
-    name: kubeadm
-    state: latest
-    force: yes
-  when: instance_data.roles is defined and
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
-
-- name: install kubectl-1.9.2-0
-  apt:
-    name: kubectl
-    state: latest
-    force: yes
-  when: instance_data.roles is defined and
-        ( instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined )
-
-- name: install rsyslogd
-  apt:
-    name: rsyslog
-    state: present
-  when: instance_data.roles is defined and
-        ( instance_data.roles.vrouter is defined )
+  when: k8s_version is defined
