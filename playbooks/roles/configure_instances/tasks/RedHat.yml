@@ -38,11 +38,6 @@
     enabled: no
   ignore_errors: yes
 
-- name: install pip
-  yum:
-    name: python-pip
-    state: latest
-
 - name: create k8s repo centos
   yum_repository:
     name: Kubernetes
