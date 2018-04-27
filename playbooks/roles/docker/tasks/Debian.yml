@@ -7,6 +7,12 @@
     - ca-certificates
     - curl
     - software-properties-common
+    - python-pip
+
+- name: add docker repo key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
 
 - name: create docker repo
   apt_repository:
@@ -16,6 +22,5 @@
 - name: install docker
   apt:
     name: docker-engine
-    force: yes
     state: present
 
