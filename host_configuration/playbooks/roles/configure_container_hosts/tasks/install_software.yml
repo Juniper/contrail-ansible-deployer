@@ -113,5 +113,21 @@
 - name: sysctl -w net.bridge.bridge-nf-call-ip6tables=1
   shell: sysctl -w net.bridge.bridge-nf-call-ip6tables=1 && echo "net.bridge.bridge-nf-call-ip6tables=1" >> /etc/sysctl.conf
 
+- name: set firewall service name
+  set_fact:
+    firewall_svc_name: "{{ 'ufw' if ansible_os_family == 'Debian' else 'firewalld' }}"
+
+- name: stop and disable firewall service
+  service:
+    name: "{{ firewall_svc_name }}"
+    state: stopped
+    enabled: no
+
 - name: flush iptables
   shell: iptables -F
+
+- name: accept input
+  shell: iptables -P INPUT ACCEPT
+
+- name: accept forward
+  shell: iptables -P FORWARD ACCEPT
