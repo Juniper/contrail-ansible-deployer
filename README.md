@@ -7,7 +7,7 @@ This set of playbooks installs Contrail Networking using a microservices archite
 This set of commands will configure the instance and install AIO contrail with k8s on the instance:
 ```
 ssh-copy-id 192.168.1.100
-yum install -y ansible
+yum install -y ansible-2.4.2.0
 git clone http://github.com/Juniper/contrail-ansible-deployer
 cd contrail-ansible-deployer
 ansible-playbook -i inventory/ -e orchestrator -e '{"instances":{"bms1":{"ip":"192.168.1.100","provider":"bms"}}}' playbooks/configure_instances.yml
@@ -59,12 +59,16 @@ in kubernetes.
 ## Prerequisites
 
 - CentOS 7.4 (kernel >= 3.10.0-693.17.1)
+- Ansible (==2.4.2.0)
 - working name resolution through either DNS or host file for long and short hostnames of the cluster nodes
 - docker engine (tested with 17.03.1-ce)
 - docker-compose (tested with 1.17.0) installed
 - docker-compose python library (tested with 1.9.0)
 - in case of k8s will be used, the tested version is 1.9.2.0
 - for HA, the time must be in sync between the cluster nodes
+
+** NOTE **
+Ansible 2.4.2.0 is temporary fix for 2.5 issues with our playbooks.
 
 ## instructions
 
