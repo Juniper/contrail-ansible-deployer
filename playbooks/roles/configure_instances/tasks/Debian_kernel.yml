@@ -1,0 +1,43 @@
+---
+# Install Kernel for Ubuntu 16.04 LTS
+- name: install latest kernel
+  apt:
+    name: linux-generic-hwe-16.04
+    state: latest
+    install_recommends: yes
+  register: upgrade_kernel
+  when: (contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true) or
+        (instance_data.UPGRADE_KERNEL is defined and instance_data.UPGRADE_KERNEL == true)
+
+# enable IOMMU if SRIOV is enabled
+- name: set grub file name.
+  stat:
+    path: "/etc/default/grub"
+  register: file_rc
+
+- name: Turn on IOMMU
+  lineinfile:
+    path: "/etc/default/grub"
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="nomdmonddf nomdmonisw intel_iommu=on"'
+    insertbefore: BOF
+  when: (vrouter_data is defined and vrouter_data.SRIOV is defined and vrouter_data.SRIOV == true) and file_rc.stat.exists == true
+
+- name: execute update-grub
+  command: update-grub
+  register: gstat
+  when: (vrouter_data is defined and vrouter_data.SRIOV is defined and vrouter_data.SRIOV == true) and file_rc.stat.exists == true
+
+- name: restart server
+  shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+  async: 1
+  poll: 0
+  become: true
+  when: (upgrade_kernel is defined and upgrade_kernel.changed) or
+        (vrouter_data is defined and vrouter_data.SRIOV is defined and vrouter_data.SRIOV == true and gstat is defined and gstat.changed)
+
+- name: wait for server to come back online
+  wait_for_connection:
+    delay: 30
+    timeout: 2400
+  when: (upgrade_kernel is defined and upgrade_kernel.changed) or
+        (vrouter_data is defined and vrouter_data.SRIOV is defined and vrouter_data.SRIOV == true and gstat is defined and gstat.changed)

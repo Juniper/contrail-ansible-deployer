@@ -14,11 +14,24 @@
     provider_data: "{{ provider_config[instance_data.provider] }}"
   when: provider_config[instance_data.provider] is defined
 
+- name: set k8s version for RedHat
+  set_fact:
+    k8s_version: "-1.9.2-0"
+  when:
+    - ansible_os_family == 'RedHat'
+    - instance_data.roles is defined
+    - instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined
+
+- name: set k8s version for Debian
+  set_fact:
+    k8s_version: "=1.9.2-00"
+  when:
+    - ansible_os_family == 'Debian'
+    - instance_data.roles is defined
+    - instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined
+
 - name: turn off swap
   shell: swapoff -a && sed -i '/swap[ \t]\+swap/d' /etc/fstab
-
-- name: OS specific package install
-  include: "{{ ansible_os_family }}.yml"
 
 - name: disable cloud init
   service:
@@ -34,24 +47,41 @@
   - NetworkManager
   ignore_errors: yes
 
-- name: set ntp service name
-  set_fact:
-    ntp_svc_name: "{{ 'ntp' if ansible_os_family == 'Debian' else 'ntpd' }}"
+- name: OS specific package install
+  include: "{{ ansible_os_family }}.yml"
 
-- name: set ntp server
-  template:
-    src: ntp.conf.j2
-    dest: /etc/ntp.conf
+- name: Install common pre-requisites
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python-pip
+
+- name: install rsyslogd
+  package:
+    name: rsyslog
+    state: present
+  when:
+    - instance_data.roles is defined
+    - instance_data.roles.vrouter is defined
+
+- name: Set up ntp
+  include: ntp.yml
   when: provider_data.ntpserver is defined
 
-- name: initial time sync
-  shell: "ntpdate {{ provider_data.ntpserver }}"
-  ignore_errors: yes
-  when: provider_data.ntpserver is defined
+# kubetcl must be first in the list - kubeadm has dependency to kubectl without version
+- name: Install k8s packages if defined
+  package:
+    name: "{{ item }}{{ k8s_version }}"
+    state: present
+  with_items:
+    - kubectl
+    - kubelet
+    - kubeadm
+  when: k8s_version is defined
 
-- name: start ntp service
-  service: name={{ ntp_svc_name }} state=started enabled=yes
-  when: provider_data.ntpserver is defined
+- name: OS specific kernel install, grub midifications, reboot
+  include: "{{ ansible_os_family }}_kernel.yml"
 
 - name: get docker compose
   get_url:
