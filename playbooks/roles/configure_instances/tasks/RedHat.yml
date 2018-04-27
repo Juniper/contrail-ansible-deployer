@@ -24,25 +24,6 @@
     state: latest
   when: ansible_distribution == 'RedHat'
 
-- name: install ntpd centos
-  yum:
-    name: ntp
-    state: latest
-  when: provider_data.ntpserver is defined
-
-# centos uses chronyd by default and run it after restart instead of ntpd
-# service can be absent - so ignore it
-- name: disable service chronyd
-  systemd:
-    name: chronyd
-    enabled: no
-  ignore_errors: yes
-
-- name: install pip
-  yum:
-    name: python-pip
-    state: latest
-
 - name: create k8s repo centos
   yum_repository:
     name: Kubernetes
@@ -79,13 +60,6 @@
   selinux:
     policy: targeted
     state: permissive
-
-- name: install rsyslogd
-  yum:
-    name: rsyslog
-    state: present
-  when: instance_data.roles is defined and
-        ( instance_data.roles.vrouter is defined)
 
 - name: install latest kernel
   yum:

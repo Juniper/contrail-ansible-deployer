@@ -17,9 +17,6 @@
 - name: turn off swap
   shell: swapoff -a && sed -i '/swap[ \t]\+swap/d' /etc/fstab
 
-- name: OS specific package install
-  include: "{{ ansible_os_family }}.yml"
-
 - name: disable cloud init
   service:
     name: "{{ item }}"
@@ -34,23 +31,26 @@
   - NetworkManager
   ignore_errors: yes
 
-- name: set ntp service name
-  set_fact:
-    ntp_svc_name: "{{ 'ntp' if ansible_os_family == 'Debian' else 'ntpd' }}"
+- name: OS specific package install
+  include: "{{ ansible_os_family }}.yml"
 
-- name: set ntp server
-  template:
-    src: ntp.conf.j2
-    dest: /etc/ntp.conf
-  when: provider_data.ntpserver is defined
+- name: Install common pre-requisites
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python-pip
 
-- name: initial time sync
-  shell: "ntpdate {{ provider_data.ntpserver }}"
-  ignore_errors: yes
-  when: provider_data.ntpserver is defined
+- name: install rsyslogd
+  package:
+    name: rsyslog
+    state: present
+  when:
+    - instance_data.roles is defined
+    - instance_data.roles.vrouter is defined
 
-- name: start ntp service
-  service: name={{ ntp_svc_name }} state=started enabled=yes
+- name: Set up ntp
+  include: ntp.yml
   when: provider_data.ntpserver is defined
 
 - name: get docker compose
