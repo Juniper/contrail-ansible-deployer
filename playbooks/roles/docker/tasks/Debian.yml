@@ -8,14 +8,18 @@
     - curl
     - software-properties-common
 
+- name: add docker repo key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
 - name: create docker repo
   apt_repository:
-    repo: deb https://apt.dockerproject.org/repo ubuntu-xenial main
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
     state: present
 
 - name: install docker
   apt:
     name: docker-engine
-    force: yes
     state: present
-
+    update_cache: yes

@@ -20,6 +20,11 @@
 - name: OS specific package install
   include: "{{ ansible_os_family }}.yml"
 
+- name: install pip
+  yum:
+    name: python-pip
+    state: latest
+
 - name: disable cloud init
   service:
     name: "{{ item }}"
