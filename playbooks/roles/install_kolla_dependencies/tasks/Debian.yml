@@ -1,0 +1,5 @@
+---
+- name: install Debian/Ubuntu packages required by kolla playbooks
+  apt:
+    name: python-dev
+    state: latest

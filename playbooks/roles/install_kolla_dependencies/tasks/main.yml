@@ -1,20 +1,14 @@
 ---
-- name: "install {{ openstack_sku }} specific repos"
-  yum:
-    name: "centos-release-openstack-{{ openstack_sku }}"
-    state: latest
-  when: ansible_os_family == 'RedHat'
+- name: OS specific package install
+  include: "{{ ansible_os_family }}.yml"
 
-- name: install packages required by kolla playbooks
-  yum:
+- name: install common packages required by kolla playbooks
+  package:
     name: "{{ item }}"
     state: latest
   with_items:
-    - epel-release
     - gcc
-    - python-devel
     - python-pip
-  when: ansible_os_family == 'RedHat'
 
 - name: install right version of jinja2 for kolla
   pip:
