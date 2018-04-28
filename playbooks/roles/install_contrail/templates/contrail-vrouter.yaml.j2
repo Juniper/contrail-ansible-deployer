@@ -41,7 +41,7 @@ services:
       - /lib/modules:/lib/modules
       - /bin:/host/bin
       - /var/log/contrail:/var/log/contrail
-{% if ansible_distribution == 'CentOS' %}
+{% if ansible_os_family == 'RedHat' %}
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
 {% endif %}
     volumes_from:
@@ -60,7 +60,7 @@ services:
       - /bin:/host/bin
       - /var/log/contrail:/var/log/contrail
       - /var/run/libvirt:/var/run/libvirt
-{% if ansible_distribution == 'CentOS' %}
+{% if ansible_os_family == 'RedHat' %}
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
 {% endif %}
       - /etc/timezone:/etc/timezone
