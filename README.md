@@ -81,10 +81,10 @@ git clone http://github.com/Juniper/contrail-ansible-deployer
 ### Providers
 
 The playbooks support installing Contrail on these providers:
--- bms - Baremetal Server    
--- kvm - KVM hosted Virtual Machines    
--- gce - GCE hosted Virtual Machines    
--- aws - AWS hosted Virtual Machines    
+-- bms - Baremetal Server
+-- kvm - KVM hosted Virtual Machines
+-- gce - GCE hosted Virtual Machines
+-- aws - AWS hosted Virtual Machines
 
 ### The plays
 
@@ -98,10 +98,10 @@ to the following infrastructure providers:
 -- kvm    
 -- gce     
 -- aws    
--- azure (to be implemented)    
--- openstack (to be implemented)    
+-- azure (to be implemented)
+-- openstack (to be implemented)
 
-- playbooks/configure_instances.yml    
+- playbooks/configure_instances.yml
 
 Configures provisioned instances. Applicable to all providers.
 Installs software, configures operating system as outlined under
@@ -208,15 +208,30 @@ contrail_configuration:     # Contrail service configuration section
   UPGRADE_KERNEL: true
 ```
 
-[Complete list of contrail_configuration](contrail_configuration.md)    
+[Complete list of contrail_configuration](contrail_configuration.md)
 
 ### Kolla services configuration
 In case kolla openstack is deployed, this section defines the paramters for it.
 
 ```
-kolla_configuration:
-
+kolla_config:
+  customize:
+    nova.conf: |
+      [libvirt]
+      virt_type=qemu
+      cpu_mode=none
+  kolla_globals:
+    network_interface: "eth0"
+    kolla_external_vip_interface: "eth0"
+    enable_haproxy: "no"
+    enable_ironic: "no"
+    enable_swift: "no"
+  kolla_passwords:
+    metadata_secret: strongmetdatasecret
+    keystone_admin_password: password
 ```
+
+More documentation about kolla-ansible parameters can be found in kolla-ansible repository.
 
 ### Instances
 Instances are the operating systems on which the containers will be launched.
@@ -266,11 +281,11 @@ instances:
       k8s_master:
 ```
 ### more examples
-[GCE k8s HA with separate control and data plane instaces](examples/gce1.md)    
-[AWS Kolla HA with separate control and data plane instaces](examples/aws1.md)    
-[KVM Kolla per instance and role configuration](examples/kvm1.md)    
-[KVM Kolla and k8s](examples/bms2.md)    
-[BMS remote compute configuration](examples/bms1.md)    
+[GCE k8s HA with separate control and data plane instaces](examples/gce1.md)
+[AWS Kolla HA with separate control and data plane instaces](examples/aws1.md)
+[KVM Kolla per instance and role configuration](examples/kvm1.md)
+[KVM Kolla and k8s](examples/bms2.md)
+[BMS remote compute configuration](examples/bms1.md)
 
 ### start the playbooks
 
@@ -290,8 +305,8 @@ orchestrator can be openstack (installs kolla) or none or kubernetes (for pure k
 ansible-playbook -e orchestrator=none|openstack|kubernetes -i inventory/ playbooks/install_contrail.yml
 ```
 
-The location of the configuration file (config/instances.yaml) can be changed    
-using the -e config_file= parameter, i.e.:    
+The location of the configuration file (config/instances.yaml) can be changed
+using the -e config_file= parameter, i.e.:
 
 ```
 ansible-playbook -i inventory/ -e config_file=/config/instances_gce.yml playbooks/install_contrail.yml
