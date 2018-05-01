@@ -22,6 +22,7 @@
     - "{{ config_file }}"
   tags:
   - k8s
+  - nova
 
 - include: install_kolla.yml
   when:
@@ -38,4 +39,5 @@
   environment:
    - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
    - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
+  tags: nova
 
