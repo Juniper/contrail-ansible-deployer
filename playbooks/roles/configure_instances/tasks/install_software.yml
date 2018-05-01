@@ -69,14 +69,15 @@
   include: ntp.yml
   when: provider_data.ntpserver is defined
 
+# kubetcl must be first in the list - kubeadm has dependency to kubectl without version
 - name: Install k8s packages if defined
   package:
     name: "{{ item }}{{ k8s_version }}"
     state: present
   with_items:
+    - kubectl
     - kubelet
     - kubeadm
-    - kubectl
   when: k8s_version is defined
 
 - name: OS specific kernel install, grub midifications, reboot
