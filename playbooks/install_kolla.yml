@@ -39,10 +39,12 @@
 - include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/kolla-host.yml"
   vars:
     action: bootstrap-servers
+  when: os_action is not defined or os_action == 'bootstrap-servers'
 
 - include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/site.yml"
   vars:
-    action: deploy
+    action: "{{ 'deploy' if os_action is not defined else os_action }}"
+  when: os_action is not defined or os_action != 'bootstrap-servers'
 
 - include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/post-deploy.yml"
   vars:
