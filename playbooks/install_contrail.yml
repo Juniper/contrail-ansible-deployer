@@ -20,8 +20,7 @@
       when: orchestrator == 'openstack'
   vars_files:
     - "{{ config_file }}"
-  tags:
-  - k8s
+  tags: always
 
 - include: install_kolla.yml
   when:
@@ -38,4 +37,5 @@
   environment:
    - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
    - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
+  tags: nova
 
