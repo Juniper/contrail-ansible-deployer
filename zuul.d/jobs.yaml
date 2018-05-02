@@ -1,0 +1,4 @@
+- job:
+    name: contrail-sanity-centos7-kolla-ocata-docker-test-kc
+    parent: contrail-sanity-centos7-kolla-base
+    run: playbooks/contrail-sanity-centos7-kolla-ocata-docker-test-kc/run
