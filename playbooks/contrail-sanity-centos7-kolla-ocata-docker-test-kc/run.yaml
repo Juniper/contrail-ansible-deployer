@@ -1,0 +1,4 @@
+- name: List running containers
+  shell: 'docker ps -a --format "{% raw %}{{.Names}}{% endraw %}"'
+  become: true
+  register: container_list
