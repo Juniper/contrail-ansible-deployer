@@ -83,12 +83,6 @@
 - name: OS specific kernel install, grub midifications, reboot
   include: "{{ ansible_os_family }}_kernel.yml"
 
-- name: get docker compose
-  get_url:
-    url: https://github.com/docker/compose/releases/download/1.17.0/docker-compose-Linux-x86_64
-    dest: /usr/local/bin/docker-compose
-    mode: 0777
-
 - name: install python compose
   pip:
     name: docker-compose==1.9.0
