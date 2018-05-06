@@ -87,12 +87,14 @@
   pip:
     name: docker-compose==1.9.0
 
-- name: create host entry dict
+- name: create host entry dict if CONTROL_DATA_NET_LIST is defined
   set_fact:
     host_intf_dict: "{{ hostvars['localhost']['instances']|ctrl_data_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) }}"
+  when: contrail_configuration.CONTROL_DATA_NET_LIST is defined
 
 - debug:
-    msg: "DEBUG HOST ENTRIES: {{ host_intf_dict }}"
+  msg: "DEBUG HOST ENTRIES: {{ host_intf_dict }}"
+  when: host_intf_dict is defined
 
 - name: "Build hosts file with ctrl-data and domain suffix when provided"
   lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}.*' line="{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}  {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present
@@ -100,37 +102,54 @@
   when:
     - instance_data.provider == 'bms'
     - provider_data.domainsuffix is defined
+    - host_intf_dict is defined
     - host_intf_dict.get(item)
 
 - name: "Build hosts file with domain suffix when provided"
   lineinfile: dest=/etc/hosts regexp='^{{ item }}.*' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
-  when: instance_data.provider == 'bms' and provider_data.domainsuffix is defined
+  when:
+    - instance_data.provider == 'bms'
+    - provider_data.domainsuffix is defined
 
 - name: "Build hosts file with domain suffix"
   lineinfile: dest=/etc/hosts regexp='^{{ item }}.*' line="{{ item }} {{ hostvars[item]['ansible_fqdn'] }} {{ hostvars[item]['ansible_hostname'] }}" state=present
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
-  when: instance_data.provider == 'bms' and provider_data.domainsuffix is undefined and hostvars[item]['ansible_fqdn'] is defined
+  when:
+    - instance_data.provider == 'bms'
+    - provider_data.domainsuffix is undefined
+    - hostvars[item]['ansible_fqdn'] is defined
 
 - name: "Build hosts file without domain suffix when not provided (bad bad)"
   lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}" state=present
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
-  when: instance_data.provider == 'bms' and provider_data.domainsuffix is undefined and hostvars[item]['ansible_fqdn'] is undefined
+  when:
+    - instance_data.provider == 'bms'
+    - provider_data.domainsuffix is undefined
+    - hostvars[item]['ansible_fqdn'] is undefined
 
 - name: "Build hosts file with domain suffix when provided"
   lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
-  when: instance_data.provider == 'kvm' and provider_data.domainsuffix is defined
+  when:
+    - instance_data.provider == 'kvm'
+    - provider_data.domainsuffix is defined
 
 - name: "Build hosts file wit domain suffix when not provided (bad bad)"
   lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ item }} {{ hostvars[item]['ansible_fqdn'] }} {{ hostvars[item]['ansible_hostname'] }}" state=present
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
-  when: instance_data.provider == 'kvm' and provider_data.domainsuffix is undefined and hostvars[item]['ansible_fqdn'] is defined
+  when:
+    - instance_data.provider == 'kvm'
+    - provider_data.domainsuffix is undefined
+    - hostvars[item]['ansible_fqdn'] is defined
 
 - name: "Build hosts file without domain suffix when not provided (bad bad)"
   lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}" state=present
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
-  when: instance_data.provider == 'kvm' and provider_data.domainsuffix is undefined and hostvars[item]['ansible_fqdn'] is undefined
+  when:
+    - instance_data.provider == 'kvm'
+    - provider_data.domainsuffix is undefined
+    - hostvars[item]['ansible_fqdn'] is undefined
 
 - name: "Build hosts file for aws instances"
   lineinfile: dest=/etc/hosts regexp='.*{{ hostvars[item]['private_ip'] }}$' line="{{ hostvars[item]['private_ip'] }} {{ hostvars[item]['ansible_hostname'] }} {{ hostvars[item]['private_dns_name'] }}" state=present

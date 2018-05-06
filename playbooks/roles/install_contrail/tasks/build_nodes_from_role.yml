@@ -1,3 +1,14 @@
+- name: create host entry dict
+  set_fact:
+    host_intf_dict: "{{ hostvars['localhost']['instances']|ctrl_data_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) }}"
+  when:
+    - contrail_configuration.CONTROL_DATA_NET_LIST is defined
+
+- debug:
+    msg: "DEBUG {{ host_intf_dict }}"
+  when:
+    - contrail_configuration.CONTROL_DATA_NET_LIST is defined
+
 - set_fact:
     config_nodes_list: []
   when: config_nodes_list is not defined
