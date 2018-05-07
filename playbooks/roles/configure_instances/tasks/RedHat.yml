@@ -12,6 +12,16 @@
     name: network
     state: restarted
 
+- name: create k8s repo centos
+  yum_repository:
+    name: Kubernetes
+    description: k8s repo
+    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+    gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    repo_gpgcheck: yes
+    gpgcheck: yes
+  when: k8s_version is defined
+
 - name: install epel
   yum:
     name: epel-release
@@ -23,16 +33,6 @@
     name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
     state: latest
   when: ansible_distribution == 'RedHat'
-
-- name: create k8s repo centos
-  yum_repository:
-    name: Kubernetes
-    description: k8s repo
-    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
-    gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-    repo_gpgcheck: yes
-    gpgcheck: yes
-  when: k8s_version is defined
 
 - name: set selinux to permissive
   selinux:
