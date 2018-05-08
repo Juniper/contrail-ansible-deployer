@@ -1,5 +1,6 @@
 ---
 kolla_config: {}
+kolla_globals: kolla_config.get
 default_openstack_sku: ocata
 openstack_sku: >-
     {%- if contrail_configuration.OPENSTACK_VERSION is defined -%}
