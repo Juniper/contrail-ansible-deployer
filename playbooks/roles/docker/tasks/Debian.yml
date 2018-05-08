@@ -20,6 +20,6 @@
 
 - name: install docker
   apt:
-    name: docker-engine
+    name: docker-engine=17.03.1~ce-0~ubuntu-xenial
     state: present
     update_cache: yes
