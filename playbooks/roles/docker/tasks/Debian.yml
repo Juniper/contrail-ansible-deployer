@@ -10,16 +10,16 @@
 
 - name: add docker repo key
   apt_key:
-    url: https://download.docker.com/linux/ubuntu/gpg
+    url: https://apt.dockerproject.org/gpg
     state: present
 
 - name: create docker repo
   apt_repository:
-    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+    repo: deb https://apt.dockerproject.org/repo ubuntu-xenial main
     state: present
 
 - name: install docker
   apt:
-    name: docker-ce
+    name: docker-engine
     state: present
     update_cache: yes
