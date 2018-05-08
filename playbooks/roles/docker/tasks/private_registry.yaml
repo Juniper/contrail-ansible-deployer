@@ -16,11 +16,14 @@
   copy:
     src: "{{ fqdn_name }}.crt"
     dest: "/etc/docker/certs.d/{{ global_configuration.CONTAINER_REGISTRY }}/{{ fqdn_name }}.crt"
+  register: docker_cert
 
 - name: copy cert to trust directory
   copy:
     src: "{{ fqdn_name }}.crt"
     dest: "/etc/pki/ca-trust/source/anchors//{{ fqdn_name }}.crt"
+  register: pki_cert
 
 - name: update ca trust
   shell: update-ca-trust
+  when: docker_cert.changed or pki_cert.changed
