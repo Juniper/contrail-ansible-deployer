@@ -1,21 +1,58 @@
 ---
-- name: Detect default value for mgmt_interface
+- name: set instance data
   set_fact:
-    external_interface_detected: >-
-      {%- set int_dict = hostvars['localhost']['instances']|mgmt_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) -%}
-      {{ int_dict.get(inventory_hostname, ansible_default_ipv4.interface) }}
+    instance_data: "{{ instances[hostvars[inventory_hostname].instance_name] }}"
+
+- name: set provider data
+  set_fact:
+    provider_data: "{{ provider_config[instance_data.provider] }}"
+  when: provider_config[instance_data.provider] is defined
+
+- name: detect iface used to reach openstack nodes
+  shell: ip route get {{ os_node|quote }} | grep -o 'dev.*' | awk '{print $2}'
+  register: tmp_iface_1
+
+- name: handle lo
+  shell: ip address show | awk '/inet .*{{ os_node | quote }}/{print($NF)}'
+  register: tmp_iface_2
+  when: tmp_iface_1.stdout == 'lo'
 
 - name: Detect default value for network_interface
   set_fact:
-    network_interface_detected: >-
-      {%- set int_dict = hostvars['localhost']['instances']|ctrl_data_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) -%}
-      {{ int_dict.get(inventory_hostname, external_interface_detected) }}
+    network_interface_detected: "{{ tmp_iface_1.stdout if tmp_iface_1.stdout != 'lo' else tmp_iface_2.stdout }}"
+    host_intf_dict: {}
+
+
+- name: Build host_intf_dict
+  set_fact:
+    host_intf_dict: "{{ host_intf_dict | combine( { item.value['ip'] : hostvars[item.value['ip']]['network_interface_detected'] } ) }}"
+  with_dict: "{{ instances }}"
+  when:
+    - item.value['ip'] in groups['openstack_nodes']
+
+- name: Detect default value for mgmt_interface
+  set_fact:
+    external_interface_detected: >-
+      {%- set int_dict = hostvars['localhost']['instances']|kolla_external_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) -%}
+      {{ int_dict.get(inventory_hostname, ansible_default_ipv4.interface) }}
 
 - debug:
     msg: "DEBUG network_interface {{ network_interface_detected }}"
 
 - debug:
     msg: "DEBUG kolla_external_vip_interface {{ external_interface_detected }}"
+
+- debug:
+    var: host_intf_dict
+
+- name: "Build hosts file with ctrl-data and domain suffix when provided"
+  lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}.*' line="{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}  {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - instance_data.provider == 'bms'
+    - provider_data.domainsuffix is defined
+    - host_intf_dict is defined
+    - host_intf_dict.get(item)
 
 - include: inventory.yml
   delegate_to: localhost
