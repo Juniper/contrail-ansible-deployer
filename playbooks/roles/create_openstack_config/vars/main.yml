@@ -1,6 +1,8 @@
 ---
 kolla_globals: "{{ kolla_config.kolla_globals if kolla_config.kolla_globals is defined else default_kolla_globals}}"
 
+os_node: "{{ contrail_configuration.OPENSTACK_NODES.split(',')|first if contrail_configuration.OPENSTACK_NODES is defined else openstack_nodes_list|first }}"
+
 # Pick first instance's IP as a default
 os_node_control: >-
      {%- set node_list = [] -%}

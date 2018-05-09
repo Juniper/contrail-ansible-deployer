@@ -1,3 +1,4 @@
+---
 - set_fact:
     config_nodes_list: []
   when: config_nodes_list is not defined
