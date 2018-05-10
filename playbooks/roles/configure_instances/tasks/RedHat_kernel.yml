@@ -1,8 +1,8 @@
 ---
-- name: install latest kernel
+- name: install kernel 3.10.0-693.21.1.el7
   yum:
-    name: 'kernel'
-    state: latest
+    name: 'kernel-3.10.0-693.21.1.el7'
+    state: present
   register: upgrade_kernel
   when: (contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true) or
         (instance_data.UPGRADE_KERNEL is defined and instance_data.UPGRADE_KERNEL == true)
