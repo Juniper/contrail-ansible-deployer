@@ -204,4 +204,10 @@ QOS_QUEUE_ID=${QOS_QUEUE_ID:-""}
 QOS_LOGICAL_QUEUES=${QOS_LOGICAL_QUEUES:-""}
 QOS_DEF_HW_QUEUE=${QOS_DEF_HW_QUEUE:-False}
 PRIORITY_TAGGING=${PRIORITY_TAGGING:-True}
+
+# Session destination options, have to be space seperated strings
+# The valid destinations are collector, syslog and file
+# Multiple values can be specified by space seperating them
+SLO_DESTINATION=${SLO_DESTINATION:-"collector"}
+SAMPLE_DESTINATION=${SAMPLE_DESTINATION:-"collector"}
 ```
