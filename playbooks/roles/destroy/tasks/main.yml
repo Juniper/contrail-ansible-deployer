@@ -1,0 +1,22 @@
+---
+- name: find all directories
+  find:
+    path: /etc/contrail
+    file_type: directory
+  register: dir_out
+
+- debug:
+    msg="{{ item.path }}"
+  with_items: "{{ dir_out.files }}"
+
+- name: Send QUIT signal to vrouter
+  command:
+    docker kill -s QUIT vrouter_vrouter-agent_1
+  register: sg_fc
+
+- docker_service:
+    project_src: "{{ item.path }}" 
+    state: absent
+    remove_images: all
+    remove_volumes: yes
+  with_items: "{{ dir_out.files }}"
