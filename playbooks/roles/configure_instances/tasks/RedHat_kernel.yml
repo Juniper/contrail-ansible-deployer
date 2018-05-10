@@ -1,8 +1,17 @@
 ---
-- name: install latest kernel
+- name: set redhat kernel version if not defined
+  set_fact:
+    kernel_version: "3.10.0-693.21.1.el7"
+
+- name: set redhat kernel version if defined
+  set_fact:
+    kernel_version: "{{ RH_KERNEL_VERSION }}"
+  when: contrail_configuration is defined and contrail_configuration.RH_KERNEL_VERSION is defined
+
+- name: install kernel 3.10.0-693.21.1.el7
   yum:
-    name: 'kernel'
-    state: latest
+    name: "kernel-{{ RH_KERNEL_VERSION }}"
+    state: present
   register: upgrade_kernel
   when: (contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true) or
         (instance_data.UPGRADE_KERNEL is defined and instance_data.UPGRADE_KERNEL == true)
