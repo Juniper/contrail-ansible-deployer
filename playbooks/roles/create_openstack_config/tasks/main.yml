@@ -28,11 +28,36 @@
 
 - include: host_params.yml
 
-- name: Merge kolla_globals params
-  set_fact:
-    final_kolla_globals: "{{ default_kolla_globals |combine(kolla_globals) if kolla_globals is defined else default_kolla_globals }}"
+# define empty kolla_globals
+- set_fact:
+    kolla_globals: {}
+  when: kolla_globals is undefined
   delegate_to: localhost
   run_once: yes
+
+- set_fact:
+    filtered_kolla_globals: {}
+  when: kolla_globals is undefined
+  delegate_to: localhost
+  run_once: yes
+
+# filter kolla_globals
+- name: filter defined kolla_globals
+  set_fact:
+    filtered_kolla_globals: "{{ filtered_kolla_globals | combine({item.key: item.value}) }}"
+  when: item.key not in ['docker_registry', 'docker_registry_username', 'docker_registry_password']
+  with_dict: "{{ kolla_globals }}"
+  delegate_to: localhost
+  run_once: yes
+
+- name: Merge kolla_globals params with defaults
+  set_fact:
+    final_kolla_globals: "{{ default_kolla_globals | combine(filtered_kolla_globals) }}"
+  delegate_to: localhost
+  run_once: yes
+
+- debug:
+    msg: "DEBUG final_kolla_globals {{ final_kolla_globals }}"
 
 - name: Populate etc/kolla/globals.yml
   template:
