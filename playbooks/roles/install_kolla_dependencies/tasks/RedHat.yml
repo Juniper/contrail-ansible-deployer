@@ -1,8 +1,4 @@
 ---
-- name: "install {{ openstack_sku }} specific repos"
-  yum:
-    name: "centos-release-openstack-{{ openstack_sku }}"
-    state: latest
 
 - name: install epel on non-Redhat destribution
   yum:
