@@ -1,4 +1,8 @@
 ---
+
+# this file is parameterized
+# it takes 'docker_registry' as a parameter that should be added to insecure_registry list
+
 - name: register /etc/docker/daemon.json
   stat:
     path: /etc/docker/daemon.json
@@ -18,7 +22,7 @@
 
 - name: set registry string if it is the first one
   set_fact:
-    new_reg: "{% raw %}{{% endraw %}\n \"insecure-registries\": [\"{{global_configuration.CONTAINER_REGISTRY}}\"]\n{% raw %}}{% endraw %}\n"
+    new_reg: "{% raw %}{{% endraw %}\n \"insecure-registries\": [\"{{docker_registry}}\"]\n{% raw %}}{% endraw %}\n"
   when: not p.stat.exists
 
 - name: add 1st registry entry to file
@@ -38,12 +42,12 @@
 - name: check if registry is already in
   set_fact:
     is_registry_in: True
-  when: global_configuration.CONTAINER_REGISTRY in item.value and p.stat.exists
+  when: docker_registry in item.value and p.stat.exists
   with_dict: "{{ docker_daemon }}"
 
 - name: add registry to list
   set_fact:
-    new_docker_registries: "{{ item.value }} + [ '{{ global_configuration.CONTAINER_REGISTRY }}' ]"
+    new_docker_registries: "{{ item.value }} + [ '{{ docker_registry }}' ]"
   when: item.key == "insecure-registries" and is_registry_in is undefined
   with_dict: "{{ docker_daemon }}"
 
