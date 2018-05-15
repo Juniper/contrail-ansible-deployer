@@ -43,6 +43,8 @@ instances:
         QOS_LOGICAL_QUEUES: "[1, 6-10, 12-15];[2];[3-5]"
         PRIORITY_TAGGING: False
         QOS_DEF_HW_QUEUE: True
+global_configuration:
+  CONTAINER_REGISTRY: opencontrailnightly
 contrail_configuration:
   CONTRAIL_VERSION: latest
   CLOUD_ORCHESTRATOR: openstack
