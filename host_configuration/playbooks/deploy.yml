@@ -1,7 +1,0 @@
----
-- hosts:
-  - container_hosts
-  roles:
-  - configure_container_hosts
-  tags:
-  - configure_vms
