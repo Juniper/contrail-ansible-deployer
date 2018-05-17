@@ -59,12 +59,14 @@
 - name: "populate cluster wide common_vcplugin.env"
   lineinfile: dest=/etc/contrail/common_vcplugin.env regexp='.*{{ item.key }}$' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ contrail_configuration }}"
+  no_log: True
 
 - name: "populate pod specific common_vcplugin.env"
   lineinfile: dest=/etc/contrail/common_vcplugin.env regexp='.*{{ item.key }}$' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ roles[inventory_hostname].vcenter_plugin }} | default ({})"
   when: roles[inventory_hostname].vcenter_plugin.key is defined
   ignore_errors: yes
+  no_log: True
 
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"

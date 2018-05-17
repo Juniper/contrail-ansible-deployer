@@ -10,7 +10,7 @@ provider_config:
   kvm:
     image: CentOS-7-x86_64-GenericCloud-1802.qcow2.xz
     image_url: https://cloud.centos.org/centos/7/images/
-    ssh_pwd: c0ntrail123
+    ssh_pwd: <Password> 
     ssh_user: root
     vcpu: 8
     vram: 24000

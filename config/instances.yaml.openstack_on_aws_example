@@ -65,7 +65,7 @@ contrail_configuration:
   RABBITMQ_NODE_PORT: 5673
   AUTH_MODE: keystone
   KEYSTONE_AUTH_URL_VERSION: /v3
-  KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123
+  KEYSTONE_AUTH_ADMIN_PASSWORD: <Password> 
 kolla_config:
   customize:
     nova.conf: |
