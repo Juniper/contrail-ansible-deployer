@@ -24,17 +24,20 @@
 - name: "populate cluster wide common_webui.env"
   lineinfile: dest=/etc/contrail/common_webui.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ contrail_configuration }}"
+  no_log: True
 
 - name: "populate instance specific common_webui.env"
   lineinfile: dest=/etc/contrail/common_webui.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ instances[instance_name].contrail_configuration }}"
   when: instances[instance_name].contrail_configuration is defined
   ignore_errors: yes
+  no_log: True
 
 - name: "populate pod specific common_webui.env"
   lineinfile: dest=/etc/contrail/common_webui.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ roles[instance_name].control }}"
   ignore_errors: yes
+  no_log: True
 
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
