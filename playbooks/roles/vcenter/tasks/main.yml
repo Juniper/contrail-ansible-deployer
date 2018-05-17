@@ -164,7 +164,7 @@
 
 - name: create fabric PG in esxi host
   include: add_fab_pg.yml esxi_host={{item}}
-  when: item.std_switch_list
+  when: item.std_switch_list is defined
   with_items: "{{ esxi_servers }}"
 
 - name: Wait for fabric PG completion
@@ -173,7 +173,7 @@
   register: pg_completed
   until: pg_completed.finished
   retries: 300
-  when: pgs_completed
+  when: pgs_completed is defined
 
 - name: Create contrail compute vm in esxi host
   include: create_contrail_vm.yml

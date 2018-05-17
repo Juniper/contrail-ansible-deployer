@@ -18,7 +18,7 @@
     validate_certs: "{{ esxi_host.vcenter_server.validate_certs }}"
     esxi_hostname: "{{ esxi_host.name }}"
     switch_name: "{{ esxi_host.vcenter_server.dv_switch_control_data.dv_switch_name }}"
-    vmnics: [ "{{ esxi_host.vcenter_server.dv_port_group_control_data.uplink | default('') }}" ]
+    vmnics: "{{ esxi_host.control_data_dvs_uplink | default(esxi_host.vcenter_server.dv_port_group_control_data.uplink) }}"
     state: present
   when: >
          esxi_host.vcenter_server.dv_switch_control_data is defined and
@@ -32,7 +32,7 @@
     validate_certs: "{{ esxi_host.vcenter_server.validate_certs }}"
     esxi_hostname: "{{ esxi_host.name }}"
     switch_name: "{{ esxi_host.vcenter_server.dv_switch_mgmt.dv_switch_name }}"
-    vmnics: [ "{{ esxi_host.vcenter_server.dv_port_group_mgmt.uplink | default('') }}"]
+    vmnics: "{{ esxi_host.mgmt_dvs_uplink | default(esxi_host.vcenter_server.dv_port_group_mgmt.uplink) }}"
     state: present
   when: >
          esxi_host.vcenter_server.dv_switch_mgmt is defined and
