@@ -14,7 +14,7 @@
     provider_data: "{{ provider_config[instance_data.provider] }}"
   when: provider_config[instance_data.provider] is defined
 
-- name: set k8s version for RedHat
+- name: set k8s version for RedHat if not defined
   set_fact:
     k8s_version: "-1.9.2-0"
   when:
@@ -22,13 +22,33 @@
     - instance_data.roles is defined
     - instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined
 
-- name: set k8s version for Debian
+- name: set k8s version for RedHat if defined
+  set_fact:
+          k8s_version: "-{{ K8S_VERSION }}-0"
+  when:
+    - ansible_os_family == 'RedHat'
+    - instance_data.roles is defined
+    - instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined
+    - global_configuration is defined
+    - global_configuration.K8S_VERSION is defined
+
+- name: set k8s version for Debian if not defined
   set_fact:
     k8s_version: "=1.9.2-00"
   when:
     - ansible_os_family == 'Debian'
     - instance_data.roles is defined
     - instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined
+
+- name: set k8s version for Debian if defined
+  set_fact:
+          k8s_version: "={{ K8S_VERSION }}-00"
+  when:
+    - ansible_os_family == 'Debian'
+    - instance_data.roles is defined
+    - instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined
+    - global_configuration is defined
+    - global_configuration.K8S_VERSION is defined
 
 - name: turn off swap
   shell: swapoff -a && sed -i '/swap[ \t]\+swap/d' /etc/fstab
