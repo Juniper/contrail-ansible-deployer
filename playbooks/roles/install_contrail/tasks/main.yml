@@ -293,9 +293,11 @@
 
 - name: populate common.env
   lineinfile: dest=/etc/contrail/common.env regexp='.*{{ item.key }}$' line="{{ item.key }}={{ item.value }}" state=present
+  no_log: True
   with_dict: "{{ contrail_configuration }}"
   tags:
    - always
+  no_log: True
 
 - name: create redis
   include: create_redis.yml
