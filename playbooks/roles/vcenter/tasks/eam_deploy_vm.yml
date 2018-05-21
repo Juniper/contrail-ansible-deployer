@@ -1,0 +1,25 @@
+---
+- name: Create cluster list
+  set_fact:
+    cluster_list: "{{ cluster_list | default ([]) + [ item ] }}"
+  with_items: "{{ vc_server.clusternames }}"
+
+- name: Create ContrailVM in the esxi host
+  shell: "python ./eam_deploy_vm.py \
+          --host \"{{ vc_server.hostname }}\" \
+          --port {{ vc_server.port | default(vcenter_port) }} \
+          --user \"{{ vc_server.username }}\" \
+          --password \"{{ vc_server.password }}\" \
+          --datacenter \"{{ vc_server.datacentername }}\" \
+          --cluster_list \"{{ cluster_list }}\" \
+          --ova_path \"{{ vc_server.vmdk }}\""
+  args:
+    chdir: "{{ role_path }}/tools"
+  async: 3600
+  poll: 0
+  register: create_vm_results
+
+- name: Save task results
+  set_fact:
+    vms_created : "{{ vms_created | default ([]) + [create_vm_results] }}"
+

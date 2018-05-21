@@ -105,6 +105,14 @@
       {%- endfor -%}
       {{ip1}}
 
+- name: set auto_deploy param
+  set_fact:
+    auto_deploy: true
+  with_items: "{{ vc_servers }}"
+  loop_control:
+    loop_var: server
+  when: server.vmdk is defined
+
 - name: Create Datacenters
   vmware_datacenter:
     hostname: "{{ item.hostname }}"
@@ -175,11 +183,29 @@
   retries: 300
   when: pgs_completed
 
+- name: update agent_vm settings of esxi host
+  include: agent_vm_settings.yml esxi_host={{item}}
+  with_items: "{{ esxi_servers }}"
+  when: auto_deploy
+
+- name: Copy ContrailVM MAC to esxi host
+  include: copy_vm_vars_to_esxi.yml esxi_host={{item}}
+  with_items: "{{ esxi_servers }}"
+  when: auto_deploy
+
 - name: Create contrail compute vm in esxi host
   include: create_contrail_vm.yml
   with_items: "{{ esxi_servers }}"
   loop_control:
     loop_var: esxi_host
+  when: not auto_deploy
+
+- name: Create contrail compute vm in esxi host
+  include: eam_deploy_vm.yml vc_server={{server}}
+  with_items: "{{ vc_servers }}"
+  loop_control:
+    loop_var: server
+  when: auto_deploy
 
 - name: Wait for contrailVm create completion
   async_status: jid={{ item.ansible_job_id }}
@@ -187,6 +213,13 @@
   register: vm_completed
   until: vm_completed.finished
   retries: 300
+
+- name: Rename ContrailVM
+  include: rename_contrailvm.yml
+  with_items: "{{ esxi_servers }}"
+  loop_control:
+    loop_var: esxi_host
+  when: auto_deploy
 
 - name: Add nics to ContrailVM
   include: add_nic.yml esxi_host={{item}}
