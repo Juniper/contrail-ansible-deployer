@@ -1,0 +1,21 @@
+---
+- name: Create ContrailVM in the esxi host
+  vars:
+    vmname: "ContrailVM"
+  shell: "python ./eam_deploy_vm.py \
+          --host \"{{ vc_server.hostname }}\" \
+          --port {{ vc_server.port | default(vcenter_port) }} \
+          --user \"{{ vc_server.username }}\" \
+          --password \"{{ vc_server.password }}\" \
+          --cluster_name \"{{ vc_server.clusternames }}\" \
+          --ova_path \"{{ vc_server.vmdk }}\""
+  args:
+    chdir: "{{ role_path }}/tools"
+  async: 3600
+  poll: 0
+  register: create_vm_results
+
+- name: Save task results
+  set_fact:
+    vms_created : "{{ vms_created | default ([]) + [create_vm_results] }}"
+
