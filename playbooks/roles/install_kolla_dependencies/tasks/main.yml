@@ -9,6 +9,7 @@
     state: latest
   with_items:
     - python-pip
+  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Debian'
 
 - name: install right version of jinja2 for kolla
   pip:
