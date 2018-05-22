@@ -39,7 +39,7 @@ vcenter_servers:
 esxihosts:
   - name: 10.84.29.28
     username: root
-    password: c0ntrail123
+    password: <Password> 
     # Optional: defaults to False
     #validate_certs: False
     datastore: ds2

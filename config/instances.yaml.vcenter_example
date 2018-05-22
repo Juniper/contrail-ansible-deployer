@@ -1,6 +1,6 @@
 provider_config:
   bms:
-    ssh_pwd: c0ntrail123
+    ssh_pwd: <Password> 
     ssh_user: root
     ntpserver: 10.84.5.100
     domainsuffix: local
@@ -34,7 +34,7 @@ contrail_configuration:
   RABBITMQ_NODE_PORT: 5673
   VCENTER_SERVER: 192.168.1.160
   VCENTER_USERNAME: administrator
-  VCENTER_PASSWORD: c0ntrail123
+  VCENTER_PASSWORD: <Password> 
   VCENTER_DATACENTER: test-dc
   VCENTER_DVSWITCH: test_dvs
   VCENTER_WSDL_PATH: /usr/src/contrail/contrail-web-core/webroot/js/vim.wsdl
