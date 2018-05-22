@@ -196,11 +196,6 @@
   tags:
    - always
 
-- name: Build nodes list from roles
-  include: build_nodes_from_role.yml
-  tags:
-   - always
-
 - name: add nodes to contrail_configuration
   set_fact:
     contrail_configuration: "{{ contrail_configuration|default({})|combine({item.name: item.nodes|join(',')}) }}"
