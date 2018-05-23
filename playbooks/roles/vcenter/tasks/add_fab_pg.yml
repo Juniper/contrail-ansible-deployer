@@ -1,10 +1,11 @@
 ---
 - name: Create pg in standard switch
   vmware_portgroup:
-    hostname: "{{ esxi_host.name }}"
-    username: "{{ esxi_host.username }}"
-    password: "{{ esxi_host.password }}"
+    hostname: "{{ esxi_host.vcenter_server.hostname }}"
+    username: "{{ esxi_host.vcenter_server.username }}"
+    password: "{{ esxi_host.vcenter_server.password }}"
     validate_certs: "{{ esxi_host.vcenter_server.validate_certs }}"
+    cluster_name: "{{ esxi_host.cluster }}"
     switch_name: "{{ esxi_host.std_switch_list[0].switch_name | default(std_switch_name) }}"
     portgroup_name: "{{ esxi_host.std_switch_list[0].pg_name | default(std_pg_name) }}"
     vlan_id: 0
@@ -14,10 +15,11 @@
 
 - name: Create more PGs in standard switch if defined
   vmware_portgroup:
-    hostname: "{{ esxi_host.name }}"
-    username: "{{ esxi_host.username }}"
-    password: "{{ esxi_host.password }}"
+    hostname: "{{ esxi_host.vcenter_server.hostname }}"
+    username: "{{ esxi_host.vcenter_server.username }}"
+    password: "{{ esxi_host.vcenter_server.password }}"
     validate_certs: "{{ esxi_host.vcenter_server.validate_certs }}"
+    cluster_name: "{{ esxi_host.cluster }}"
     switch_name: "{{ esxi_host.std_switch_list[1].switch_name | default(std_switch_name) }}"
     portgroup_name: "{{ esxi_host.std_switch_list[1].pg_name | default(std_pg_name) }}"
     vlan_id: 0
