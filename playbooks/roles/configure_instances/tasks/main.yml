@@ -1,4 +1,11 @@
 ---
+- name: set contrail configuration to empty if absent
+  set_fact:
+   contrail_configuration: {}
+  when: contrail_configuration is undefined
+  tags:
+   - always
+
 - name: install software
   include: install_software.yml
 
