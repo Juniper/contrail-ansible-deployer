@@ -36,18 +36,6 @@ services:
     tty: {{ tty }}
     depends_on:
       - node-init
-  kafka:
-    image: "{{ container_registry }}/contrail-external-kafka:{{ contrail_version_tag }}"
-    network_mode: "host"
-    env_file: /etc/contrail/common.env
-    environment:
-      - KAFKA_NODES={{ kafka_nodes }}
-      - ZOOKEEPER_NODES={{ zookeeper_nodes }}
-      - ZOOKEEPER_PORT=2182
-      - NODE_TYPE=database
-    restart: always
-    volumes:
-     - /etc/hosts:/etc/hosts
   cassandra:
     image: "{{ container_registry }}/contrail-external-cassandra:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common.env
