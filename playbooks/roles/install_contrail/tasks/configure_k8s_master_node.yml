@@ -65,7 +65,7 @@
 #      mkdir -p $HOME/.kube &&
 #      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
 #      chown -R $(id -u):$(id -g) $HOME/.kube
-#  when: inventory_hostname == master and listen_ip is defined
+#  when: inventory_hostname == k8s_master_name and listen_ip is defined
 #
 #- name: initialize k8s master without listen ip
 #  shell: |
@@ -73,7 +73,7 @@
 #      mkdir -p $HOME/.kube &&
 #      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
 #      chown -R $(id -u):$(id -g) $HOME/.kube
-#  when: inventory_hostname == master and listen_ip is undefined
+#  when: inventory_hostname == k8s_master_name and listen_ip is undefined
 
 - name: initialize k8s master with listen ip
   shell: | 
