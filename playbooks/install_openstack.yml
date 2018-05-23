@@ -7,13 +7,67 @@
   pre_tasks:
     - name: Expose instances
       set_fact:
-          instances: "{{ instances }}"
+        instances: "{{ instances }}"
       when: hostvars['localhost']['instances'] is undefined
   roles:
-    - name: Generate openstack host groups
-      role: create_openstack_host_group
+    - create_container_host_group
+    - create_openstack_host_group
   vars_files:
     - "{{ config_file }}"
   tags: always
 
-# TODO: move kolla tasks here
+- hosts: openstack_nodes
+  vars_files:
+    - "{{ hostvars['localhost'].config_file }}"
+  gather_facts: yes
+
+  roles:
+    - name: Generate openstack configurations
+      role: create_openstack_config
+      tags: always
+
+  tasks:
+  - name: Import group variables
+    include_vars:
+      dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/group_vars"
+      extensions: ['yml']
+    tags: always
+
+  - name: Import global variables
+    include_vars:
+      dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/etc/kolla"
+      extensions: ['yml']
+      ignore_files:
+        - passwords.yml.original
+        - globals.yml.original
+    tags: always
+
+  - name: set tmphost
+    set_fact:
+      tmp_host: "{{ inventory_hostname }}"
+    tags: always
+
+  - stat:
+      path: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/host_vars/{{ tmp_host }}.yml"
+    register: st
+    delegate_to: localhost
+    tags: always
+
+  - name: Import host variables
+    include_vars:
+      file: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/host_vars/{{ inventory_hostname }}.yml"
+    when: st.stat.exists is defined and st.stat.exists
+    tags: always
+
+- include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/kolla-host.yml"
+  vars:
+    action: bootstrap-servers
+
+- include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/site.yml"
+  vars:
+    action: deploy
+
+- include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/post-deploy.yml"
+  tags: always
+
+- include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/post-deploy-contrail.yml"
