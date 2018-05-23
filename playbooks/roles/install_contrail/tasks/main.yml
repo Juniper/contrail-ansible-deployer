@@ -20,7 +20,7 @@
 
 - name: set orchestrator param
   set_fact:
-    contrail_configuration: "{{ contrail_configuration|default({})|combine({'CLOUD_ORCHESTRATOR': orchestrator}) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({'CLOUD_ORCHESTRATOR': orchestrator}) }}"
   when:
     - orchestrator is defined
     - contrail_configuration.CLOUD_ORCHESTRATOR is not defined
@@ -29,7 +29,7 @@
 
 - name: set KEYSTONE_AUTH_ADMIN_PASSWORD
   set_fact:
-    contrail_configuration: "{{ contrail_configuration|default({})|combine({'KEYSTONE_AUTH_ADMIN_PASSWORD': kolla_config.kolla_passwords.keystone_admin_password }) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({'KEYSTONE_AUTH_ADMIN_PASSWORD': kolla_config.kolla_passwords.keystone_admin_password }) }}"
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
     - kolla_config is defined
@@ -44,21 +44,18 @@
   when: contrail_configuration.CONTRAIL_VERSION is undefined
   tags:
    - always
-
 - name: set container tag contrail version if defined
   set_fact:
     contrail_version_tag: "{{ contrail_configuration.CONTRAIL_VERSION }}"
   when: contrail_configuration.CONTRAIL_VERSION is defined
   tags:
    - always
-
 - name: add openstack version tag if defined
   set_fact:
     contrail_version_tag: "{{ contrail_configuration.OPENSTACK_VERSION }}-{{ contrail_version_tag }}"
   when: contrail_configuration.OPENSTACK_VERSION is defined
   tags:
    - always
-
 - name: add linux distr tag if defined
   set_fact:
     contrail_version_tag: "{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_version_tag }}"
@@ -72,7 +69,6 @@
   when: global_configuration is not defined or (global_configuration is defined and global_configuration.CONTAINER_REGISTRY is undefined)
   tags:
    - always
-
 - name: set registry if defined
   set_fact:
     container_registry: "{{ global_configuration.CONTAINER_REGISTRY }}"
@@ -93,112 +89,23 @@
 
 - name: set stdin_open to true if it's not defined
   set_fact:
-    stdin_open: true
-  when: contrail_configuration.STDIN_OPEN is undefined
+    stdin_open: "{{ contrail_configuration.STDIN_OPEN | default(true) }}"
   tags:
-   - always
-
-- name: set stdin_open to specified value if defined
-  set_fact:
-    stdin_open: "{{ contrail_configuration.STDIN_OPEN }}"
-  when: contrail_configuration.STDIN_OPEN is defined
-  tags:
-   - always
-
+    - always
 - name: set tty to true if it's not defined
   set_fact:
-    tty: true
-  when: contrail_configuration.TTY is undefined
+    tty: "{{ contrail_configuration.TTY | default(true) }}"
   tags:
-   - always
+    - always
 
-- name: set tty to specified value if defined
-  set_fact:
-    tty: "{{ contrail_configuration.TTY }}"
-  when: contrail_configuration.TTY is defined
+- name: Evaluate roles
+  include: eval_node_roles.yml
   tags:
-   - always
-
-- set_fact:
-    default_roles: "{{ default_roles|default({})|combine({item.0: item.1}) }}"
-  with_together:
-    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'vrouter', 'webui']
-    - []
-  when:
-    - contrail_configuration.CLOUD_ORCHESTRATOR is undefined
-  tags:
-   - always
-
-- set_fact:
-    default_roles: "{{ default_roles|default({})|combine({item.0: item.1}) }}"
-  with_together:
-    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'k8s_master', 'k8s_node', 'kubemanager', 'vrouter', 'webui']
-    - []
-  when:
-    - contrail_configuration.CLOUD_ORCHESTRATOR is defined
-    - contrail_configuration.CLOUD_ORCHESTRATOR == 'kubernetes'
-  tags:
-   - always
-
-
-- set_fact:
-    default_roles: "{{ default_roles|default({})|combine({item.0: item.1}) }}"
-  with_together:
-    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'vrouter', 'webui', 'openstack']
-    - []
-  when:
-    - contrail_configuration.CLOUD_ORCHESTRATOR is defined
-    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
-  tags:
-   - always
-
-- set_fact:
-    default_roles: "{{ default_roles|default({})|combine({item.0: item.1}) }}"
-  with_together:
-    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'vrouter', 'webui', 'vcenter_plugin']
-    - []
-  when:
-    - contrail_configuration.CLOUD_ORCHESTRATOR is defined
-    - contrail_configuration.CLOUD_ORCHESTRATOR == 'vcenter'
-  tags:
-   - always
-
-- set_fact:
-    default_roles_hosts: {}
-  tags:
-   - always
-
-- name: add roles if not defined
-  set_fact:
-     default_roles_hosts: "{{ default_roles_hosts|combine({item.key: default_roles}, recursive=True) }}"
-  when: item.value.roles is undefined
-  with_dict: "{{ instances }}"
-  tags:
-   - always
-
-- name: add roles if defined
-  set_fact:
-     default_roles_hosts: "{{ default_roles_hosts|combine({item.key: item.value.roles}, recursive=True) }}"
-  when: item.value.roles is defined
-  with_dict: "{{ instances }}"
-  tags:
-   - always
-
-- debug:
-    msg: "default_roles {{ default_roles_hosts }}"
-  tags:
-   - always
-
-- name: set roles if not defined
-  set_fact:
-    roles: "{{ default_roles_hosts }}"
-  when: default_roles_hosts is defined
-  tags:
-   - always
+    - always
 
 - name: add nodes to contrail_configuration
   set_fact:
-    contrail_configuration: "{{ contrail_configuration|default({})|combine({item.name: item.nodes|join(',')}) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: item.nodes|join(',')}) }}"
   when: contrail_configuration.get(item.name, 0) == 0 and item.nodes | length > 0
   with_items:
     - {'name': 'CONFIG_NODES', 'nodes': "{{config_nodes_list}}"}
@@ -224,7 +131,7 @@
 
 - name: set OpenStack endpoints from derived kolla parameters
   set_fact:
-    contrail_configuration: "{{ contrail_configuration | default({}) | combine({item.name: final_kolla_configs.kolla_internal_vip_address }) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: final_kolla_configs.kolla_internal_vip_address }) }}"
   when:
     - item.is_not_defined | bool
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
@@ -241,7 +148,7 @@
 
 - name: set OpenStack endpoints from kolla_config.kolla_globals
   set_fact:
-    contrail_configuration: "{{ contrail_configuration | default({}) | combine({item.name: kolla_config.kolla_globals.kolla_internal_vip_address }) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: kolla_config.kolla_globals.kolla_internal_vip_address }) }}"
   when:
     - item.is_not_defined | bool
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
@@ -257,34 +164,12 @@
     - { name: 'imageManager_ip', is_not_defined : "{{ contrail_configuration.imageManager_ip is not defined }}" }
     - { name: 'networkManager_ip', is_not_defined : "{{ contrail_configuration.networkManager_ip is not defined }}" }
 
-- name: init master list
-  set_fact:
-    master_list: []
-  tags:
-    - k8s
-
-- name: init master inventory list
-  set_fact:
-    master_inventory_list: []
-  tags:
-    - k8s
-
-- name: set master
+- name: Evaluate k8s master ip/name
   include: set_master.yml
-  with_items:
-    - "{{ k8s_master_nodes_list }}"
-  loop_control:
-    loop_var: controller_item
-  when: roles[instance_name].k8s_master is defined or roles[instance_name].k8s_node is defined or roles[instance_name].kubemanager is defined
+  when:
+    - roles[instance_name].k8s_master is defined or roles[instance_name].k8s_node is defined or roles[instance_name].kubemanager is defined
   tags:
     - k8s
-
-- name: "create contrail_configuration.KUBERNETES_API_SERVER for nodes"
-  set_fact:
-    contrail_configuration: "{{ contrail_configuration | combine({'KUBERNETES_API_SERVER': master}) }}"
-  when:
-    - contrail_configuration.KUBERNETES_API_SERVER is undefined
-    - master is defined
 
 - name: create /var/log/contrail
   file:
@@ -389,7 +274,7 @@
 
 - name: configure k8s master
   include: configure_k8s_master_node.yml
-  when: roles[instance_name].k8s_master is defined and master_inventory is defined and inventory_hostname == master_inventory
+  when: roles[instance_name].k8s_master is defined and k8s_master_name is defined and inventory_hostname == k8s_master_name
   tags:
     - k8s
 
@@ -401,19 +286,19 @@
 
 - name: join k8s master
   include: configure_k8s_join_node.yml
-  when: roles[instance_name].k8s_node is defined and master_inventory is defined and inventory_hostname != master_inventory
+  when: roles[instance_name].k8s_node is defined and k8s_master_name is defined and inventory_hostname != k8s_master_name
   tags:
     - k8s
 
 - name: create k8s dashboard
   include: create_k8s_dashboard.yml
-  when: roles[instance_name].k8s_master is defined and master_inventory is defined and inventory_hostname == master_inventory
+  when: roles[instance_name].k8s_master is defined and k8s_master_name is defined and inventory_hostname == k8s_master_name
   tags:
     - k8s
 
 - name: create contrail kube manager
   include: create_kubemanager.yml
-  when: roles[instance_name].kubemanager is defined and master is defined and master_inventory is defined
+  when: roles[instance_name].kubemanager is defined and k8s_master_ip is defined and k8s_master_name is defined
   tags:
     - k8s
 
@@ -432,8 +317,8 @@
     loop_var: instance
   when:
     - roles[instance_name].k8s_master is defined
-    - master_inventory is defined
-    - inventory_hostname == master_inventory
+    - k8s_master_name is defined
+    - inventory_hostname == k8s_master_name
     - instance.value.roles is defined
     - instance.value.roles.k8s_node is defined
     - instance.value.roles.k8s_master is defined
