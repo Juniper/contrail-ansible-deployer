@@ -88,4 +88,5 @@ EOF
 ansible-playbook -e orchestrator=kubernetes -i inventory/ playbooks/provision_instances.yml
 ansible-playbook -e orchestrator=kubernetes -i inventory/ playbooks/configure_instances.yml
 ansible-playbook -e orchestrator=kubernetes -i inventory/ playbooks/install_contrail.yml
+ansible-playbook -e orchestrator=kubernetes -i inventory/ playbooks/install_k8s.yml
 ```

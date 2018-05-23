@@ -66,6 +66,7 @@ instances:
       k8s_node:
 EOF
 ansible-playbook -i inventory/ playbooks/provision_instances.yml
-ansible-playbook -i inventory/ playbooks/configure_instances.yml
-ansible-playbook -e orchestrator=none -i inventory/ playbooks/install_contrail.yml
+ansible-playbook -e orchestrator=kubernetes -i inventory/ playbooks/configure_instances.yml
+ansible-playbook -e orchestrator=kubernetes -i inventory/ playbooks/install_contrail.yml
+ansible-playbook -e orchestrator=kubernetes -i inventory/ playbooks/install_k8s.yml
 ```

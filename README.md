@@ -12,6 +12,7 @@ git clone http://github.com/Juniper/contrail-ansible-deployer
 cd contrail-ansible-deployer
 ansible-playbook -i inventory/ -e orchestrator=kubernetes -e '{"instances":{"bms1":{"ip":"192.168.1.100","provider":"bms"}}}' playbooks/configure_instances.yml
 ansible-playbook -i inventory/ -e orchestrator=kubernetes -e '{"instances":{"bms1":{"ip":"192.168.1.100","provider":"bms"}}}' playbooks/install_contrail.yml
+ansible-playbook -i inventory/ -e orchestrator=kubernetes -e '{"instances":{"bms1":{"ip":"192.168.1.100","provider":"bms"}}}' playbooks/install_k8s.yml
 ```
 The ip address 192.168.1.100 has to be replaced with the instances ip address
 
@@ -89,9 +90,9 @@ The playbook contains three plays:
 Provisions operating system instances for hosting the containers
 to the following infrastructure providers:
 
--- kvm    
--- gce     
--- aws    
+-- kvm
+-- gce
+-- aws
 -- azure (to be implemented)
 -- openstack (to be implemented)
 
@@ -290,13 +291,25 @@ ansible-playbook -i inventory/ playbooks/provision_instances.yml
 
 Instance configuration:
 ```
-ansible-playbook -i inventory/ playbooks/configure_instances.yml
+ansible-playbook -e orchestrator=none|openstack|kubernetes -i inventory/ playbooks/configure_instances.yml
+```
+
+OpenStack installation:
+```
+ansible-playbook -i inventory/ playbooks/install_openstack.yml
 ```
 
 Contrail installation:
-orchestrator can be openstack (installs kolla) or none or kubernetes (for pure k8s installations).
+orchestrator can be openstack or none or kubernetes (for pure k8s installations).
 ```
 ansible-playbook -e orchestrator=none|openstack|kubernetes -i inventory/ playbooks/install_contrail.yml
+```
+
+Contrail's k8s installation:
+orchestrator can be openstack or kubernetes (for pure k8s installations).
+openstack can be used here for hybrid clouds like Contrail+OpenStack+K8s
+```
+ansible-playbook -e orchestrator=openstack|kubernetes -i inventory/ playbooks/install_contrail.yml
 ```
 
 The location of the configuration file (config/instances.yaml) can be changed

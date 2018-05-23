@@ -1,4 +1,8 @@
-# ansible-playbook -i inventory/ playbook/install_k8s.yml
+# orchestrator MUST be passed as a command line argument like so:
+#
+# ansible-playbook -i inventory/ -e orchestrator=openstack playbook/install_k8s.yml
+#
+# orchestrator can be openstack or kubernetes
 #
 - name: Create container host group
   hosts: localhost

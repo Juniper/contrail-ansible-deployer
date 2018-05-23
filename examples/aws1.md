@@ -143,11 +143,12 @@ kolla_config:
 
 ## Deploying the Cluster
 
-The deployment takes just three steps:
+The deployment takes just four steps:
 
 ```
 ansible-playbook -i inventory/ playbooks/provision_instances.yml
 ansible-playbook -i inventory/ playbooks/configure_instances.yml
+ansible-playbook -i inventory/ playbooks/install_openstack.yml
 ansible-playbook -i inventory/ -e orchestrator=openstack playbooks/install_contrail.yml
 ```
 
