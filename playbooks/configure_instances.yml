@@ -1,20 +1,26 @@
+# ansible-playbook -i inventory/ -e orchestrator=openstack playbook/install_openstack.yml
+#
 - name: Create container host group
   hosts: localhost
   connection: local
   gather_facts: yes
   pre_tasks:
-    - name: Set orchestrator if not passed
-      set_fact:
-          contrail_configuration: "{{ contrail_configuration|default({}) | combine({'CLOUD_ORCHESTRATOR': orchestrator if orchestrator is defined else 'openstack'}) }}"
-      when: contrail_configuration is not defined or contrail_configuration.CLOUD_ORCHESTRATOR is not defined
     - name: Expose instances
       set_fact:
           instances: "{{ instances }}"
       when: hostvars['localhost']['instances'] is undefined
   roles:
     - create_container_host_group
-    - { role: create_kolla_playbooks }
-    - { role: install_kolla_dependencies, when: contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' }
+    - name: Clone kolla-ansible
+      role: create_kolla_playbooks 
+      when:
+        - orchestrator is defined
+        - orchestrator == 'openstack'
+    - name: prepare localhost for kolla
+      role: install_kolla_dependencies
+      when:
+        - orchestrator is defined
+        - orchestrator == 'openstack'
     - generate_root_ca
   vars_files:
     - "{{ config_file }}"
@@ -27,5 +33,5 @@
   vars_files:
     - "{{ hostvars['localhost'].config_file }}"
   environment:
-    - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
-    - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
+    - https_proxy: "{{ contrail_configuration.HTTPS_PROXY | default('') }}"
+    - http_proxy: "{{ contrail_configuration.HTTP_PROXY | default('') }}"

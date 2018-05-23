@@ -20,7 +20,7 @@
 
 - name: set orchestrator param
   set_fact:
-    contrail_configuration: "{{ contrail_configuration|default({})|combine({'CLOUD_ORCHESTRATOR': orchestrator}) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({'CLOUD_ORCHESTRATOR': orchestrator}) }}"
   when:
     - orchestrator is defined
     - contrail_configuration.CLOUD_ORCHESTRATOR is not defined
@@ -29,7 +29,7 @@
 
 - name: set KEYSTONE_AUTH_ADMIN_PASSWORD
   set_fact:
-    contrail_configuration: "{{ contrail_configuration|default({})|combine({'KEYSTONE_AUTH_ADMIN_PASSWORD': kolla_config.kolla_passwords.keystone_admin_password }) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({'KEYSTONE_AUTH_ADMIN_PASSWORD': kolla_config.kolla_passwords.keystone_admin_password }) }}"
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
     - kolla_config is defined
@@ -198,7 +198,7 @@
 
 - name: add nodes to contrail_configuration
   set_fact:
-    contrail_configuration: "{{ contrail_configuration|default({})|combine({item.name: item.nodes|join(',')}) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: item.nodes|join(',')}) }}"
   when: contrail_configuration.get(item.name, 0) == 0 and item.nodes | length > 0
   with_items:
     - {'name': 'CONFIG_NODES', 'nodes': "{{config_nodes_list}}"}
@@ -224,7 +224,7 @@
 
 - name: set OpenStack endpoints from derived kolla parameters
   set_fact:
-    contrail_configuration: "{{ contrail_configuration | default({}) | combine({item.name: final_kolla_configs.kolla_internal_vip_address }) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: final_kolla_configs.kolla_internal_vip_address }) }}"
   when:
     - item.is_not_defined | bool
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
@@ -241,7 +241,7 @@
 
 - name: set OpenStack endpoints from kolla_config.kolla_globals
   set_fact:
-    contrail_configuration: "{{ contrail_configuration | default({}) | combine({item.name: kolla_config.kolla_globals.kolla_internal_vip_address }) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: kolla_config.kolla_globals.kolla_internal_vip_address }) }}"
   when:
     - item.is_not_defined | bool
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
