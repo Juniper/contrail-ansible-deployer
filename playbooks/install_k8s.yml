@@ -1,0 +1,19 @@
+# ansible-playbook -i inventory/ playbook/install_k8s.yml
+#
+- name: Create container host group
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  pre_tasks:
+    - name: Expose instances
+      set_fact:
+          instances: "{{ instances }}"
+      when: hostvars['localhost']['instances'] is undefined
+  roles:
+    - name: Generate container_host group
+      role: create_container_host_group
+  vars_files:
+    - "{{ config_file }}"
+  tags: always
+
+# TODO: create role for k8s installing and use it here
