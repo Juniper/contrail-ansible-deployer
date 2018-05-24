@@ -1,0 +1,14 @@
+DEVICE=eth{{interface_var.0 + 1 }}
+{% if interface_var.1.ip is defined %}
+IPADDR={{ interface_var.1.ip }}
+{% endif %}
+{% if interface_var.1.mask is defined %}
+NETMASK={{ interface_var.1.mask }}
+{% endif %}
+{% if interface_var.1.gateway is defined %}
+GATEWAY={{ interface_var.1.gateway }}
+{% endif %}
+{% if interface_var.1.dns is defined %}
+DNS1={{ interface_var.1.dns }}
+{% endif %}
+ONBOOT=yes
