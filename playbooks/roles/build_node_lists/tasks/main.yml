@@ -8,6 +8,7 @@
   when:
     - item.value.roles is defined
     - item.value.roles.config is defined
+    - contrail_configuration.CONTROLLER_NODES is not defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:
@@ -19,6 +20,7 @@
   when:
     - item.value.roles is defined
     - item.value.roles.control is defined
+    - contrail_configuration.CONTROLLER_NODES is not defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:
@@ -30,6 +32,7 @@
   when:
     - item.value.roles is defined
     - item.value.roles.config_database is defined
+    - contrail_configuration.CONTROLLER_NODES is not defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:
@@ -41,6 +44,7 @@
   when:
     - item.value.roles is defined
     - item.value.roles.analytics is defined
+    - contrail_configuration.CONTROLLER_NODES is not defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:
@@ -52,6 +56,7 @@
   when:
     - item.value.roles is defined
     - item.value.roles.analytics_database is defined
+    - contrail_configuration.CONTROLLER_NODES is not defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:
