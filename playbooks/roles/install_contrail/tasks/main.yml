@@ -374,6 +374,11 @@
   tags:
     - k8s
 
+- name: "create contrail_configuration.KUBERNETES_API_SERVER"
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'KUBERNETES_API_SERVER': master}) }}"
+  when: master is defined and roles[instance_name].kubemanager.KUBERNETES_API_SERVER is undefined
+
 - name: create cni
   include: create_k8s_cni.yml
   when: roles[instance_name].k8s_node is defined
