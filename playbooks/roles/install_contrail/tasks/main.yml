@@ -257,6 +257,35 @@
     - { name: 'imageManager_ip', is_not_defined : "{{ contrail_configuration.imageManager_ip is not defined }}" }
     - { name: 'networkManager_ip', is_not_defined : "{{ contrail_configuration.networkManager_ip is not defined }}" }
 
+- name: init master list
+  set_fact:
+    master_list: []
+  tags:
+    - k8s
+
+- name: init master inventory list
+  set_fact:
+    master_inventory_list: []
+  tags:
+    - k8s
+
+- name: set master
+  include: set_master.yml
+  with_items:
+    - "{{ k8s_master_nodes_list }}"
+  loop_control:
+    loop_var: controller_item
+  when: roles[instance_name].k8s_master is defined or roles[instance_name].k8s_node is defined or roles[instance_name].kubemanager is defined
+  tags:
+    - k8s
+
+- name: "create contrail_configuration.KUBERNETES_API_SERVER for nodes"
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'KUBERNETES_API_SERVER': master}) }}"
+  when:
+    - contrail_configuration.KUBERNETES_API_SERVER is undefined
+    - master is defined
+
 - name: create /var/log/contrail
   file:
     path: /var/log/contrail
@@ -351,28 +380,6 @@
   when: roles[instance_name].analytics is defined
   tags:
     - analytics
-
-- name: init master list
-  set_fact:
-    master_list: []
-  tags:
-    - k8s
-
-- name: init master inventory list
-  set_fact:
-    master_inventory_list: []
-  tags:
-    - k8s
-
-- name: set master
-  include: set_master.yml
-  with_items:
-    - "{{ k8s_master_nodes_list }}"
-  loop_control:
-    loop_var: controller_item
-  when: roles[instance_name].k8s_master is defined or roles[instance_name].k8s_node is defined or roles[instance_name].kubemanager is defined
-  tags:
-    - k8s
 
 - name: create cni
   include: create_k8s_cni.yml
