@@ -1,8 +1,0 @@
-container_hosts:        
-  hosts:
-    192.168.1.100:
-      ansible_ssh_pass: contrail123
-    192.168.1.101:
-      ansible_ssh_pass: contrail123
-    192.168.1.102:
-      ansible_ssh_pass: contrail123
