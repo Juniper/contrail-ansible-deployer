@@ -23,6 +23,8 @@ vcenter_servers:
       #  dv_portgroup_name:
       #  number_of_ports:
       #  uplink:
+      #    - 'vmnic0'
+      #    - 'vmnic1'
       # Optional: Specify the mgmt DVswitch and PG
       #dv_switch_mgmt:
       #  dv_switch_name:
@@ -30,6 +32,8 @@ vcenter_servers:
       #  dv_portgroup_name:
       #  number_of_ports:
       #  uplink:
+      #    - 'vmnic0'
+      #    - 'vmnic1'
       # Optional: The user is exepcted to pre-create this switch and pre-configure sriov related items in vcenter/esxi, PG is created by the playbook
       #dv_switch_sr_iov:
       #  dv_switch_name:
@@ -45,6 +49,14 @@ esxihosts:
     datastore: ds2
     datacenter: "kp datacenter11 sp"
     cluster: "kp_cluster11 sp"
+    # Optional: specify uplink to be used for control_data on this esxi host, if not specified cluster level param is used
+    #control_data_dvs_uplink:
+    # - 'vmnic0'
+    # - 'vmnic1'
+    # Optional: specify uplink to be used for mgmt on this esxi host, if not specified cluster level param is used
+    #mgmt_dvs_uplink:
+    # - 'vmnic0'
+    # - 'vmnic1'
     # Optional: specify std switch name (pre-configured), pg name specified here will be created, default switch_name is vswitch0 and pg is fab-pg
     #std_switch_list:
     #  - pg_name: mgmt-pg
