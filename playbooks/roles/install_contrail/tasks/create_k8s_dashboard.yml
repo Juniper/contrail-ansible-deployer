@@ -1,0 +1,15 @@
+---
+- name: create k8s dashboard manifest
+  template:
+    src: k8s-dashboard.yaml.j2
+    dest: /tmp/k8s-dashboard.yaml.j2
+
+- name: start k8s dashboard
+  shell: kubectl apply -f /tmp/k8s-dashboard.yaml.j2
+
+- name: look for a privileged token for full k8s dashboard access
+  shell: kubectl -n kube-system get secret | grep namespace-controller-token | awk '{print $1}'
+  register: privileged_token_output
+
+- name: store privileged token for full k8s dashboard access
+  shell: kubectl describe secret {{ privileged_token_output.stdout }} -n kube-system | grep "token:" | awk '{print $2}' > /root/k8s_dashboard_token.txt
