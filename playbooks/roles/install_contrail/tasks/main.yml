@@ -308,7 +308,15 @@
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'vcenter'
     - roles[instance_name].vcenter_plugin is defined
   tags:
-    - vcenter_plugin
+    - vcenter
+
+- name: create contrail vcenter-manager
+  include: create_vcenter_manager.yml
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'vcenter'
+    - roles[instance_name].vcenter_manager is defined
+  tags:
+    - vcenter
 
 - name: untaint node
   shell: "kubectl taint nodes {{ hostvars[instance.value.ip]['ansible_fqdn'] }} node-role.kubernetes.io/master-"
