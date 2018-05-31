@@ -1,7 +1,18 @@
 ---
-- name: install latest kernel
+- name: set new kernel version tag <global>
+  set_fact:
+    kernel_version_tag: "{{ contrail_configuration.KERNEL_VERSION }}"
+  when: contrail_configuration.KERNEL_VERSION is defined
+
+# kernel version under instance data takes precedence over global kernel version
+- name: set new kernel version tag <instance>
+  set_fact:
+    kernel_version_tag: "{{ instance_data.KERNEL_VERSION }}"
+  when: instance_data.KERNEL_VERSION is defined
+
+- name: install new kernel version
   yum:
-    name: 'kernel'
+    name: "{{ ('kernel-' + kernel_version_tag) if kernel_version_tag is defined else 'kernel'}}"
     state: latest
   register: upgrade_kernel
   when: (contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true) or
