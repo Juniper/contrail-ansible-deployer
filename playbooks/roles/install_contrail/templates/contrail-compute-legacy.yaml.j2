@@ -1,0 +1,8 @@
+version: '2'
+services:
+  openstack-compute-legacy:
+    image: "{{ container_registry }}/contrail-openstack-compute-init:{{ contrail_version_tag }}"
+    network_mode: "host"
+    volumes:
+      - /usr/bin:/opt/plugin/bin
+      - {{ pythonpath.stdout }}:/opt/plugin/site-packages
