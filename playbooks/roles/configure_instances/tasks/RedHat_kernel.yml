@@ -1,11 +1,26 @@
 ---
-- name: install latest kernel
+- name: set new kernel version tag <global>
+  set_fact:
+    kernel_version_tag: "{{ global_configuration.KERNEL_VERSION }}"
+  when:
+    - global_configuration is defined
+    - global_configuration.KERNEL_VERSION is defined
+
+# kernel version under roles-->vrouter takes
+# precedence over global kernel version
+- name: set new kernel version tag <instance>
+  set_fact:
+    kernel_version_tag: "{{ vrouter_data.KERNEL_VERSION }}"
+  when:
+    - vrouter_data is defined
+    - vrouter_data.KERNEL_VERSION is defined
+
+- name: install new kernel version
   yum:
-    name: 'kernel'
+    name: "{{ 'kernel' if kernel_version_tag == 'latest' else ('kernel-' + kernel_version_tag) }}"
     state: latest
-  register: upgrade_kernel
-  when: (contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true) or
-        (instance_data.UPGRADE_KERNEL is defined and instance_data.UPGRADE_KERNEL == true)
+  register: modify_kernel
+  when: kernel_version_tag is defined
 
 # enable IOMMU if sriov/vfio-dpdk is enabled
 - name: set grub file name.
@@ -66,12 +81,12 @@
   async: 1
   poll: 0
   become: true
-  when: (upgrade_kernel is defined and upgrade_kernel.changed) or
+  when: (modify_kernel is defined and modify_kernel.changed) or
         (contrail_modify_grub is defined and gstat is defined and gstat.changed)
 
 - name: wait for server to come back online
   wait_for_connection:
     delay: 30
     timeout: 2400
-  when: (upgrade_kernel is defined and upgrade_kernel.changed) or
+  when: (modify_kernel is defined and modify_kernel.changed) or
         (contrail_modify_grub is defined and gstat is defined and gstat.changed)

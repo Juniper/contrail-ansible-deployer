@@ -5,9 +5,8 @@
 
 - name: set vrouter data
   set_fact:
-    vrouter_data: "{{ hostvars[inventory_hostname].instance_data.roles.vrouter }}"
-  when: hostvars[inventory_hostname].instance_data.roles is defined and
-        hostvars[inventory_hostname].instance_data.roles.vrouter is defined
+    vrouter_data: "{{ instance_data.roles.vrouter }}"
+  when: instance_data.roles is defined and instance_data.roles.vrouter is defined
 
 - name: set provider data
   set_fact:
