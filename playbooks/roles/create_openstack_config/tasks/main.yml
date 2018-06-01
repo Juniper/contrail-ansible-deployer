@@ -49,8 +49,28 @@
   lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}.*' line="{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}  {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
-    - instance_data.provider == 'bms'
+    - provider_data is defined
     - provider_data.domainsuffix is defined
+    - host_intf_dict is defined
+    - host_intf_dict.get(item)
+
+- name: Build hosts file with ctrl-data using ansible_fqdn
+  lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}.*' line="{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}  {{ hostvars[item]['ansible_fqdn'] }} {{ hostvars[item]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - provider_data is defined
+    - provider_data.domainsuffix is not defined
+    - hostvars[item].ansible_fqdn is defined
+    - host_intf_dict is defined
+    - host_intf_dict.get(item)
+
+- name: Build hosts file with ctrl-data without domain suffix
+  lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}.*' line="{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }} {{ hostvars[item]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - provider_data is defined
+    - provider_data.domainsuffix is not defined
+    - hostvars[item].ansible_fqdn is not defined
     - host_intf_dict is defined
     - host_intf_dict.get(item)
 
