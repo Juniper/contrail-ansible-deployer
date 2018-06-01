@@ -117,7 +117,9 @@ def CreateAgencyConfig(si, args):
     agency_config.preferHostConfiguration = True
 
     compute_scope = eam.Agency.ComputeResourceScope()
-    cluster_list = args.cluster_list.split(',')
+    cluster_list = args.cluster_list.rstrip(',')
+    cluster_list = cluster_list.split(',')
+
     for cluster in cluster_list:
         compute_host = get_obj(content, [vim.ClusterComputeResource], cluster)
         compute_scope.computeResource.append(compute_host)

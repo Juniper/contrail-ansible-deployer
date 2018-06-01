@@ -94,7 +94,7 @@ def main():
     children = containerView.view
     for child in children:
         if child.parent.name == 'ESX Agents':
-           if child.guest.toolsStatus == 'toolsNotRunning':
+           if child.guest.toolsStatus in {'toolsOk', 'toolsNotRunning'}:
               print "deployed"
               break
 
