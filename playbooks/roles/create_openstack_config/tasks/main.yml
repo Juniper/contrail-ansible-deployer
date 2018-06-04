@@ -74,6 +74,34 @@
     - host_intf_dict is defined
     - host_intf_dict.get(item)
 
+# define empty kolla_globals
+- set_fact:
+    kolla_globals: {}
+  when: kolla_globals is undefined
+  delegate_to: localhost
+  run_once: yes
+
+- fail:
+    msg: "Kolla's internal VIP must be configured if deployment has more than one OpenStack controller."
+  when:
+    - openstack_nodes_list is defined
+    - openstack_nodes_list | length > 1
+    - kolla_globals.kolla_internal_vip_address is not defined
+  run_once: True
+- fail:
+    msg: "Kolla's haproxy must be enabled if deployment has more than one OpenStack controller."
+  when:
+    - openstack_nodes_list is defined
+    - openstack_nodes_list | length > 1
+    - not (kolla_globals.enable_haproxy | default('yes') | bool)
+  run_once: True
+- fail:
+    msg: "Kolla's internal VIP must be configured if kolla's haproxy is enabled"
+  when:
+    - kolla_globals.enable_haproxy | default('yes') | bool
+    - kolla_globals.kolla_internal_vip_address is not defined
+  run_once: True
+
 - include: inventory.yml
   delegate_to: localhost
   run_once: yes
@@ -84,13 +112,6 @@
   run_once: yes
 
 - include: host_params.yml
-
-# define empty kolla_globals
-- set_fact:
-    kolla_globals: {}
-  when: kolla_globals is undefined
-  delegate_to: localhost
-  run_once: yes
 
 - set_fact:
     filtered_kolla_globals: {}
