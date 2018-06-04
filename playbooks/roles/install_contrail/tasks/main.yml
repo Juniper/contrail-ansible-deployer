@@ -27,12 +27,49 @@
   tags:
    - always
 
+- name: set empty kolla_config sections in case of OpenStack
+  set_fact:
+    kolla_config: {}
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR} == 'openstack'
+    - kolla_config is not defined
+  tags:
+   - always
+- name: set empty kolla sections in case of OpenStack
+  set_fact:
+    kolla_config: "{{ kolla_config | combine('kolla_globals': {}) }}"
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+    - kolla_config.kolla_globals is not defined
+  tags:
+   - always
+
+- fail:
+    msg: "Kolla's internal VIP must be configured if deployment has more than one OpenStack controller."
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+    - openstack_nodes_list is defined
+    - openstack_nodes_list | length > 1
+    - kolla_config.kolla_globals.kolla_internal_vip_address is not defined
+- fail:
+    msg: "Kolla's haproxy must be enabled if deployment has more than one OpenStack controller."
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+    - openstack_nodes_list is defined
+    - openstack_nodes_list | length > 1
+    - not (kolla_config.kolla_globals.enable_haproxy | bool)
+- fail:
+    msg: "Kolla's internal VIP must be configured if kolla's haproxy is enabled"
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+    - kolla_config.kolla_globals.enable_haproxy is not defined or not (kolla_config.kolla_globals.enable_haproxy | bool)
+    - kolla_config.kolla_globals.kolla_internal_vip_address is not defined
+
 - name: set KEYSTONE_AUTH_ADMIN_PASSWORD
   set_fact:
     contrail_configuration: "{{ contrail_configuration | combine({'KEYSTONE_AUTH_ADMIN_PASSWORD': kolla_config.kolla_passwords.keystone_admin_password }) }}"
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
-    - kolla_config is defined
     - kolla_config.kolla_passwords is defined
     - kolla_config.kolla_passwords.keystone_admin_password is defined
   tags:
@@ -117,44 +154,20 @@
     - {'name': 'WEBUI_NODES', 'nodes': "{{webui_nodes_list}}"}
     - {'name': 'TSN_NODES', 'nodes': "{{tsn_nodes_list}}"}
 
-- name: get the final kolla configurations
+- name: get the internal VIP of openstack
   set_fact:
-    final_kolla_configs: "{{ hostvars[item.value.ip].final_kolla_globals }}"
-  with_dict: "{{ hostvars['localhost']['instances'] }}"
+    openstack_internal_vip: "{{ kolla_config.kolla_globals.kolla_internal_vip_address | default(openstack_nodes_list | first) }}"
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
-    - item.value is defined
-    - item.value.ip is defined
-    - hostvars[item.value.ip].final_kolla_globals is defined
   tags:
    - always
 
-- name: set OpenStack endpoints from derived kolla parameters
-  set_fact:
-    contrail_configuration: "{{ contrail_configuration | combine({item.name: final_kolla_configs.kolla_internal_vip_address }) }}"
-  when:
-    - item.is_not_defined | bool
-    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
-    - final_kolla_configs is defined
-    - final_kolla_configs.kolla_internal_vip_address is defined
-  tags:
-    - always
-  with_items:
-    - { name: 'KEYSTONE_AUTH_HOST', is_not_defined : "{{ contrail_configuration.KEYSTONE_AUTH_HOST is not defined }}" }
-    - { name: 'IPFABRIC_SERVICE_HOST', is_not_defined : "{{ contrail_configuration.IPFABRIC_SERVICE_HOST is not defined }}" }
-    - { name: 'computeManager_ip', is_not_defined : "{{ contrail_configuration.computeManager_ip is not defined }}" }
-    - { name: 'imageManager_ip', is_not_defined : "{{ contrail_configuration.imageManager_ip is not defined }}" }
-    - { name: 'networkManager_ip', is_not_defined : "{{ contrail_configuration.networkManager_ip is not defined }}" }
-
 - name: set OpenStack endpoints from kolla_config.kolla_globals
   set_fact:
-    contrail_configuration: "{{ contrail_configuration | combine({item.name: kolla_config.kolla_globals.kolla_internal_vip_address }) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: openstack_internal_vip }) }}"
   when:
     - item.is_not_defined | bool
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
-    - kolla_config is defined
-    - kolla_config.kolla_globals is defined
-    - kolla_config.kolla_globals.kolla_internal_vip_address is defined
   tags:
     - always
   with_items:
