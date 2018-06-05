@@ -169,6 +169,15 @@
     dest: "/tmp/ifcfg_{{ container_vm_hostname }}"
 #  when: ansible_os_family == "RedHat"
 
+- name: create ifcfg for additional interfaces file
+  template:
+    src: additional_interface.j2
+    dest: "/tmp/ifcfg_ext_{{interface_var.0 + 1 }}_{{ container_vm_hostname }}"
+  when: item.value.additional_interfaces is defined
+  with_indexed_items: "{{ item.value.additional_interfaces | default({}) }}"
+  loop_control:
+    loop_var: interface_var
+
 - name: read public ssh key
   set_fact:
     pub_key: "{{ lookup('file', item) }}"
@@ -185,22 +194,14 @@
 - name: run virt-customize
   shell: /tmp/virt-customize.sh
 
-- name: Install container vm {{ container_vm_hostname }} without portgroup
-  command: |
-    virt-install --name {{ container_vm_hostname }} \
-    --disk /var/lib/libvirt/images/{{ container_vm_hostname }}.qcow2 \
-    --cpu host-passthrough \
-    --vcpus={{ vcpu }} \
-    --ram={{ vram }} \
-    --network network={{ item.value.bridge }},model=virtio \
-    --network network=default,model=virtio \
-    --virt-type kvm \
-    --import \
-    --os-variant rhel7 \
-    --graphics vnc \
-    --serial pty \
-    --noautoconsole \
-    --console pty,target_type=virtio
+- name: copy virt-install
+  template:
+    src: virt-install.sh.j2
+    dest: /tmp/virt-install.sh
+    mode: 0700
+
+- name: run virt-install
+  shell: /tmp/virt-install.sh
 
 - name: add container vm {{ container_vm_hostname }} to inventory when pwd is defined
   add_host:
@@ -210,7 +211,7 @@
     ansible_user: "{{ item.value.ssh_user|default(provider_config.kvm.ssh_user) }}"
     instance_name: "{{ item.key }}"
     privat_ip: "{{ item.value.ip }}"
-  when: (provider_config.kvm.ssh_pwd is defined or item.value.ssh_pwd) and 
+  when: (provider_config.kvm.ssh_pwd is defined or item.value.ssh_pwd) and
         (provider_config.kvm.ssh_user is defined or item.value.ssh_user is defined)
 
 - name: add container vm {{ container_vm_hostname }} to inventory when private key is defined

@@ -18,4 +18,11 @@ export LIBGUESTFS_BACKEND=direct
 --install 'ntp' \
 --run-command 'yum remove -y cloud-init' \
 --upload /tmp/ifcfg_{{ container_vm_hostname }}:/etc/sysconfig/network-scripts/ifcfg-eth0 \
+{% if item.value.additional_interfaces is defined %}
+{% for additional_interface in item.value.additional_interfaces %}
+{% if additional_interface.bridge is defined %}
+--upload /tmp/ifcfg_ext_{{loop.index}}_{{ container_vm_hostname }}:/etc/sysconfig/network-scripts/ifcfg-eth{{loop.index}} \
+{% endif %}
+{% endfor %}
+{% endif %}
 --selinux-relabel
