@@ -1,4 +1,4 @@
-This is the list of parameters and their defaults which can be manually defined in the contrail_configuration section. All paramters are optional and are calculated or use defaults.    
+This is the list of parameters and their defaults which can be manually defined in the contrail_configuration section. All paramters are optional and are calculated or use defaults.
 ```
 LOG_LEVEL=${LOG_LEVEL:-SYS_NOTICE}
 
@@ -132,16 +132,12 @@ ANALYTICSDB_SERVERS=${ANALYTICSDB_SERVERS:-`get_server_list ANALYTICSDB ":$ANALY
 ANALYTICSDB_CQL_SERVERS=${ANALYTICSDB_CQL_SERVERS:-`get_server_list ANALYTICSDB ":$ANALYTICSDB_CQL_PORT "`}
 KAFKA_SERVERS=${KAFKA_SERVERS:-`get_server_list KAFKA ":$KAFKA_PORT "`}
 
-ANALYTICS_API_VIP=${ANALYTICS_API_VIP:-$(get_vip_for_node ANALYTICS)}
-CONFIG_API_VIP=${CONFIG_API_VIP:-$(get_vip_for_node CONFIG)}
-WEBUI_VIP=${WEBUI_VIP:-$(get_vip_for_node CONFIG)}
-
 LINKLOCAL_SERVICE_PORT=${LINKLOCAL_SERVICE_PORT:-80}
 LINKLOCAL_SERVICE_NAME=${LINKLOCAL_SERVICE_NAME:-'metadata'}
 LINKLOCAL_SERVICE_IP=${LINKLOCAL_SERVICE_IP:-'169.254.169.254'}
 
 IPFABRIC_SERVICE_PORT=${IPFABRIC_SERVICE_PORT:-8775}
-IPFABRIC_SERVICE_HOST=${IPFABRIC_SERVICE_HOST:-${CONFIG_API_VIP}}
+#IPFABRIC_SERVICE_HOST=< not defined >
 
 XMPP_SSL_ENABLE=${XMPP_SSL_ENABLE:-${SSL_ENABLE}}
 XMPP_SERVER_CERTFILE=${XMPP_SERVER_CERTFILE:-${SERVER_CERTFILE}}
