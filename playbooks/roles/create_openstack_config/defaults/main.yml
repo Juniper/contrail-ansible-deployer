@@ -13,7 +13,6 @@ openstack_sku: >-
       {{ default_openstack_sku }}
     {%- endif %}
 
-
 default_kolla_globals:
   neutron_opencontrail_init_image_full: "{{ container_registry }}/contrail-openstack-neutron-init:{{ contrail_tag }}"
   nova_compute_opencontrail_init_image_full: "{{ container_registry}}/contrail-openstack-compute-init:{{ contrail_tag }}"
