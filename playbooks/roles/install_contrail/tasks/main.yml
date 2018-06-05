@@ -131,11 +131,20 @@
     - { name: 'KEYSTONE_AUTH_ADMIN_PASSWORD', os_key: 'keystone_admin_password', is_defined: "{{ kolla_config.kolla_passwords.keystone_admin_password is defined }}" }
     - { name: 'METADATA_PROXY_SECRET', os_key: 'metadata_secret', is_defined: "{{ kolla_config.kolla_passwords.metadata_secret is defined }}" }
 
-- name: get the internal VIP of openstack
+- name: get the internal VIP from openstack node if haproxy is disabled
   set_fact:
-    openstack_internal_vip: "{{ kolla_config.kolla_globals.kolla_internal_vip_address | default(openstack_nodes_list | first) }}"
+    openstack_internal_vip: "{{ openstack_nodes_list | first }}"
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+    - not (kolla_config.kolla_globals.enable_haproxy | bool)
+  tags:
+   - always
+- name: get the internal VIP from internal_vip if haproxy is enabled
+  set_fact:
+    openstack_internal_vip: "{{ kolla_config.kolla_globals.kolla_internal_vip_address }}"
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+    - kolla_config.kolla_globals.enable_haproxy | bool
   tags:
    - always
 
