@@ -37,29 +37,6 @@ os_nodes_storage: >-
       {%- endfor -%}
       {{ node_list|join(',') }}
 
-# try to use VIP. then try to use CONFIG_NODES, then CONTROLLER_NODES.
-# if all of these are not set IP of any node with config role is used
-# using first item of any list is not good. but contrail plugins still can work in this case.
-config_api_vip: >-
-    {%- set cfg = contrail_configuration if contrail_configuration is defined else {} -%}
-    {%- if cfg['CONFIG_API_VIP'] is defined -%}
-      {%- print cfg['CONFIG_API_VIP'] -%}
-    {%- elif cfg['CONFIG_NODES'] is defined -%}
-      {%- print cfg['CONFIG_NODES'].split(',')[0] -%}
-    {%- elif cfg['CONTROLLER_NODES'] is defined -%}
-      {%- print cfg['CONTROLLER_NODES'].split(',')[0] -%}
-    {%- else -%}
-      {%- set node_list = [] -%}
-      {%- for k,v in hostvars['localhost']['instances'].iteritems() -%}
-        {%- if v.roles is not defined or v.roles.config is defined -%}
-          {%- if hostvars[inventory_hostname]['ansible_' + hostvars[inventory_hostname]['external_interface_detected']].get('ipv4',{}).get('address') -%}
-            {%- do node_list.append(v.ip) -%}
-          {%- endif -%}
-        {%- endif -%}
-      {%- endfor -%}
-      {{ node_list | first }}
-    {%- endif -%}
-
 container_registry: >-
     {%- if global_configuration is defined and global_configuration.CONTAINER_REGISTRY is defined -%}
       {%- print global_configuration.CONTAINER_REGISTRY -%}
