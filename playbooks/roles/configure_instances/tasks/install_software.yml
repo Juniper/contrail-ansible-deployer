@@ -89,6 +89,16 @@
   include: ntp.yml
   when: provider_data.ntpserver is defined
 
+- name: Packages needed for swift
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - parted
+    - xfsprogs
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+
 # kubetcl must be first in the list - kubeadm has dependency to kubectl without version
 - name: Install k8s packages if defined
   package:
