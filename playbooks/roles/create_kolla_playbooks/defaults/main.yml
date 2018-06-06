@@ -8,4 +8,4 @@ openstack_sku: >-
       {{ default_openstack_sku }}
     {%- endif -%}
 
-kolla_dir: "{{ playbook_dir }}/../../contrail-kolla-ansible"
+kolla_dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/{{ openstack_sku }}"
