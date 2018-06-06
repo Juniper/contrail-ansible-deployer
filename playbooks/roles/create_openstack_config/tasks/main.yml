@@ -8,40 +8,95 @@
     provider_data: "{{ provider_config[instance_data.provider] }}"
   when: provider_config[instance_data.provider] is defined
 
-- name: detect iface used to reach openstack nodes
-  shell: ip route get {{ os_node|quote }} | grep -o 'dev.*' | awk '{print $2}'
+
+# check input params
+- fail:
+    msg: "Kolla's internal VIP must be configured if deployment has more than one OpenStack controller."
+  when:
+    - openstack_nodes_list is defined
+    - openstack_nodes_list | length > 1
+    - kolla_globals.kolla_internal_vip_address is not defined
+  run_once: True
+- fail:
+    msg: "Kolla's haproxy must be enabled if deployment has more than one OpenStack controller."
+  when:
+    - openstack_nodes_list is defined
+    - openstack_nodes_list | length > 1
+    - not (kolla_globals.enable_haproxy | default('yes') | bool)
+  run_once: True
+- fail:
+    msg: "Kolla's internal VIP must be configured if kolla's haproxy is enabled"
+  when:
+    - kolla_globals.enable_haproxy | default('yes') | bool
+    - kolla_globals.kolla_internal_vip_address is not defined
+  run_once: True
+
+
+# detect network_interface based on kolla_globals.kolla_internal_vip_address if it's set
+- name: evaluate network_interface for kolla_globals.kolla_internal_vip_address
+  shell: ip route get {{ kolla_globals.kolla_internal_vip_address | quote }} | grep -o 'dev.*' | awk '{print $2}'
   register: tmp_iface_1
-
-- name: handle lo
-  shell: ip address show | awk '/inet .*{{ os_node | quote }}/{print($NF)}'
+  when:
+    - kolla_globals.enable_haproxy | default('yes') | bool
+    - kolla_globals.kolla_internal_vip_address is defined
+- name: handle lo for network_interface detection
+  shell: ip address show | awk '/inet .*{{ kolla_globals.kolla_internal_vip_address | quote }}/{print($NF)}'
   register: tmp_iface_2
-  when: tmp_iface_1.stdout == 'lo'
-
-- name: Detect default value for network_interface
+  when:
+    - kolla_globals.enable_haproxy | default('yes') | bool
+    - kolla_globals.kolla_internal_vip_address is defined
+    - tmp_iface_1.stdout == 'lo'
+- name: Set default value for network_interface
   set_fact:
     network_interface_detected: "{{ tmp_iface_1.stdout if tmp_iface_1.stdout != 'lo' else tmp_iface_2.stdout }}"
+  when:
+    - kolla_globals.enable_haproxy | default('yes') | bool
+    - kolla_globals.kolla_internal_vip_address is not defined
+- name: Set default value for network_interface
+  set_fact:
+    network_interface_detected: "{{ ansible_default_ipv4.interface }}"
+  when: network_interface_detected is not defined
+- debug:
+    msg: "DEBUG network_interface_detected {{ network_interface_detected }}"
+
+
+# detect external_interface_detected based on kolla_globals.kolla_external_vip_address if it's set
+- name: evaluate external_interface_detected for kolla_globals.kolla_external_vip_address
+  shell: ip route get {{ kolla_globals.kolla_external_vip_address | quote }} | grep -o 'dev.*' | awk '{print $2}'
+  register: tmp_iface_1
+  when:
+    - kolla_globals.enable_haproxy | default('yes') | bool
+    - kolla_globals.kolla_external_vip_address is defined
+- name: handle lo for external_interface_detected detection
+  shell: ip address show | awk '/inet .*{{ kolla_globals.kolla_external_vip_address | quote }}/{print($NF)}'
+  register: tmp_iface_2
+  when:
+    - kolla_globals.enable_haproxy | default('yes') | bool
+    - kolla_globals.kolla_external_vip_address is defined
+    - tmp_iface_1.stdout == 'lo'
+- name: Set default value for external_interface_detected
+  set_fact:
+    external_interface_detected: "{{ tmp_iface_1.stdout if tmp_iface_1.stdout != 'lo' else tmp_iface_2.stdout }}"
+  when:
+    - kolla_globals.enable_haproxy | default('yes') | bool
+    - kolla_globals.kolla_external_vip_address is not defined
+- name: Set default value for external_interface_detected
+  set_fact:
+    external_interface_detected: "{{ ansible_default_ipv4.interface }}"
+  when: external_interface_detected is not defined
+- debug:
+    msg: "DEBUG external_interface_detected {{ external_interface_detected }}"
+
+# evaluate mgmt IP for all hosts in deployment to be able to create /etc/hosts
+- name: Set empty host_intf_dict
+  set_fact:
     host_intf_dict: {}
-
-
 - name: Build host_intf_dict
   set_fact:
-    host_intf_dict: "{{ host_intf_dict | combine( { item.value['ip'] : hostvars[item.value['ip']]['network_interface_detected'] } ) }}"
+    host_intf_dict: "{{ host_intf_dict | combine({item.value['ip'] : hostvars[item.value['ip']]['network_interface_detected']}) }}"
   with_dict: "{{ instances }}"
   when:
     - item.value['ip'] in groups['openstack_nodes']
-
-- name: Detect default value for mgmt_interface
-  set_fact:
-    external_interface_detected: >-
-      {%- set int_dict = hostvars['localhost']['instances']|kolla_external_intf_dict(contrail_configuration, kolla_config if kolla_config is defined else {}, hostvars) -%}
-      {{ int_dict.get(inventory_hostname, ansible_default_ipv4.interface) }}
-
-- debug:
-    msg: "DEBUG network_interface {{ network_interface_detected }}"
-
-- debug:
-    msg: "DEBUG kolla_external_vip_interface {{ external_interface_detected }}"
-
 - debug:
     var: host_intf_dict
 
@@ -81,38 +136,6 @@
   delegate_to: localhost
   run_once: yes
 
-- fail:
-    msg: "Kolla's internal VIP must be configured if deployment has more than one OpenStack controller."
-  when:
-    - openstack_nodes_list is defined
-    - openstack_nodes_list | length > 1
-    - kolla_globals.kolla_internal_vip_address is not defined
-  run_once: True
-- fail:
-    msg: "Kolla's haproxy must be enabled if deployment has more than one OpenStack controller."
-  when:
-    - openstack_nodes_list is defined
-    - openstack_nodes_list | length > 1
-    - not (kolla_globals.enable_haproxy | default('yes') | bool)
-  run_once: True
-- fail:
-    msg: "Kolla's internal VIP must be configured if kolla's haproxy is enabled"
-  when:
-    - kolla_globals.enable_haproxy | default('yes') | bool
-    - kolla_globals.kolla_internal_vip_address is not defined
-  run_once: True
-
-- include: inventory.yml
-  delegate_to: localhost
-  run_once: yes
-
-- include: passwords.yml
-  when: gen_passwords | bool
-  delegate_to: localhost
-  run_once: yes
-
-- include: host_params.yml
-
 - set_fact:
     filtered_kolla_globals: {}
   delegate_to: localhost
@@ -135,6 +158,17 @@
 
 - debug:
     msg: "DEBUG final_kolla_globals {{ final_kolla_globals }}"
+
+- include: inventory.yml
+  delegate_to: localhost
+  run_once: yes
+
+- include: passwords.yml
+  when: gen_passwords | bool
+  delegate_to: localhost
+  run_once: yes
+
+- include: host_params.yml
 
 - name: Populate etc/kolla/globals.yml
   template:
