@@ -67,7 +67,4 @@
   vars:
     action: deploy
 
-- include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/post-deploy.yml"
-  tags: always
-
 - include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/post-deploy-contrail.yml"

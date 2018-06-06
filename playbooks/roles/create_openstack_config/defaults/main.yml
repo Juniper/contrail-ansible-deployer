@@ -21,7 +21,7 @@ default_kolla_globals:
   enable_barbican: yes
   customize_etc_hosts: no
   enable_swift: yes
-  openstack_release: ocata
+  openstack_release: "{{ openstack_sku }}"
   enable_opencontrail_rbac: "{{ 'yes' if contrail_configuration.AAA_MODE is defined and contrail_configuration.AAA_MODE == 'rbac' else 'no' }}"
   contrail_api_interface_address: "{{ contrail_configuration.CONFIG_NODES | default(contrail_configuration.CONTROLLER_NODES | default(config_nodes_list | join(','))) | replace (',', ' ') }}"
   neutron_plugin_agent: opencontrail
