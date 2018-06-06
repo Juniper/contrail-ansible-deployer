@@ -9,6 +9,11 @@
 - name: install software
   include: install_software.yml
 
+#- name: kolla customizations
+#  include: kolla_baremetal.yml
+#  when:
+#    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+
 - name: copy root ca
   include: copy_root_ca.yml
   when:
