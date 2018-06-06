@@ -20,9 +20,8 @@
 
 - name: set orchestrator param
   set_fact:
-    contrail_configuration: "{{ contrail_configuration | combine({'CLOUD_ORCHESTRATOR': orchestrator}) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({'CLOUD_ORCHESTRATOR': orchestrator | default('none')}) }}"
   when:
-    - orchestrator is defined
     - contrail_configuration.CLOUD_ORCHESTRATOR is not defined
   tags:
    - always
@@ -292,6 +291,10 @@
   when: roles[instance_name].vrouter is defined
   tags:
     - vrouter
+
+- name: Pluginize legacy compute
+  include: compute_legacy.yml
+  when: roles[instance_name].openstack_compute_legacy is defined
 
 - name: join k8s master
   include: configure_k8s_join_node.yml
