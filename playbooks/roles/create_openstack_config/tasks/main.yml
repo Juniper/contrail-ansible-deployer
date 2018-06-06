@@ -8,6 +8,8 @@
     provider_data: "{{ provider_config[instance_data.provider] }}"
   when: provider_config[instance_data.provider] is defined
 
+- name: kolla customizations
+  include: kolla_baremetal.yml
 
 # check input params
 - fail:
