@@ -30,6 +30,7 @@
 
   roles:
     - configure_instances
+    - docker
   vars:
     - contrail_configuration: "{{ contrail_configuration }}"
   vars_files:

@@ -89,16 +89,6 @@
   include: ntp.yml
   when: provider_data.ntpserver is defined
 
-- name: Packages needed for swift
-  package:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - parted
-    - xfsprogs
-  when:
-    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
-
 # kubetcl must be first in the list - kubeadm has dependency to kubectl without version
 - name: Install k8s packages if defined
   package:
@@ -174,6 +164,10 @@
    state: directory
    mode: 0777
 
+- name: Enable bridge-netfilter
+  modprobe:
+    name: br_netfilter
+
 - name: sysctl -w net.bridge.bridge-nf-call-iptables=1
   shell: sysctl -w net.bridge.bridge-nf-call-iptables=1 && echo "net.bridge.bridge-nf-call-iptables=1" >> /etc/sysctl.conf
 
@@ -221,15 +215,3 @@
   shell: iptables -P FORWARD ACCEPT
   ignore_errors: yes
 
-#TODO: Test code. Apparently CI test containers need some iptables rules created
-#by docker
-- name: reload systemd
-  shell: systemctl daemon-reload
-  when:
-    - ansible_os_family == 'RedHat'
-
-- name: start docker daemon
-  service:
-    enabled: yes
-    name: docker
-    state: restarted
