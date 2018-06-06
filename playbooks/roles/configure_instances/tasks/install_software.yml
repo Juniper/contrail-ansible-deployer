@@ -89,6 +89,16 @@
   include: ntp.yml
   when: provider_data.ntpserver is defined
 
+- name: Packages needed for swift
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - parted
+    - xfsprogs
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+
 # kubetcl must be first in the list - kubeadm has dependency to kubectl without version
 - name: Install k8s packages if defined
   package:
@@ -105,7 +115,7 @@
 
 - name: install python compose
   pip:
-    name: docker-compose==1.9.0
+    name: docker-compose
 
 - name: "Build hosts file with domain suffix when provided"
   lineinfile: dest=/etc/hosts regexp='^{{ item }}.*' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present
@@ -210,3 +220,16 @@
 - name: accept forward
   shell: iptables -P FORWARD ACCEPT
   ignore_errors: yes
+
+#TODO: Test code. Apparently CI test containers need some iptables rules created
+#by docker
+- name: reload systemd
+  shell: systemctl daemon-reload
+  when:
+    - ansible_os_family == 'RedHat'
+
+- name: start docker daemon
+  service:
+    enabled: yes
+    name: docker
+    state: restarted
