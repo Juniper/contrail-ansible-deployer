@@ -1,31 +1,6 @@
 ---
 kolla_globals: "{{ kolla_config.kolla_globals if kolla_config.kolla_globals is defined else default_kolla_globals}}"
 
-os_node: "{{ contrail_configuration.OPENSTACK_NODES.split(',')|first if contrail_configuration.OPENSTACK_NODES is defined else openstack_nodes_list|first }}"
-
-# Pick first instance's IP as a default
-os_node_control: >-
-     {%- set node_list = [] -%}
-      {%- for k,v in hostvars['localhost']['instances'].iteritems() -%}
-       {%- if v.roles is not defined or v.roles.openstack is defined or v.roles.openstack_control is defined -%}
-        {%- if hostvars[v.ip]['ansible_' + hostvars[v.ip]['network_interface_detected']].get('ipv4',{}).get('address') -%}
-         {%- do node_list.append(hostvars[v.ip]['ansible_' + hostvars[v.ip]['network_interface_detected']].get('ipv4',{}).get('address')) -%}
-        {%- endif -%}
-       {%- endif -%}
-      {%- endfor -%}
-      {{ node_list | first }}
-
-os_node_mgmt: >-
-     {%- set node_list = [] -%}
-      {%- for k,v in hostvars['localhost']['instances'].iteritems() -%}
-       {%- if v.roles is not defined or v.roles.openstack is defined or v.roles.openstack_control is defined -%}
-        {%- if hostvars[inventory_hostname]['ansible_' + hostvars[inventory_hostname]['external_interface_detected']].get('ipv4',{}).get('address') -%}
-         {%- do node_list.append(v.ip) -%}
-        {%- endif -%}
-       {%- endif -%}
-      {%- endfor -%}
-      {{ node_list | first }}
-
 os_nodes_storage: >-
      {%- set node_list = [] -%}
       {%- for k,v in hostvars['localhost']['instances'].iteritems() -%}
