@@ -9,3 +9,4 @@ openstack_sku: >-
     {%- endif -%}
 
 kolla_dir: "{{ playbook_dir }}/../../contrail-kolla-ansible"
+force_checkout: no
