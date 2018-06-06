@@ -4,7 +4,7 @@
     {%- if v.roles is defined and v.roles[role] is defined and v.roles[role] is mapping() and v.roles[role]|length() > 0 -%}
       {%- if hostvars[inventory_hostname].tmp_host is defined and v.ip == hostvars[inventory_hostname]['tmp_host'] -%}
         {%- for a,b in v.roles[role].iteritems() -%}
-          {%- set excludes = ['PHYSICAL_INTERFACE', 'network_interface', 'QOS_LOGICAL_QUEUES'] -%}
+          {%- set excludes = ['PHYSICAL_INTERFACE', 'network_interface', 'kolla_external_vip_interface', 'QOS_LOGICAL_QUEUES'] -%}
           {%- if a not in excludes -%}
             {%- print a + ': ' + b|string() + '\n' -%}
           {%- endif -%}
