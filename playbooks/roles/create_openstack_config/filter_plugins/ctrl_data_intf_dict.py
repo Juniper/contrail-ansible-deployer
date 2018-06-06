@@ -6,59 +6,41 @@ import ipaddress
 class FilterModule(object):
     def filters(self):
         return {
-            'nw_intf_dict': self.nw_intf_dict,
             'kolla_external_intf_dict': self.kolla_external_intf_dict
         }
-
-    def nw_intf_dict(self, instances, contrail_config,
-                     kolla_config, hostvars, openstack_nodes_list):
-        host_intf = {}
-        kolla_globals = kolla_config.get('kolla_globals', {})
-        os_nodes = contrail_config.get('OPENSTACK_NODES', openstack_nodes_list)
-        if isinstance(os_nodes, basestring):
-            os_nodes = os_nodes.split(',')
-
-        # Interface corresponding to the IP address in OPENSTACK_NODES
-        for k,v in instances.iteritems():
-            for i in hostvars.get(v['ip'], {}).get('ansible_interfaces', []):
-                if_str = 'ansible_' + i
-                if_ipv4 = hostvars[v['ip']].get(if_str, {}).get('ipv4', \
-                        {}).get('address', None)
-                if any(if_ipv4 == osip for osip in os_nodes):
-                    host_intf[v['ip']] = i
-
-            tmp_intf = kolla_globals.get('network_interface', None)
-            if tmp_intf != None:
-                host_intf[v['ip']] = tmp_intf
-
-            for i,j in v.get('roles', {}).iteritems():
-                if j is not None:
-                    tmp_intf = j.get('network_interface', None)
-                    if tmp_intf != None:
-                        host_intf[v['ip']] = tmp_intf
-
-        return host_intf
-
 
     def kolla_external_intf_dict(self, instances, contrail_config,
                             kolla_config, hostvars):
         host_intf = {}
         kolla_globals = kolla_config.get('kolla_globals', {})
         for k,v in instances.iteritems():
-            for i in hostvars.get(v['ip'], {}).get('ansible_interfaces', []):
-                if_str = 'ansible_' + i
-                if_ipv4 = hostvars[v['ip']].get(if_str, {}).get('ipv4', None)
-                if if_ipv4 and if_ipv4.get('address', None) == v['ip']:
-                    host_intf[v['ip']] = i
+            cur_ip = v['ip']
 
+            # try to find instance specific value
+            for i,j in v.get('roles', {}).iteritems():
+                if j is None:
+                    continue
+                tmp_intf = j.get('kolla_external_vip_interface', None)
+                if tmp_intf != None:
+                    host_intf[cur_ip] = tmp_intf
+                    break
+            if host_intf.get(cur_ip):
+                continue
+
+            # then try to get global value
             tmp_intf = kolla_globals.get('kolla_external_vip_interface', None)
             if tmp_intf != None:
-                host_intf[v['ip']] = tmp_intf
+                host_intf[cur_ip] = tmp_intf
+                continue
 
-            for i,j in v.get('roles', {}).iteritems():
-                if j is not None:
-                    tmp_intf = j.get('kolla_external_vip_interface', None)
-                    if tmp_intf != None:
-                        host_intf[v['ip']] = tmp_intf
+            # TODO: here must be derivation from kolla_external_vip_address if it is set
+            # if kolla_external_vip_address is not set then this interface is not needed
+
+            # TODO: this is not correct and must be removed
+            for i in hostvars.get(cur_ip, {}).get('ansible_interfaces', []):
+                if_str = 'ansible_' + i
+                if_ipv4 = hostvars[cur_ip].get(if_str, {}).get('ipv4', None)
+                if if_ipv4 and if_ipv4.get('address', None) == cur_ip:
+                    host_intf[cur_ip] = i
 
         return host_intf
