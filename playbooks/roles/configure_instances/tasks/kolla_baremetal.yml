@@ -1,0 +1,33 @@
+---
+- name: Ensure sudo group is present
+  group:
+    name: sudo
+    state: present
+  become: True
+
+- name: Ensure kolla group is present
+  group:
+    name: kolla
+    state: present
+  become: True
+  when: create_kolla_user | bool
+
+- name: Create kolla user
+  user:
+    name: kolla
+    state: present
+    group: kolla
+    groups: "sudo"
+  become: True
+  when: create_kolla_user | bool
+
+- name: Grant kolla user passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^kolla'
+    line: 'kolla ALL=(ALL) NOPASSWD: ALL'
+  become: True
+  when: create_kolla_user | bool
+
+
