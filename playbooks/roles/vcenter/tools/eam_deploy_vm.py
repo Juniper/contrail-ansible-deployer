@@ -68,7 +68,7 @@ def get_obj(content, vimtype, name):
             break
     return obj
 
-def CreateAgencyConfig(si, args):
+def CreateAgencyConfig(si, args, scope):
     content = si.RetrieveContent()
 
     agency_config = eam.Agency.ConfigInfo()
@@ -119,10 +119,14 @@ def CreateAgencyConfig(si, args):
     compute_scope = eam.Agency.ComputeResourceScope()
     cluster_list = args.cluster_list.rstrip(',')
     cluster_list = cluster_list.split(',')
-
     for cluster in cluster_list:
-        compute_host = get_obj(content, [vim.ClusterComputeResource], cluster)
-        compute_scope.computeResource.append(compute_host)
+        compute = get_obj(content, [vim.ClusterComputeResource], cluster)
+        if scope and scope.computeResource:
+           compute_scope = scope
+           if compute not in scope.computeResource:
+              compute_scope.computeResource.append(compute)
+        else:
+           compute_scope.computeResource.append(compute)
     agency_config.scope = compute_scope
 
     return agency_config
@@ -161,9 +165,6 @@ def main():
         print "Unable to connect to %s" % args.host
         exit(1)
 
-    # Populate Agency and AgentVM configuration
-    agency_config = CreateAgencyConfig(si, args)
-
     # Connect to EAM endpoint
     eamCx = ConnectEAM(si, si._stub, context)
 
@@ -173,6 +174,8 @@ def main():
        for agency in agencies:
            agency_name = agency.QueryConfig().agencyName
            if agency_name == "ContrailVM-Agency":
+              scope = agency.QueryConfig().scope
+              agency_config = CreateAgencyConfig(si, args, scope)
               agency.Update(agency_config)
               return
            else:
@@ -181,6 +184,8 @@ def main():
        create_agency = True
 
     if create_agency:
+       # Populate Agency and AgentVM configuration
+       agency_config = CreateAgencyConfig(si, args, None)
        # Create Agency and spawn AgentVMs
        eamCx.CreateAgency(agency_config, "enabled")
 
