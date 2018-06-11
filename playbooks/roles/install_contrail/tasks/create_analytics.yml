@@ -47,7 +47,6 @@
     - contrail-analytics-api
     - contrail-analytics-collector
     - contrail-analytics-query-engine
-    - contrail-analytics-alarm-gen
   when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
 
 - name: create contrail analytics file
