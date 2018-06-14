@@ -78,6 +78,7 @@ class FilterModule(object):
         "neutron-lbaas-agent": ["neutron"],
         "neutron-metadata-agent": ["neutron"],
         "neutron-vpnaas-agent": ["neutron"],
+        "neutron-bgp-dragent": ["neutron"],
         "ceph-mon": ["ceph"],
         "ceph-rgw": ["ceph"],
         "ceph-osd": ["storage"],
