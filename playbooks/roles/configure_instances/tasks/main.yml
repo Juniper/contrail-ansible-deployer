@@ -9,6 +9,14 @@
 - name: install software
   include: install_software.yml
 
+- name: Setup interfaces for all instances
+  include: interface_setup.yml
+  when: instance_data.additional_interfaces is defined
+
+- name: Setup Static Routes
+  include: staticroute_setup.yml
+  when: instance_data.routes is defined
+
 - name: copy root ca
   include: copy_root_ca.yml
   when:
