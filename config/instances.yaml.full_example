@@ -96,6 +96,29 @@ instances:
   bms3:
     provider: bms
     ip: 192.168.1.102
+  bms4:
+    provider: bms
+    ip: 192.168.1.103
+    additional_interfaces:
+      - name: em2
+        ip: 10.10.10.2
+        mask: 255.255.255.0
+        dhcp: True
+        mac_address: aa:bb:cc:dd:ee:ff
+        default_gateway: 10.10.10.254
+        type: vlan
+        bond_options:
+          miimon: 100
+          mode: 802.3ad
+          xmit_hash_policy: "layer3+4"
+        member_interfaces: p20p1,p20p2
+        vlan: 2003
+        parent_interface: bond0
+    routes:
+      - network: 3.3.3.0
+        gateway: 3.3.3.254
+        interface: em2
+        netmask: 255.255.255.0
 global_configuration:
   CONTAINER_REGISTRY: michaelhenkel
 contrail_configuration:
