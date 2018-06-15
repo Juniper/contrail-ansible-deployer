@@ -1,0 +1,63 @@
+{% set temp_ip = '' %}
+{% set temp_gw = '' %}
+{% set temp_vlan = '' %}
+{% set temp_parent = '' %}
+{% set temp_mac = '' %}
+{% set temp_name = '' %}
+{% set temp_bond_options = '' %}
+
+{% if instance_data.additional_interfaces is defined %}
+{% for additional_interface in instance_data.additional_interfaces %}
+
+{% if additional_interface.ip is defined and additional_interface.dhcp is not defined %}
+{% set temp_ip = '--ip ' ~ additional_interface.ip %}
+{% endif %}
+
+{% if additional_interface.vlan is defined %}
+{% set temp_vlan = '--vlan ' ~ additional_interface.vlan %}
+{% endif %}
+
+{% if additional_interface.default_gateway is defined %}
+{% set temp_gw = '--gw ' ~ additional_interface.default_gateway %}
+{% endif %}
+
+{% if additional_interface.parent_interface is defined %}
+{% set temp_parent = additional_interface.parent_interface %}
+{% endif %}
+
+{% if additional_interface.dhcp is defined and additional_interface.dhcp %}
+{% set temp_dhcp = '--dhcp' %}
+{% endif %}
+
+{% if additional_interface.type is defined and additional_interface.type == 'bond' %}
+
+{% set temp_name = additional_interface.name %}
+
+{% set temp_mac = '' %}
+{% for member in additional_interface.bond_options.member_interfaces %}
+{% set temp_mac = temp_mac ~ intf_mac_dict[member] %}
+{% endfor %}
+
+{% if additional_interface.bond_options is defined %}
+{% set temp_bond_options = '--bond-opts \'' ~ additional_interface.bond_options|to_json ~ '\'' %}
+{% endif %}
+
+{% else %}
+
+{% set temp_bond_options = '' %}
+{% if additional_interface.mac_address is defined %}
+{% set temp_name = additional_interface.mac_address %}
+{% endif %}
+
+{% endif %}
+
+{% if additional_interface.parent_interface is defined %}
+{% set temp_name = '--device ' ~ temp_parent %}
+{% else %}
+{% set temp_name = '--device ' ~ temp_name %}
+{% endif %}
+
+python /root/interface_setup.py {{ temp_name }} {{ temp_vlan }} {{ temp_mac }} {{ temp_bond_options }} {{ temp_ip }} {{ temp_gw }}
+
+{% endfor %}
+{% endif %}
