@@ -2,8 +2,8 @@
 - name: remove interfaces from Network Manager
   lineinfile:
     path: "/etc/sysconfig/network-scripts/ifcfg-{{ item }}"
-    regexp: "NM_CONTROLLED=no"
     line: "NM_CONTROLLED=no"
+  register: net_config
   with_items: "{{ ansible_interfaces }}"
   ignore_errors: yes
 
@@ -11,6 +11,7 @@
   service:
     name: network
     state: restarted
+  when: net_config.changed
 
 - name: install epel
   yum:
