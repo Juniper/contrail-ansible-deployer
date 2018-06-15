@@ -1,0 +1,56 @@
+---
+
+- debug: var=instance_data.routes
+
+- name: Get list of Network IP_addresses 
+  set_fact:
+    network_item: "{{ item.network }}"
+  with_items: "{{ instance_data.routes }}"
+  register: network_result
+
+- name: Get list of Gateways
+  set_fact:
+    gateway_item: "{{ item.gateway }}"
+  with_items: "{{ instance_data.routes }}"
+  register: gateway_result
+
+- name: Get list of Netmasks
+  set_fact:
+    netmask_item: "{{ item.netmask }}"
+  with_items: "{{ instance_data.routes }}"
+  register: netmask_result
+
+- name: Get list of Interfaces
+  set_fact:
+    intf_item: "{{ item.interface }}"
+  with_items: "{{ instance_data.routes }}"
+  register: intf_result
+
+- name: Network IP list
+  set_fact: network_list="{{ network_result.results | map(attribute='ansible_facts.network_item') | list | join(" ") }}"
+
+- name: Gateway list
+  set_fact: gateway_list="{{ gateway_result.results | map(attribute='ansible_facts.gateway_item') | list | join(" ") }}"
+
+- name: Netmask list
+  set_fact: netmask_list="{{ netmask_result.results | map(attribute='ansible_facts.netmask_item') | list | join(" ") }}"
+
+- name: Interface list
+  set_fact: intf_list="{{ intf_result.results | map(attribute='ansible_facts.intf_item') | list | join(" ") }}"
+
+- debug: var=intf_list
+
+- name: Copy Static Route Python script
+  copy:
+    src: staticroute_setup.py
+    dest: /root/staticroute_setup.py
+    mode: 0600
+
+- name: Create Static Route Setup script and run
+  template:
+    src: staticroute.sh.j2
+    dest: /tmp/staticroute_setup.sh
+    mode: 0700
+
+- name: run staticroute_setup
+  shell: /tmp/staticroute_setup.sh 

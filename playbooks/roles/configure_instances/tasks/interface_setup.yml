@@ -1,0 +1,23 @@
+---
+
+- debug: var=instance_data.additional_interfaces
+
+- name: Create Interface Name - MAC Address Map
+  set_fact:
+    intf_mac_dict: "{{ intf_mac_dict|default({})|combine({item.name: item.mac_address}) }}"
+  with_items: "{{ instance_data.additional_interfaces }}"
+
+- name: Copy Interface setup Python script
+  copy:
+    src: interface_setup.py
+    dest: /root/interface_setup.py
+    mode: 0600
+
+- name: Create Interface Setup script and run
+  template:
+    src: interface_setup.sh.j2
+    dest: /tmp/interface_setup.sh
+    mode: 0700
+
+- name: run interface_setup
+  shell: /tmp/interface_setup.sh 
