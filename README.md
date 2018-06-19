@@ -8,6 +8,10 @@ This set of commands will configure the instance and install AIO contrail with k
 ```
 ssh-copy-id 192.168.1.100
 yum install -y ansible-2.4.2.0
+#for Contrail R5 
+git clone -b R5.0 http://github.com/Juniper/contrail-ansible-deployer
+
+#for Contrail master branch 
 git clone http://github.com/Juniper/contrail-ansible-deployer
 cd contrail-ansible-deployer
 ansible-playbook -i inventory/ -e orchestrator=kubernetes -e '{"instances":{"bms1":{"ip":"192.168.1.100","provider":"bms"}}}' playbooks/configure_instances.yml
@@ -70,7 +74,12 @@ Ansible 2.4.2.0 is temporary fix for 2.5 issues with our playbooks.
 ### get the playbooks
 
 ```
+#for Contrail R5 use 
+git clone -b R5.0 http://github.com/Juniper/contrail-ansible-deployer
+
+#for Contrail master branch 
 git clone http://github.com/Juniper/contrail-ansible-deployer
+
 ```
 
 ### Providers
