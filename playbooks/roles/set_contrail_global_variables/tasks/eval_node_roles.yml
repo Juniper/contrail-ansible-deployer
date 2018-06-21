@@ -1,0 +1,58 @@
+---
+- set_fact:
+    default_roles: "{{ default_roles|default({})|combine({item.0: item.1}) }}"
+  with_together:
+    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'vrouter', 'webui']
+    - []
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR is undefined
+
+- set_fact:
+    default_roles: "{{ default_roles|default({})|combine({item.0: item.1}) }}"
+  with_together:
+    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'k8s_master', 'k8s_node', 'kubemanager', 'vrouter', 'webui']
+    - []
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR is defined
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'kubernetes'
+
+- set_fact:
+    default_roles: "{{ default_roles|default({})|combine({item.0: item.1}) }}"
+  with_together:
+    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'vrouter', 'webui', 'openstack']
+    - []
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR is defined
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+
+- set_fact:
+    default_roles: "{{ default_roles|default({})|combine({item.0: item.1}) }}"
+  with_together:
+    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'vrouter', 'webui', 'vcenter_plugin', 'vcenter_manager']
+    - []
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR is defined
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'vcenter'
+
+- set_fact:
+    default_roles_hosts: {}
+
+- name: add roles if not defined
+  set_fact:
+     default_roles_hosts: "{{ default_roles_hosts|combine({item.key: default_roles}, recursive=True) }}"
+  when: item.value.roles is undefined
+  with_dict: "{{ instances }}"
+
+- name: add roles if defined
+  set_fact:
+     default_roles_hosts: "{{ default_roles_hosts|combine({item.key: item.value.roles}, recursive=True) }}"
+  when: item.value.roles is defined
+  with_dict: "{{ instances }}"
+
+- debug:
+    msg: "default_roles {{ default_roles_hosts }}"
+
+- name: set roles if not defined
+  set_fact:
+    roles: "{{ default_roles_hosts }}"
+  when: default_roles_hosts is defined
