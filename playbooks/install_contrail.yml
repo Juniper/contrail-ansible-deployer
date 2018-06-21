@@ -14,6 +14,10 @@
   roles:
     - name: Generate container_host group
       role: create_container_host_group
+    - name: Build node lists
+      role: build_node_lists
+    - name: Parse global variables and map to localhost hostvars
+      role: set_global_variables
   vars_files:
     - "{{ config_file }}"
   tags: always
@@ -22,11 +26,14 @@
   hosts: container_hosts
   gather_facts: yes
   roles:
-  - { role: install_contrail, when: skip_contrail is not defined or not skip_contrail|bool }
+    - { role: install_contrail, when: skip_contrail is not defined or not skip_contrail|bool }
+  vars:
+    - contrail_configuration: "{{ hostvars['localhost'].contrail_configuration }}"
+    - roles: "{{ hostvars['localhost'].roles }}"
   vars_files:
-  - "{{ hostvars['localhost'].config_file }}"
+    - "{{ hostvars['localhost'].config_file }}"
   environment:
-   - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
-   - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
+    - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
+    - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
   tags: always
 

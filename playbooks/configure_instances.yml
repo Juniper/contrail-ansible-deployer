@@ -31,6 +31,7 @@
   roles:
     - configure_instances
     - docker
+    - k8s
   vars:
     - contrail_configuration: "{{ contrail_configuration }}"
   vars_files:

@@ -22,6 +22,9 @@
   gather_facts: yes
 
   roles:
+    - name: Build node lists
+      role: build_node_lists
+      tags: always
     - name: Generate openstack configurations
       role: create_openstack_config
       tags: always
