@@ -14,6 +14,8 @@
   roles:
     - name: Generate container_host group
       role: create_container_host_group
+    - name: Parse global variables and map to localhost hostvars
+      role: set_contrail_global_variables
   vars_files:
     - "{{ config_file }}"
   tags: always
