@@ -11,9 +11,15 @@
       set_fact:
           instances: "{{ instances }}"
       when: hostvars['localhost']['instances'] is undefined
+    - name: Expose global configuration
+      set_fact:
+          global_configuration: "{{ global_configuration }}"
+      when: hostvars['localhost']['global_configuration'] is undefined
   roles:
-    - name: Generate container_host group
-      role: create_container_host_group
+    - create_container_host_group
+    - build_node_lists
+    - set_global_variables
+    - set_contrail_variables
   vars_files:
     - "{{ config_file }}"
   tags: always
@@ -22,11 +28,16 @@
   hosts: container_hosts
   gather_facts: yes
   roles:
-  - { role: install_contrail, when: skip_contrail is not defined or not skip_contrail|bool }
-  vars_files:
-  - "{{ hostvars['localhost'].config_file }}"
+    - install_contrail
+  vars:
+    - contrail_configuration: "{{ hostvars['localhost'].contrail_configuration }}"
+    - global_configuration: "{{ hostvars['localhost'].global_configuration }}"
+    - instances: "{{ hostvars['localhost'].instances }}"
+    - container_registry: "{{ hostvars['localhost'].container_registry }}"
+    - contrail_version_tag: "{{ hostvars['localhost'].contrail_version_tag }}"
+    - roles: "{{ hostvars['localhost'].roles }}"
   environment:
-   - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
-   - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
+    - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
+    - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
   tags: always
 

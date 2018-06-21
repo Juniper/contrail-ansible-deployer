@@ -1,0 +1,47 @@
+---
+- name: set contrail configuration param
+  set_fact:
+    contrail_configuration: {}
+  when: contrail_configuration is undefined
+  tags:
+   - always
+
+- name: set container tag contrail version if defined
+  set_fact:
+    contrail_version_tag: "{{ contrail_configuration.CONTRAIL_VERSION | default('latest') }}"
+  tags:
+   - always
+- name: add openstack version tag if defined
+  set_fact:
+    contrail_version_tag: "{{ contrail_configuration.OPENSTACK_VERSION }}-{{ contrail_version_tag }}"
+  when:
+    - contrail_configuration.OPENSTACK_VERSION is defined
+    - contrail_configuration.CONTRAIL_VERSION is defined
+    - contrail_configuration.CONTRAIL_VERSION != 'latest'
+  tags:
+    - always
+- name: add linux distr tag if defined
+  set_fact:
+    contrail_version_tag: "{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_version_tag }}"
+  when:
+    - contrail_configuration.LINUX_DISTR is defined
+    - contrail_configuration.CONTRAIL_VERSION is defined
+    - contrail_configuration.CONTRAIL_VERSION != 'latest'
+  tags:
+   - always
+
+- name: set registry if defined
+  set_fact:
+    container_registry: "{{ global_configuration.CONTAINER_REGISTRY }}"
+  when:
+    - global_configuration is defined
+    - global_configuration.CONTAINER_REGISTRY is defined
+  tags:
+    - always
+- name: set registry to opencontrailnightly if undefined
+  set_fact:
+    container_registry: opencontrailnightly
+  when:
+    container_registry is not defined
+  tags:
+   - always
