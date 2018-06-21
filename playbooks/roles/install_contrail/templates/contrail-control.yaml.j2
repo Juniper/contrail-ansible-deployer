@@ -29,8 +29,8 @@ services:
     volumes_from:
       - node-init
     restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
     depends_on:
       - node-init
   control:
@@ -48,8 +48,8 @@ services:
     depends_on:
       - node-init
     restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
 {% if roles[instance_name].control.location is undefined %}
   named:
     image: "{{ container_registry }}/contrail-controller-control-named:{{ contrail_version_tag }}"
@@ -64,8 +64,8 @@ services:
       - node-init
       - dns
     restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
   dns:
     image: "{{ container_registry }}/contrail-controller-control-dns:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -83,6 +83,6 @@ services:
     depends_on:
       - node-init
     restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
 {% endif %}

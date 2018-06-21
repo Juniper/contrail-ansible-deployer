@@ -12,13 +12,6 @@ os_nodes_storage: >-
       {%- endfor -%}
       {{ node_list|join(',') }}
 
-container_registry: >-
-    {%- if global_configuration is defined and global_configuration.CONTAINER_REGISTRY is defined -%}
-      {%- print global_configuration.CONTAINER_REGISTRY -%}
-    {%- else -%}
-      {%- print 'opencontrailnightly' -%}
-    {%- endif -%}
-
 contrail_tag: >-
     {%- if contrail_configuration is defined and contrail_configuration['CONTRAIL_VERSION'] is defined and contrail_configuration['OPENSTACK_VERSION'] is defined -%}
       {%- print contrail_configuration['OPENSTACK_VERSION'] ~ '-' ~ contrail_configuration['CONTRAIL_VERSION'] -%}

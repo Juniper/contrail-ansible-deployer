@@ -26,8 +26,8 @@ services:
     volumes_from:
       - node-init
     restart: on-failure
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
     depends_on:
       - node-init
   vrouter-kernel-init:
@@ -70,8 +70,8 @@ services:
     volumes_from:
       - node-init
     restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
     depends_on:
       - vrouter-kernel-init
       - node-init
