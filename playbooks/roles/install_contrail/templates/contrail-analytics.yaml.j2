@@ -27,8 +27,8 @@ services:
     volumes_from:
       - node-init
     restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
     depends_on:
       - node-init
   api:
@@ -46,8 +46,8 @@ services:
     depends_on:
       - node-init
     restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
   collector:
     image: "{{ container_registry }}/contrail-analytics-collector:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -63,8 +63,8 @@ services:
     depends_on:
       - node-init
     restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
   query-engine:
     image: "{{ container_registry }}/contrail-analytics-query-engine:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -95,5 +95,5 @@ services:
     depends_on:
       - node-init
     restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
