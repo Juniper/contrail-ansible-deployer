@@ -21,7 +21,7 @@ container_registry: >-
 
 contrail_tag: >-
     {%- if contrail_configuration is defined and contrail_configuration['CONTRAIL_VERSION'] is defined and contrail_configuration['OPENSTACK_VERSION'] is defined -%}
-      {%- print contrail_configuration['CONTRAIL_VERSION'] ~ '-' ~ contrail_configuration['OPENSTACK_VERSION'] -%}
+      {%- print contrail_configuration['OPENSTACK_VERSION'] ~ '-' ~ contrail_configuration['CONTRAIL_VERSION'] -%}
     {%- elif contrail_configuration is defined and contrail_configuration['CONTRAIL_VERSION'] is defined -%}
       {%- print contrail_configuration['CONTRAIL_VERSION'] -%}
     {%- else -%}
