@@ -105,7 +105,7 @@
 
 - name: install python compose
   pip:
-    name: docker-compose==1.9.0
+    name: docker-compose
 
 - name: "Build hosts file with domain suffix when provided"
   lineinfile: dest=/etc/hosts regexp='^{{ item }}.*' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present
@@ -164,6 +164,10 @@
    state: directory
    mode: 0777
 
+- name: Enable bridge-netfilter
+  modprobe:
+    name: br_netfilter
+
 - name: sysctl -w net.bridge.bridge-nf-call-iptables=1
   shell: sysctl -w net.bridge.bridge-nf-call-iptables=1 && echo "net.bridge.bridge-nf-call-iptables=1" >> /etc/sysctl.conf
 
@@ -210,3 +214,4 @@
 - name: accept forward
   shell: iptables -P FORWARD ACCEPT
   ignore_errors: yes
+

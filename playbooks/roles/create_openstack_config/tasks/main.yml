@@ -8,6 +8,8 @@
     provider_data: "{{ provider_config[instance_data.provider] }}"
   when: provider_config[instance_data.provider] is defined
 
+- name: kolla customizations
+  include: kolla_baremetal.yml
 
 # check input params
 - fail:
@@ -157,23 +159,9 @@
   delegate_to: localhost
   run_once: yes
 
-- set_fact:
-    filtered_kolla_globals: {}
-  delegate_to: localhost
-  run_once: yes
-
-# filter kolla_globals
-- name: filter defined kolla_globals
-  set_fact:
-    filtered_kolla_globals: "{{ filtered_kolla_globals | combine({item.key: item.value}) }}"
-  when: item.key not in ['docker_registry', 'docker_registry_username', 'docker_registry_password']
-  with_dict: "{{ kolla_globals }}"
-  delegate_to: localhost
-  run_once: yes
-
 - name: Merge kolla_globals params with defaults
   set_fact:
-    final_kolla_globals: "{{ default_kolla_globals | combine(filtered_kolla_globals) }}"
+    final_kolla_globals: "{{ default_kolla_globals | combine(kolla_globals) }}"
   delegate_to: localhost
   run_once: yes
 
