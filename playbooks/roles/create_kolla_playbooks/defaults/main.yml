@@ -15,5 +15,5 @@ force_checkout: >-
     {%- if kolla_config.kolla_globals is defined and kolla_config.kolla_globals.force_checkout is defined -%}
       {{ kolla_config.kolla_globals.force_checkout }}
     {%- else -%}
-      'no'
+      no
     {%- endif -%}
