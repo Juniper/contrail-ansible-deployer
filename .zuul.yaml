@@ -1,0 +1,14 @@
+- project:
+    name: Juniper/contrail-ansible-deployer
+    check:
+      jobs:
+        - contrail-vnc-build-test-containers-queens:
+            dependencies:
+              - contrail-vnc-build-package-centos74
+        - contrail-vnc-build-containers-centos7-queens:
+            dependencies:
+              - contrail-vnc-build-package-centos74
+        - contrail-sanity-centos7-kolla-queens:
+            dependencies:
+              - contrail-vnc-build-containers-centos7-queens
+              - contrail-vnc-build-test-containers-queens
