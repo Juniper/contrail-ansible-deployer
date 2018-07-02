@@ -235,6 +235,32 @@
   until: mac_fixed.finished
   retries: 300
 
+- name: Add pci nics to ContrailVM
+  include: add_pci_nics.yml esxi_host={{item}}
+  when: item.contrail_vm.pci_devices is defined and item.contrailvm.pci_devices
+  with_items: "{{ esxi_servers }}"
+
+- name: Wait for pci nic add completion
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ pci_nics_added }}"
+  register: pci_nic_completed
+  until: pci_nic_completed.finished
+  retries: 300
+  when: pci_nics_added is defined and pci_nics_added
+
+- name: Add sriov nics to ContrailVM
+  include: add_sriov_nics.yml esxi_host={{item}}
+  when: item.contrail_vm.sr_iov_nics is defined and item.contrailvm.sr_iov_nics
+  with_items: "{{ esxi_servers }}"
+
+- name: Wait for sriov nic add completion
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ sriov_nics_added }}"
+  register: sriov_nic_completed
+  until: sriov_nic_completed.finished
+  retries: 300
+  when: sriov_nics_added is defined and sriov_nics_added
+
 - name: Power on ContrailVMs
   include: power_on_vm.yml esxi_host={{item}}
   with_items: "{{ esxi_servers }}"
