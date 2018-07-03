@@ -14,10 +14,10 @@ openstack_sku: >-
     {%- endif %}
 
 default_kolla_globals:
-  neutron_opencontrail_init_image_full: "{{ container_registry }}/contrail-openstack-neutron-init:{{ contrail_tag }}"
-  nova_compute_opencontrail_init_image_full: "{{ container_registry}}/contrail-openstack-compute-init:{{ contrail_tag }}"
-  ironic_notification_manager_image_full: "{{ container_registry}}/contrail-openstack-ironic-notification-manager:{{ contrail_tag }}"
-  heat_opencontrail_init_image_full: "{{ container_registry}}/contrail-openstack-heat-init:{{ contrail_tag }}"
+  neutron_opencontrail_init_image_full: "{{ container_registry }}/contrail-openstack-neutron-init:{{ contrail_version_tag }}"
+  nova_compute_opencontrail_init_image_full: "{{ container_registry}}/contrail-openstack-compute-init:{{ contrail_version_tag }}"
+  ironic_notification_manager_image_full: "{{ container_registry}}/contrail-openstack-ironic-notification-manager:{{ contrail_version_tag }}"
+  heat_opencontrail_init_image_full: "{{ container_registry}}/contrail-openstack-heat-init:{{ contrail_version_tag }}"
   enable_barbican: yes
   customize_etc_hosts: no
   enable_swift: yes

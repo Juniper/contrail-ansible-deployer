@@ -29,8 +29,8 @@ services:
     volumes_from:
       - node-init
     restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
     depends_on:
       - node-init
   api:
@@ -48,8 +48,8 @@ services:
     depends_on:
       - node-init
     restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
   svcmonitor:
     image: "{{ container_registry }}/contrail-controller-config-svcmonitor:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -65,8 +65,8 @@ services:
     depends_on:
       - node-init
     restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
   schema:
     image: "{{ container_registry }}/contrail-controller-config-schema:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -82,8 +82,8 @@ services:
     depends_on:
       - node-init
     restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
   devicemgr:
     image: "{{ container_registry }}/contrail-controller-config-devicemgr:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -99,5 +99,5 @@ services:
     depends_on:
       - node-init
     restart: always
-    stdin_open: {{ stdin_open }}
-    tty: {{ tty }}
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
