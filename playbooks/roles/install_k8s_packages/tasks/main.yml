@@ -52,3 +52,10 @@
     - kubelet
     - kubeadm
   when: k8s_version is defined
+
+- name: copy global variables from localhost's hostvars
+  set_fact:
+    k8s_master_ip: "{{ hostvars['localhost'].k8s_master_ip if hostvars['localhost'].k8s_master_ip is defined else omit }}"
+    k8s_master_name: "{{ hostvars['localhost'].k8s_master_name if hostvars['localhost'].k8s_master_name is defined else omit }}"
+  tags:
+   - always
