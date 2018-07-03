@@ -24,8 +24,8 @@
   gather_facts: yes
   roles:
     - configure_instances
-    - docker
-    - k8s
+    - install_docker_packages
+    - install_k8s_packages
   vars_files:
     - "{{ hostvars['localhost'].config_file }}"
   environment:

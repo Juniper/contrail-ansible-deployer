@@ -4,20 +4,40 @@
 #
 # orchestrator can be openstack or kubernetes
 #
-- name: Create container host group
+
+- name: Create container host group and evaluate variables for k8s
   hosts: localhost
   connection: local
   gather_facts: no
   pre_tasks:
     - name: Expose instances
       set_fact:
-          instances: "{{ instances }}"
+          instances: "{{ instances | default({}) }}"
       when: hostvars['localhost']['instances'] is undefined
+    - name: Expose global configuration
+      set_fact:
+          global_configuration: "{{ global_configuration | default({}) }}"
+      when: hostvars['localhost']['global_configuration'] is undefined
   roles:
-    - name: Generate container_host group
-      role: create_container_host_group
+    - create_container_host_group
+    - build_node_lists
+    - set_global_variables
+    - set_contrail_variables
+    - set_k8s_variables
   vars_files:
     - "{{ config_file }}"
-  tags: always
+  tags: k8s
 
-# TODO: create role for k8s installing and use it here
+- name: Install Kubernetes
+  hosts: k8s_hosts
+  gather_facts: yes
+  roles:
+    - install_k8s
+  vars:
+    - contrail_configuration: "{{ hostvars['localhost'].contrail_configuration }}"
+    - global_configuration: "{{ hostvars['localhost'].global_configuration }}"
+    - instances: "{{ hostvars['localhost'].instances }}"
+    - roles: "{{ hostvars['localhost'].roles }}"
+    - k8s_master_ip: "{{ hostvars['localhost'].k8s_master_ip if hostvars['localhost'].k8s_master_ip is defined else omit }}"
+    - k8s_master_name: "{{ hostvars['localhost'].k8s_master_name if hostvars['localhost'].k8s_master_name is defined else omit }}"
+  tags: k8s

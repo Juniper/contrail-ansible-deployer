@@ -125,9 +125,6 @@
   set_fact:
     kubemanagertoken: "{{ output.stdout }}"
 
-- debug:
-    msg: "{{ kubemanagertoken }}"
-
 - name: get nodes
   shell: kubectl get nodes -o yaml |grep "\- address:" |awk '{print $3}'
   register: nodes_list_output
