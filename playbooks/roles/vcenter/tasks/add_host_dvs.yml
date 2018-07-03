@@ -38,3 +38,17 @@
          esxi_host.vcenter_server.dv_switch_mgmt is defined and
          esxi_host.vcenter_server.dv_switch_mgmt.dv_switch_name
 
+- name: Add esxi host to sriov DVS
+  vmware_dvs_host:
+    hostname: "{{ esxi_host.vcenter_server.hostname }}"
+    username: "{{ esxi_host.vcenter_server.username }}"
+    password: "{{ esxi_host.vcenter_server.password }}"
+    validate_certs: "{{ esxi_host.vcenter_server.validate_certs }}"
+    esxi_hostname: "{{ esxi_host.name }}"
+    switch_name: "{{ esxi_host.vcenter_server.dv_switch_sr_iov.dv_switch_name }}"
+    vmnics: "{{ esxi_host.contrail_vm.sr_iov_nics }}"
+    state: present
+  when: >
+         esxi_host.vcenter_server.dv_switch_sr_iov is defined and
+         esxi_host.vcenter_server.dv_switch_sr_iov.dv_switch_name
+
