@@ -24,6 +24,7 @@
 
 - name: add private registry
   include: private_registry.yaml
+    docker_registry="{{ global_configuration.CONTAINER_REGISTRY }}"
   when:
     - global_configuration is defined
     - global_configuration.CONTAINER_REGISTRY is defined

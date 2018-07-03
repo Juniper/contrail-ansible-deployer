@@ -22,17 +22,10 @@
 - name: Configure instance(s)
   hosts: container_hosts
   gather_facts: yes
-  pre_tasks:
-    - name: Set orchestrator if not passed
-      set_fact:
-          contrail_configuration: "{{ contrail_configuration | default({}) | combine({'CLOUD_ORCHESTRATOR': orchestrator if orchestrator is defined else 'openstack'}) }}"
-      when: contrail_configuration is not defined or contrail_configuration.CLOUD_ORCHESTRATOR is not defined
-
   roles:
     - configure_instances
     - docker
-  vars:
-    - contrail_configuration: "{{ contrail_configuration }}"
+    - k8s
   vars_files:
     - "{{ hostvars['localhost'].config_file }}"
   environment:
