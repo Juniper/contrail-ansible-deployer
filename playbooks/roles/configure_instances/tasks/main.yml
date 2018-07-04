@@ -6,8 +6,16 @@
   tags:
    - always
 
-- name: install software
-  include: install_software.yml
+- debug:
+    var: ansible_os_family
+
+- name: install Linux software
+  include: install_software_linux.yml
+  when: ansible_os_family!='Windows'
+
+- name: install Windows software
+  include: install_software_windows.yml
+  when: ansible_os_family=='Windows'
 
 - name: copy root ca
   include: copy_root_ca.yml

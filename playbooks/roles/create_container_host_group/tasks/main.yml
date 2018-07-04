@@ -1,3 +1,20 @@
+- name: add bms windows container hosts
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: container_hosts
+    instance_name: "{{ item.key }}"
+    ansible_user: "{{ provider_config.bms_win.ansible_user|default(item.value.ansible_user) }}"
+    ansible_password: "{{provider_config.bms_win.ansible_password|default(item.value.ansible_password) }}"
+    ansible_connection: winrm
+    ansible_winrm_transport: credssp
+    ansible_winrm_server_cert_validation: ignore
+    ansible_winrm_operation_timeout_sec: 60
+    ansible_winrm_read_timeout_sec: 120
+  when: item.value.provider=='bms_win'
+  with_dict: "{{ instances }}"
+  tags:
+    - install_contrail
+
 - name: add kvm container hosts
   add_host:
     hostname: "{{ item.value.ip }}"
