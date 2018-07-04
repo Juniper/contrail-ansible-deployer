@@ -1,0 +1,23 @@
+provider_config:
+  bms_win:
+    ansible_user: Administrator
+    ansible_password: 
+instances:
+  win_compute1: 
+    provider: bms_win
+    ip: 
+global_configuration:
+  CONTAINER_REGISTRY: mclapinski
+
+contrail_configuration:
+  CONTRAIL_VERSION: latest
+  CONTROLLER_NODES: 
+
+  WINDOWS_PHYSICAL_INTERFACE: 
+
+  WINDOWS_ENABLE_TEST_SIGNING: true
+  WINDOWS_DEBUG_DLLS_PATH: 
+
+  AUTH_MODE: keystone
+  KEYSTONE_AUTH_HOST: 
+  KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123
