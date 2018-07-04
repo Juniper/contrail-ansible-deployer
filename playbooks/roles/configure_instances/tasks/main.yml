@@ -7,7 +7,7 @@
    - always
 
 - name: install software
-  include: install_software.yml
+  include: install_software_{{ansible_system}}.yml
 
 - name: copy root ca
   include: copy_root_ca.yml
