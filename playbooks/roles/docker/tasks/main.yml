@@ -31,11 +31,13 @@
     - global_configuration.REGISTRY_PRIVATE_SECURE is defined
     - global_configuration.REGISTRY_PRIVATE_SECURE == true
 
-- name: start docker daemon
-  service:
-    enabled: yes
-    name: docker
-    state: started
+- name: start docker daemon on windows
+  include: start_docker_windows.yml
+  when: ansible_os_family=='Windows'
+
+- name: start docker daemon on linux
+  include: start_docker_linux.yml
+  when: ansible_os_family!='Windows'
 
 - name: add Contrail's private registry authentication
   include: auth_registry.yaml
