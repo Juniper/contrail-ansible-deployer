@@ -237,7 +237,7 @@
 
 - name: Add pci nics to ContrailVM
   include: add_pci_nics.yml esxi_host={{item}}
-  when: item.contrail_vm.pci_devices is defined and item.contrailvm.pci_devices
+  when: item.contrail_vm.pci_devices is defined and item.contrail_vm.pci_devices
   with_items: "{{ esxi_servers }}"
 
 - name: Wait for pci nic add completion
@@ -250,7 +250,7 @@
 
 - name: Add sriov nics to ContrailVM
   include: add_sriov_nics.yml esxi_host={{item}}
-  when: item.contrail_vm.sr_iov_nics is defined and item.contrailvm.sr_iov_nics
+  when: item.contrail_vm.sr_iov_nics is defined and item.contrail_vm.sr_iov_nics
   with_items: "{{ esxi_servers }}"
 
 - name: Wait for sriov nic add completion
