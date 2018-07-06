@@ -8,7 +8,8 @@ instances:
     provider: bms_win
     ip: 192.168.1.101
     roles:
-      win_compute
+      vrouter:
+      win_docker_driver:
 
 global_configuration:
   CONTAINER_REGISTRY: mclapinski
