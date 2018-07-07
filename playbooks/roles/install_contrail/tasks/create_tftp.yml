@@ -1,0 +1,27 @@
+---
+- name: create /etc/contrail/tftp
+  file:
+    path: /etc/contrail/tftp
+    state: directory
+    recurse: yes
+
+- name: create {{ global_configuration.TFTP_DIR }}
+  file:
+    path: "{{ global_configuration.TFTP_DIR }}"
+    state: directory
+    recurse: yes
+
+- name: update image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-tftp
+  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+
+- name: create contrail tftp compose file
+  template:
+    src: contrail-tftp.yaml.j2
+    dest: /etc/contrail/tftp/docker-compose.yaml
+
+- name: start contrail tftp
+  docker_service:
+    project_src: /etc/contrail/tftp

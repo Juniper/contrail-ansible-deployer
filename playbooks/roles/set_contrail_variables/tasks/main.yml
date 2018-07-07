@@ -59,6 +59,34 @@
   tags:
     - always
 
+- name: set default dhcp node
+  set_fact:
+    dhcp_node: ""
+  tags:
+    - always
+
+- name: set dhcp node when orchestrator is openstack
+  set_fact:
+    dhcp_node: "{{ dhcp_nodes_list | first }}"
+  when:
+    - (dhcp_nodes_list | length) > 0
+  tags:
+    - always
+
+- name: set default tftp node
+  set_fact:
+    tftp_node: ""
+  tags:
+    - always
+
+- name: set tftp node when orchestrator is openstack
+  set_fact:
+    tftp_node: "{{ tftp_nodes_list | first }}"
+  when:
+    - (tftp_nodes_list | length) > 0
+  tags:
+    - always
+
 - name: add nodes to contrail_configuration
   set_fact:
     contrail_configuration: "{{ contrail_configuration | combine({item.name: item.nodes|join(',')}) }}"
@@ -73,6 +101,8 @@
     - {'name': 'WEBUI_NODES', 'nodes': "{{webui_nodes_list}}"}
     - {'name': 'TSN_NODES', 'nodes': "{{tsn_nodes_list}}"}
     - {'name': 'KUBERNETES_API_NODES', 'nodes': "{{k8s_master_nodes_list}}"}
+    - {'name': 'DHCP_NODE', 'nodes': "{{dhcp_node}}"}
+    - {'name': 'TFTP_NODE', 'nodes': "{{tftp_node}}"}
 
 - name: explicitly set OpenStack secrets for Contrail
   set_fact:

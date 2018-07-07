@@ -20,3 +20,6 @@
       ( contrail_configuration.INTROSPECT_SSL_ENABLE|bool )) or
       (( contrail_configuration.SANDESH_SSL_ENABLE is defined ) and
       ( contrail_configuration.SANDESH_SSL_ENABLE|bool ))
+
+- name: copy ssh keys
+  include: copy_ssh_keys.yml

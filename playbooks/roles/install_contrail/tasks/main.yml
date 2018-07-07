@@ -110,3 +110,17 @@
 - name: create win docker driver
   include: create_win_docker_driver.yml
   when: roles[instance_name].win_docker_driver is defined
+
+- name: create contrail dhcp
+  include: create_dhcp.yml
+  when: roles[instance_name].dhcp is defined
+  tags:
+    - dhcp
+  run_once: true
+
+- name: create contrail tftp
+  include: create_tftp.yml
+  when: roles[instance_name].tftp is defined
+  tags:
+    - tftp
+  run_once: true
