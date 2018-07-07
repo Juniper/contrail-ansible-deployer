@@ -59,6 +59,22 @@
   tags:
     - always
 
+- name: add dhcp info to contrail_configuration
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: item.value}) }}"
+  when: dhcp_master is defined and contrail_configuration.get(item.name, 0) == 0
+  with_items:
+    - {'name': 'DHCP_NODE', 'value': "{{dhcp_master}}"}
+    - {'name': 'DHCP_DIR', 'value': "/etc/contrail/dhcp/config"}
+
+- name: add tftp info to contrail_configuration
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: item.value}) }}"
+  when: tftp_master is defined and contrail_configuration.get(item.name, 0) == 0
+  with_items:
+    - {'name': 'TFTP_NODE', 'value': "{{tftp_master}}"}
+    - {'name': 'TFTP_DIR', 'value': "/etc/contrail/tftp/config"}
+
 - name: add nodes to contrail_configuration
   set_fact:
     contrail_configuration: "{{ contrail_configuration | combine({item.name: item.nodes|join(',')}) }}"
