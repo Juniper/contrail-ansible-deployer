@@ -59,6 +59,35 @@
   tags:
     - always
 
+- name: add dhcp info to contrail_configuration
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: item.value}) }}"
+  when: dhcp_master is defined
+  with_items:
+    - {'name': 'DHCP_NODE', 'value': "{{ dhcp_master }}"}
+    - {'name': 'DHCP_CONFIG_DIR', 'value': "/etc/contrail/dhcp/config"}
+    - {'name': 'DHCP_LEASES_DIR', 'value': "/etc/contrail/dhcp/leases"}
+
+- name: add tftp info to contrail_configuration
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: item.value}) }}"
+  when: tftp_master is defined
+  with_items:
+    - {'name': 'TFTP_NODE', 'value': "{{ tftp_master }}"}
+    - {'name': 'TFTP_DIR', 'value': "/etc/contrail/tftp/config"}
+
+- name: add openstack tftp info to contrail_configuration
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: item.value}) }}"
+  when:
+    - contrail_configuration.USE_OPENSTACK_TFTP is defined
+    - contrail_configuration.USE_OPENSTACK_TFTP|bool
+    - openstack_nodes_list is defined
+    - openstack_nodes_list | length > 0
+  with_items:
+    - {'name': 'TFTP_NODE', 'value': "{{ openstack_nodes_list | first }}"}
+    - {'name': 'TFTP_DIR', 'value': "/var/lib/docker/volumes/ironic_pxe/_data"}
+
 - name: add nodes to contrail_configuration
   set_fact:
     contrail_configuration: "{{ contrail_configuration | combine({item.name: item.nodes|join(',')}) }}"
