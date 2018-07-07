@@ -1,7 +1,18 @@
 ---
+- name: install dhcp server for ztp
+  package:
+    name: dhcp
+    state: present
+
 - name: create /etc/contrail/config
   file:
     path: /etc/contrail/config
+    state: directory
+    recurse: yes
+
+- name: create /etc/contrail/ssh
+  file:
+    path: /etc/contrail/ssh
     state: directory
     recurse: yes
 
@@ -21,6 +32,11 @@
     path: "/etc/contrail/common_config.env"
     state: touch
 
+- name: Generate Contrail SSH keys
+  shell: ssh-keygen -f /etc/contrail/ssh/id_rsa -t rsa -N ''
+  args:
+    creates: /etc/contrail/ssh/id_rsa
+
 - name: "populate global common_config.env"
   lineinfile: dest=/etc/contrail/common_config.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ contrail_configuration }}"
@@ -39,6 +55,12 @@
   when: roles[instance_name].config is defined
   ignore_errors: yes
   no_log: True
+
+- name: Set authorized key for bms
+  authorized_key:
+    user: {{ ansible_user|default(lookup('env', 'USER')) }}
+    state: present
+    key: "{{ lookup('file', '/etc/contrail/ssh/id_rsa.pub') }}"
 
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
