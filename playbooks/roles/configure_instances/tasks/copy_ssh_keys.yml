@@ -1,0 +1,35 @@
+---
+- name: set ssh dir when its undefined
+  set_fact:
+    ssh_dir: "/etc/contrail/ssh"
+  when:
+   - ssh_dir is not defined
+
+- name: create ssh dir on host
+  become: yes
+  file:
+    state: directory
+    path: "{{ item.dir }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - dir: "{{ ssh_dir }}"
+      mode: "0700"
+
+- name: copy ssh dir to host
+  copy: src={{ item.src }} dest={{ item.dest }} mode={{ item.mode }}
+  with_items:
+    - src: "{{ ssh_dir }}/"
+      dest: "{{ ssh_dir }}"
+      mode: "0400"
+  when:
+    - ssh_dir is defined
+
+- name: set public ssh key path
+  set_fact:
+    public_ssh_key: "{{ ssh_dir }}/id_rsa.pub"
+
+- name: set authorized key
+  authorized_key:
+    user: "{{ ansible_user | default(lookup('env', 'USER')) }}"
+    state: present
+    key: "{{ lookup('file', public_ssh_key) }}"

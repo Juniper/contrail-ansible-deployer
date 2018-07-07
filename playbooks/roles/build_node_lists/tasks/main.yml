@@ -125,3 +125,23 @@
     - item.value.roles.vrouter.TSN_EVPN_MODE is defined
     - item.value.roles.vrouter.TSN_EVPN_MODE | bool
   with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
+    dhcp_nodes_list: []
+- name: add dhcp nodes to the list
+  set_fact:
+    dhcp_nodes_list: "{{ dhcp_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.dhcp is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
+    tftp_nodes_list: []
+- name: add tftp nodes to the list
+  set_fact:
+    tftp_nodes_list: "{{ tftp_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.tftp is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"

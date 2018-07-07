@@ -59,6 +59,50 @@
   tags:
     - always
 
+- name: set default dhcp node
+  set_fact:
+    dhcp_node: ""
+  tags:
+    - always
+
+- name: set dhcp node when orchestrator is openstack
+  set_fact:
+    dhcp_node: "{{ dhcp_nodes_list | first }}"
+  when:
+    - (dhcp_nodes_list | length) > 0
+  tags:
+    - always
+
+- name: add dhcp info to contrail_configuration
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: item.value}) }}"
+  when: contrail_configuration.get(item.name, 0) == 0
+  with_items:
+    - {'name': 'DHCP_NODE', 'value': "{{dhcp_node}}"}
+    - {'name': 'DHCP_DIR', 'value': "/etc/contrail/dhcp/config"}
+
+- name: set default tftp node
+  set_fact:
+    tftp_node: ""
+  tags:
+    - always
+
+- name: set tftp node when orchestrator is openstack
+  set_fact:
+    tftp_node: "{{ tftp_nodes_list | first }}"
+  when:
+    - (tftp_nodes_list | length) > 0
+  tags:
+    - always
+
+- name: add tftp info to contrail_configuration
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: item.value}) }}"
+  when: contrail_configuration.get(item.name, 0) == 0
+  with_items:
+    - {'name': 'TFTP_NODE', 'value': "{{tftp_node}}"}
+    - {'name': 'TFTP_DIR', 'value': "/etc/contrail/tftp/config"}
+
 - name: add nodes to contrail_configuration
   set_fact:
     contrail_configuration: "{{ contrail_configuration | combine({item.name: item.nodes|join(',')}) }}"

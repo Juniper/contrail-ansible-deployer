@@ -1,0 +1,14 @@
+version: '2'
+services:
+  server:
+    image: "{{ container_registry }}/contrail-external-tftp:{{ contrail_version_tag }}"
+    network_mode: "host"
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/crashes:/var/crashes
+      - /etc/contrail/tftp/config:/var/lib/tftpboot
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
