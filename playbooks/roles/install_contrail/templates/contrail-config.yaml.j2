@@ -41,6 +41,7 @@ services:
       - /etc/localtime:/etc/localtime
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
+      - /etc/contrail/ssh:/root/.ssh
     volumes_from:
       - node-init
     depends_on:

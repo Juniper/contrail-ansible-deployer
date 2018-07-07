@@ -1,0 +1,14 @@
+version: '2'
+services:
+  server:
+    image: "{{ container_registry }}/contrail-external-dhcp:{{ contrail_version_tag }}"
+    network_mode: "host"
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/crashes:/var/crashes
+      - /etc/contrail/dhcp/config:/etc/dhcp
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
