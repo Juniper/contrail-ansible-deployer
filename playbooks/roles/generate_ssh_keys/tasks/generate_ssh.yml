@@ -1,0 +1,15 @@
+---
+- name: create ssh directory
+  become: yes
+  file:
+    state: directory
+    path: "{{ item.dir }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - dir: "{{ ssh_dir }}"
+      mode: "0700"
+
+- name: generate ssh keys
+  shell: ssh-keygen -f {{ ssh_dir }}/id_rsa -t rsa -N ''
+  args:
+    creates: "{{ ssh_dir }}/id_rsa"

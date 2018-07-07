@@ -1,0 +1,5 @@
+---
+- name: install openssh tools
+  package:
+    name: openssh
+    state: latest

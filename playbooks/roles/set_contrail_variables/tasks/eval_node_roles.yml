@@ -19,7 +19,7 @@
 - set_fact:
     default_roles: "{{ default_roles|default({})|combine({item.0: item.1}) }}"
   with_together:
-    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'vrouter', 'webui', 'openstack']
+    - ['analytics', 'analytics_database', 'config', 'config_database', 'control', 'vrouter', 'webui', 'openstack', 'dhcp']
     - []
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR is defined

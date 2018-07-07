@@ -1,0 +1,19 @@
+---
+- name: Prepare host for ssh key generation
+  include: prepare.yml
+
+- name: set ssh dir when its defined
+  set_fact:
+    ssh_dir: "{{ global_configuration.SSH_DIR }}"
+  when:
+   - global_configuration is defined
+   - global_configuration.SSH_DIR is defined
+
+- name: set ssh dir when its undefined
+  set_fact:
+    ssh_dir: "/etc/contrail/ssh"
+  when:
+   - ssh_dir is not defined
+
+- name: generate ssh keys
+  include: generate_ssh.yml

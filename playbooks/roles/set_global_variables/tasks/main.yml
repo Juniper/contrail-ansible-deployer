@@ -45,3 +45,19 @@
     container_registry is not defined
   tags:
    - always
+
+- name: set ssh dir if it's not defined
+  set_fact:
+    global_configuration: "{{ global_configuration | combine({'SSH_DIR': '/etc/contrail/ssh'}) }}"
+  when:
+    - global_configuration.SSH_DIR is not defined
+  tags:
+    - always
+
+- name: set dhcp dir if it's not defined
+  set_fact:
+    global_configuration: "{{ global_configuration | combine({'DHCP_DIR': '/etc/dhcp'}) }}"
+  when:
+    - global_configuration.DHCP_DIR is not defined
+  tags:
+    - always
