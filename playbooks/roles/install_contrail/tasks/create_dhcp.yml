@@ -1,0 +1,27 @@
+---
+- name: create /etc/contrail/dhcp/config
+  file:
+    path: /etc/contrail/dhcp/config
+    state: directory
+    recurse: yes
+
+- name: create /etc/contrail/dhcp/leases
+  file:
+    path: /etc/contrail/dhcp/leases
+    state: directory
+    recurse: yes
+
+- name: update image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-external-dhcp
+  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+
+- name: create contrail dhcp compose file
+  template:
+    src: contrail-dhcp.yaml.j2
+    dest: /etc/contrail/dhcp/docker-compose.yaml
+
+- name: start contrail dhcp
+  docker_service:
+    project_src: /etc/contrail/dhcp
