@@ -125,3 +125,41 @@
     - item.value.roles.vrouter.TSN_EVPN_MODE is defined
     - item.value.roles.vrouter.TSN_EVPN_MODE | bool
   with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
+    dhcp_nodes_list: []
+- name: add dhcp nodes to the list
+  set_fact:
+    dhcp_nodes_list: "{{ dhcp_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.dhcp is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- fail:
+    msg: "HA for dhcp is not supported. Only one instance should have the 'dhcp' role."
+  when: dhcp_nodes_list | length > 1
+
+- name: set dhcp_master as first item of dhcp_nodes_list
+  set_fact:
+    dhcp_master: "{{ dhcp_nodes_list[0] }}"
+  when: dhcp_nodes_list | length > 0
+
+- set_fact:
+    tftp_nodes_list: []
+- name: add tftp nodes to the list
+  set_fact:
+    tftp_nodes_list: "{{ tftp_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.tftp is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- fail:
+    msg: "HA for tftp is not supported. Only one instance should have the 'tftp' role."
+  when: tftp_nodes_list | length > 1
+
+- name: set tftp_master as first item of tftp_nodes_list
+  set_fact:
+    tftp_master: "{{ tftp_nodes_list[0] }}"
+  when: tftp_nodes_list | length > 0
