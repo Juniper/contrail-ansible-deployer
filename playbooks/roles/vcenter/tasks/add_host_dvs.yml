@@ -22,7 +22,9 @@
     state: present
   when: >
          esxi_host.vcenter_server.dv_switch_control_data is defined and
-         esxi_host.vcenter_server.dv_switch_control_data.dv_switch_name
+         esxi_host.vcenter_server.dv_switch_control_data.dv_switch_name and
+         esxi_host.contrail_vm.sr_iov_nics is undefined and
+         esxi_host.contrail_vm.pci_devices is undefined 
 
 - name: Add esxi host to mgmt DVS
   vmware_dvs_host:
@@ -50,5 +52,6 @@
     state: present
   when: >
          esxi_host.vcenter_server.dv_switch_sr_iov is defined and
-         esxi_host.vcenter_server.dv_switch_sr_iov.dv_switch_name
+         esxi_host.vcenter_server.dv_switch_sr_iov.dv_switch_name and
+         esxi_host.contrail_vm.sr_iov_nics is defined
 
