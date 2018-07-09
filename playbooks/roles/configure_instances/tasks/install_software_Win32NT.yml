@@ -1,0 +1,72 @@
+---
+
+- name: install feature Windows-Containers
+  win_feature:
+    name: 'Containers'
+    state: present
+  register: windows_container_status
+
+- name: install feature NET-Framework-Features
+  win_feature:
+    name: 'NET-Framework-Features'
+    state: present
+  register: net_framework_status
+
+- name: install feature Hyper-V
+  win_feature:
+    name: 'Hyper-V'
+    include_management_tools: True
+    state: present
+  register: hyperv_status
+
+# TODO: It can't be verified if reboot is actually need,
+#       thus we have to do it each time operation is successful
+- name: enable testsigning
+  win_shell: |
+    Bcdedit.exe -set TESTSIGNING ON
+  register: bcdedit_status
+  when: contrail_configuration.WINDOWS_ENABLE_TEST_SIGNING is defined
+
+- name: reboot the system
+  win_reboot:
+    test_command: powershell.exe 'Get-WindowsFeature'
+    pre_reboot_delay: 15
+    post_reboot_delay: 15
+  when: windows_container_status.reboot_required or
+        hyperv_status.reboot_required or
+        net_framework_status.reboot_required or
+        (contrail_configuration.WINDOWS_ENABLE_TEST_SIGNING is defined and bcdedit_status.changed)
+
+- name: wait for reconnection
+  wait_for_connection:
+
+- name: install python 2.7.13
+  win_chocolatey:
+    name: python2
+    version: 2.7.13
+    state: present
+
+- name: install NSSM
+  win_chocolatey:
+    name: nssm
+    state: present
+
+- name: install DockerProvider
+  win_psmodule:
+    name: DockerProvider
+
+- name: install Docker-EE
+  win_shell: "Install-Package Docker -ProviderName DockerProvider -Force"
+
+- name: install MS Visuall C++ Redist 14
+  win_chocolatey:
+    name: vcredist140
+    state: present
+
+- name: disable Windows Firewall
+  win_firewall:
+    profiles:
+      - Public
+      - Domain
+      - Private
+    state: disabled
