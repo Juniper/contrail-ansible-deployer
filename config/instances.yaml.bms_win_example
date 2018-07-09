@@ -19,7 +19,7 @@ contrail_configuration:
 
   WINDOWS_PHYSICAL_INTERFACE: Ethernet1
 
-  WINDOWS_ENABLE_TEST_SIGNING: true
+  WINDOWS_ENABLE_TEST_SIGNING:
   WINDOWS_DEBUG_DLLS_PATH: ~/dlls
 
   AUTH_MODE: keystone
