@@ -1,4 +1,4 @@
-# contrail-container-deployer
+# contrail-ansible-deployer
 
 This set of playbooks installs Contrail Networking using a microservices architecture.
 
