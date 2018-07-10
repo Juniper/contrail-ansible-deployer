@@ -20,9 +20,11 @@
     switch_name: "{{ esxi_host.vcenter_server.dv_switch_control_data.dv_switch_name }}"
     vmnics: "{{ esxi_host.control_data_dvs_uplink | default(esxi_host.vcenter_server.dv_port_group_control_data.uplink) }}"
     state: present
-  when: >
-         esxi_host.vcenter_server.dv_switch_control_data is defined and
-         esxi_host.vcenter_server.dv_switch_control_data.dv_switch_name
+  when:
+    - esxi_host.vcenter_server.dv_switch_control_data is defined
+    - esxi_host.vcenter_server.dv_switch_control_data.dv_switch_name
+    - esxi_host.contrail_vm.sr_iov_nics is undefined
+    - esxi_host.contrail_vm.pci_devices is undefined 
 
 - name: Add esxi host to mgmt DVS
   vmware_dvs_host:
@@ -48,7 +50,8 @@
     switch_name: "{{ esxi_host.vcenter_server.dv_switch_sr_iov.dv_switch_name }}"
     vmnics: "{{ esxi_host.contrail_vm.sr_iov_nics }}"
     state: present
-  when: >
-         esxi_host.vcenter_server.dv_switch_sr_iov is defined and
-         esxi_host.vcenter_server.dv_switch_sr_iov.dv_switch_name
+  when:
+    - esxi_host.vcenter_server.dv_switch_sr_iov is defined
+    - esxi_host.vcenter_server.dv_switch_sr_iov.dv_switch_name
+    - esxi_host.contrail_vm.sr_iov_nics is defined
 
