@@ -3,6 +3,39 @@ volumes:
  config_cassandra:
  config_zookeeper:
 services:
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    pid: host
+    network_mode: "host"
+    volumes:
+      - /usr/bin:/host/usr/bin
+      - /etc/contrail/ssl:/etc/contrail/ssl
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+      - NODE_TYPE=config-database
+      - CASSANDRA_CQL_PORT=9041
+      - CASSANDRA_JMX_LOCAL_PORT=7201
+    network_mode: "host"
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    depends_on:
+      - node-init
   cassandra:
     image: "{{ container_registry }}/contrail-external-cassandra:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common.env
@@ -15,7 +48,7 @@ services:
      - CASSANDRA_SSL_STORAGE_PORT=7013
      - CASSANDRA_STORAGE_PORT=7012
      - CASSANDRA_JMX_LOCAL_PORT=7201
-     - NODE_TYPE=config
+     - NODE_TYPE=config-database
     volumes:
       - /etc/hosts:/etc/hosts
       - config_cassandra:/var/lib/cassandra/data
@@ -28,7 +61,7 @@ services:
      - ZOOKEEPER_NODES={{ zookeeper_nodes }}
      - ZOOKEEPER_PORTS=2888:3888
      - ZOOKEEPER_PORT=2181
-     - NODE_TYPE=config
+     - NODE_TYPE=config-database
     volumes:
      - /etc/hosts:/etc/hosts
      - config_zookeeper:/data
@@ -41,6 +74,6 @@ services:
     environment:
      - RABBITMQ_NODES={{ rabbitmq_nodes }}
      - RABBITMQ_ERLANG_COOKIE=abcdefg
-     - NODE_TYPE=config
+     - NODE_TYPE=config-database
     network_mode: "host"
     restart: always
