@@ -19,6 +19,18 @@
     state: latest
   when: ansible_distribution != 'RedHat'
 
+# Enhancement: In scale clusters, previous runs might have pending transactions
+# These need to be cleared before we can proceed
+- name: install yum-utils
+  yum:
+    name: yum-utils
+    state: latest
+  when: ansible_distribution != 'RedHat'
+
+- name: Clear pending transactions if any
+  shell: 'yum-complete-transaction --cleanup-only'
+  when: ansible_distribution != 'RedHat'
+
 - name: install epel on RedHat distribution
   yum:
     name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
