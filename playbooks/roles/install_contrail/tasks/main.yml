@@ -21,7 +21,6 @@
 
 - name: run common tasks
   include: "common_{{ ansible_system }}.yml"
-  when: ansible_system != 'Win32NT'
 
 - name: create redis
   include: create_redis.yml
