@@ -29,8 +29,3 @@
       extensions: ['yml']
       contrail_cleanup: true
     when: orchestrator == 'openstack'
-
-- name: Apply role destroy to contrail
-  hosts: container_hosts
-  roles:
-  - destroy
