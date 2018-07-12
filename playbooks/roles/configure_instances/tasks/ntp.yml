@@ -1,4 +1,9 @@
 ---
+- name: install ntpdate
+  package:
+    name: ntpdate
+    state: latest
+
 - name: install ntpd
   package:
     name: ntp
@@ -7,6 +12,9 @@
 - name: set ntp service name
   set_fact:
     ntp_svc_name: "{{ 'ntp' if ansible_os_family == 'Debian' else 'ntpd' }}"
+
+- name: stop ntp service
+  service: name={{ ntp_svc_name }} state=stopped enabled=yes
 
 - name: set ntp server
   template:
