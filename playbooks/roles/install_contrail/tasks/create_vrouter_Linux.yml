@@ -76,9 +76,14 @@
   with_dict: "{{ remote_locations[location] }}"
   when: location is defined
 
+- name: "set kubemanagertoken if defined"
+  set_fact:
+    kubemanagertoken: "{{ hostvars[k8s_master_name].kubemanagertoken }}"
+  when: k8s_master_name is defined
+
 - name: "add kubemanager token to common_vrouter.env"
-  lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^K8S_TOKEN=.*' line="K8S_TOKEN={{ hostvars[k8s_master_name].kubemanagertoken }}" state=present
-  when: k8s_master_name is defined and hostvars[k8s_master_name].kubemanagertoken is defined
+  lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^K8S_TOKEN=.*' line="K8S_TOKEN={{ kubemanagertoken }}" state=present
+  when: kubemanagertoken is defined
 
 - name: "add SUBCLUSTER name if location is defined and subcluster name is defined"
   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ remote_locations[location].SUBCLUSTER }}" state=present
