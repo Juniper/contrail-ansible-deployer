@@ -1,0 +1,11 @@
+win_container_artifacts_dir: C:\artifacts\
+win_host_artifacts_dir: "{{ win_container_artifacts_dir }}"
+win_vhost_name: vEthernet (HNSTransparent)
+win_agent_config_path: C:\ProgramData\Contrail\etc\contrail\contrail-vrouter-agent.conf
+contrail_configuration_default:
+  KEYSTONE_AUTH_PROTO: http
+  KEYSTONE_AUTH_PUBLIC_PORT: 5000
+  KEYSTONE_AUTH_URL_TOKENS: /v2.0/tokens
+  KEYSTONE_AUTH_ADMIN_TENANT: admin
+  KEYSTONE_AUTH_ADMIN_USER: admin
+  CONFIG_API_PORT: 8082
