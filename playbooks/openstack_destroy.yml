@@ -6,7 +6,6 @@
       role: create_container_host_group
     - name: Generate openstack host groups
       role: create_openstack_host_group
-      when: orchestrator == 'openstack'
   vars_files:
     - "{{ config_file }}"
 
@@ -28,9 +27,3 @@
       dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/etc/kolla"
       extensions: ['yml']
       contrail_cleanup: true
-    when: orchestrator == 'openstack'
-
-- name: Apply role destroy to contrail
-  hosts: container_hosts
-  roles:
-  - destroy
