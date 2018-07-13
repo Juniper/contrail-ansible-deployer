@@ -2,7 +2,7 @@
 #
 # ansible-playbook -i inventory/ -e orchestrator=openstack playbook/install_contrail.yml
 #
-- name: Create container host group for Contrail
+- name: Create container host group and evaluate variables for Contrail
   hosts: localhost
   connection: local
   gather_facts: no
@@ -20,9 +20,17 @@
     - build_node_lists
     - set_global_variables
     - set_contrail_variables
+    - set_k8s_variables
   vars_files:
     - "{{ config_file }}"
   tags: always
+
+- name: Get kubemanager token
+  hosts: k8s_master
+  gather_facts: yes
+  roles:
+    - get_kubemanager_token
+  tags: k8s
 
 - name: Install Contrail
   hosts: container_hosts
@@ -36,6 +44,9 @@
     - container_registry: "{{ hostvars['localhost'].container_registry }}"
     - contrail_version_tag: "{{ hostvars['localhost'].contrail_version_tag }}"
     - roles: "{{ hostvars['localhost'].roles }}"
+    - k8s_master_ip: "{{ hostvars['localhost'].k8s_master_ip if hostvars['localhost'].k8s_master_ip is defined else omit }}"
+    - k8s_master_name: "{{ hostvars['localhost'].k8s_master_name if hostvars['localhost'].k8s_master_name is defined else omit }}"
+    - kubemanagertoken: "{{ hostvars[k8s_master_name].kubemanagertoken if k8s_master_name is defined and hostvars[k8s_master_name].kubemanagertoken is defined else omit }}"
   environment:
     - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
     - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
