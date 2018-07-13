@@ -25,11 +25,6 @@
   roles:
     - configure_instances
     - docker
-  tasks:
-    - name: Configure k8s
-      include_role:
-        name: k8s
-      when: ansible_os_family != 'Windows'
   vars_files:
     - "{{ hostvars['localhost'].config_file }}"
   environment:
