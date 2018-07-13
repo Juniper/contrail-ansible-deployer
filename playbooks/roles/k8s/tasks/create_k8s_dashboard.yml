@@ -8,8 +8,8 @@
   shell: kubectl apply -f /tmp/k8s-dashboard.yaml.j2
 
 - name: look for a privileged token for full k8s dashboard access
-  shell: kubectl -n kube-system get secret | grep namespace-controller-token | awk '{print $1}'
+  shell: kubectl get secret -n contrail | grep kubemanager | awk '{print $1}'
   register: privileged_token_output
 
 - name: store privileged token for full k8s dashboard access
-  shell: kubectl describe secret {{ privileged_token_output.stdout }} -n kube-system | grep "token:" | awk '{print $2}' > /root/k8s_dashboard_token.txt
+  shell: kubectl describe secret {{ privileged_token_output.stdout }} -n contrail | grep "token:" | awk '{print $2}' > /root/k8s_dashboard_token.txt

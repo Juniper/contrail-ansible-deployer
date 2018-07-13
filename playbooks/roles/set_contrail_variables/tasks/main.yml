@@ -46,6 +46,7 @@
     - contrail_configuration.STDIN_OPEN is not defined
   tags:
     - always
+
 - name: set tty to true if it's not defined
   set_fact:
     contrail_configuration: "{{ contrail_configuration | combine({'TTY': true}) }}"
@@ -95,6 +96,7 @@
     - not (kolla_config.kolla_globals.enable_haproxy | bool)
   tags:
    - always
+
 - name: get the internal VIP from internal_vip if haproxy is enabled
   set_fact:
     openstack_internal_vip: "{{ kolla_config.kolla_globals.kolla_internal_vip_address }}"
@@ -119,7 +121,3 @@
     - { name: 'imageManager_ip', is_not_defined: "{{ contrail_configuration.imageManager_ip is not defined }}" }
     - { name: 'networkManager_ip', is_not_defined: "{{ contrail_configuration.networkManager_ip is not defined }}" }
 
-- name: Evaluate k8s master ip/name
-  include: set_master.yml
-  tags:
-    - k8s
