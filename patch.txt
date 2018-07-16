@@ -1,0 +1,1142 @@
+From 9db36cbc4c91655e745c2c7f728c2f345d85bf3b Mon Sep 17 00:00:00 2001
+From: Leela Bharath Kumar Kassetti <bharatkk@juniper.net>
+Date: Thu, 12 Jul 2018 16:06:11 -0700
+Subject: [PATCH] Separating k8s from contrail installation... k8s installation comes first
+
+Change-Id: Ic63eee39bcd45d02abb280ec5c6f95610977253a
+Closes-Bug: 1779937
+---
+
+diff --git a/playbooks/configure_instances.yml b/playbooks/configure_instances.yml
+index c928122..52328db 100644
+--- a/playbooks/configure_instances.yml
++++ b/playbooks/configure_instances.yml
+@@ -25,11 +25,6 @@
+   roles:
+     - configure_instances
+     - docker
+-  tasks:
+-    - name: Configure k8s
+-      include_role:
+-        name: k8s
+-      when: ansible_os_family != 'Windows'
+   vars_files:
+     - "{{ hostvars['localhost'].config_file }}"
+   environment:
+diff --git a/playbooks/install_contrail.yml b/playbooks/install_contrail.yml
+index fdd08d7..d36332d 100644
+--- a/playbooks/install_contrail.yml
++++ b/playbooks/install_contrail.yml
+@@ -2,7 +2,7 @@
+ #
+ # ansible-playbook -i inventory/ -e orchestrator=openstack playbook/install_contrail.yml
+ #
+-- name: Create container host group for Contrail
++- name: Create container host group and evaluate variables for Contrail
+   hosts: localhost
+   connection: local
+   gather_facts: no
+@@ -20,9 +20,17 @@
+     - build_node_lists
+     - set_global_variables
+     - set_contrail_variables
++    - set_k8s_variables
+   vars_files:
+     - "{{ config_file }}"
+   tags: always
++
++- name: Get kubemanager token
++  hosts: k8s_master
++  gather_facts: yes
++  roles:
++    - get_kubemanager_token
++  tags: k8s
+ 
+ - name: Install Contrail
+   hosts: container_hosts
+@@ -36,6 +44,9 @@
+     - container_registry: "{{ hostvars['localhost'].container_registry }}"
+     - contrail_version_tag: "{{ hostvars['localhost'].contrail_version_tag }}"
+     - roles: "{{ hostvars['localhost'].roles }}"
++    - k8s_master_ip: "{{ hostvars['localhost'].k8s_master_ip if hostvars['localhost'].k8s_master_ip is defined else omit }}"
++    - k8s_master_name: "{{ hostvars['localhost'].k8s_master_name if hostvars['localhost'].k8s_master_name is defined else omit }}"
++    - kubemanagertoken: "{{ hostvars[k8s_master_name].kubemanagertoken if k8s_master_name is not match('') else omit }}"
+   environment:
+     - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
+     - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
+diff --git a/playbooks/install_k8s.yml b/playbooks/install_k8s.yml
+index 3eee0a7..5f3627d 100644
+--- a/playbooks/install_k8s.yml
++++ b/playbooks/install_k8s.yml
+@@ -4,20 +4,38 @@
+ #
+ # orchestrator can be openstack or kubernetes
+ #
+-- name: Create container host group
++
++- name: Create container host group and evaluate variables for k8s
+   hosts: localhost
+   connection: local
+   gather_facts: no
+   pre_tasks:
+     - name: Expose instances
+       set_fact:
+-          instances: "{{ instances }}"
++          instances: "{{ instances | default({}) }}"
+       when: hostvars['localhost']['instances'] is undefined
++    - name: Expose global configuration
++      set_fact:
++          global_configuration: "{{ global_configuration | default({}) }}"
++      when: hostvars['localhost']['global_configuration'] is undefined
+   roles:
+-    - name: Generate container_host group
+-      role: create_container_host_group
++    - create_container_host_group
++    - build_node_lists
++    - set_global_variables
++    - set_contrail_variables
++    - set_k8s_variables
+   vars_files:
+     - "{{ config_file }}"
+-  tags: always
+ 
+-# TODO: create role for k8s installing and use it here
++- name: Install Kubernetes
++  hosts: k8s_hosts
++  gather_facts: yes
++  roles:
++    - k8s
++  vars:
++    - contrail_configuration: "{{ hostvars['localhost'].contrail_configuration }}"
++    - global_configuration: "{{ hostvars['localhost'].global_configuration }}"
++    - instances: "{{ hostvars['localhost'].instances }}"
++    - roles: "{{ hostvars['localhost'].roles }}"
++    - k8s_master_ip: "{{ hostvars['localhost'].k8s_master_ip if hostvars['localhost'].k8s_master_ip is defined else omit }}"
++    - k8s_master_name: "{{ hostvars['localhost'].k8s_master_name if hostvars['localhost'].k8s_master_name is defined else omit }}"
+diff --git a/playbooks/roles/get_kubemanager_token/tasks/main.yml b/playbooks/roles/get_kubemanager_token/tasks/main.yml
+new file mode 100644
+index 0000000..60df26f
+--- /dev/null
++++ b/playbooks/roles/get_kubemanager_token/tasks/main.yml
+@@ -0,0 +1,15 @@
++---
++- name: get kubemanager token name from serviceaccount
++  shell: kubectl describe sa contrail-kubemanager -n contrail  | grep -i 'Tokens' | awk '{print $2}'
++  register: output
++
++- name: get kubemanager token
++  shell: kubectl describe secret "{{ output.stdout }}" -n contrail  | grep -i 'token:' | awk '{print $2}'
++  register: output
++
++- name: set kubemanager token
++  set_fact:
++    kubemanagertoken: "{{ output.stdout }}"
++
++- debug:
++   msg: "{{ kubemanagertoken }}"
+diff --git a/playbooks/roles/install_contrail/tasks/configure_k8s_join_node.yml b/playbooks/roles/install_contrail/tasks/configure_k8s_join_node.yml
+deleted file mode 100644
+index 1f62353..0000000
+--- a/playbooks/roles/install_contrail/tasks/configure_k8s_join_node.yml
++++ /dev/null
+@@ -1,39 +0,0 @@
+----
+-- name: initialize node_exists with false
+-  set_fact:
+-    node_exists: false
+-
+-- name: check if node already exists
+-  set_fact:
+-    node_exists: true
+-  when: ansible_hostname in hostvars[k8s_master_name].node_list
+-
+-- name: docker info for getting cgroup driver
+-  shell: docker info 2>/dev/null |grep "Cgroup Driver" |awk '{print $3}'
+-  register: docker_info
+-
+-- name: get cgroup driver
+-  set_fact:
+-    cgroup_driver: "{{ docker_info.stdout }}"
+-
+-- name: set cgroup driver to cgroupfs
+-  lineinfile:
+-    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+-    regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
+-    line: 'Environment="KUBELET_CGROUP_ARGS=--cgroup-driver={{ cgroup_driver }}"'
+-
+-- name: enable kubelet service
+-  systemd:
+-    name: kubelet
+-    state: restarted
+-    daemon_reload: yes
+-    enabled: True
+-  when: node_exists == false
+-
+-- name: debug join
+-  debug:
+-    msg: "master token: {{ hostvars[k8s_master_name].mastertoken }}"
+-
+-- name: join k8s cluster
+-  shell: "kubeadm join --token {{ hostvars[k8s_master_name].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ k8s_master_ip }}:6443"
+-  when: node_exists == false
+diff --git a/playbooks/roles/install_contrail/tasks/create_k8s_dashboard.yml b/playbooks/roles/install_contrail/tasks/create_k8s_dashboard.yml
+deleted file mode 100644
+index 2638f19..0000000
+--- a/playbooks/roles/install_contrail/tasks/create_k8s_dashboard.yml
++++ /dev/null
+@@ -1,15 +0,0 @@
+----
+-- name: create k8s dashboard manifest
+-  template:
+-    src: k8s-dashboard.yaml.j2
+-    dest: /tmp/k8s-dashboard.yaml.j2
+-
+-- name: start k8s dashboard
+-  shell: kubectl apply -f /tmp/k8s-dashboard.yaml.j2
+-
+-- name: look for a privileged token for full k8s dashboard access
+-  shell: kubectl -n kube-system get secret | grep namespace-controller-token | awk '{print $1}'
+-  register: privileged_token_output
+-
+-- name: store privileged token for full k8s dashboard access
+-  shell: kubectl describe secret {{ privileged_token_output.stdout }} -n kube-system | grep "token:" | awk '{print $2}' > /root/k8s_dashboard_token.txt
+diff --git a/playbooks/roles/install_contrail/tasks/create_vrouter_Linux.yml b/playbooks/roles/install_contrail/tasks/create_vrouter_Linux.yml
+index 6f23d32..4c77b22 100644
+--- a/playbooks/roles/install_contrail/tasks/create_vrouter_Linux.yml
++++ b/playbooks/roles/install_contrail/tasks/create_vrouter_Linux.yml
+@@ -77,8 +77,8 @@
+   when: location is defined
+ 
+ - name: "add kubemanager token to common_vrouter.env"
+-  lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^K8S_TOKEN=.*' line="K8S_TOKEN={{ hostvars[k8s_master_name].kubemanagertoken }}" state=present
+-  when: k8s_master_name is defined and hostvars[k8s_master_name].kubemanagertoken is defined
++  lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^K8S_TOKEN=.*' line="K8S_TOKEN={{ kubemanagertoken }}" state=present
++  when: kubemanagertoken is defined
+ 
+ - name: "add SUBCLUSTER name if location is defined and subcluster name is defined"
+   lineinfile: dest=/etc/contrail/common_vrouter.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ remote_locations[location].SUBCLUSTER }}" state=present
+diff --git a/playbooks/roles/install_contrail/tasks/main.yml b/playbooks/roles/install_contrail/tasks/main.yml
+index 24b81f6..8c40aaa 100644
+--- a/playbooks/roles/install_contrail/tasks/main.yml
++++ b/playbooks/roles/install_contrail/tasks/main.yml
+@@ -11,14 +11,6 @@
+   tags:
+    - always
+ 
+-# TODO: move this to install_k8s playbook
+-- name: copy global variables from localhost's hostvars
+-  set_fact:
+-    k8s_master_ip: "{{ hostvars['localhost'].k8s_master_ip if hostvars['localhost'].k8s_master_ip is defined else omit }}"
+-    k8s_master_name: "{{ hostvars['localhost'].k8s_master_name if hostvars['localhost'].k8s_master_name is defined else omit }}"
+-  tags:
+-   - always
+-
+ - name: run common tasks
+   include: "common_{{ ansible_system }}.yml"
+   when: ansible_system != 'Win32NT'
+@@ -30,7 +22,7 @@
+     - webui
+     - analytics
+ 
+-- name: create contrail config datqbase
++- name: create contrail config database
+   include: create_config_database.yml
+   when: roles[instance_name].config_database is defined
+   tags:
+@@ -78,12 +70,6 @@
+   tags:
+     - k8s
+ 
+-- name: configure k8s master
+-  include: configure_k8s_master_node.yml
+-  when: roles[instance_name].k8s_master is defined and k8s_master_name is defined and inventory_hostname == k8s_master_name
+-  tags:
+-    - k8s
+-
+ - name: create contrail vrouter
+   include: "create_vrouter_{{ ansible_system }}.yml"
+   when: roles[instance_name].vrouter is defined
+@@ -93,18 +79,6 @@
+ - name: Pluginize legacy compute
+   include: compute_legacy.yml
+   when: roles[instance_name].openstack_compute_legacy is defined
+-
+-- name: join k8s master
+-  include: configure_k8s_join_node.yml
+-  when: roles[instance_name].k8s_node is defined and k8s_master_name is defined and inventory_hostname != k8s_master_name
+-  tags:
+-    - k8s
+-
+-- name: create k8s dashboard
+-  include: create_k8s_dashboard.yml
+-  when: roles[instance_name].k8s_master is defined and k8s_master_name is defined and inventory_hostname == k8s_master_name
+-  tags:
+-    - k8s
+ 
+ - name: create contrail kube manager
+   include: create_kubemanager.yml
+@@ -131,17 +105,3 @@
+ - name: create win docker driver
+   include: create_win_docker_driver.yml
+   when: roles[instance_name].win_docker_driver is defined
+-
+-- name: untaint node
+-  shell: "kubectl taint nodes {{ hostvars[instance.value.ip]['ansible_fqdn'] }} node-role.kubernetes.io/master-"
+-  with_dict: "{{ hostvars['localhost']['instances'] }}"
+-  loop_control:
+-    loop_var: instance
+-  when:
+-    - roles[instance_name].k8s_master is defined
+-    - k8s_master_name is defined
+-    - inventory_hostname == k8s_master_name
+-    - instance.value.roles is defined
+-    - instance.value.roles.k8s_node is defined
+-    - instance.value.roles.k8s_master is defined
+-  ignore_errors: yes
+diff --git a/playbooks/roles/install_contrail/templates/contrail-kubemanager-serviceaccount.yaml.j2 b/playbooks/roles/install_contrail/templates/contrail-kubemanager-serviceaccount.yaml.j2
+deleted file mode 100644
+index 1ba13a5..0000000
+--- a/playbooks/roles/install_contrail/templates/contrail-kubemanager-serviceaccount.yaml.j2
++++ /dev/null
+@@ -1,35 +0,0 @@
+----
+-kind: Namespace
+-apiVersion: v1
+-metadata:
+-  name: contrail
+----
+-kind: ClusterRole
+-apiVersion: rbac.authorization.k8s.io/v1beta1
+-metadata:
+-  name: contrail-kubemanager
+-  namespace: contrail
+-rules:
+-  - apiGroups: ["*"]
+-    resources: ["*"]
+-    verbs: ["*"]
+----
+-apiVersion: v1
+-kind: ServiceAccount
+-metadata:
+-  name: contrail-kubemanager
+-  namespace: contrail
+----
+-apiVersion: rbac.authorization.k8s.io/v1beta1
+-kind: ClusterRoleBinding
+-metadata:
+-  name: contrail-kubemanager
+-roleRef:
+-  apiGroup: rbac.authorization.k8s.io
+-  kind: ClusterRole
+-  name: contrail-kubemanager
+-subjects:
+-- kind: ServiceAccount
+-  name: contrail-kubemanager
+-  namespace: contrail
+----
+diff --git a/playbooks/roles/install_contrail/templates/contrail-kubemanager.yaml.j2 b/playbooks/roles/install_contrail/templates/contrail-kubemanager.yaml.j2
+index a173f1b..4edde94 100644
+--- a/playbooks/roles/install_contrail/templates/contrail-kubemanager.yaml.j2
++++ b/playbooks/roles/install_contrail/templates/contrail-kubemanager.yaml.j2
+@@ -4,7 +4,7 @@
+     image: "{{ container_registry }}/contrail-kubernetes-kube-manager:{{ contrail_version_tag }}"
+     network_mode: host
+     environment:
+-      - K8S_TOKEN={{ hostvars[k8s_master_name].kubemanagertoken }}
++      - K8S_TOKEN={{ kubemanagertoken }}
+     env_file: /etc/contrail/common_kubemanager.env
+     volumes:
+       - /var/log/contrail:/var/log/contrail
+diff --git a/playbooks/roles/install_contrail/templates/k8s-dashboard.yaml.j2 b/playbooks/roles/install_contrail/templates/k8s-dashboard.yaml.j2
+deleted file mode 100644
+index bed644c..0000000
+--- a/playbooks/roles/install_contrail/templates/k8s-dashboard.yaml.j2
++++ /dev/null
+@@ -1,168 +0,0 @@
+-# Copyright 2017 The Kubernetes Authors.
+-#
+-# Licensed under the Apache License, Version 2.0 (the "License");
+-# you may not use this file except in compliance with the License.
+-# You may obtain a copy of the License at
+-#
+-#     http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing, software
+-# distributed under the License is distributed on an "AS IS" BASIS,
+-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-# See the License for the specific language governing permissions and
+-# limitations under the License.
+-
+-# Configuration to deploy release version of the Dashboard UI compatible with
+-# Kubernetes 1.8.
+-#
+-# Example usage: kubectl create -f <this_file>
+-
+-# ------------------- Dashboard Secret ------------------- #
+-
+-apiVersion: v1
+-kind: Secret
+-metadata:
+-  labels:
+-    k8s-app: kubernetes-dashboard
+-  name: kubernetes-dashboard-certs
+-  namespace: kube-system
+-type: Opaque
+-
+----
+-# ------------------- Dashboard Service Account ------------------- #
+-
+-apiVersion: v1
+-kind: ServiceAccount
+-metadata:
+-  labels:
+-    k8s-app: kubernetes-dashboard
+-  name: kubernetes-dashboard
+-  namespace: kube-system
+-
+----
+-# ------------------- Dashboard Role & Role Binding ------------------- #
+-
+-kind: Role
+-apiVersion: rbac.authorization.k8s.io/v1
+-metadata:
+-  name: kubernetes-dashboard-minimal
+-  namespace: kube-system
+-rules:
+-  # Allow Dashboard to create 'kubernetes-dashboard-key-holder' secret.
+-- apiGroups: [""]
+-  resources: ["secrets"]
+-  verbs: ["create"]
+-  # Allow Dashboard to create 'kubernetes-dashboard-settings' config map.
+-- apiGroups: [""]
+-  resources: ["configmaps"]
+-  verbs: ["create"]
+-  # Allow Dashboard to get, update and delete Dashboard exclusive secrets.
+-- apiGroups: [""]
+-  resources: ["secrets"]
+-  resourceNames: ["kubernetes-dashboard-key-holder", "kubernetes-dashboard-certs"]
+-  verbs: ["get", "update", "delete"]
+-  # Allow Dashboard to get and update 'kubernetes-dashboard-settings' config map.
+-- apiGroups: [""]
+-  resources: ["configmaps"]
+-  resourceNames: ["kubernetes-dashboard-settings"]
+-  verbs: ["get", "update"]
+-  # Allow Dashboard to get metrics from heapster.
+-- apiGroups: [""]
+-  resources: ["services"]
+-  resourceNames: ["heapster"]
+-  verbs: ["proxy"]
+-- apiGroups: [""]
+-  resources: ["services/proxy"]
+-  resourceNames: ["heapster", "http:heapster:", "https:heapster:"]
+-  verbs: ["get"]
+-
+----
+-apiVersion: rbac.authorization.k8s.io/v1
+-kind: RoleBinding
+-metadata:
+-  name: kubernetes-dashboard-minimal
+-  namespace: kube-system
+-roleRef:
+-  apiGroup: rbac.authorization.k8s.io
+-  kind: Role
+-  name: kubernetes-dashboard-minimal
+-subjects:
+-- kind: ServiceAccount
+-  name: kubernetes-dashboard
+-  namespace: kube-system
+-
+----
+-# ------------------- Dashboard Deployment ------------------- #
+-
+-kind: Deployment
+-apiVersion: apps/v1beta2
+-metadata:
+-  labels:
+-    k8s-app: kubernetes-dashboard
+-  name: kubernetes-dashboard
+-  namespace: kube-system
+-spec:
+-  replicas: 1
+-  revisionHistoryLimit: 10
+-  selector:
+-    matchLabels:
+-      k8s-app: kubernetes-dashboard
+-  template:
+-    metadata:
+-      labels:
+-        k8s-app: kubernetes-dashboard
+-    spec:
+-      hostNetwork: true
+-      containers:
+-      - name: kubernetes-dashboard
+-        image: k8s.gcr.io/kubernetes-dashboard-amd64:v1.8.3
+-        ports:
+-        - containerPort: 8443
+-          protocol: TCP
+-        args:
+-          - --auto-generate-certificates
+-          # Uncomment the following line to manually specify Kubernetes API server Host
+-          # If not specified, Dashboard will attempt to auto discover the API server and connect
+-          # to it. Uncomment only if the default does not work.
+-          # - --apiserver-host=http://my-address:port
+-        volumeMounts:
+-        - name: kubernetes-dashboard-certs
+-          mountPath: /certs
+-          # Create on-disk volume to store exec logs
+-        - mountPath: /tmp
+-          name: tmp-volume
+-        livenessProbe:
+-          httpGet:
+-            scheme: HTTPS
+-            path: /
+-            port: 8443
+-          initialDelaySeconds: 30
+-          timeoutSeconds: 30
+-      volumes:
+-      - name: kubernetes-dashboard-certs
+-        secret:
+-          secretName: kubernetes-dashboard-certs
+-      - name: tmp-volume
+-        emptyDir: {}
+-      serviceAccountName: kubernetes-dashboard
+-      # Comment the following tolerations if Dashboard must not be deployed on master
+-      tolerations:
+-      - key: node-role.kubernetes.io/master
+-        effect: NoSchedule
+-
+----
+-# ------------------- Dashboard Service ------------------- #
+-
+-kind: Service
+-apiVersion: v1
+-metadata:
+-  labels:
+-    k8s-app: kubernetes-dashboard
+-  name: kubernetes-dashboard
+-  namespace: kube-system
+-spec:
+-  ports:
+-    - port: 443
+-      targetPort: 8443
+-  selector:
+-    k8s-app: kubernetes-dashboard
+diff --git a/playbooks/roles/k8s/tasks/configure_k8s_join_node.yml b/playbooks/roles/k8s/tasks/configure_k8s_join_node.yml
+new file mode 100644
+index 0000000..1f62353
+--- /dev/null
++++ b/playbooks/roles/k8s/tasks/configure_k8s_join_node.yml
+@@ -0,0 +1,39 @@
++---
++- name: initialize node_exists with false
++  set_fact:
++    node_exists: false
++
++- name: check if node already exists
++  set_fact:
++    node_exists: true
++  when: ansible_hostname in hostvars[k8s_master_name].node_list
++
++- name: docker info for getting cgroup driver
++  shell: docker info 2>/dev/null |grep "Cgroup Driver" |awk '{print $3}'
++  register: docker_info
++
++- name: get cgroup driver
++  set_fact:
++    cgroup_driver: "{{ docker_info.stdout }}"
++
++- name: set cgroup driver to cgroupfs
++  lineinfile:
++    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
++    regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
++    line: 'Environment="KUBELET_CGROUP_ARGS=--cgroup-driver={{ cgroup_driver }}"'
++
++- name: enable kubelet service
++  systemd:
++    name: kubelet
++    state: restarted
++    daemon_reload: yes
++    enabled: True
++  when: node_exists == false
++
++- name: debug join
++  debug:
++    msg: "master token: {{ hostvars[k8s_master_name].mastertoken }}"
++
++- name: join k8s cluster
++  shell: "kubeadm join --token {{ hostvars[k8s_master_name].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ k8s_master_ip }}:6443"
++  when: node_exists == false
+diff --git a/playbooks/roles/k8s/tasks/configure_k8s_master_node.yml b/playbooks/roles/k8s/tasks/configure_k8s_master_node.yml
+new file mode 100644
+index 0000000..0978089
+--- /dev/null
++++ b/playbooks/roles/k8s/tasks/configure_k8s_master_node.yml
+@@ -0,0 +1,134 @@
++---
++- name: check if master is already running
++  shell: kubectl cluster-info
++  register: master_state
++  ignore_errors: true
++
++- name: set master_running state to true if master is running
++  set_fact:
++    master_running: true
++  when: master_state is defined and master_state.rc == 0
++
++- name: set master_running state to false if master is not running
++  set_fact:
++    master_running: false
++  when: (master_state is undefined) or
++        (master_state is defined and master_state.rc == 1)
++
++- name: docker info for getting cgroup driver
++  shell: docker info 2>/dev/null |grep "Cgroup Driver" |awk '{print $3}'
++  register: docker_info
++
++- name: get cgroup driver
++  set_fact:
++    cgroup_driver: "{{ docker_info.stdout }}"
++
++- name: set cgroup driver to cgroupfs
++  lineinfile:
++    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
++    regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
++    line: 'Environment="KUBELET_CGROUP_ARGS=--cgroup-driver={{ cgroup_driver }}"'
++
++- name: enable kubelet service
++  systemd:
++    name: kubelet
++    state: restarted
++    daemon_reload: yes
++    enabled: True
++  when: master_running == false
++
++- name: set k8s version to default
++  set_fact:
++    k8s_version: "v1.9.2"
++
++- name: set k8s version if not defined
++  set_fact:
++    k8s_version: "v{{ global_configuration.K8S_VERSION }}"
++  when:
++    - global_configuration is defined
++    - global_configuration.K8S_VERSION is defined
++
++- debug:
++    msg: "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
++
++- name: get controller ip from all ips
++  set_fact:
++    listen_ip: "{{ item[0] }}"
++  when: item[0] == item[1]
++  with_nested:
++    - "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
++    - "{{ contrail_configuration.KUBERNETES_API_NODES }}"
++
++#- name: initialize k8s master with listen ip
++#  shell: |
++#      kubeadm init --kubernetes-version v1.7.4 --apiserver-advertise-address {{ listen_ip }} &&
++#      mkdir -p $HOME/.kube &&
++#      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
++#      chown -R $(id -u):$(id -g) $HOME/.kube
++#  when: inventory_hostname == k8s_master_name and listen_ip is defined
++#
++#- name: initialize k8s master without listen ip
++#  shell: |
++#      kubeadm init --kubernetes-version v1.7.4 &&
++#      mkdir -p $HOME/.kube &&
++#      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
++#      chown -R $(id -u):$(id -g) $HOME/.kube
++#  when: inventory_hostname == k8s_master_name and listen_ip is undefined
++
++- name: initialize k8s master with listen ip
++  shell: |
++      kubeadm init --token-ttl 0 --kubernetes-version {{ k8s_version }} --apiserver-advertise-address {{ listen_ip }} &&
++      mkdir -p $HOME/.kube &&
++      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
++      chown -R $(id -u):$(id -g) $HOME/.kube
++  when: listen_ip is defined and master_running == false
++
++- name: initialize k8s master without listen ip
++  shell: |
++      kubeadm init --token-ttl 0 --kubernetes-version {{ k8s_version }} &&
++      mkdir -p $HOME/.kube &&
++      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
++      chown -R $(id -u):$(id -g) $HOME/.kube
++  when: listen_ip is undefined and master_running == false
++
++- name: get master token
++  shell: kubeadm token list |grep "The default bootstrap token generated by 'kubeadm init'." |awk '{print $1}'
++  register: output
++
++- name: set master token
++  set_fact:
++    mastertoken: "{{ output.stdout }}"
++
++- name: create /etc/contrail
++  file:
++    path: /etc/contrail
++    state: directory
++    recurse: yes
++
++- name: create contrail kubemanager serviceaccount yaml
++  template:
++    src: contrail-kubemanager-serviceaccount.yaml.j2
++    dest: /etc/contrail/contrail-kubemanager-serviceaccount.yaml
++
++- name: excute contrail kubemanager serviceaccount yaml
++  shell: kubectl apply -f /etc/contrail/contrail-kubemanager-serviceaccount.yaml
++
++- name: get kubemanager token name from serviceaccount
++  shell: kubectl describe sa contrail-kubemanager -n contrail  | grep -i 'Tokens' | awk '{print $2}'
++  register: output
++
++- name: get kubemanager token
++  shell: kubectl describe secret "{{ output.stdout }}" -n contrail  | grep -i 'token:' | awk '{print $2}'
++  register: output
++
++- name: set kubemanager token
++  set_fact:
++    kubemanagertoken: "{{ output.stdout }}"
++
++- name: get nodes
++  shell: kubectl get nodes -o yaml |grep "\- address:" |awk '{print $3}'
++  register: nodes_list_output
++
++- name: set node list
++  set_fact:
++    node_list: "{{ nodes_list_output.stdout }}"
+diff --git a/playbooks/roles/k8s/tasks/create_k8s_dashboard.yml b/playbooks/roles/k8s/tasks/create_k8s_dashboard.yml
+new file mode 100644
+index 0000000..2069776
+--- /dev/null
++++ b/playbooks/roles/k8s/tasks/create_k8s_dashboard.yml
+@@ -0,0 +1,15 @@
++---
++- name: create k8s dashboard manifest
++  template:
++    src: k8s-dashboard.yaml.j2
++    dest: /tmp/k8s-dashboard.yaml.j2
++
++- name: start k8s dashboard
++  shell: kubectl apply -f /tmp/k8s-dashboard.yaml.j2
++
++- name: look for a privileged token for full k8s dashboard access
++  shell: kubectl get secret -n contrail | grep kubemanager | awk '{print $1}'
++  register: privileged_token_output
++
++- name: store privileged token for full k8s dashboard access
++  shell: kubectl describe secret {{ privileged_token_output.stdout }} -n contrail | grep "token:" | awk '{print $2}' > /root/k8s_dashboard_token.txt
+diff --git a/playbooks/roles/k8s/tasks/main.yml b/playbooks/roles/k8s/tasks/main.yml
+index 7d98263..ca19ba2 100644
+--- a/playbooks/roles/k8s/tasks/main.yml
++++ b/playbooks/roles/k8s/tasks/main.yml
+@@ -3,6 +3,10 @@
+   set_fact:
+     instance_data: "{{ instances[hostvars[inventory_hostname].instance_name] }}"
+ 
++- name: set instance name
++  set_fact:
++    instance_name: "{{ hostvars[inventory_hostname].instance_name }}"
++
+ - name: set k8s version for RedHat if not defined
+   set_fact:
+     k8s_version: "-1.9.2-0"
+@@ -52,3 +56,29 @@
+     - kubelet
+     - kubeadm
+   when: k8s_version is defined
++
++- name: configure k8s master
++  include: configure_k8s_master_node.yml
++  when: roles[instance_name].k8s_master is defined and k8s_master_name is defined and inventory_hostname == k8s_master_name
++
++- name: join k8s master
++  include: configure_k8s_join_node.yml
++  when: roles[instance_name].k8s_node is defined and k8s_master_name is defined and inventory_hostname != k8s_master_name
++
++- name: create k8s dashboard
++  include: create_k8s_dashboard.yml
++  when: roles[instance_name].k8s_master is defined and k8s_master_name is defined and inventory_hostname == k8s_master_name
++
++- name: untaint node
++  shell: "kubectl taint nodes {{ hostvars[instance.value.ip]['ansible_fqdn'] }} node-role.kubernetes.io/master-"
++  with_dict: "{{ hostvars['localhost']['instances'] }}"
++  loop_control:
++    loop_var: instance
++  when:
++    - roles[instance_name].k8s_master is defined
++    - k8s_master_name is defined
++    - inventory_hostname == k8s_master_name
++    - instance.value.roles is defined
++    - instance.value.roles.k8s_node is defined
++    - instance.value.roles.k8s_master is defined
++  ignore_errors: yes
+diff --git a/playbooks/roles/k8s/templates/contrail-kubemanager-serviceaccount.yaml.j2 b/playbooks/roles/k8s/templates/contrail-kubemanager-serviceaccount.yaml.j2
+new file mode 100644
+index 0000000..1ba13a5
+--- /dev/null
++++ b/playbooks/roles/k8s/templates/contrail-kubemanager-serviceaccount.yaml.j2
+@@ -0,0 +1,35 @@
++---
++kind: Namespace
++apiVersion: v1
++metadata:
++  name: contrail
++---
++kind: ClusterRole
++apiVersion: rbac.authorization.k8s.io/v1beta1
++metadata:
++  name: contrail-kubemanager
++  namespace: contrail
++rules:
++  - apiGroups: ["*"]
++    resources: ["*"]
++    verbs: ["*"]
++---
++apiVersion: v1
++kind: ServiceAccount
++metadata:
++  name: contrail-kubemanager
++  namespace: contrail
++---
++apiVersion: rbac.authorization.k8s.io/v1beta1
++kind: ClusterRoleBinding
++metadata:
++  name: contrail-kubemanager
++roleRef:
++  apiGroup: rbac.authorization.k8s.io
++  kind: ClusterRole
++  name: contrail-kubemanager
++subjects:
++- kind: ServiceAccount
++  name: contrail-kubemanager
++  namespace: contrail
++---
+diff --git a/playbooks/roles/k8s/templates/k8s-dashboard.yaml.j2 b/playbooks/roles/k8s/templates/k8s-dashboard.yaml.j2
+new file mode 100644
+index 0000000..bed644c
+--- /dev/null
++++ b/playbooks/roles/k8s/templates/k8s-dashboard.yaml.j2
+@@ -0,0 +1,168 @@
++# Copyright 2017 The Kubernetes Authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++# Configuration to deploy release version of the Dashboard UI compatible with
++# Kubernetes 1.8.
++#
++# Example usage: kubectl create -f <this_file>
++
++# ------------------- Dashboard Secret ------------------- #
++
++apiVersion: v1
++kind: Secret
++metadata:
++  labels:
++    k8s-app: kubernetes-dashboard
++  name: kubernetes-dashboard-certs
++  namespace: kube-system
++type: Opaque
++
++---
++# ------------------- Dashboard Service Account ------------------- #
++
++apiVersion: v1
++kind: ServiceAccount
++metadata:
++  labels:
++    k8s-app: kubernetes-dashboard
++  name: kubernetes-dashboard
++  namespace: kube-system
++
++---
++# ------------------- Dashboard Role & Role Binding ------------------- #
++
++kind: Role
++apiVersion: rbac.authorization.k8s.io/v1
++metadata:
++  name: kubernetes-dashboard-minimal
++  namespace: kube-system
++rules:
++  # Allow Dashboard to create 'kubernetes-dashboard-key-holder' secret.
++- apiGroups: [""]
++  resources: ["secrets"]
++  verbs: ["create"]
++  # Allow Dashboard to create 'kubernetes-dashboard-settings' config map.
++- apiGroups: [""]
++  resources: ["configmaps"]
++  verbs: ["create"]
++  # Allow Dashboard to get, update and delete Dashboard exclusive secrets.
++- apiGroups: [""]
++  resources: ["secrets"]
++  resourceNames: ["kubernetes-dashboard-key-holder", "kubernetes-dashboard-certs"]
++  verbs: ["get", "update", "delete"]
++  # Allow Dashboard to get and update 'kubernetes-dashboard-settings' config map.
++- apiGroups: [""]
++  resources: ["configmaps"]
++  resourceNames: ["kubernetes-dashboard-settings"]
++  verbs: ["get", "update"]
++  # Allow Dashboard to get metrics from heapster.
++- apiGroups: [""]
++  resources: ["services"]
++  resourceNames: ["heapster"]
++  verbs: ["proxy"]
++- apiGroups: [""]
++  resources: ["services/proxy"]
++  resourceNames: ["heapster", "http:heapster:", "https:heapster:"]
++  verbs: ["get"]
++
++---
++apiVersion: rbac.authorization.k8s.io/v1
++kind: RoleBinding
++metadata:
++  name: kubernetes-dashboard-minimal
++  namespace: kube-system
++roleRef:
++  apiGroup: rbac.authorization.k8s.io
++  kind: Role
++  name: kubernetes-dashboard-minimal
++subjects:
++- kind: ServiceAccount
++  name: kubernetes-dashboard
++  namespace: kube-system
++
++---
++# ------------------- Dashboard Deployment ------------------- #
++
++kind: Deployment
++apiVersion: apps/v1beta2
++metadata:
++  labels:
++    k8s-app: kubernetes-dashboard
++  name: kubernetes-dashboard
++  namespace: kube-system
++spec:
++  replicas: 1
++  revisionHistoryLimit: 10
++  selector:
++    matchLabels:
++      k8s-app: kubernetes-dashboard
++  template:
++    metadata:
++      labels:
++        k8s-app: kubernetes-dashboard
++    spec:
++      hostNetwork: true
++      containers:
++      - name: kubernetes-dashboard
++        image: k8s.gcr.io/kubernetes-dashboard-amd64:v1.8.3
++        ports:
++        - containerPort: 8443
++          protocol: TCP
++        args:
++          - --auto-generate-certificates
++          # Uncomment the following line to manually specify Kubernetes API server Host
++          # If not specified, Dashboard will attempt to auto discover the API server and connect
++          # to it. Uncomment only if the default does not work.
++          # - --apiserver-host=http://my-address:port
++        volumeMounts:
++        - name: kubernetes-dashboard-certs
++          mountPath: /certs
++          # Create on-disk volume to store exec logs
++        - mountPath: /tmp
++          name: tmp-volume
++        livenessProbe:
++          httpGet:
++            scheme: HTTPS
++            path: /
++            port: 8443
++          initialDelaySeconds: 30
++          timeoutSeconds: 30
++      volumes:
++      - name: kubernetes-dashboard-certs
++        secret:
++          secretName: kubernetes-dashboard-certs
++      - name: tmp-volume
++        emptyDir: {}
++      serviceAccountName: kubernetes-dashboard
++      # Comment the following tolerations if Dashboard must not be deployed on master
++      tolerations:
++      - key: node-role.kubernetes.io/master
++        effect: NoSchedule
++
++---
++# ------------------- Dashboard Service ------------------- #
++
++kind: Service
++apiVersion: v1
++metadata:
++  labels:
++    k8s-app: kubernetes-dashboard
++  name: kubernetes-dashboard
++  namespace: kube-system
++spec:
++  ports:
++    - port: 443
++      targetPort: 8443
++  selector:
++    k8s-app: kubernetes-dashboard
+diff --git a/playbooks/roles/set_contrail_variables/tasks/main.yml b/playbooks/roles/set_contrail_variables/tasks/main.yml
+index f964d08..6a1d726 100644
+--- a/playbooks/roles/set_contrail_variables/tasks/main.yml
++++ b/playbooks/roles/set_contrail_variables/tasks/main.yml
+@@ -46,6 +46,7 @@
+     - contrail_configuration.STDIN_OPEN is not defined
+   tags:
+     - always
++
+ - name: set tty to true if it's not defined
+   set_fact:
+     contrail_configuration: "{{ contrail_configuration | combine({'TTY': true}) }}"
+@@ -95,6 +96,7 @@
+     - not (kolla_config.kolla_globals.enable_haproxy | bool)
+   tags:
+    - always
++
+ - name: get the internal VIP from internal_vip if haproxy is enabled
+   set_fact:
+     openstack_internal_vip: "{{ kolla_config.kolla_globals.kolla_internal_vip_address }}"
+@@ -119,7 +121,3 @@
+     - { name: 'imageManager_ip', is_not_defined: "{{ contrail_configuration.imageManager_ip is not defined }}" }
+     - { name: 'networkManager_ip', is_not_defined: "{{ contrail_configuration.networkManager_ip is not defined }}" }
+ 
+-- name: Evaluate k8s master ip/name
+-  include: set_master.yml
+-  tags:
+-    - k8s
+diff --git a/playbooks/roles/set_contrail_variables/tasks/set_master.yml b/playbooks/roles/set_contrail_variables/tasks/set_master.yml
+deleted file mode 100644
+index ffe790f..0000000
+--- a/playbooks/roles/set_contrail_variables/tasks/set_master.yml
++++ /dev/null
+@@ -1,42 +0,0 @@
+----
+-- name: init master_ip list
+-  set_fact:
+-    k8s_master_ip_list: []
+-
+-- name: init master_name list
+-  set_fact:
+-    k8s_master_name_list: []
+-
+-- name: fill master lists
+-  set_fact:
+-    k8s_master_ip_list: "{{ k8s_master_ip_list + [ hostvars[item]['private_ip'] ] }}"
+-    k8s_master_name_list: "{{ k8s_master_name_list + [ item ] }}"
+-  when:
+-    - roles[hostvars[item]['instance_name']].k8s_master is defined
+-  with_items:
+-    - "{{ groups['container_hosts'] }}"
+-
+-- name: show master_ip list
+-  debug:
+-    msg: "{{ k8s_master_ip_list }}"
+-
+-- name: show master_name list
+-  debug:
+-    msg: "{{ k8s_master_name_list }}"
+-
+-- name: set master_ip as first item of master_ip list
+-  set_fact:
+-    k8s_master_ip: "{{ k8s_master_ip_list[0] }}"
+-  when: k8s_master_ip_list | length > 0
+-
+-- name: set master_name as first item of master_name list
+-  set_fact:
+-    k8s_master_name: "{{ k8s_master_name_list[0] }}"
+-  when: k8s_master_name_list | length > 0
+-
+-- name: "create contrail_configuration.KUBERNETES_API_SERVER for nodes"
+-  set_fact:
+-    contrail_configuration: "{{ contrail_configuration | combine({'KUBERNETES_API_SERVER': k8s_master_ip}) }}"
+-  when:
+-    - contrail_configuration.KUBERNETES_API_SERVER is undefined
+-    - k8s_master_ip is defined
+diff --git a/playbooks/roles/set_k8s_variables/tasks/main.yml b/playbooks/roles/set_k8s_variables/tasks/main.yml
+new file mode 100644
+index 0000000..09b0715
+--- /dev/null
++++ b/playbooks/roles/set_k8s_variables/tasks/main.yml
+@@ -0,0 +1,71 @@
++---
++- name: init k8s_host_name list
++  set_fact:
++    k8s_host_list: []
++
++- name: fill k8s host lists
++  set_fact:
++    k8s_host_list: "{{ k8s_host_list + [ item ] }}"
++  when:
++    - roles[hostvars[item]['instance_name']].k8s_master is defined or roles[hostvars[item]['instance_name']].k8s_node is defined
++  with_items:
++    - "{{ groups['container_hosts'] }}"
++
++- name: init master_ip list
++  set_fact:
++    k8s_master_ip_list: []
++
++- name: init master_name list
++  set_fact:
++    k8s_master_name_list: []
++
++- name: fill master lists
++  set_fact:
++    k8s_master_ip_list: "{{ k8s_master_ip_list + [ hostvars[item]['private_ip'] ] }}"
++    k8s_master_name_list: "{{ k8s_master_name_list + [ item ] }}"
++  when:
++    - roles[hostvars[item]['instance_name']].k8s_master is defined
++  with_items:
++    - "{{ groups['container_hosts'] }}"
++
++- name: show master_ip list
++  debug:
++    msg: "{{ k8s_master_ip_list }}"
++
++- name: show master_name list
++  debug:
++    msg: "{{ k8s_master_name_list }}"
++
++- name: set master_ip as first item of master_ip list
++  set_fact:
++    k8s_master_ip: "{{ k8s_master_ip_list[0] }}"
++  when: k8s_master_ip_list | length > 0
++
++- name: set master_name as first item of master_name list
++  set_fact:
++    k8s_master_name: "{{ k8s_master_name_list[0] }}"
++  when: k8s_master_name_list | length > 0
++
++- name: "create contrail_configuration.KUBERNETES_API_SERVER for nodes"
++  set_fact:
++    contrail_configuration: "{{ contrail_configuration | combine({'KUBERNETES_API_SERVER': k8s_master_ip}) }}"
++  when:
++    - contrail_configuration.KUBERNETES_API_SERVER is undefined
++    - k8s_master_ip is defined
++
++- name: create k8s_master host group
++  add_host:
++    hostname: "{{ item }}"
++    groupname: k8s_master
++  when:
++    - k8s_master_ip is defined
++    - item == k8s_master_ip
++  with_items: "{{ groups['container_hosts'] }}"
++
++- name: create k8s_hosts host group
++  add_host:
++    hostname: "{{ item }}"
++    groupname: k8s_hosts
++  when: item in k8s_host_list
++  with_items: "{{ groups['container_hosts'] }}"
++
