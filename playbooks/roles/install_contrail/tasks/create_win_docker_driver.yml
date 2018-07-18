@@ -1,0 +1,75 @@
+---
+
+- name: run contrail-windows-docker-driver
+  win_shell: >
+    docker run -v {{ win_host_artifacts_dir }}:{{ win_container_artifacts_dir }}
+    {{ global_configuration.CONTAINER_REGISTRY }}/contrail-windows-docker-driver:{{ contrail_configuration.CONTRAIL_VERSION }}
+
+- name: install docker-driver
+  win_package:
+    path: '{{ win_host_artifacts_dir }}\docker-driver\docker-driver.msi'
+
+- name: create docker-driver service
+  win_nssm:
+    name: contrail-docker-driver
+    application: C:\Program Files\Juniper Networks\contrail-windows-docker.exe
+    state: started
+    start_mode: auto
+    app_parameters_free_form: >
+      -forceAsInteractive
+      -controllerIP {{ contrail_configuration.CONFIG_NODES }}
+      -os_username {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_TENANT }}
+      -os_password {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_PASSWORD }}
+      -os_auth_url {{ contrail_configuration.KEYSTONE_AUTH_PROTO }}://{{ contrail_configuration.KEYSTONE_AUTH_HOST }}:{{ contrail_configuration.KEYSTONE_AUTH_PUBLIC_PORT }}{{ contrail_configuration.KEYSTONE_AUTH_URL_VERSION }}
+      -os_tenant_name {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_TENANT }}
+      -adapter "{{ contrail_configuration.WINDOWS_PHYSICAL_INTERFACE }}"
+      -logLevel Debug
+
+# TODO: It should be investigated if win_stat is a more elegant solution.
+- name: wait for docker driver startup
+  win_shell: '[System.IO.File]::Exists("\\.\pipe\Contrail")'
+  register: docker_driver_pipe
+  until: docker_driver_pipe.stdout_lines[0] == "True"
+  retries: 5
+  delay: 20
+
+# TODO: Agent configuration should be created only if docker driver has been restared
+- name: fetch network adapters information
+  register: adapters_raw
+  win_shell: |
+    $ErrorActionPreference = "Stop"
+    $PhysicalAdapter = Get-NetAdapter -Name "{{ contrail_configuration.WINDOWS_PHYSICAL_INTERFACE }}"
+    $VHostAdapter = Get-NetAdapter -Name "{{ win_vhost_name }}"
+    $VHostIP = $VHostAdapter | Get-NetIPAddress -AddressFamily IPv4
+    @{
+      physical = @{
+        interface_name = $PhysicalAdapter.ifName
+      }
+      vhost = @{
+        interface_name = $VHostAdapter.ifName
+        ip = $VHostIP.IPAddress
+        ip_mask_length = $VHostIP.PrefixLength
+      }
+    } | ConvertTo-Json
+
+- name: parse network adapters information
+  set_fact:
+    adapters: "{{ adapters_raw.stdout | from_json }}"
+
+- name: create vrouter-agent configuration file
+  win_template:
+    src: templates/contrail-vrouter-agent.conf.j2
+    dest: "{{ win_agent_config_path }}"
+    newline_sequence: "\r\n"
+  register: agent_config
+
+- name: restart vrouter-agent service in case of config change
+  win_service:
+    name: ContrailAgent
+    state: restarted
+  when: agent_config.changed
+
+- name: make sure vrouter-agent service is running
+  win_service:
+    name: ContrailAgent
+    state: started
