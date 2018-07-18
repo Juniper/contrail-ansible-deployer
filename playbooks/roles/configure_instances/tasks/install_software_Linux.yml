@@ -60,6 +60,27 @@
   pip:
     name: docker-compose
 
+- name: "Build hosts file for rabbitmq with domain suffix when provided"
+  lineinfile: dest=/etc/hosts regexp='^{{ item.0 }}.*' line="{{ item.0 }} {{ hostvars[item.1]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item.1]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
+  with_nested:
+    - "{{ contrail_configuration.CONTROLLER_NODES.split(',') }}"
+    - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - provider_data.domainsuffix is defined
+    - contrail_configuration.CONTROLLER_NODES is defined
+    - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
+
+- name: "Build hosts file for rabbitmq with domain suffix"
+  lineinfile: dest=/etc/hosts regexp='^{{ item.0 }}.*' line="{{ item.0 }} {{ hostvars[item.1]['ansible_fqdn'] }} {{ hostvars[item.1]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
+  with_nested:
+    - "{{ contrail_configuration.CONTROLLER_NODES.split(',') }}"
+    - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - provider_data.domainsuffix is undefined
+    - hostvars[item.1]['ansible_fqdn'] is defined
+    - contrail_configuration.CONTROLLER_NODES is defined
+    - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
+
 - name: "Build hosts file with domain suffix when provided"
   lineinfile: dest=/etc/hosts regexp='^{{ item }}.*' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
