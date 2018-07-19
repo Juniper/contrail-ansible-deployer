@@ -2,7 +2,7 @@
 #
 # ansible-playbook -i inventory/ -e orchestrator=openstack playbook/install_contrail.yml
 #
-- name: Create container host group for Contrail
+- name: Create container host group and evaluate variables for Contrail
   hosts: localhost
   connection: local
   gather_facts: no
@@ -20,6 +20,7 @@
     - build_node_lists
     - set_global_variables
     - set_contrail_variables
+    - set_k8s_variables
   vars_files:
     - "{{ config_file }}"
   tags: always
@@ -27,6 +28,15 @@
 - name: Install Contrail
   hosts: container_hosts
   gather_facts: yes
+  pre_tasks:
+    - name: define k8s_master_ip
+      set_fact:
+          k8s_master_ip: "{{ hostvars['localhost'].k8s_master_ip }}"
+      when: hostvars['localhost'].k8s_master_ip is defined
+    - name: define k8s_master_name
+      set_fact:
+          k8s_master_name: "{{ hostvars['localhost'].k8s_master_name }}"
+      when: hostvars['localhost'].k8s_master_name is defined
   roles:
     - install_contrail
   vars:

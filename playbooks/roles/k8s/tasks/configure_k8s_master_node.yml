@@ -12,7 +12,7 @@
 - name: set master_running state to false if master is not running
   set_fact:
     master_running: false
-  when: (master_state is undefined) or 
+  when: (master_state is undefined) or
         (master_state is defined and master_state.rc == 1)
 
 - name: docker info for getting cgroup driver
@@ -60,7 +60,7 @@
     - "{{ contrail_configuration.KUBERNETES_API_NODES }}"
 
 #- name: initialize k8s master with listen ip
-#  shell: | 
+#  shell: |
 #      kubeadm init --kubernetes-version v1.7.4 --apiserver-advertise-address {{ listen_ip }} &&
 #      mkdir -p $HOME/.kube &&
 #      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
@@ -76,7 +76,7 @@
 #  when: inventory_hostname == k8s_master_name and listen_ip is undefined
 
 - name: initialize k8s master with listen ip
-  shell: | 
+  shell: |
       kubeadm init --token-ttl 0 --kubernetes-version {{ k8s_version }} --apiserver-advertise-address {{ listen_ip }} &&
       mkdir -p $HOME/.kube &&
       cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
@@ -98,35 +98,6 @@
 - name: set master token
   set_fact:
     mastertoken: "{{ output.stdout }}"
-
-- name: create /etc/contrail
-  file:
-    path: /etc/contrail
-    state: directory
-    recurse: yes
-
-- name: create contrail kubemanager serviceaccount yaml
-  template:
-    src: contrail-kubemanager-serviceaccount.yaml.j2
-    dest: /etc/contrail/contrail-kubemanager-serviceaccount.yaml
-
-- name: excute contrail kubemanager serviceaccount yaml
-  shell: kubectl apply -f /etc/contrail/contrail-kubemanager-serviceaccount.yaml
-
-- name: get kubemanager token name from serviceaccount
-  shell: kubectl describe sa contrail-kubemanager -n contrail  | grep -i 'Tokens' | awk '{print $2}'
-  register: output
-
-- name: get kubemanager token
-  shell: kubectl describe secret "{{ output.stdout }}" -n contrail  | grep -i 'token:' | awk '{print $2}'
-  register: output
-
-- name: set kubemanager token
-  set_fact:
-    kubemanagertoken: "{{ output.stdout }}"
-
-- debug:
-    msg: "{{ kubemanagertoken }}"
 
 - name: get nodes
   shell: kubectl get nodes -o yaml |grep "\- address:" |awk '{print $3}'
