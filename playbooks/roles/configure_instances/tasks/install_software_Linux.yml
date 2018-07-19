@@ -66,8 +66,8 @@
     - "{{ contrail_configuration.CONTROLLER_NODES.split(',') }}"
     - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
-    - provider_data.domainsuffix is defined
     - contrail_configuration.CONTROLLER_NODES is defined
+    - provider_data.domainsuffix is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
 
 - name: "Build hosts file for rabbitmq with domain suffix"
@@ -76,9 +76,9 @@
     - "{{ contrail_configuration.CONTROLLER_NODES.split(',') }}"
     - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
+    - contrail_configuration.CONTROLLER_NODES is defined
     - provider_data.domainsuffix is undefined
     - hostvars[item.1]['ansible_fqdn'] is defined
-    - contrail_configuration.CONTROLLER_NODES is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
 
 - name: "Build hosts file for rabbitmq without domain suffix"
@@ -87,9 +87,9 @@
     - "{{ contrail_configuration.CONTROLLER_NODES.split(',') }}"
     - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
+    - contrail_configuration.CONTROLLER_NODES is defined
     - provider_data.domainsuffix is undefined
     - hostvars[item.1]['ansible_fqdn'] is undefined
-    - contrail_configuration.CONTROLLER_NODES is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
 
 - name: "Build hosts file with domain suffix when provided"
