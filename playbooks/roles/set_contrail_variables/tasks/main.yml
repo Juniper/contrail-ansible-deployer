@@ -119,7 +119,3 @@
     - { name: 'imageManager_ip', is_not_defined: "{{ contrail_configuration.imageManager_ip is not defined }}" }
     - { name: 'networkManager_ip', is_not_defined: "{{ contrail_configuration.networkManager_ip is not defined }}" }
 
-- name: Evaluate k8s master ip/name
-  include: set_master.yml
-  tags:
-    - k8s

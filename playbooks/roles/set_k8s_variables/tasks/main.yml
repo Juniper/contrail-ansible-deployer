@@ -1,4 +1,16 @@
 ---
+- name: init k8s_host_name list
+  set_fact:
+    k8s_host_list: []
+
+- name: fill k8s host lists
+  set_fact:
+    k8s_host_list: "{{ k8s_host_list + [ item ] }}"
+  when:
+    - roles[hostvars[item]['instance_name']].k8s_master is defined or roles[hostvars[item]['instance_name']].k8s_node is defined
+  with_items:
+    - "{{ groups['container_hosts'] }}"
+
 - name: init master_ip list
   set_fact:
     k8s_master_ip_list: []
@@ -40,3 +52,19 @@
   when:
     - contrail_configuration.KUBERNETES_API_SERVER is undefined
     - k8s_master_ip is defined
+
+- name: create k8s_master host group
+  add_host:
+    hostname: "{{ item }}"
+    groupname: k8s_master
+  when:
+    - k8s_master_ip is defined
+    - item == k8s_master_ip
+  with_items: "{{ groups['container_hosts'] }}"
+
+- name: create k8s_hosts host group
+  add_host:
+    hostname: "{{ item }}"
+    groupname: k8s_hosts
+  when: item in k8s_host_list
+  with_items: "{{ groups['container_hosts'] }}"
