@@ -69,9 +69,6 @@
   set_fact:
     network_interface_detected: "{{ ansible_default_ipv4.interface }}"
   when: network_interface_detected is not defined
-- debug:
-    msg: "DEBUG network_interface_detected {{ network_interface_detected }}"
-
 
 # detect external_interface_detected based on kolla_globals.kolla_external_vip_address if it's set
 - name: evaluate external_interface_detected for kolla_globals.kolla_external_vip_address
@@ -97,8 +94,6 @@
   set_fact:
     external_interface_detected: "{{ network_interface_detected }}"
   when: external_interface_detected is not defined
-- debug:
-    msg: "DEBUG external_interface_detected {{ external_interface_detected }}"
 
 # set default internal_address
 - name: Set firs openstack node as default for internal_address
@@ -107,21 +102,14 @@
   when:
     - openstack_nodes_list is defined
     - openstack_nodes_list | length > 0
-- debug:
-    msg: "DEBUG internal_address_detected {{ internal_address_detected }}"
 
 # evaluate mgmt IP for all hosts in deployment to be able to create /etc/hosts
-- name: Set empty host_intf_dict
-  set_fact:
-    host_intf_dict: {}
 - name: Build host_intf_dict
   set_fact:
     host_intf_dict: "{{ host_intf_dict | combine({item.value['ip'] : hostvars[item.value['ip']]['network_interface_detected']}) }}"
   with_dict: "{{ instances }}"
   when:
     - item.value['ip'] in groups['openstack_nodes']
-- debug:
-    var: host_intf_dict
 
 - name: "Build hosts file with ctrl-data and domain suffix when provided"
   lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}.*' line="{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}  {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
@@ -171,9 +159,6 @@
     final_kolla_globals: "{{ final_kolla_globals | combine({'storage_nodes': os_nodes_storage}) }}"
   delegate_to: localhost
   run_once: yes
-
-- debug:
-    msg: "DEBUG final_kolla_globals {{ final_kolla_globals }}"
 
 - include: inventory.yml
   delegate_to: localhost
