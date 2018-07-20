@@ -11,14 +11,6 @@
   tags:
    - always
 
-# TODO: move this to install_k8s playbook
-- name: copy global variables from localhost's hostvars
-  set_fact:
-    k8s_master_ip: "{{ hostvars['localhost'].k8s_master_ip if hostvars['localhost'].k8s_master_ip is defined else omit }}"
-    k8s_master_name: "{{ hostvars['localhost'].k8s_master_name if hostvars['localhost'].k8s_master_name is defined else omit }}"
-  tags:
-   - always
-
 - name: run common tasks
   include: "common_{{ ansible_system }}.yml"
   when: ansible_system != 'Win32NT'
@@ -30,7 +22,7 @@
     - webui
     - analytics
 
-- name: create contrail config datqbase
+- name: create contrail config database
   include: create_config_database.yml
   when: roles[instance_name].config_database is defined
   tags:
@@ -78,8 +70,8 @@
   tags:
     - k8s
 
-- name: configure k8s master
-  include: configure_k8s_master_node.yml
+- name: configure k8s for Contrail
+  include: configure_k8s.yml
   when: roles[instance_name].k8s_master is defined and k8s_master_name is defined and inventory_hostname == k8s_master_name
   tags:
     - k8s
@@ -93,18 +85,6 @@
 - name: Pluginize legacy compute
   include: compute_legacy.yml
   when: roles[instance_name].openstack_compute_legacy is defined
-
-- name: join k8s master
-  include: configure_k8s_join_node.yml
-  when: roles[instance_name].k8s_node is defined and k8s_master_name is defined and inventory_hostname != k8s_master_name
-  tags:
-    - k8s
-
-- name: create k8s dashboard
-  include: create_k8s_dashboard.yml
-  when: roles[instance_name].k8s_master is defined and k8s_master_name is defined and inventory_hostname == k8s_master_name
-  tags:
-    - k8s
 
 - name: create contrail kube manager
   include: create_kubemanager.yml
@@ -131,17 +111,3 @@
 - name: create win docker driver
   include: create_win_docker_driver.yml
   when: roles[instance_name].win_docker_driver is defined
-
-- name: untaint node
-  shell: "kubectl taint nodes {{ hostvars[instance.value.ip]['ansible_fqdn'] }} node-role.kubernetes.io/master-"
-  with_dict: "{{ hostvars['localhost']['instances'] }}"
-  loop_control:
-    loop_var: instance
-  when:
-    - roles[instance_name].k8s_master is defined
-    - k8s_master_name is defined
-    - inventory_hostname == k8s_master_name
-    - instance.value.roles is defined
-    - instance.value.roles.k8s_node is defined
-    - instance.value.roles.k8s_master is defined
-  ignore_errors: yes
