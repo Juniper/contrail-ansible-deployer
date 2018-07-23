@@ -12,7 +12,8 @@ instances:
       win_docker_driver:
 
 global_configuration:
-  CONTAINER_REGISTRY: mclapinski
+  CONTAINER_REGISTRY: opencontrailnightly
+  WINDOWS_CONTAINER_REGISTY: mclapinski
 
 contrail_configuration:
   CONTRAIL_VERSION: latest
