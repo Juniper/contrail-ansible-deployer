@@ -3,7 +3,7 @@
 - name: run contrail-windows-vrouter container
   win_shell: >
     docker run -v {{ win_host_artifacts_dir }}:{{ win_container_artifacts_dir }}
-    {{ global_configuration.CONTAINER_REGISTRY }}/contrail-windows-vrouter:{{ contrail_configuration.CONTRAIL_VERSION }}
+    {{ global_configuration.WINDOWS_CONTAINER_REGISTRY }}/contrail-windows-vrouter:{{ contrail_configuration.CONTRAIL_VERSION }}
 
 - name: copy debug dlls to compute node
   win_copy:
@@ -19,6 +19,11 @@
 - name: install vrouter driver
   win_package:
     path: '{{ win_host_artifacts_dir }}\vrouter\vRouter.msi'
+    state: present
+
+- name: install utils
+  win_package:
+    path: '{{ win_host_artifacts_dir }}\vrouter\utils.msi'
     state: present
 
 - name: install vrouter agent
