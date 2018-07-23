@@ -4,6 +4,16 @@
 # 'kolla-ansible/ansible/group_vars/all.yml' file.
 
 {% for key, value in final_kolla_globals.iteritems() %}
-{{ key }}: {{ value }}
+{% if value is mapping %}
+{% print '\n' %}
+{{ key }}:
+{% for k, v in value.iteritems() %}
+  {{ k }}: {{ v }}
 {% endfor %}
+{% print '\n' %}
+{% else %}
+{{ key }}: {{ value }}
+{% endif %}
+{% endfor %}
+
 
