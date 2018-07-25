@@ -58,6 +58,24 @@
 - name: install Docker-EE
   win_shell: "Install-Package Docker -ProviderName DockerProvider -Force"
 
+  # Workaround (#1) for Docker/Windows behavior:
+# When WinNAT is enabled and NetNat object associated with default bridge
+# network created by Docker exists, ICMP/UDP packets bigger than MTU do
+# not reach containers and the host itself.
+# Workaround (#2) for win_service behavior:
+# We use win_shell instead of win_service because for this particular service
+# win_service seems to fail ("An error occurred while creating the pipeline"
+# or "Service 'winnat' is not installed") while it works fine for other
+# services like Docker.
+# Workaround (#3) for Set-Service:
+# We use Stop-Service instead of "Set-Service -Status Stopped" because of a
+# known bug in powershell.
+- name: stop winnat
+  win_shell: Stop-Service winnat
+
+- name: disable winnat
+  win_shell: Set-Service -Name winnat -StartupType Disabled
+
 - name: install MS Visuall C++ Redist 14
   win_chocolatey:
     name: vcredist140
