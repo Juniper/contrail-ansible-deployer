@@ -58,7 +58,29 @@
 - name: install Docker-EE
   win_shell: "Install-Package Docker -ProviderName DockerProvider -Force"
 
-  # Workaround (#1) for Docker/Windows behavior:
+- name: stop Docker
+  win_service:
+    name: docker
+    state: stopped
+
+- name: remove NetNat objects
+  win_shell: |
+    Get-NetNat | Remove-NetNat -Confirm:$false
+
+# Workaround for flaky HNS behavior.
+# Removing container networks sometimes ends with "Unspecified error".
+# For environment cleanup in tests it is acceptable to just ignore this error
+# (-ErrorAction SilentlyContinue). However, this is not acceptable for
+# template creation (we don't want to have unreliable template).
+- name: remove container networks (first attempt)
+  win_shell: |
+    Get-ContainerNetwork | Remove-ContainerNetwork -ErrorAction SilentlyContinue -Force
+
+- name: remove container networks (final attempt)
+  win_shell: |
+    Get-ContainerNetwork | Remove-ContainerNetwork -Force
+
+# Workaround (#1) for Docker/Windows behavior:
 # When WinNAT is enabled and NetNat object associated with default bridge
 # network created by Docker exists, ICMP/UDP packets bigger than MTU do
 # not reach containers and the host itself.
