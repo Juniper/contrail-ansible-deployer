@@ -1,0 +1,10 @@
+[DEFAULT]
+platform=windows
+
+[CONTROL-NODE]
+servers={{ contrail_configuration.CONTROLLER_NODES }}
+
+[VIRTUAL-HOST-INTERFACE]
+name={{ adapters.vhost.interface_name }}
+ip={{ adapters.vhost.ip }}/{{ adapters.vhost.ip_mask_length }}
+physical_interface={{ adapters.physical.interface_name }}

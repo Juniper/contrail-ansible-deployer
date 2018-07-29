@@ -5,6 +5,7 @@ win_agent_config_path: C:\ProgramData\Contrail\etc\contrail\contrail-vrouter-age
 contrail_configuration_default:
   KEYSTONE_AUTH_PROTO: http
   KEYSTONE_AUTH_PUBLIC_PORT: 5000
+  KEYSTONE_AUTH_URL_VERSION: /v2.0
   KEYSTONE_AUTH_URL_TOKENS: /v2.0/tokens
   KEYSTONE_AUTH_ADMIN_TENANT: admin
   KEYSTONE_AUTH_ADMIN_USER: admin
