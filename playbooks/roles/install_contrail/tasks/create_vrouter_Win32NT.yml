@@ -31,6 +31,14 @@
     path: '{{ win_host_artifacts_dir }}\agent\contrail-vrouter-agent.msi'
     state: present
 
+- name: run hostname command
+  win_shell: "hostname"
+  register: hostname_output
+
+- name: extract real hostname
+  set_fact:
+    hostname: "{{ hostname_output.stdout_lines | last}}"
+
 - name: get auth token from keystone
   delegate_to: localhost
   uri:
@@ -64,7 +72,7 @@
       {
         "virtual-router": {
           "virtual_router_ip_address": "{{ inventory_hostname }}",
-          "fq_name": ["default-global-system-config", "{{ hostvars[inventory_hostname].ansible_hostname }}"],
+          "fq_name": ["default-global-system-config", "{{ hostname }}"],
           "parent_type": "global-system-config"
         }
       }
