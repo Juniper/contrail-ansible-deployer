@@ -1,4 +1,8 @@
 ---
+- name: Reset the nics set_fact per VM
+  set_fact:
+    nics: "{{ '' }}"
+
 - name: Create nic list
   set_fact:
     nics: "{{ nics | default('') + x.pg|default(std_pg_name) + '*' + x.mac + '*' + x.sw_type|default('standard') + '*' + x.switch_name|default(std_switch_name) + ','}}"
