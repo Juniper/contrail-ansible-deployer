@@ -39,7 +39,7 @@
   ignore_errors: yes
   no_log: True
 
-- name: update image
+- name: update contrail analytics images
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
     - contrail-node-init
@@ -47,10 +47,25 @@
     - contrail-analytics-api
     - contrail-analytics-collector
     - contrail-analytics-query-engine
+  when: contrail_configuration.UPDATE_ANALYTICS_IMAGES is undefined or contrail_configuration.UPDATE_ANALYTICS_IMAGES != false
+
+- name: update contrail-alarm-gen image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
     - contrail-analytics-alarm-gen
+  when: contrail_configuration.UPDATE_ALARM_GEN_IMAGE is defined and contrail_configuration.UPDATE_ALARM_GEN_IMAGE != false
+
+- name: update contrail-snmp-collector image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
     - contrail-analytics-snmp-collector
+  when: contrail_configuration.UPDATE_SNMP_COLLECTOR_IMAGE is defined and contrail_configuration.UPDATE_SNMP_COLLECTOR_IMAGE != false
+
+- name: update contrail-analytics-topology image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
     - contrail-analytics-topology
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when: contrail_configuration.UPDATE_TOPOLOGY_IMAGE is defined and contrail_configuration.UPDATE_TOPOLOGY_IMAGE != false
 
 - name: create contrail analytics file
   template:
