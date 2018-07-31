@@ -8,71 +8,81 @@
     path: /etc/docker/daemon.json
   register: p
 
+- name: read /etc/docker/daemon.json if it exists
+  shell: cat /etc/docker/daemon.json
+  register: docker_daemon_file
+  when: p.stat.exists
+
+- name: set entries to json if file exists
+  set_fact:
+    docker_daemon: "{{ docker_daemon_file.stdout | from_json }}"
+  when: p.stat.exists
+
+- name: set docker_daemon as empty dictionary if file doesn't exist
+  set_fact:
+    docker_daemon: {}
+  when: not p.stat.exists
+
+- name: check if insecure-registries key is already in file
+  set_fact:
+    has_insecure_registries: True
+  when: "'insecure-registries' in docker_daemon"
+
+- name: set insecure-registries to value from file it it exists
+  set_fact:
+    insecure_registries: "{{ docker_daemon['insecure-registries'] }}"
+  when: has_insecure_registries is defined
+
+- name: set insecure-registries to empty array if it doesn't exist
+  set_fact:
+    insecure_registries: []
+  when: has_insecure_registries is undefined
+
+- name: check if file update is needed
+  set_fact:
+    docker_daemon_update_needed: True
+  when: "docker_registry not in insecure_registries"
+
+- name: append docker registry to insecure-registries if it isn't already in
+  set_fact:
+    insecure_registries: "{{ insecure_registries + [docker_registry] }}"
+  when: docker_daemon_update_needed is defined
+
+- name: insert new insecure-registries to docker daemon
+  set_fact:
+    docker_daemon: "{{ docker_daemon | combine({ 'insecure-registries': insecure_registries}) }}"
+  when: docker_daemon_update_needed is defined
+
 - name: create /etc/docker directory
   file:
     path: /etc/docker
     state: directory
     mode: 0755
+  when: docker_daemon_update_needed is defined
 
-- name: create emtpy /etc/docker/daemon.json is it doesn't exis
+- name: create empty /etc/docker/daemon.json is it doesn't exist
   copy:
     content: ""
     dest: /etc/docker/daemon.json
   when: not p.stat.exists
 
-- name: set registry string if it is the first one
-  set_fact:
-    new_reg: "{% raw %}{{% endraw %}\n \"insecure-registries\": [\"{{docker_registry}}\"]\n{% raw %}}{% endraw %}\n"
-  when: not p.stat.exists
-
-- name: add 1st registry entry to file
-  lineinfile:
-    dest: /etc/docker/daemon.json
-    line: "{{ new_reg |to_json}}"
-  when: not p.stat.exists
-
-- name: read /etc/docker/daemon.json if it exists
-  shell: cat /etc/docker/daemon.json
-  register: docker_daemon_file
-
-- name: set entries to json
-  set_fact:
-    docker_daemon: "{{ docker_daemon_file.stdout | from_json }}"
-
-- name: check if registry is already in
-  set_fact:
-    is_registry_in: True
-  when: docker_registry in item.value and p.stat.exists
-  with_dict: "{{ docker_daemon }}"
-
-- name: add registry to list
-  set_fact:
-    new_docker_registries: "{{ item.value }} + [ '{{ docker_registry }}' ]"
-  when: item.key == "insecure-registries" and is_registry_in is undefined
-  with_dict: "{{ docker_daemon }}"
-
-- name: create new registry string
-  set_fact:
-    reg_string: "{% raw %}{{% endraw %}\n \"insecure-registries\": [{% for arg1 in new_docker_registries %}\"{{arg1}}\"{% if not loop.last %},{% endif %}{% endfor %}]\n{% raw %}}{% endraw %}"
-  when: is_registry_in is undefined
-
-- name: empty existing file *danger danger*
+- name: empty existing file
   copy:
     content: ""
     dest: /etc/docker/daemon.json
-  when: p.stat.exists and is_registry_in is undefined
+  when: docker_daemon_update_needed is defined
 
 - name: write to /etc/docker/daemon.json
   lineinfile:
     dest: /etc/docker/daemon.json
-    line: "{{ reg_string |to_json}}"
-  when: p.stat.exists and is_registry_in is undefined
+    line: "{{ docker_daemon | to_nice_json }}"
+  when: docker_daemon_update_needed is defined
 
 - name: reload systemd
   shell: systemctl daemon-reload
   when:
     - ansible_os_family == 'RedHat'
-    - not p.stat.exists or is_registry_in is undefined
+    - docker_daemon_update_needed is defined
 
 - name: start docker daemon
   service:
@@ -80,4 +90,4 @@
     name: docker
     state: restarted
   when:
-    - not p.stat.exists or is_registry_in is undefined
+    - docker_daemon_update_needed is defined
