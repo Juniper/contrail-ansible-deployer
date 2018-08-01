@@ -45,3 +45,8 @@
     container_registry is not defined
   tags:
    - always
+
+- name: Evaluate roles
+  include: eval_node_roles.yml
+  tags:
+    - always
