@@ -77,7 +77,7 @@
 
 - name: initialize k8s master with listen ip
   shell: |
-      kubeadm init --token-ttl 0 --kubernetes-version {{ k8s_version }} --apiserver-advertise-address {{ listen_ip }} &&
+      kubeadm init --token-ttl 0 --kubernetes-version {{ k8s_version }} --apiserver-advertise-address {{ listen_ip }} --pod-network-cidr {{ kube_pod_subnet }} &&
       mkdir -p $HOME/.kube &&
       cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
       chown -R $(id -u):$(id -g) $HOME/.kube
@@ -85,7 +85,7 @@
 
 - name: initialize k8s master without listen ip
   shell: |
-      kubeadm init --token-ttl 0 --kubernetes-version {{ k8s_version }} &&
+      kubeadm init --token-ttl 0 --kubernetes-version {{ k8s_version }} --pod-network-cidr {{ kube_pod_subnet }} &&
       mkdir -p $HOME/.kube &&
       cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
       chown -R $(id -u):$(id -g) $HOME/.kube
