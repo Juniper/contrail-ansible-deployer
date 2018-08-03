@@ -1,0 +1,11 @@
+---
+
+- name: install dependencies for these playbooks
+  pip:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - pywinrm
+    - requests
+    - requests-credssp
+  become: yes

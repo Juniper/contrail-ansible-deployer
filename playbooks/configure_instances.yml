@@ -13,6 +13,7 @@
       when: hostvars['localhost']['instances'] is undefined
   roles:
     - create_container_host_group
+    - { role: install_windows_dependencies, when: provider_config.bms_win is defined }
     - { role: create_kolla_playbooks, when: contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' }
     - { role: install_kolla_dependencies, when: contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' }
     - generate_root_ca
