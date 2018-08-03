@@ -45,7 +45,6 @@ global_configuration:
 
 contrail_configuration:
   CONTRAIL_VERSION: latest
-  CONTROLLER_NODES: 192.168.1.100
   CLOUD_ORCHESTRATOR: openstack
   RABBITMQ_NODE_PORT: 5673
   PHYSICAL_INTERFACE: ens192
