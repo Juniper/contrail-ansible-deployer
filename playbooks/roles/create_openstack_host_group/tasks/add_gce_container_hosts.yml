@@ -115,7 +115,7 @@
 - name: add gce container hosts with ssh pwd
   add_host:
     hostname: "{{ gce.instance_data[0].public_ip }}"
-    groupname: container_hosts
+    groupname: "{{ instances|openstack_host_groups(item.value.ip) }}"
     ansible_ssh_user: "{{ item.value.ssh_user|default(provider_config.gce.ssh_user) }}"
     ansible_ssh_pass: "{{ item.value.ssh_pwd|default(provider_config.gce.ssh_pwd) }}"
     ansible_become: true
@@ -127,7 +127,7 @@
 - name: add gce container hosts with ssh key
   add_host:
     hostname: "{{ gce.instance_data[0].public_ip }}"
-    groupname: container_hosts
+    groupname: "{{ instances|openstack_host_groups(item.value.ip) }}"
     ansible_ssh_user: "{{ item.value.ssh_user|default(provider_config.gce.ssh_user) }}"
     ansible_ssh_private_key_file: "{{ item.value.ssh_private_key|default(provider_config.gce.ssh_private_key) }}"
     ansible_become: true
@@ -138,7 +138,7 @@
 - name: add gce container hosts with ssh key
   add_host:
     hostname: "{{ gce.instance_data[0].public_ip }}"
-    groupname: container_hosts
+    groupname: "{{ instances|openstack_host_groups(item.value.ip) }}"
     ansible_ssh_user: "{{ item.value.ssh_user|default(provider_config.gce.ssh_user) }}"
     ansible_become: true
     private_ip: "{{ gce.instance_data[0].private_ip }}"

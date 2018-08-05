@@ -13,25 +13,25 @@
     - create_container_host_group
     - create_openstack_host_group
     - set_global_variables
+    - build_node_lists
   vars_files:
     - "{{ config_file }}"
   tags: always
 
 - hosts: openstack_nodes
-  vars:
-    - container_registry: "{{ hostvars['localhost'].container_registry }}"
-    - contrail_version_tag: "{{ hostvars['localhost'].contrail_version_tag }}"
-  vars_files:
-    - "{{ hostvars['localhost'].config_file }}"
   gather_facts: yes
-
   roles:
-    - name: Build node lists
-      role: build_node_lists
-      tags: always
     - name: Generate openstack configurations
       role: create_openstack_config
       tags: always
+  vars_files:
+    - "{{ hostvars['localhost'].config_file }}"
+  vars:
+    - container_registry: "{{ hostvars['localhost'].container_registry }}"
+    - contrail_version_tag: "{{ hostvars['localhost'].contrail_version_tag }}"
+    - config_nodes_list: "{{ hostvars['localhost'].config_nodes_list }}"
+    - analytics_nodes_list: "{{ hostvars['localhost'].analytics_nodes_list }}"
+    - openstack_nodes_list: "{{ hostvars['localhost'].openstack_nodes_list }}"
 
   tasks:
   - name: Import group variables
