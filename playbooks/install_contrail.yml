@@ -17,8 +17,8 @@
       when: hostvars['localhost']['global_configuration'] is undefined
   roles:
     - create_container_host_group
-    - build_node_lists
     - set_global_variables
+    - build_node_lists
     - set_contrail_variables
     - set_k8s_variables
   vars_files:
