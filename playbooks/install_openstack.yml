@@ -13,6 +13,7 @@
     - create_container_host_group
     - create_openstack_host_group
     - set_global_variables
+    - build_node_lists
   vars_files:
     - "{{ config_file }}"
   tags: always
@@ -26,12 +27,13 @@
   gather_facts: yes
 
   roles:
-    - name: Build node lists
-      role: build_node_lists
-      tags: always
     - name: Generate openstack configurations
       role: create_openstack_config
       tags: always
+  vars:
+    - config_nodes_list: "{{ hostvars['localhost'].config_nodes_list }}"
+    - analytics_nodes_list: "{{ hostvars['localhost'].analytics_nodes_list }}"
+    - openstack_nodes_list: "{{ hostvars['localhost'].openstack_nodes_list }}"
 
   tasks:
   - name: Import group variables
