@@ -7,9 +7,9 @@
 
 - name: copy debug dlls to compute node
   win_copy:
-    src: '{{ global_configuration.win_debug_dlls }}/'
+    src: '{{ contrail_configuration.WINDOWS_DEBUG_DLLS_PATH }}/'
     dest: 'C:\Windows\System32\'
-  when: global_configuration.win_debug_dlls is defined
+  when: contrail_configuration.WINDOWS_DEBUG_DLLS_PATH is defined
 
 - name: import vrouter certificate
   win_shell: |
