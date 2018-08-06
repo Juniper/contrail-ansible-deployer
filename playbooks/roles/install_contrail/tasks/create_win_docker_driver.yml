@@ -18,7 +18,6 @@
     application: C:\Program Files\Juniper Networks\contrail-windows-docker.exe
     state: present
     app_parameters_free_form: >
-      -forceAsInteractive
       -controllerIP {{ contrail_configuration.CONFIG_NODES }}
       -os_username {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_TENANT }}
       -os_password {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_PASSWORD }}
