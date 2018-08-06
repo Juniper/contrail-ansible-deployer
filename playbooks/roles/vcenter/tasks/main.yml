@@ -147,6 +147,17 @@
   include: add_dvs.yml vc_server={{item}}
   with_items: "{{ vc_servers }}"
 
+- name: Fix VM DVS-PGs and add pvlan config
+  include: fix_dvs.yml vc_server={{item}}
+  with_items: "{{ vc_servers }}"
+
+- name: Wait for VM DVS-PG pvlan fix task
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ dvs_fixed }}"
+  register: t1
+  until: t1.finished
+  retries: 300
+
 - name: add esxi host to DVS
   include: add_host_dvs.yml esxi_host={{item}}
   with_items: "{{ esxi_servers }}"
