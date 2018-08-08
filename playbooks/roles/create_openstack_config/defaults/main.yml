@@ -16,6 +16,8 @@ openstack_sku: >-
     {%- endif %}
 
 default_kolla_globals:
+  haproxy_client_timeout: 30m
+  haproxy_server_timeout: 30m
   neutron_opencontrail_init_image_full: "{{ container_registry }}/contrail-openstack-neutron-init:{{ contrail_version_tag }}"
   nova_compute_opencontrail_init_image_full: "{{ container_registry}}/contrail-openstack-compute-init:{{ contrail_version_tag }}"
   ironic_notification_manager_image_full: "{{ container_registry}}/contrail-openstack-ironic-notification-manager:{{ contrail_version_tag }}"
