@@ -39,7 +39,7 @@
   ignore_errors: yes
   no_log: True
 
-- name: update image
+- name: update contrail analytics images
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
     - contrail-node-init
@@ -47,9 +47,6 @@
     - contrail-analytics-api
     - contrail-analytics-collector
     - contrail-analytics-query-engine
-    - contrail-analytics-alarm-gen
-    - contrail-analytics-snmp-collector
-    - contrail-analytics-topology
   when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
 
 - name: create contrail analytics file

@@ -60,6 +60,17 @@ in kubernetes.
 +-------------+ +------------------+ +-----------+ +-------------+ +-------------+ +----------++-----------+
 ```
 
+Please note that the below components in analytics are optional, by default they
+will not be installed.
+```
+  kafka,
+  alarm
+  snmp
+  topology
+```
+
+Please check [Enable/Disable Contrail Analytics Components](https://github.com/Juniper/contrail-ansible-deployer/blob/master/README.md#enabledisable-contrail-analytics-components) Section to enable these services.
+
 ## Prerequisites
 
 - CentOS 7.4 (kernel >= 3.10.0-693.17.1)
@@ -214,6 +225,23 @@ This section sets global contrail service parameters. All parameters are optiona
 contrail_configuration:     # Contrail service configuration section
   CONTRAIL_VERSION: latest
   UPGRADE_KERNEL: true
+```
+
+### Enable/Disable Contrail Analytics Components
+Be default, the below analytics components will be not be installed.
+To install them, we need to add the below flags inside contrail_configuration and
+set to true.
+
+To enable alarm and kafka:
+```
+contrail_configuration:
+    ENABLE_ANALYTICS_ALARM: True
+```
+
+To enable snmp and topology:
+```
+contrail_configuration:
+    ENABLE_ANALYTICS_UNDERLAY_OVERLAY: True
 ```
 
 [Complete list of contrail_configuration](contrail_configuration.md)

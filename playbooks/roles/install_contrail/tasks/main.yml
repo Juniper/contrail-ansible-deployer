@@ -63,6 +63,25 @@
   tags:
     - analytics
 
+- name: create contrail analytics alarm
+  include: create_analytics_alarm.yml
+  when:
+    - roles[instance_name].analytics is defined
+    - roles[instance_name].analytics_database is defined
+    - contrail_configuration.ENABLE_ANALYTICS_ALARM is defined
+    - contrail_configuration.ENABLE_ANALYTICS_ALARM != false
+  tags:
+    - analytics_alarm
+
+- name: create contrail analytics underlay overlay
+  include: create_analytics_underlay_overlay.yml
+  when:
+   - roles[instance_name].analytics is defined
+   - contrail_configuration.ENABLE_ANALYTICS_UNDERLAY_OVERLAY is defined
+   - contrail_configuration.ENABLE_ANALYTICS_UNDERLAY_OVERLAY != false
+  tags:
+    - analytics_underlay_overlay
+
 - name: create cni
   include: create_k8s_cni.yml
   when: roles[instance_name].k8s_node is defined
