@@ -53,10 +53,10 @@
 
 - name: install DockerProvider
   win_psmodule:
-    name: DockerProvider
+    name: DockerMsftProvider
 
 - name: install Docker-EE
-  win_shell: "Install-Package Docker -ProviderName DockerProvider -Force"
+  win_shell: "Install-Package Docker -ProviderName DockerMsftProvider -Force"
 
 # DockerProvider by default starts Docker.
 # However, in this role we don't care in what state Docker is right now.

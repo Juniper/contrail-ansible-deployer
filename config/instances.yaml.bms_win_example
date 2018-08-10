@@ -1,12 +1,14 @@
+# lines with comments require changes/attention
+
 provider_config:
   bms_win:
     ansible_user: Administrator
-    ansible_password: Contrail123!
+    ansible_password: Contrail123! # supply Administrator password
 
 instances:
   win_compute1:
     provider: bms_win
-    ip: 192.168.1.101
+    ip: 192.168.1.101 # supply mgmt interface IP
     roles:
       vrouter:
       win_docker_driver:
@@ -17,13 +19,13 @@ global_configuration:
 
 contrail_configuration:
   CONTRAIL_VERSION: latest
-  CONTROLLER_NODES: 192.168.1.100
+  CONTROLLER_NODES: 192.168.1.100 # supply mgmt interface IP of controller
 
-  WINDOWS_PHYSICAL_INTERFACE: Ethernet1
+  WINDOWS_PHYSICAL_INTERFACE: Ethernet1 # supply alias of dataplane interface
 
   WINDOWS_ENABLE_TEST_SIGNING:
-  WINDOWS_DEBUG_DLLS_PATH: ~/dlls
+  WINDOWS_DEBUG_DLLS_PATH: ~/dlls # this folder should contain debug DLLs
 
   AUTH_MODE: keystone
-  KEYSTONE_AUTH_HOST: 192.168.1.100
-  KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123
+  KEYSTONE_AUTH_HOST: 192.168.1.100 # supply IP of keystone host
+  KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123 # supply real admin password
