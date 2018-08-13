@@ -188,15 +188,40 @@
     enabled: no
   ignore_errors: yes
 
-- name: flush iptables
-  shell: iptables -F
-  ignore_errors: yes
+- name: Install FW dependencies Ubuntu
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+  with_items:
+    - iptables-persistent
+  when: ansible_os_family == 'Debian'
 
-- name: accept input
-  shell: iptables -P INPUT ACCEPT
-  ignore_errors: yes
+- name: Install FW dependencies CentOS
+  yum:
+    pkg: "{{ item }}"
+    state: latest
+  with_items:
+    - iptables-services
+  when: ansible_os_family == 'RedHat'
 
-- name: accept forward
-  shell: iptables -P FORWARD ACCEPT
-  ignore_errors: yes
+- name: enable iptables-persistent service after reboot
+  systemd:
+    name: iptables
+    state: started
+    enabled: true
+  when: ansible_os_family == 'RedHat'
+
+- name: configure iptables to allow traffic for established sessions
+  iptables:
+    chain: INPUT
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+
+- name: Save iptables rules into service
+  shell: 'service netfilter-persistent save'
+  when: ansible_os_family == 'Debian'
+
+- name: Save iptables rules into service
+  shell: 'service iptables save'
+  when: ansible_os_family == 'RedHat'
 

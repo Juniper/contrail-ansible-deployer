@@ -82,6 +82,40 @@
   lineinfile: dest=/etc/contrail/common_control.env regexp='^BGP_AUTO_MESH=.*' line="BGP_AUTO_MESH=false" state=present
   when: location is defined
 
+- name: configure iptables to allow traffic to contrail control+dns+named (TCP)
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{ item }}"
+    jump: ACCEPT
+  with_items:
+  - 53
+  - 179
+  - 5269
+  - 8083
+  - 8092
+  - 8093
+  - 8094
+  - 8101
+
+- name: configure iptables to allow traffic to contrail control+dns+named (UDP)
+  iptables:
+    chain: INPUT
+    protocol: udp
+    destination_port: "{{ item }}"
+    jump: ACCEPT
+  with_items:
+  - 53
+  - 8092
+
+- name: Save iptables rules into service
+  shell: 'service netfilter-persistent save'
+  when: ansible_os_family == 'Debian'
+
+- name: Save iptables rules into service
+  shell: 'service iptables save'
+  when: ansible_os_family == 'RedHat'
+
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
