@@ -22,6 +22,32 @@
     regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
     line: 'Environment="KUBELET_CGROUP_ARGS=--cgroup-driver={{ cgroup_driver }}"'
 
+- name: configure iptables to allow traffic to kubernetes
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{ item }}"
+    jump: ACCEPT
+  with_items:
+  - 8443
+  - 10248
+  - 10249
+  - 10250
+  - 10251
+  - 10252
+  - 10253
+  - 10254
+  - 10255
+  - 10256
+
+- name: Save iptables rules into service
+  shell: 'service netfilter-persistent save'
+  when: ansible_os_family == 'Debian'
+
+- name: Save iptables rules into service
+  shell: 'service iptables save'
+  when: ansible_os_family == 'RedHat'
+
 - name: enable kubelet service
   systemd:
     name: kubelet

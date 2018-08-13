@@ -98,6 +98,31 @@
     vrouter_kernel_init_img_name: contrail-vrouter-kernel-init
   when: ansible_os_family == 'RedHat'
 
+- name: configure iptables to allow traffic to vrouter
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{ item }}"
+    jump: ACCEPT
+  with_items:
+  - 8085
+  - 8097
+  - 8102
+  - 9091
+
+- name: configure iptables to allow traffic through vrouter
+  iptables:
+    chain: FORWARD
+    policy: ACCEPT
+
+- name: Save iptables rules into service
+  shell: 'service netfilter-persistent save'
+  when: ansible_os_family == 'Debian'
+
+- name: Save iptables rules into service
+  shell: 'service iptables save'
+  when: ansible_os_family == 'RedHat'
+
 - name: update image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
