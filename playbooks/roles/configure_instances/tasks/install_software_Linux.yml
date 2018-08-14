@@ -188,10 +188,6 @@
     enabled: no
   ignore_errors: yes
 
-- name: flush iptables
-  shell: iptables -F
-  ignore_errors: yes
-
 - name: accept input
   shell: iptables -P INPUT ACCEPT
   ignore_errors: yes
