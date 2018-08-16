@@ -101,8 +101,6 @@ services:
     image: "{{ container_registry }}/contrail-analytics-snmp-collector:{{ contrail_version_tag }}"
     network_mode: "host"
     env_file: /etc/contrail/common_analytics.env
-    environment:
-      - SNMPCONFPATH=/etc/contrail
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
