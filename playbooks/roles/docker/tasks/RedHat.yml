@@ -3,14 +3,14 @@
   yum_repository:
     name: dockerrepo
     description: Docker Repository
-    baseurl: https://yum.dockerproject.org/repo/main/centos/7
-    gpgkey: https://yum.dockerproject.org/gpg
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    gpgkey: https://download.docker.com/linux/centos/gpg
     gpgcheck: yes
-
-- name: install docker selinux
-  yum:
-    name: docker-engine-selinux-17.03.1.ce
 
 - name: install docker
   yum:
-    name: docker-engine-17.03.1.ce
+    name: docker-ce-18.03.0.ce
+
+- name: install docker selinux
+  yum:
+    name: docker-ce-selinux-17.03.1.ce
