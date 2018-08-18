@@ -30,6 +30,14 @@
   tags:
    - always
 
+- name: add specific contrail version tag if defined
+  set_fact:
+    contrail_version_tag: "{{ contrail_configuration.CONTRAIL_CONTAINER_TAG }}"
+  when:
+    - contrail_configuration.CONTRAIL_CONTAINER_TAG is defined
+  tags:
+    - always
+
 - name: set registry if defined
   set_fact:
     container_registry: "{{ global_configuration.CONTAINER_REGISTRY }}"
