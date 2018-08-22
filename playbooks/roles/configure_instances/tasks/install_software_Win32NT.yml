@@ -55,6 +55,33 @@
   win_psmodule:
     name: DockerMsftProvider
 
+- name: ensure docker config directory exists
+  win_file:
+    path: "{{ win_docker_config_dir }}"
+    state: directory
+
+- name: ensure docker config file exists
+  win_file:
+    path: "{{ win_docker_daemon_file }}"
+    state: touch
+
+- name: read docker config file
+  register: docker_daemon_file
+  win_shell: Get-Content "{{ win_docker_daemon_file }}"
+
+- name: convert docker config entries to json
+  set_fact:
+    docker_daemon: "{{ docker_daemon_file.stdout | default('{}', true) | from_json }}"
+
+- name: disable the nat network in docker config
+  set_fact:
+    docker_daemon: "{{ docker_daemon | combine({\"bridge\" : \"none\"}) }}"
+
+- name: write config to daemon.json
+  win_copy:
+    content: "{{ docker_daemon | to_nice_json }}"
+    dest: "{{ win_docker_daemon_file }}"
+
 - name: install Docker-EE
   win_shell: "Install-Package Docker -ProviderName DockerMsftProvider -Force"
 
