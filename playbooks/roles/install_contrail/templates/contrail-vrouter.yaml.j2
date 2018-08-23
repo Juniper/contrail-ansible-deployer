@@ -64,6 +64,7 @@ services:
 {% if ansible_os_family == 'RedHat' %}
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
 {% endif %}
+      - /etc/modprobe.d:/etc/modprobe.d
       - /etc/timezone:/etc/timezone
       - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
