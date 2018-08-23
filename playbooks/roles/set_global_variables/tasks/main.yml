@@ -53,3 +53,11 @@
     container_registry is not defined
   tags:
    - always
+
+- set_fact:
+    roles: {}
+- name: add roles if defined
+  set_fact:
+     roles: "{{ roles | combine({item.key: item.value.roles}, recursive=True) }}"
+  when: item.value.roles is defined
+  with_dict: "{{ instances }}"
