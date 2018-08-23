@@ -48,6 +48,7 @@
     $PhysicalAdapter = Get-NetAdapter -Name "{{ contrail_configuration.WINDOWS_PHYSICAL_INTERFACE }}"
     $VHostAdapter = Get-NetAdapter -Name "{{ win_vhost_name }}"
     $VHostIP = $VHostAdapter | Get-NetIPAddress -AddressFamily IPv4
+    $VHostGateway = ($VHostAdapter | Get-NetIPConfiguration).IPv4DefaultGateway
     @{
       physical = @{
         interface_name = $PhysicalAdapter.ifName
@@ -56,6 +57,7 @@
         interface_name = $VHostAdapter.ifName
         ip = $VHostIP.IPAddress
         ip_mask_length = $VHostIP.PrefixLength
+        gateway = if ($VHostGateway) { $VHostGateway.NextHop } else { $null }
       }
     } | ConvertTo-Json
 
