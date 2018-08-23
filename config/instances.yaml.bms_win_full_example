@@ -25,14 +25,14 @@ instances:
       openstack_monitoring:
       openstack_compute:
 
-  bms-win1:
+  win_compute1:
     provider: bms_win
     ip: 192.168.1.101
     roles:
       vrouter:
       win_docker_driver:
 
-  bms-win2:
+  win_compute2:
     provider: bms_win
     ip: 192.168.1.102
     roles:
@@ -54,7 +54,6 @@ contrail_configuration:
   AUTH_MODE: keystone
   KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123
   KEYSTONE_AUTH_HOST: 192.168.1.100
-  KEYSTONE_AUTH_URL_VERSION: "/v2"
 
 kolla_config:
   kolla_globals:
