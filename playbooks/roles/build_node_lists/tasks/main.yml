@@ -55,6 +55,17 @@
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:
+    analyticsdb_kafka_nodes_list: []
+- name: add analyticsdb_kafka nodes to the list
+  set_fact:
+    analyticsdb_kafka_nodes_list: "{{ analyticsdb_kafka_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.analytics_database_kafka is defined
+    - contrail_configuration.CONTROLLER_NODES is not defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
     webui_nodes_list: []
 - name: add webui nodes to the list
   set_fact:

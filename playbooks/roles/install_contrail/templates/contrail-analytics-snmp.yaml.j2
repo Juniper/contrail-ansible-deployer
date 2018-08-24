@@ -11,28 +11,8 @@ services:
     volumes:
       - /usr/bin:/host/usr/bin
       - /etc/contrail/ssl:/etc/contrail/ssl
-  nodemgr:
-    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
-    env_file: /etc/contrail/common_analytics.env
-    environment:
-      - NODE_TYPE=analytics
-    network_mode: "host"
-    volumes:
-      - /var/log/contrail:/var/log/contrail
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/hosts:/etc/hosts
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-      - /var/crashes:/var/crashes
-    volumes_from:
-      - node-init
-    restart: always
-    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
-    tty: {{ contrail_configuration.TTY }}
-    depends_on:
-      - node-init
-  api:
-    image: "{{ container_registry }}/contrail-analytics-api:{{ contrail_version_tag }}"
+  snmp-collector:
+    image: "{{ container_registry }}/contrail-analytics-snmp-collector:{{ contrail_version_tag }}"
     network_mode: "host"
     env_file: /etc/contrail/common_analytics.env
     volumes:
@@ -48,8 +28,8 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
-  collector:
-    image: "{{ container_registry }}/contrail-analytics-collector:{{ contrail_version_tag }}"
+  topology:
+    image: "{{ container_registry }}/contrail-analytics-topology:{{ contrail_version_tag }}"
     network_mode: "host"
     env_file: /etc/contrail/common_analytics.env
     volumes:
@@ -65,18 +45,3 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
-  query-engine:
-    image: "{{ container_registry }}/contrail-analytics-query-engine:{{ contrail_version_tag }}"
-    network_mode: "host"
-    env_file: /etc/contrail/common_analytics.env
-    volumes:
-      - /var/log/contrail:/var/log/contrail
-      - /etc/hosts:/etc/hosts
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-      - /var/crashes:/var/crashes
-    volumes_from:
-      - node-init
-    depends_on:
-      - node-init
-    restart: always
