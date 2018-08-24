@@ -63,6 +63,27 @@
   tags:
     - analytics
 
+- name: create contrail analytics alarm
+  include: create_analytics_alarm.yml
+  when:
+    - roles[instance_name].analytics_alarm is defined
+  tags:
+    - analytics_alarm
+
+- name: create contrail analytics kafka
+  include: create_analytics_database_kafka.yml
+  when:
+    - roles[instance_name].analytics_database_kafka is defined
+  tags:
+    - analytics_alarm
+
+- name: create contrail analytics snmp
+  include: create_analytics_snmp.yml
+  when:
+   - roles[instance_name].analytics_snmp is defined
+  tags:
+    - analytics_snmp
+
 - name: create cni
   include: create_k8s_cni.yml
   when: roles[instance_name].k8s_node is defined

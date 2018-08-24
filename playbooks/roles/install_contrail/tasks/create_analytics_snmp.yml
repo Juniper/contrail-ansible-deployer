@@ -1,0 +1,27 @@
+---
+- name: create /etc/contrail/analytics_snmp
+  file:
+    path: /etc/contrail/analytics_snmp
+    state: directory
+    recurse: yes
+
+- name: add ENABLE_ANALYTICS_SNMP environment variable in /etc/contrail/common.env
+  lineinfile:
+    dest: /etc/contrail/common.env
+    line: "ENABLE_ANALYTICS_SNMP=True"
+  when: roles[instance_name].analytics is defined and roles[instance_name].analytics_snmp is defined
+
+- name: update contrail-snmp-collector and contrail-analytics-topology image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-analytics-topology
+    - contrail-analytics-snmp-collector
+
+- name: create contrail analytics_snmp file
+  template:
+    src: contrail-analytics-snmp.yaml.j2
+    dest: /etc/contrail/analytics_snmp/docker-compose.yaml
+
+- name: start contrail analytics_snmp
+  docker_service:
+    project_src: /etc/contrail/analytics_snmp
