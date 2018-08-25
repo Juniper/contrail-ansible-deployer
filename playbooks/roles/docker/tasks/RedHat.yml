@@ -13,4 +13,4 @@
 
 - name: install docker selinux
   yum:
-    name: docker-ce-selinux-17.03.1.ce
+    name: docker-ce-selinux-18.03.1.ce
