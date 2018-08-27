@@ -1,0 +1,20 @@
+---
+- name: Power Off ContrailVM
+  vars:
+    vmname: "ContrailVM-{{ esxi_host.vcenter_server.datacentername }}-{{ esxi_host.name }}"
+  vmware_guest:
+    hostname: "{{ esxi_host.vcenter_server.hostname }}"
+    username: "{{ esxi_host.vcenter_server.username }}"
+    password: "{{ esxi_host.vcenter_server.password }}"
+    validate_certs: "{{ esxi_host.vcenter_server.validate_certs }}"
+    datacenter: "{{ esxi_host.vcenter_server.datacentername }}"
+    cluster: "{{ esxi_host.cluster }}"
+    name: "{{ esxi_host.contrail_vm.name | default (vmname) }}"
+    state: poweredoff
+  async: 3600
+  poll: 0
+  register: res
+
+- name: Save Power Off VM task result
+  set_fact:
+    powered_off: "{{ powered_off | default ([]) + [res] }}"
