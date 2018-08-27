@@ -80,6 +80,8 @@ services:
     depends_on:
       - node-init
     restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
   alarm-gen:
     image: "{{ container_registry }}/contrail-analytics-alarm-gen:{{ contrail_version_tag }}"
     network_mode: "host"
