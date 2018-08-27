@@ -8,11 +8,26 @@
   git:
     repo: https://github.com/Juniper/contrail-kolla-ansible.git
     dest: "{{ kolla_dir }}"
-    version: "contrail/{{ openstack_sku }}"
     force: "{{ force_checkout }}"
   ignore_errors: yes
   register: kolla_repo
   when: not kolla_dir_stat.stat.exists or force_checkout|bool
+
+- name: Check current branch
+  shell: "git rev-parse --abbrev-ref HEAD"
+  args:
+    chdir: "{{ kolla_dir }}"
+  register: kolla_branch
+  when:
+      - kolla_dir_stat.stat.exists
+
+- name: Choosing openstack branch
+  shell: "git checkout contrail/{{ openstack_sku }}"
+  args:
+    chdir: "{{ kolla_dir }}"
+  when:
+      - kolla_dir_stat.stat.exists
+      - kolla_branch != "contrail/{{ openstack_sku }}"
 
 - name: Revert kolla to given commit
   shell: "git reset --hard {{ kolla_config.commit_id }}"
