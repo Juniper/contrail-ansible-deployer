@@ -111,10 +111,6 @@ def CreateAgencyConfig(si, args, scope):
     agency_config.agentConfig = agent_config_list
 
     agency_config.agentName = "ContrailVM"
-    agency_config.manuallyMarkAgentVmAvailableAfterPowerOn = True
-    agency_config.manuallyMarkAgentVmAvailableAfterProvisioning = True
-    agency_config.optimizedDeploymentEnabled = False
-    agency_config.preferHostConfiguration = True
 
     compute_scope = eam.Agency.ComputeResourceScope()
     cluster_list = args.cluster_list.rstrip(',')
