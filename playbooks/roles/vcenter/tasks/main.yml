@@ -213,6 +213,17 @@
   with_items: "{{ esxi_servers }}"
   when: auto_deploy
 
+- name: Power off ContrailVMs
+  include: power_off_vm.yml esxi_host={{item}}
+  with_items: "{{ esxi_servers }}"
+
+- name: Wait for VM power off task complete
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ powered_off }}"
+  register: power_off
+  until: power_off.finished
+  retries: 300
+
 - name: Add nics to ContrailVM
   include: add_nic.yml esxi_host={{item}}
   with_items: "{{ esxi_servers }}"
