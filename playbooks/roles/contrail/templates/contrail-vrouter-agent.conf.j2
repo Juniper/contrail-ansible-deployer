@@ -2,7 +2,11 @@
 platform=windows
 
 [CONTROL-NODE]
-servers={{ contrail_configuration.CONTROLLER_NODES }}
+servers={{ contrail_configuration.CONTROL_NODES }}
+
+[DNS]
+dns_client_port=53
+servers={{ contrail_configuration.CONTROL_NODES }}:53
 
 [VIRTUAL-HOST-INTERFACE]
 name={{ adapters.vhost.interface_name }}
