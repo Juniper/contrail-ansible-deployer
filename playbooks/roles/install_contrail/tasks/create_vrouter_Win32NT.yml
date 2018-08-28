@@ -31,6 +31,22 @@
     path: '{{ win_host_artifacts_dir }}\agent\contrail-vrouter-agent.msi'
     state: present
 
+- name: get vrouter nodemgr packages
+  win_find:
+    paths: '{{ win_host_artifacts_dir }}\nodemgr'
+    patterns: ['*.tar.gz']
+  register: nodemgr_packages
+
+- name: install vrouter nodemgr
+  win_shell: 'pip install {{ item.path }}'
+  with_items: "{{ nodemgr_packages.files }}"
+
+- name: create vrouter nodemgr configuration file
+  win_template:
+    src: templates/contrail-nodemgr-win.conf.j2
+    dest: "{{ win_nodemgr_config_path }}"
+    newline_sequence: "\r\n"
+
 - name: run hostname command
   win_shell: "hostname"
   register: hostname_output
