@@ -135,6 +135,11 @@
     name: vcredist140
     state: present
 
+- name: install vcpython2.7
+  win_chocolatey:
+    name: vcpython27
+    state: present
+
 - name: disable Windows Firewall
   win_firewall:
     profiles:
