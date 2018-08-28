@@ -1,0 +1,2 @@
+win_cnm_plugin_config_path: C:\ProgramData\Contrail\etc\contrail\contrail-cnm-plugin.conf
+win_cnm_plugin_nssm_log_path: C:\ProgramData\Contrail\var\log\contrail\contrail-cnm-plugin-service.log
