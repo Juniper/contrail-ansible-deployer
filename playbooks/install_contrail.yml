@@ -15,6 +15,10 @@
       set_fact:
           global_configuration: "{{ global_configuration | default({}) }}"
       when: hostvars['localhost']['global_configuration'] is undefined
+    - name: Expose remote_locations configuration
+      set_fact:
+          remote_locations: "{{ remote_locations | default({}) }}"
+      when: hostvars['localhost']['remote_locations'] is undefined
   roles:
     - create_container_host_group
     - set_global_variables
@@ -42,6 +46,7 @@
   vars:
     - contrail_configuration: "{{ hostvars['localhost'].contrail_configuration }}"
     - global_configuration: "{{ hostvars['localhost'].global_configuration }}"
+    - remote_locations: "{{ hostvars['localhost'].remote_locations }}"
     - instances: "{{ hostvars['localhost'].instances }}"
     - container_registry: "{{ hostvars['localhost'].container_registry }}"
     - contrail_version_tag: "{{ hostvars['localhost'].contrail_version_tag }}"
