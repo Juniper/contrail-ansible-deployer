@@ -42,6 +42,7 @@
   vars:
     - contrail_configuration: "{{ hostvars['localhost'].contrail_configuration }}"
     - global_configuration: "{{ hostvars['localhost'].global_configuration }}"
+    - remote_locations: "{{ hostvars['localhost'].remote_locations }}"
     - instances: "{{ hostvars['localhost'].instances }}"
     - container_registry: "{{ hostvars['localhost'].container_registry }}"
     - contrail_version_tag: "{{ hostvars['localhost'].contrail_version_tag }}"
