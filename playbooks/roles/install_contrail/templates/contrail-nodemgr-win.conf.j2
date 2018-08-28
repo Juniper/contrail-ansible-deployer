@@ -1,0 +1,8 @@
+[DEFAULTS]
+log_local = 1
+log_level = SYS_DEBUG
+log_file = {{ win_nodemgr_log_path }}
+
+[COLLECTOR]
+server_list= {{ contrail_configuration.CONTROLLER_NODES }}:8086
+
