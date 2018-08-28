@@ -1,0 +1,8 @@
+[DEFAULTS]
+log_local = 1
+log_level = SYS_DEBUG
+log_file = C:\ProgramData\Contrail\var\log\contrail\contrail-vrouter-nodemgr.log
+hostip = {{ hostvars[inventory_hostname]['instance_data']['ip'] }}
+
+[COLLECTOR]
+server_list = {{ win_collector_nodes | join(' ') }}
