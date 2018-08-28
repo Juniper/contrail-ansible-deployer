@@ -9,7 +9,22 @@
     contrail_configuration: "{{ contrail_configuration | combine( { 'CONFIG_NODES': contrail_configuration.CONTROLLER_NODES } ) }}"
   when: contrail_configuration.CONFIG_NODES is not defined
 
+- name: set DNS nodes if not defined
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'DNS_NODES': contrail_configuration.DNS_NODES|default(contrail_configuration.CONTROLLER_NODES)}) }}"
+  when: contrail_configuration.DNS_NODES is not defined
+
 - name: create artifacts directory
   win_file:
     path: "{{ win_host_artifacts_dir }}"
+    state: directory
+
+- name: create logs directory
+  win_file:
+    path: C:\ProgramData\Contrail\var\log\contrail
+    state: directory
+
+- name: ensure configuration folder exists
+  win_file:
+    path: C:\ProgramData\Contrail\etc\contrail
     state: directory
