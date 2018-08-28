@@ -1,5 +1,32 @@
 ---
 
+- name: set DNS nodes if not defined
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'DNS_NODES': contrail_configuration.DNS_NODES|default(contrail_configuration.CONTROLLER_NODES)}) }}"
+  when: roles[instance_name].vrouter.DNS_NODES is undefined
+
+- name: prepare variables for configuration files
+  set_fact:
+    win_collector_port: "{{ (contrail_configuration.COLLECTOR_PORT | default(8086)) }}"
+    win_dns_server_port: "{{ (contrail_configuration.DNS_SERVER_PORT | default(53)) }}"
+    win_dns_nodes: []
+    win_collector_nodes: []
+
+- name: append dns client port to dns nodes ip's
+  set_fact:
+    win_dns_nodes: "{{ win_dns_nodes + [item ~ ':' ~ win_dns_server_port] }}"
+  with_items: "{{ contrail_configuration.DNS_NODES.split(',') }}"
+
+- name: append collector port to collector nodes ip's
+  set_fact:
+    win_collector_nodes: "{{ win_collector_nodes + [item ~ ':' ~ win_collector_port] }}"
+  with_items: "{{ contrail_configuration.CONTROL_NODES.split(',') }}"
+
+- name: ensure configuration folder exists
+  win_file:
+    path: C:\ProgramData\Contrail\etc\contrail
+    state: directory
+
 - name: extract vrouter artifacts from container
   win_shell: >
     docker run -v {{ win_host_artifacts_dir }}:{{ win_container_artifacts_dir }}
@@ -30,6 +57,36 @@
   win_package:
     path: '{{ win_host_artifacts_dir }}\agent\contrail-vrouter-agent.msi'
     state: present
+
+- name: get nodemgr packages
+  win_find:
+    paths: '{{ win_host_artifacts_dir }}\nodemgr'
+    patterns: ['*.tar.gz']
+  register: nodemgr_packages
+
+- name: install nodemgr with dependencies
+  win_shell: 'pip install {{ item.path }}'
+  with_items: "{{ nodemgr_packages.files }}"
+
+- name: create vrouter nodemgr configuration file
+  win_template:
+    src: templates/contrail-nodemgr-win.conf.j2
+    dest: C:\ProgramData\Contrail\etc\contrail\contrail-vrouter-nodemgr.conf
+    newline_sequence: "\r\n"
+
+- name: create vrouter nodemgr service
+  win_nssm:
+    name: contrail-vrouter-nodemgr
+    application: C:\Python27\Scripts\contrail-nodemgr.exe
+    state: present
+    app_parameters_free_form: >
+      --nodetype contrail-vrouter
+
+- name: start vrouter nodemgr service
+  win_service:
+    name: contrail-vrouter-nodemgr
+    state: started
+    start_mode: auto
 
 - name: run hostname command
   win_shell: "hostname"
@@ -91,3 +148,10 @@
       }
     status_code: 200, 409
     headers: "{{ rest_headers }}"
+
+- name: create vrouter-agent configuration file
+  win_template:
+    src: templates/contrail-vrouter-agent.conf.j2
+    dest: "{{ win_agent_config_path }}"
+    newline_sequence: "\r\n"
+  register: agent_config
