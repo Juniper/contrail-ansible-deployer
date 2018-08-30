@@ -1,0 +1,20 @@
+---
+- name: Add esxi host to cluster
+  vmware_host:
+    hostname: "{{ esxi_host.vcenter_server.hostname }}"
+    username: "{{ esxi_host.vcenter_server.username }}"
+    password: "{{ esxi_host.vcenter_server.password }}"
+    esxi_hostname: "{{ esxi_host.name }}"
+    esxi_username: "{{ esxi_host.username }}"
+    esxi_password: "{{ esxi_host.password }}"
+    validate_certs: "{{ esxi_host.validate_certs }}"
+    datacenter_name: "{{ esxi_host.vcenter_server.datacentername }}"
+    cluster_name: "{{ esxi_host.cluster }}"
+    state: present
+  async: 3600
+  poll: 0
+  register: r1
+
+- name: save add host task result
+  set_fact:
+    added_hosts: "{{ added_hosts | default ([]) + [r1] }}"

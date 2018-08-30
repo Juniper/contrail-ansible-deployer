@@ -1,0 +1,140 @@
+- name: set instance_type to default if not defined
+  set_fact:
+    instance_type: t2.xlarge
+  when: provider_config.aws.instance_type is undefined and item.value.instance_type is undefined
+
+- name: set instance_type to provider default if not defined
+  set_fact:
+    instance_type: "{{ provider_config.aws.instance_type }}"
+  when: provider_config.aws.instance_type is defined
+
+- name: set instance_type to instance if not defined
+  set_fact:
+    instance_type: "{{ item.value.instance_type }}"
+  when: item.value.instance_type is defined
+
+- name: set image to default if not defined
+  set_fact:
+    image: ami-337be65c
+  when: provider_config.aws.image is undefined and item.value.image is undefined
+
+- name: set image to provider default if not defined
+  set_fact:
+    image: "{{ provider_config.aws.image }}"
+  when: provider_config.aws.image is defined
+
+- name: set image to provider default if not defined
+  set_fact:
+    image: "{{ item.value.image }}"
+  when: item.value.image is defined
+
+- name: set vpc_subnet_id to default if not defined
+  set_fact:
+    vpc_subnet_id: default
+  when: provider_config.aws.vpc_subnet_id is undefined and item.value.vpc_subnet_id is undefined
+
+- name: set vpc_subnet_id to provider default if not defined
+  set_fact:
+    vpc_subnet_id: "{{ provider_config.aws.vpc_subnet_id }}"
+  when: provider_config.aws.vpc_subnet_id is defined
+
+- name: set vpc_subnet_id to provider default if not defined
+  set_fact:
+    vpc_subnet_id: "{{ item.value.vpc_subnet_id }}"
+  when: item.value.vpc_subnet_id is defined
+
+- name: set region to default if not defined
+  set_fact:
+    region: eu-central-1
+  when: provider_config.aws.region is undefined and item.value.region is undefined
+
+- name: set region to provider default if not defined
+  set_fact:
+    region: "{{ provider_config.aws.region }}"
+  when: provider_config.aws.region is defined
+
+- name: set region to provider default if not defined
+  set_fact:
+    region: "{{ item.value.region }}"
+  when: item.value.region is defined
+
+- name: set volume_size to default if not defined
+  set_fact:
+    volume_size: 50
+  when: provider_config.aws.volume_size is undefined and item.value.volume_size is undefined
+
+- name: set volume_size to provider default if not defined
+  set_fact:
+    volume_size: "{{ provider_config.aws.volume_size }}"
+  when: provider_config.aws.volume_size is defined
+
+- name: set volume_size to provider default if not defined
+  set_fact:
+    volume_size: "{{ item.value.volume_size }}"
+  when: item.value.volume_size is defined
+
+- name: set security group to default if not defined
+  set_fact:
+    security_group: default
+  when: provider_config.aws.security_group is undefined and item.value.security_group is undefined
+
+- name: set security_group to provider default if not defined
+  set_fact:
+    security_group: "{{ provider_config.aws.security_group }}"
+  when: provider_config.aws.security_group is defined
+
+- name: set security_group to provider default if not defined
+  set_fact:
+    security_group: "{{ item.value.security_group }}"
+  when: item.value.security_group is defined
+
+- name: Launch instance
+  ec2:
+   key_name: "{{ provider_config.aws.key_pair }}"
+   instance_type: "{{ instance_type }}"
+   image: "{{ image }}"
+   ec2_access_key: "{{ provider_config.aws.ec2_access_key }}"
+   ec2_secret_key: "{{ provider_config.aws.ec2_secret_key }}"
+   group: "{{ security_group }}"
+   vpc_subnet_id: "{{ vpc_subnet_id }}"
+   region: "{{ region }}"
+   volumes:
+   - device_name: /dev/sda1
+     volume_size: "{{ volume_size }}"
+     delete_on_termination: true
+   assign_public_ip: yes
+   exact_count: 1
+   count_tag: "{{ item.key }}"
+   instance_tags:
+     Name: "{{ item.key }}"
+   wait: true
+  register: aws
+
+- name: Wait for SSH to come up
+  wait_for: host={{ instance_data.public_ip }} port=22 delay=10 timeout=120
+  with_items: "{{ aws.instances }}"
+  loop_control:
+    loop_var: instance_data
+
+- name: Add host to groupname
+  add_host:
+    hostname: "{{ instance_data.public_ip }}"
+    groupname: container_hosts
+    instance_name: "{{ item.key }}"
+  with_items: "{{ aws.instances }}"
+  loop_control:
+    loop_var: instance_data
+
+- name: display new instance
+  debug:
+   msg: "{{ aws.instances }}"
+
+#- name: configure new instances
+#  include: ../../../../../host_configuration/playbooks/roles/configure_container_hosts/tasks/main.yml
+#- name: Manage new instances
+#  hosts: new_instances
+#  connection: ssh
+#  sudo: True
+#  roles:
+#    - base_configuration
+#    - production_server

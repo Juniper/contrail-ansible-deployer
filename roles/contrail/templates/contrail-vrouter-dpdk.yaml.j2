@@ -1,0 +1,94 @@
+version: '2'
+services:
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_vrouter.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    pid: host
+    network_mode: "host"
+    volumes:
+      - /usr/bin:/host/usr/bin
+      - /etc/contrail/ssl:/etc/contrail/ssl
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_vrouter.env
+    environment:
+      - NODE_TYPE=vrouter
+    network_mode: host
+    volumes:
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/crashes:/var/crashes
+    restart: on-failure
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+  vrouter-kernel-init-dpdk:
+    image: "{{ container_registry }}/contrail-vrouter-kernel-init-dpdk:{{ contrail_version_tag }}"
+    network_mode: host
+    privileged: true
+    env_file: /etc/contrail/common_vrouter.env
+    pid: host
+    volumes:
+      - /lib/modules:/lib/modules
+      - /var/run:/var/run
+      - /etc/os-release:/etc/os-release
+      - /etc/lsb-release:/etc/lsb-release
+      - /dev:/dev
+      - /var/log/contrail:/var/log/contrail
+      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+  vrouter-agent-dpdk:
+    image: "{{ container_registry }}/contrail-vrouter-agent-dpdk:{{ contrail_version_tag }}"
+    network_mode: host
+    privileged: true
+    env_file: /etc/contrail/common_vrouter.env
+    pid: host
+    volumes:
+      - /lib/modules:/lib/modules
+      - /var/run:/var/run
+      - /var/log/contrail:/var/log/contrail
+      - /etc/os-release:/etc/os-release
+      - /etc/lsb-release:/etc/lsb-release
+      - /dev:/dev
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/crashes:/var/crashes
+      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+    volumes_from:
+      - node-init
+    restart: always
+    depends_on:
+      - vrouter-kernel-init-dpdk
+      - node-init
+  vrouter-agent:
+    image: "{{ container_registry }}/contrail-vrouter-agent:{{ contrail_version_tag }}"
+    network_mode: host
+    privileged: true
+    pid: host
+    env_file: /etc/contrail/common_vrouter.env
+    volumes:
+      - /lib/modules:/lib/modules
+      - /var/lib/contrail:/var/lib/contrail
+      - /var/log/contrail:/var/log/contrail
+      - /var/run:/var/run
+      - /bin:/host/bin
+      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+      - /dev:/dev
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    restart: always
+    depends_on:
+      - vrouter-agent-dpdk
+      - node-init

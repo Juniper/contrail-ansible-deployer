@@ -1,0 +1,102 @@
+---
+- name: create /etc/contrail/control
+  file:
+    path: /etc/contrail/control
+    state: directory
+    recurse: yes
+
+- name: "get /etc/contrail/common_control.env stat"
+  stat:
+    path: "/etc/contrail/common_control.env"
+  register: st
+
+- name: "delete /etc/contrail/common_control.env if exists"
+  file:
+    path: "/etc/contrail/common_control.env"
+    state: absent
+  when: st.stat.exists is defined and st.stat.exists
+
+- name: "create /etc/contrail/common_control.env"
+  file:
+    path: "/etc/contrail/common_control.env"
+    state: touch
+
+- name: set location if defined
+  set_fact:
+    location: "{{ roles[instance_name].control.location }}"
+  when: roles[instance_name].control.location is defined
+
+- name: init location control peers list if location is defined
+  set_fact:
+    control_peer_list: []
+  when: roles[instance_name].control.location is defined
+
+- name: add peer control nodes to the list
+  set_fact:
+    control_peer_list: "{{ control_peer_list + [ instances[item.key].ip ] }}"
+  when: location is defined and item.value.control is defined and item.value.control.location is defined and item.value.control.location == location
+  with_dict: "{{ roles }}"
+  ignore_errors: yes
+
+- name: create controller host list if not defined
+  set_fact:
+    control_peers: "{{ control_peer_list|join(',') }}"
+  when: control_peer_list is defined
+
+- name: create contrail_configuration.CONTROL_NODES
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'CONTROL_NODES': control_peers}) }}"
+  when: control_peers is defined and roles[instance_name].control.CONTROL_NODES is undefined
+
+- name: "populate global common_control.env"
+  lineinfile: dest=/etc/contrail/common_control.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ contrail_configuration }}"
+  no_log: True
+
+- name: "populate instance specific common_control.env"
+  lineinfile: dest=/etc/contrail/common_control.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ instances[instance_name].contrail_configuration }}"
+  when: instances[instance_name].contrail_configuration is defined
+  ignore_errors: yes
+  no_log: True
+
+- name: "populate pod specific common_control.env"
+  lineinfile: dest=/etc/contrail/common_control.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ roles[instance_name].control }}"
+  ignore_errors: yes
+  no_log: True
+
+- name: add BGP_ASN if location is defined
+  lineinfile: dest=/etc/contrail/common_control.env regexp='^BGP_ASN=.*' line="BGP_ASN={{ remote_locations[location].BGP_ASN }}" state=present
+  when: location is defined
+
+- name: add SUBCLUSTER name if location is defined and subcluster name is defined
+  lineinfile: dest=/etc/contrail/common_control.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ remote_locations[location].SUBCLUSTER }}" state=present
+  when: location is defined and remote_locations[location].SUBCLUSTER is defined
+
+- name: add SUBCLUSTER name if location is defined and subcluster name is undefined
+  lineinfile: dest=/etc/contrail/common_control.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ location }}" state=present
+  when: location is defined and remote_locations[location].SUBCLUSTER is undefined
+
+- name: set BGP_AUTO_MESH to false if location is enabled
+  lineinfile: dest=/etc/contrail/common_control.env regexp='^BGP_AUTO_MESH=.*' line="BGP_AUTO_MESH=false" state=present
+  when: location is defined
+
+- name: update image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-node-init
+    - contrail-nodemgr
+    - contrail-controller-control-control
+    - contrail-controller-control-named
+    - contrail-controller-control-dns
+  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+
+- name: "create contrail control compose file"
+  template:
+    src: contrail-control.yaml.j2
+    dest: "/etc/contrail/control/docker-compose.yaml"
+
+- name: "start contrail control"
+  docker_service:
+    project_src: /etc/contrail/control

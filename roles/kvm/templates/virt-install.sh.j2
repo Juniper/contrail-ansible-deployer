@@ -1,0 +1,31 @@
+#!/bin/bash
+virt-install --name {{ container_vm_hostname }} \
+--disk /var/lib/libvirt/images/{{ container_vm_hostname }}.qcow2 \
+--cpu host-passthrough \
+--vcpus={{ vcpu }} \
+--ram={{ vram }} \
+{% if item.value.port_group is defined %}
+--network network={{ item.value.bridge }},model=virtio,portgroup={{ item.value.port_group }} \
+{% else %}
+--network network={{ item.value.bridge }},model=virtio \
+{% endif %}
+{% if item.value.additional_interfaces is defined %}
+{% for additional_interface in item.value.additional_interfaces %}
+{% if additional_interface.bridge is defined %}
+{% if additional_interface.port_group is defined %}
+--network network={{ additional_interface.bridge }},model=virtio,portgroup={{ additional_interface.port_group }} \
+{% else %}
+--network network={{ additional_interface.bridge }},model=virtio \
+{% endif %}
+{% endif %}
+{% endfor %}
+{% else %}
+--network network=default,model=virtio \
+{% endif %}
+--virt-type kvm \
+--import \
+--os-variant rhel7 \
+--graphics vnc \
+--serial pty \
+--noautoconsole \
+--console pty,target_type=virtio

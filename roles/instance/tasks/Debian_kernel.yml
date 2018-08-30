@@ -1,0 +1,79 @@
+---
+# Install Kernel for Ubuntu 16.04 LTS
+- name: install latest kernel
+  apt:
+    name: linux-generic-hwe-16.04
+    state: latest
+    install_recommends: yes
+  register: upgrade_kernel
+  when: (contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true) or
+        (instance_data.UPGRADE_KERNEL is defined and instance_data.UPGRADE_KERNEL == true)
+
+# enable IOMMU if sriov/vfio-dpdk is enabled
+- name: set grub file name.
+  stat:
+    path: "/etc/default/grub"
+  register: file_rc
+
+- name: set SRIOV data
+  set_fact:
+    contrail_modify_grub: 'True'
+    contrail_grub_cmd_line: 'nomdmonddf nomdmonisw intel_iommu=on'
+  when: vrouter_data is defined and (vrouter_data.SRIOV is defined and vrouter_data.SRIOV == true)
+
+- name: set VFIO-DPDK data
+  set_fact:
+    contrail_modify_grub: 'True'
+    contrail_grub_cmd_line: 'intel_iommu=on iommu=pt'
+  when: vrouter_data is defined and
+        (vrouter_data.AGENT_MODE is defined and vrouter_data.AGENT_MODE == 'dpdk') and
+        (vrouter_data.DPDK_UIO_DRIVER is defined and
+        (vrouter_data.DPDK_UIO_DRIVER == 'vfio_pci' or vrouter_data.DPDK_UIO_DRIVER == 'vfio-pci'))
+
+- name: Remove the SRIOV/VFIO config if present - to fix limiation in lineinfile
+  replace:
+    path: "/etc/default/grub"
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT=\"((.*))(( {{ contrail_grub_cmd_line}}))\"'
+    replace: 'GRUB_CMDLINE_LINUX_DEFAULT="\1"'
+  register: contrail_grub_restored
+  when: contrail_modify_grub is defined and file_rc.stat.exists == true
+
+- name: Modify grub to include iommu for SRIOV and VFIO-DPDK
+  replace:
+    path: "/etc/default/grub"
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT=\"((.*))(( {{ contrail_grub_cmd_line}})|(?<! {{contrail_grub_cmd_line}}))\"'
+    replace: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 {{ contrail_grub_cmd_line }}"'
+  register: contrail_grub_modified
+  when: contrail_modify_grub is defined and file_rc.stat.exists == true
+
+- name: Add iommu for grub for SRIOV and VFIO-DPDK
+  lineinfile:
+    path: "/etc/default/grub"
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT=" {{contrail_grub_cmd_line}}"'
+    insertafter: EOF
+  register: contrail_grub_added
+  when: contrail_modify_grub is defined and file_rc.stat.exists == true and contrail_grub_modified.changed == false
+
+- name: execute update-grub/sys
+  command: update-grub
+  register: gstat
+  when:
+    - contrail_modify_grub is defined
+    - file_rc.stat.exists == true
+    - ((contrail_grub_restored.changed == false and contrail_grub_modified.changed == true) or
+      (contrail_grub_added.changed == true))
+
+- name: restart server
+  shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+  async: 1
+  poll: 0
+  become: true
+  when: (upgrade_kernel is defined and upgrade_kernel.changed) or
+        (contrail_modify_grub is defined and gstat is defined and gstat.changed)
+
+- name: wait for server to come back online
+  wait_for_connection:
+    delay: 30
+    timeout: 2400
+  when: (upgrade_kernel is defined and upgrade_kernel.changed) or
+        (contrail_modify_grub is defined and gstat is defined and gstat.changed)

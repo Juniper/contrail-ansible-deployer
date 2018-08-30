@@ -1,0 +1,28 @@
+---
+- name: OS specific package install
+  include: RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- name: install common packages required by kolla playbooks
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - python-pip
+  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Debian'
+
+- name: install right version of jinja2 for kolla
+  pip:
+    name: jinja2
+    extra_args: --upgrade
+  become: yes
+
+- name: install packages used to generate passwords
+  pip:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - pycrypto
+    - oslo.config
+    - oslo.utils
+  become: yes

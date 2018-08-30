@@ -1,0 +1,30 @@
+---
+- name: Create pg in standard switch
+  vmware_portgroup:
+    hostname: "{{ esxi_host.vcenter_server.hostname }}"
+    username: "{{ esxi_host.vcenter_server.username }}"
+    password: "{{ esxi_host.vcenter_server.password }}"
+    validate_certs: "{{ esxi_host.vcenter_server.validate_certs }}"
+    cluster_name: "{{ esxi_host.cluster }}"
+    switch_name: "{{ esxi_host.std_switch_list[0].switch_name | default(std_switch_name) }}"
+    portgroup_name: "{{ esxi_host.std_switch_list[0].pg_name | default(std_pg_name) }}"
+    vlan_id: 0
+  async: 3600
+  poll: 0
+  register: res
+
+- name: Create more PGs in standard switch if defined
+  vmware_portgroup:
+    hostname: "{{ esxi_host.vcenter_server.hostname }}"
+    username: "{{ esxi_host.vcenter_server.username }}"
+    password: "{{ esxi_host.vcenter_server.password }}"
+    validate_certs: "{{ esxi_host.vcenter_server.validate_certs }}"
+    cluster_name: "{{ esxi_host.cluster }}"
+    switch_name: "{{ esxi_host.std_switch_list[1].switch_name | default(std_switch_name) }}"
+    portgroup_name: "{{ esxi_host.std_switch_list[1].pg_name | default(std_pg_name) }}"
+    vlan_id: 0
+  when: esxi_host.std_switch_list | length > 1
+
+- name: Save fab pg task results
+  set_fact:
+    pgs_completed: "{{ pgs_completed | default ([]) + [res] }}"

@@ -1,0 +1,198 @@
+---
+- name: set instance data
+  set_fact:
+    instance_data: "{{ instances[hostvars[inventory_hostname].instance_name] }}"
+
+- name: set vrouter data
+  set_fact:
+    vrouter_data: "{{ hostvars[inventory_hostname].instance_data.roles.vrouter }}"
+  when: hostvars[inventory_hostname].instance_data.roles is defined and
+        hostvars[inventory_hostname].instance_data.roles.vrouter is defined
+
+- name: set provider data
+  set_fact:
+    provider_data: "{{ provider_config[instance_data.provider] }}"
+  when: provider_config[instance_data.provider] is defined
+
+- name: turn off swap
+  shell: swapoff -a && sed -i '/swap[ \t]\+swap/d' /etc/fstab
+
+- name: disable cloud init
+  service:
+    name: "{{ item }}"
+    state: stopped
+    enabled: no
+  with_items:
+  - cloud-config
+  - cloud-final
+  - cloud-init-local
+  - cloud-init
+  - cloud-config
+  - NetworkManager
+  ignore_errors: yes
+
+- name: OS specific package install
+  include: "{{ ansible_os_family }}.yml"
+
+- name: Install common pre-requisites
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python-pip
+
+- name: install rsyslogd
+  package:
+    name: rsyslog
+    state: present
+  when:
+    - instance_data.roles is defined
+    - instance_data.roles.vrouter is defined
+
+- name: Set up ntp
+  include: ntp.yml
+  when: provider_data.ntpserver is defined
+
+- name: OS specific kernel install, grub midifications, reboot
+  include: "{{ ansible_os_family }}_kernel.yml"
+
+- name: install python compose
+  pip:
+    name: docker-compose
+
+- name: "Build hosts file for rabbitmq with domain suffix when provided"
+  lineinfile: dest=/etc/hosts regexp='^{{ item.0 }}.*' line="{{ item.0 }} {{ hostvars[item.1]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item.1]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
+  with_nested:
+    - "{{ contrail_configuration.CONTROLLER_NODES.split(',') }}"
+    - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - contrail_configuration.CONTROLLER_NODES is defined
+    - provider_data.domainsuffix is defined
+    - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
+
+- name: "Build hosts file for rabbitmq with domain suffix"
+  lineinfile: dest=/etc/hosts regexp='^{{ item.0 }}.*' line="{{ item.0 }} {{ hostvars[item.1]['ansible_fqdn'] }} {{ hostvars[item.1]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
+  with_nested:
+    - "{{ contrail_configuration.CONTROLLER_NODES.split(',') }}"
+    - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - contrail_configuration.CONTROLLER_NODES is defined
+    - provider_data.domainsuffix is undefined
+    - hostvars[item.1]['ansible_fqdn'] is defined
+    - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
+
+- name: "Build hosts file for rabbitmq without domain suffix"
+  lineinfile: dest=/etc/hosts regexp='^{{ item.0 }}.*' line="{{ item.0 }} {{ hostvars[item.1]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
+  with_nested:
+    - "{{ contrail_configuration.CONTROLLER_NODES.split(',') }}"
+    - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - contrail_configuration.CONTROLLER_NODES is defined
+    - provider_data.domainsuffix is undefined
+    - hostvars[item.1]['ansible_fqdn'] is undefined
+    - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
+
+- name: "Build hosts file with domain suffix when provided"
+  lineinfile: dest=/etc/hosts regexp='^{{ item }}.*' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - instance_data.provider == 'bms'
+    - provider_data.domainsuffix is defined
+
+- name: "Build hosts file with domain suffix"
+  lineinfile: dest=/etc/hosts regexp='^{{ item }}.*' line="{{ item }} {{ hostvars[item]['ansible_fqdn'] }} {{ hostvars[item]['ansible_hostname'] }}" state=present
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - instance_data.provider == 'bms'
+    - provider_data.domainsuffix is undefined
+    - hostvars[item]['ansible_fqdn'] is defined
+
+- name: "Build hosts file without domain suffix when not provided (bad bad)"
+  lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}" state=present
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - instance_data.provider == 'bms'
+    - provider_data.domainsuffix is undefined
+    - hostvars[item]['ansible_fqdn'] is undefined
+
+- name: "Build hosts file with domain suffix when provided"
+  lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - instance_data.provider == 'kvm'
+    - provider_data.domainsuffix is defined
+
+- name: "Build hosts file wit domain suffix when not provided (bad bad)"
+  lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ item }} {{ hostvars[item]['ansible_fqdn'] }} {{ hostvars[item]['ansible_hostname'] }}" state=present
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - instance_data.provider == 'kvm'
+    - provider_data.domainsuffix is undefined
+    - hostvars[item]['ansible_fqdn'] is defined
+
+- name: "Build hosts file without domain suffix when not provided (bad bad)"
+  lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}" state=present
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - instance_data.provider == 'kvm'
+    - provider_data.domainsuffix is undefined
+    - hostvars[item]['ansible_fqdn'] is undefined
+
+- name: "Build hosts file for aws instances"
+  lineinfile: dest=/etc/hosts regexp='.*{{ hostvars[item]['private_ip'] }}$' line="{{ hostvars[item]['private_ip'] }} {{ hostvars[item]['ansible_hostname'] }} {{ hostvars[item]['private_dns_name'] }}" state=present
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when: instance_data.provider == 'aws'
+
+- name: create log file directory
+  file:
+   dest: /var/log/docker/contrail
+   state: directory
+   mode: 0777
+
+- name: Enable bridge-netfilter
+  modprobe:
+    name: br_netfilter
+
+- name: sysctl -w net.bridge.bridge-nf-call-iptables=1
+  shell: sysctl -w net.bridge.bridge-nf-call-iptables=1 && echo "net.bridge.bridge-nf-call-iptables=1" >> /etc/sysctl.conf
+
+- name: sysctl -w net.bridge.bridge-nf-call-ip6tables=1
+  shell: sysctl -w net.bridge.bridge-nf-call-ip6tables=1 && echo "net.bridge.bridge-nf-call-ip6tables=1" >> /etc/sysctl.conf
+
+- name: configure tcp_keepalive_time
+  sysctl:
+    name: net.ipv4.tcp_keepalive_time
+    value: 15
+    sysctl_set: yes
+
+- name: configure tcp_keepalive_intvl
+  sysctl:
+    name: net.ipv4.tcp_keepalive_intvl
+    value: 15
+    sysctl_set: yes
+
+- name: configure tcp_keepalive_probes
+  sysctl:
+    name: net.ipv4.tcp_keepalive_probes
+    value: 5
+    sysctl_set: yes
+
+- name: set firewall service name
+  set_fact:
+    firewall_svc_name: "{{ 'ufw' if ansible_os_family == 'Debian' else 'firewalld' }}"
+
+- name: stop and disable firewall service
+  service:
+    name: "{{ firewall_svc_name }}"
+    state: stopped
+    enabled: no
+  ignore_errors: yes
+
+- name: accept input
+  shell: iptables -P INPUT ACCEPT
+  ignore_errors: yes
+
+- name: accept forward
+  shell: iptables -P FORWARD ACCEPT
+  ignore_errors: yes
+
