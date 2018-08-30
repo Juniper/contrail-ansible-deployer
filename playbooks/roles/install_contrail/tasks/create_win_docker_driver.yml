@@ -31,6 +31,12 @@
     name: contrail-docker-driver
     state: started
     start_mode: auto
+  async: 1
+  poll: 0
+
+- name: wait for connection after creating vswitch
+  wait_for_connection:
+    delay: 10
 
 # TODO: It should be investigated if win_stat is a more elegant solution.
 - name: wait for docker driver startup
