@@ -1,0 +1,8 @@
+---
+
+kube_pod_subnet: >-
+    {%- if contrail_configuration is defined -%}
+      {{ contrail_configuration.get('KUBERNETES_POD_SUBNETS', '10.32.0.0/12') }}
+    {%- else -%}
+      {{ '10.32.0.0/12' }}
+    {%- endif -%}

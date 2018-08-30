@@ -1,0 +1,86 @@
+- name: set provider data
+  set_fact:
+    provider_data: "{{ provider_config.kvm }}"
+
+- name: set image to default if not provided
+  set_fact:
+    image: CentOS-7-x86_64-GenericCloud-1802.qcow2.xz
+
+- name: set image to provider default if not provided
+  set_fact:
+    image: "{{ provider_data.image }}"
+  when: provider_data.image is defined
+
+- name: set image url to default if not provided
+  set_fact:
+    image_url: https://cloud.centos.org/centos/7/images/
+
+- name: set image_url to provider default if not provided
+  set_fact:
+    image_url: "{{ provider_data.image_url }}"
+  when: provider_data.image_url is defined
+
+- name: register uncompressed image
+  find:
+    paths: /tmp/centos_image/
+    patterns: '*.qcow2'
+    file_type: file
+  register: qcow_exists
+
+- name: get image
+  stat:
+    path: "/tmp/centos_image/{{ image }}"
+  register: st
+
+- name: Clean image directory path
+  file:
+    state: absent
+    path: /tmp/centos_image/
+  when: qcow_exists.matched == 0 and st.stat.exists == False
+
+- name: create image directory
+  file:
+    path: /tmp/centos_image
+    state: directory
+    mode: 0770
+  when: qcow_exists.matched == 0 and st.stat.exists == False
+
+- name: Get {{ image }}
+  get_url:
+    url: "{{ image_url }}/{{ image }}"
+    dest: "/tmp/centos_image/{{ image }}"
+  when: qcow_exists.matched == 0 and st.stat.exists == False
+
+- name: Figure out file type
+  stat:
+    path: /tmp/centos_image/{{ image }}
+    get_mime: true
+  register: image_file_type
+  when: st is defined
+
+- name: xz -d {{ image }}
+  shell: /usr/bin/xz -f -d /tmp/centos_image/{{ image }}
+  when: qcow_exists.matched == 0 and image_file_type.stat.mimetype == "application/x-xz"
+
+- name: ungzip {{ image }}
+  unarchive:
+    src: /tmp/centos_image/{{ image }}
+    dest: /tmp/centos_image
+    remote_src: yes
+  register: extract_return
+  when: qcow_exists.matched == 0 and image_file_type.stat.mimetype == "application/gzip"
+
+- name: register uncompressed image
+  find:
+    paths: /tmp/centos_image/
+    patterns: '*.qcow2'
+    file_type: file
+  register: uncompressed_image_file
+
+- name: set uncompressed image name
+  set_fact:
+     uncompressed_image_name: "{{ uncompressed_image_file.files[0].path.split('/')[3] }}"
+
+- name: build vms
+  include: build_and_start_container_hosts.yml
+  with_dict: "{{ hostvars['localhost'].kvm_host_dict[inventory_hostname] }}"

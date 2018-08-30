@@ -1,0 +1,15 @@
+---
+
+- name: merge contrail_configuration dicts
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration_default | combine(contrail_configuration) }}"
+
+- name: set CONFIG_NODES var
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine( { 'CONFIG_NODES': contrail_configuration.CONTROLLER_NODES } ) }}"
+  when: contrail_configuration.CONFIG_NODES is not defined
+
+- name: create artifacts directory
+  win_file:
+    path: "{{ win_host_artifacts_dir }}"
+    state: directory

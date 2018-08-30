@@ -1,0 +1,9 @@
+---
+
+# this file is parameterized
+# it takes 'docker_registry','docker_registry_username','docker_registry_password'  as parameters
+
+- name: activate docker login
+  shell: "docker login --username {{ docker_registry_username }} --password {{ docker_registry_password }} {{ docker_registry }}"
+  tags:
+   - always

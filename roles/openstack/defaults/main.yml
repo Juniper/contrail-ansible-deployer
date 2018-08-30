@@ -1,0 +1,32 @@
+---
+kolla_config: {}
+kolla_dir: "{{ playbook_dir }}/../../contrail-kolla-ansible"
+inventory_name: "my_inventory"
+kolla_passwd: "{{ kolla_config.get('kolla_passwords', {}) }}"
+gen_passwords: yes
+
+default_openstack_sku: ocata
+openstack_sku: >-
+    {%- if contrail_configuration.OPENSTACK_VERSION is defined -%}
+      {{ contrail_configuration.OPENSTACK_VERSION }}
+    {%- elif kolla_config.kolla_globals is defined and kolla_config.kolla_globals.openstack_release is defined -%}
+      {{ kolla_config.kolla_globals.openstack_release }}
+    {%- else -%}
+      {{ default_openstack_sku }}
+    {%- endif %}
+
+default_kolla_globals:
+  haproxy_client_timeout: 30m
+  haproxy_server_timeout: 30m
+  neutron_opencontrail_init_image_full: "{{ container_registry }}/contrail-openstack-neutron-init:{{ contrail_version_tag }}"
+  nova_compute_opencontrail_init_image_full: "{{ container_registry}}/contrail-openstack-compute-init:{{ contrail_version_tag }}"
+  ironic_notification_manager_image_full: "{{ container_registry}}/contrail-openstack-ironic-notification-manager:{{ contrail_version_tag }}"
+  heat_opencontrail_init_image_full: "{{ container_registry}}/contrail-openstack-heat-init:{{ contrail_version_tag }}"
+  enable_barbican: yes
+  customize_etc_hosts: no
+  enable_swift: yes
+  openstack_release: "{{ openstack_sku }}"
+  enable_opencontrail_rbac: "{{ 'yes' if contrail_configuration.AAA_MODE is defined and contrail_configuration.AAA_MODE == 'rbac' else 'no' }}"
+  opencontrail_api_server_ip: "{{ contrail_configuration.CONFIG_NODES | default(contrail_configuration.CONTROLLER_NODES | default(config_nodes_list | join(','))) | replace (',', ' ') }}"
+  opencontrail_collector_ip: "{{ contrail_configuration.ANALYTICS_NODES | default(contrail_configuration.CONTROLLER_NODES | default(analytics_nodes_list | join(','))) | replace (',', ' ') }}"
+  neutron_plugin_agent: opencontrail

@@ -1,0 +1,33 @@
+---
+- name: Reset the nets set_fact per VM
+  set_fact:
+    nets: "{{ [] }}"
+
+- name: Build networks list
+  set_fact:
+    nets: "{{ nets | default([]) + [ {'name': x.pg|default(std_pg_name)} ] }}"
+  with_items: "{{ esxi_host.contrail_vm.networks }}"
+  loop_control:
+    loop_var: x
+
+- name: Add nics to ContrailVM
+  vars: 
+    vmname: "ContrailVM-{{ esxi_host.vcenter_server.datacentername }}-{{ esxi_host.name }}"
+    nics: "{{ nets + [{'name': esxi_host.vcenter_server.dv_port_group.dv_portgroup_name}] }}" 
+  vmware_guest:
+    hostname: "{{ esxi_host.vcenter_server.hostname }}"
+    username: "{{ esxi_host.vcenter_server.username }}"
+    password: "{{ esxi_host.vcenter_server.password }}"
+    validate_certs: "{{ esxi_host.vcenter_server.validate_certs }}"
+    datacenter: "{{ esxi_host.vcenter_server.datacentername }}"
+    cluster: "{{ esxi_host.cluster }}"
+    name: "{{ esxi_host.contrail_vm.name | default (vmname) }}"
+    networks: "{{ nics }}"
+    state: present
+  async: 3600
+  poll: 0
+  register: add_nic_result
+
+- name: Save add_nic task results
+  set_fact:
+    nics_added: "{{ nics_added | default ([]) + [add_nic_result] }}"

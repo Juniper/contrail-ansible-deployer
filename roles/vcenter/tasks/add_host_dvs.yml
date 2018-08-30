@@ -1,0 +1,57 @@
+---
+- name: Add esxi host to DVS
+  vmware_dvs_host:
+    hostname: "{{ esxi_host.vcenter_server.hostname }}"
+    username: "{{ esxi_host.vcenter_server.username }}"
+    password: "{{ esxi_host.vcenter_server.password }}"
+    validate_certs: "{{ esxi_host.vcenter_server.validate_certs }}"
+    esxi_hostname: "{{ esxi_host.name }}"
+    switch_name: "{{ esxi_host.vcenter_server.dv_switch.dv_switch_name }}"
+    vmnics: []
+    state: present
+
+- name: Add esxi host to control-data DVS
+  vmware_dvs_host:
+    hostname: "{{ esxi_host.vcenter_server.hostname }}"
+    username: "{{ esxi_host.vcenter_server.username }}"
+    password: "{{ esxi_host.vcenter_server.password }}"
+    validate_certs: "{{ esxi_host.vcenter_server.validate_certs }}"
+    esxi_hostname: "{{ esxi_host.name }}"
+    switch_name: "{{ esxi_host.vcenter_server.dv_switch_control_data.dv_switch_name }}"
+    vmnics: "{{ esxi_host.control_data_dvs_uplink | default(esxi_host.vcenter_server.dv_port_group_control_data.uplink) }}"
+    state: present
+  when:
+    - esxi_host.vcenter_server.dv_switch_control_data is defined
+    - esxi_host.vcenter_server.dv_switch_control_data.dv_switch_name
+    - esxi_host.contrail_vm.sr_iov_nics is undefined
+    - esxi_host.contrail_vm.pci_devices is undefined 
+
+- name: Add esxi host to mgmt DVS
+  vmware_dvs_host:
+    hostname: "{{ esxi_host.vcenter_server.hostname }}"
+    username: "{{ esxi_host.vcenter_server.username }}"
+    password: "{{ esxi_host.vcenter_server.password }}"
+    validate_certs: "{{ esxi_host.vcenter_server.validate_certs }}"
+    esxi_hostname: "{{ esxi_host.name }}"
+    switch_name: "{{ esxi_host.vcenter_server.dv_switch_mgmt.dv_switch_name }}"
+    vmnics: "{{ esxi_host.mgmt_dvs_uplink | default(esxi_host.vcenter_server.dv_port_group_mgmt.uplink) }}"
+    state: present
+  when: >
+         esxi_host.vcenter_server.dv_switch_mgmt is defined and
+         esxi_host.vcenter_server.dv_switch_mgmt.dv_switch_name
+
+- name: Add esxi host to sriov DVS
+  vmware_dvs_host:
+    hostname: "{{ esxi_host.vcenter_server.hostname }}"
+    username: "{{ esxi_host.vcenter_server.username }}"
+    password: "{{ esxi_host.vcenter_server.password }}"
+    validate_certs: "{{ esxi_host.vcenter_server.validate_certs }}"
+    esxi_hostname: "{{ esxi_host.name }}"
+    switch_name: "{{ esxi_host.vcenter_server.dv_switch_sr_iov.dv_switch_name }}"
+    vmnics: "{{ esxi_host.contrail_vm.sr_iov_nics }}"
+    state: present
+  when:
+    - esxi_host.vcenter_server.dv_switch_sr_iov is defined
+    - esxi_host.vcenter_server.dv_switch_sr_iov.dv_switch_name
+    - esxi_host.contrail_vm.sr_iov_nics is defined
+

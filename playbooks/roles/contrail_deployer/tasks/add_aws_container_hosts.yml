@@ -1,0 +1,145 @@
+- name: set instance_type to default if not defined
+  set_fact:
+    instance_type: t2.xlarge
+  when: provider_config.aws.instance_type is undefined and item.value.instance_type is undefined
+
+- name: set instance_type to provider default if not defined
+  set_fact:
+    instance_type: "{{ provider_config.aws.instance_type }}"
+  when: provider_config.aws.instance_type is defined
+
+- name: set instance_type to instance if not defined
+  set_fact:
+    instance_type: "{{ item.value.instance_type }}"
+  when: item.value.instance_type is defined
+
+- name: set image to default if not defined
+  set_fact:
+    image: ami-337be65c
+  when: provider_config.aws.image is undefined and item.value.image is undefined
+
+- name: set image to provider default if not defined
+  set_fact:
+    image: "{{ provider_config.aws.image }}"
+  when: provider_config.aws.image is defined
+
+- name: set image to provider default if not defined
+  set_fact:
+    image: "{{ item.value.image }}"
+  when: item.value.image is defined
+
+- name: set vpc_subnet_id to default if not defined
+  set_fact:
+    vpc_subnet_id: default
+  when: provider_config.aws.vpc_subnet_id is undefined and item.value.vpc_subnet_id is undefined
+
+- name: set vpc_subnet_id to provider default if not defined
+  set_fact:
+    vpc_subnet_id: "{{ provider_config.aws.vpc_subnet_id }}"
+  when: provider_config.aws.vpc_subnet_id is defined
+
+- name: set vpc_subnet_id to provider default if not defined
+  set_fact:
+    vpc_subnet_id: "{{ item.value.vpc_subnet_id }}"
+  when: item.value.vpc_subnet_id is defined
+
+- name: set region to default if not defined
+  set_fact:
+    region: eu-central-1
+  when: provider_config.aws.region is undefined and item.value.region is undefined
+
+- name: set region to provider default if not defined
+  set_fact:
+    region: "{{ provider_config.aws.region }}"
+  when: provider_config.aws.region is defined
+
+- name: set region to provider default if not defined
+  set_fact:
+    region: "{{ item.value.region }}"
+  when: item.value.region is defined
+
+- name: set volume_size to default if not defined
+  set_fact:
+    volume_size: 50
+  when: provider_config.aws.volume_size is undefined and item.value.volume_size is undefined
+
+- name: set volume_size to provider default if not defined
+  set_fact:
+    volume_size: "{{ provider_config.aws.volume_size }}"
+  when: provider_config.aws.volume_size is defined
+
+- name: set volume_size to provider default if not defined
+  set_fact:
+    volume_size: "{{ item.value.volume_size }}"
+  when: item.value.volume_size is defined
+
+- name: set security group to default if not defined
+  set_fact:
+    security_group: default
+  when: provider_config.aws.security_group is undefined and item.value.security_group is undefined
+
+- name: set security_group to provider default if not defined
+  set_fact:
+    security_group: "{{ provider_config.aws.security_group }}"
+  when: provider_config.aws.security_group is defined
+
+- name: set security_group to provider default if not defined
+  set_fact:
+    security_group: "{{ item.value.security_group }}"
+  when: item.value.security_group is defined
+
+- name: Get aws instance
+  ec2_instance_facts:
+    region: "{{ region }}"
+    ec2_access_key: "{{ provider_config.aws.ec2_access_key }}"
+    ec2_secret_key: "{{ provider_config.aws.ec2_secret_key }}"
+    filters:
+      "tag:Name": "{{ item.key }}"
+      "image-id": "{{ image }}"
+      "instance-state-name": "running"
+  register: aws
+
+- debug:
+    msg: "{{ aws }}"
+
+- set_fact:
+    ip_key: "{{ {} | combine({'ip': aws.instances[0].public_ip_address, 'private_ip': aws.instances[0].private_ip_address}) }}"
+
+- set_fact:
+    instances: "{{ instances | combine({item.key: ip_key}, recursive=True) }}"
+
+- name: add aws container hosts with ssh pwd
+  add_host:
+    hostname: "{{ aws.instances[0].public_ip_address }}"
+    groupname: container_hosts
+    ansible_ssh_user: "{{ provider_config.aws.ssh_user|default(item.value.ssh_user) }}"
+    ansible_ssh_pass: "{{ provider_config.aws.ssh_pwd|default(item.value.ssh_pwd) }}"
+    ansible_become: true
+    private_ip: "{{ aws.instances[0].private_ip_address }}"
+    instance_name: "{{ item.key }}"
+    private_dns_name: "{{ aws.instances[0].private_dns_name }}"
+  when: (provider_config.aws.ssh_pwd is defined or item.value.ssh_pwd is defined) and 
+        (provider_config.aws.ssh_private_key is undefined and item.value.ssh_private_key is undefined)
+
+- name: add aws container hosts with ssh key
+  add_host:
+    hostname: "{{ aws.instances[0].public_ip_address }}"
+    groupname: container_hosts
+    ansible_ssh_user: "{{ provider_config.aws.ssh_user|default(item.value.ssh_user) }}"
+    ansible_ssh_private_key_file: "{{ provider_config.aws.ssh_private_key|default(item.value.ssh_private_key) }}"
+    ansible_become: true
+    private_ip: "{{ aws.instances[0].private_ip_address }}"
+    instance_name: "{{ item.key }}"
+    private_dns_name: "{{ aws.instances[0].private_dns_name }}"
+  when: provider_config.aws.ssh_private_key is defined or item.value.ssh_private_key is defined
+
+- name: add aws container hosts with ssh key
+  add_host:
+    hostname: "{{ aws.instances[0].public_ip_address }}"
+    groupname: container_hosts
+    ansible_ssh_user: "{{ provider_config.aws.ssh_user|default(item.value.ssh_user) }}"
+    ansible_become: true
+    private_ip: "{{ aws.instances[0].private_ip_address }}"
+    instance_name: "{{ item.key }}"
+    private_dns_name: "{{ aws.instances[0].private_dns_name }}"
+  when: provider_config.aws.ssh_private_key is undefined and item.value.ssh_private_key is undefined and provider_config.aws.ssh_pwd is undefined and item.value.ssh_pwd is undefined

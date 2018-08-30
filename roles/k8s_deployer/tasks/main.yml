@@ -1,0 +1,62 @@
+---
+- name: init master_ip list
+  set_fact:
+    k8s_master_ip_list: []
+- name: init master_name list
+  set_fact:
+    k8s_master_name_list: []
+- name: fill master lists
+  set_fact:
+    k8s_master_ip_list: "{{ k8s_master_ip_list + [ hostvars[item]['private_ip'] ] }}"
+    k8s_master_name_list: "{{ k8s_master_name_list + [ item ] }}"
+  when:
+    - roles[hostvars[item]['instance_name']].k8s_master is defined
+  with_items:
+    - "{{ groups['container_hosts'] }}"
+
+- name: show master_ip list
+  debug:
+    msg: "{{ k8s_master_ip_list }}"
+
+- name: show master_name list
+  debug:
+    msg: "{{ k8s_master_name_list }}"
+
+- name: set master_ip as first item of master_ip list
+  set_fact:
+    k8s_master_ip: "{{ k8s_master_ip_list[0] }}"
+  when: k8s_master_ip_list | length > 0
+
+- name: set master_name as first item of master_name list
+  set_fact:
+    k8s_master_name: "{{ k8s_master_name_list[0] }}"
+  when: k8s_master_name_list | length > 0
+
+- name: "create contrail_configuration.KUBERNETES_API_SERVER for nodes"
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'KUBERNETES_API_SERVER': k8s_master_ip}) }}"
+  when:
+    - contrail_configuration.KUBERNETES_API_SERVER is undefined
+    - k8s_master_ip is defined
+
+# TODO: there are no private_ip/ansible_user/ansible_ssh_pass/ansible_ssh_private_key_file
+- name: create k8s_master_host host group
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: k8s_master_host
+    instance_name: "{{ item.key }}"
+  when:
+    - k8s_master_ip is defined
+    - item.value.ip == k8s_master_ip
+  with_dict: "{{ instances }}"
+
+# TODO: there are no private_ip/ansible_user/ansible_ssh_pass/ansible_ssh_private_key_file
+- name: create k8s_hosts host group
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: k8s_hosts
+    instance_name: "{{ item.key }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.k8s_master is defined or item.value.roles.k8s_node is defined
+  with_dict: "{{ instances }}"
