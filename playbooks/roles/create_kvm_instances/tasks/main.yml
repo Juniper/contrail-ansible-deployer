@@ -1,2 +1,0 @@
-- name: Create KVM instance
-  include: build_kvm_instances.yml
