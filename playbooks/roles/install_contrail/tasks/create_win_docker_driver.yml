@@ -9,22 +9,32 @@
   win_package:
     path: '{{ win_host_artifacts_dir }}\docker-driver\docker-driver.msi'
 
-# We divide creation and start of Docker Driver service, because
-# sometimes win_nssm won't start it. It is probably bug in win_nssm module.
-# TODO: If the bug is fixed, merge these two tasks into one.
+- name: construct basic argument list for docker-driver
+  set_fact:
+    docker_driver_args:
+      - '-controllerIP {{ contrail_configuration.CONFIG_NODES }}'
+      - '-adapter "{{ contrail_configuration.WINDOWS_PHYSICAL_INTERFACE }}"'
+      - '-logLevel Debug'
+
+- name: add keystone args if needed
+  set_fact:
+    docker_driver_args: >
+      {{ docker_driver_args }} + [
+      '-os_username {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_TENANT }}',
+      '-os_password {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_PASSWORD }}',
+      '-os_auth_url {{ contrail_configuration.KEYSTONE_AUTH_PROTO }}://{{ contrail_configuration.KEYSTONE_AUTH_HOST }}:{{ contrail_configuration.KEYSTONE_AUTH_PUBLIC_PORT }}{{ contrail_configuration.KEYSTONE_AUTH_URL_VERSION }}',
+      '-os_tenant_name {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_TENANT }}']
+  when: contrail_configuration.AUTH_MODE == 'keystone'
+
+# We divide creation and start of Docker Driver service, because sometimes win_nssm
+# won't start it. It's a bug in win_nssm module. It should be fixed in Ansible 2.7.
+# TODO: When the bug is fixed, merge these two tasks into one.
 - name: create docker-driver service
   win_nssm:
     name: contrail-docker-driver
     application: C:\Program Files\Juniper Networks\contrail-windows-docker.exe
     state: present
-    app_parameters_free_form: >
-      -controllerIP {{ contrail_configuration.CONFIG_NODES }}
-      -os_username {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_TENANT }}
-      -os_password {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_PASSWORD }}
-      -os_auth_url {{ contrail_configuration.KEYSTONE_AUTH_PROTO }}://{{ contrail_configuration.KEYSTONE_AUTH_HOST }}:{{ contrail_configuration.KEYSTONE_AUTH_PUBLIC_PORT }}{{ contrail_configuration.KEYSTONE_AUTH_URL_VERSION }}
-      -os_tenant_name {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_TENANT }}
-      -adapter "{{ contrail_configuration.WINDOWS_PHYSICAL_INTERFACE }}"
-      -logLevel Debug
+    app_parameters_free_form: "{{ docker_driver_args | join(' ') }}"
 
 - name: start docker-driver service
   win_service:
