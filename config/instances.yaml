@@ -1,10 +1,28 @@
 provider_config:
   bms:
+   ssh_pwd: 1q2w3e
+   ssh_user: root
+   domainsuffix: local
 instances:
   bms1:
-    provider: bms
-    ip: 192.168.1.100
-global_configuration:
-  CONTAINER_REGISTRY: michaelhenkel
+   provider: bms
+   roles:            # Optional.  If roles is not defined, all below roles will be created
+      config_database:         # Optional.
+      config:                  # Optional.
+      control:                 # Optional.
+      analytics_database:      # Optional.
+      analytics:               # Optional.
+      webui:                   # Optional.
+      k8s_master:              # Optional.
+      kubemanager:             # Optional.
+      vrouter:        # Optional.
+      k8s_node:       # Optional.
+   ip: 10.0.2.15
 contrail_configuration:
-  CONTRAIL_VERSION: ocata-5.0-20180219195722
+  CONTAINER_REGISTRY: opencontrailnightly
+  CONTRAIL_VERSION: master-152
+  KUBERNETES_CLUSTER_PROJECT: {}
+global_configuration:
+  CONTAINER_REGISTRY: opencontrailnightly
+  CONTRAIL_VERSION: master-152
+  
