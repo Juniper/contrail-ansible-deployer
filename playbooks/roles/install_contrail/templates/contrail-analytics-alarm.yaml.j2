@@ -2,7 +2,9 @@ version: '2'
 services:
   node-init:
     image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
-    env_file: /etc/contrail/common_analytics.env
+    env_file:
+      - /etc/contrail/common.env
+      - /etc/contrail/common_analytics.env
     environment:
       - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
     privileged: true
@@ -17,7 +19,7 @@ services:
       - /etc/contrail/common.env
       - /etc/contrail/common_analytics.env
     environment:
-      - NODE_TYPE=analytics
+      - NODE_TYPE=analytics-alarm
     network_mode: "host"
     volumes:
       - /var/log/contrail:/var/log/contrail
@@ -33,14 +35,14 @@ services:
     tty: {{ contrail_configuration.TTY }}
     depends_on:
       - node-init
-  api:
-    image: "{{ container_registry }}/contrail-analytics-api:{{ contrail_version_tag }}"
+  alarm-gen:
+    image: "{{ container_registry }}/contrail-analytics-alarm-gen:{{ contrail_version_tag }}"
     network_mode: "host"
     env_file:
       - /etc/contrail/common.env
       - /etc/contrail/common_analytics.env
     environment:
-      - NODE_TYPE=analytics
+      - NODE_TYPE=analytics-alarm
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
@@ -54,24 +56,17 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
-  collector:
-    image: "{{ container_registry }}/contrail-analytics-collector:{{ contrail_version_tag }}"
+  kafka:
+    image: "{{ container_registry }}/contrail-external-kafka:{{ contrail_version_tag }}"
     network_mode: "host"
     env_file:
       - /etc/contrail/common.env
       - /etc/contrail/common_analytics.env
     environment:
-      - NODE_TYPE=analytics
-    volumes:
-      - /var/log/contrail:/var/log/contrail
-      - /etc/hosts:/etc/hosts
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-      - /var/crashes:/var/crashes
-    volumes_from:
-      - node-init
-    depends_on:
-      - node-init
+      - KAFKA_NODES={{ kafka_nodes }}
+      - ZOOKEEPER_NODES={{ zookeeper_nodes }}
+      - ZOOKEEPER_PORT=2181
+      - NODE_TYPE=analytics-alarm
     restart: always
-    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
-    tty: {{ contrail_configuration.TTY }}
+    volumes:
+     - /etc/hosts:/etc/hosts
