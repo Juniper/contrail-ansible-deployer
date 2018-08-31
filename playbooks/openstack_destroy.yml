@@ -3,9 +3,9 @@
   hosts: localhost
   roles:
     - name: Generate container_host group
-      role: create_container_host_group
+      role: contrail_deployer
     - name: Generate openstack host groups
-      role: create_openstack_host_group
+      role: contrail_deployer
   vars_files:
     - "{{ config_file }}"
 
