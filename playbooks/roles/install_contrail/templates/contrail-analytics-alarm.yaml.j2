@@ -1,10 +1,10 @@
 version: '2'
-volumes:
-  analytics_cassandra:
 services:
   node-init:
     image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
-    env_file: /etc/contrail/common.env
+    env_file:
+      - /etc/contrail/common.env
+      - /etc/contrail/common_analytics.env
     environment:
       - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
     privileged: true
@@ -13,21 +13,20 @@ services:
     volumes:
       - /usr/bin:/host/usr/bin
       - /etc/contrail/ssl:/etc/contrail/ssl
-      - /etc/sysctl.conf:/etc/sysctl.conf
   nodemgr:
     image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
-    env_file: /etc/contrail/common.env
+    env_file:
+      - /etc/contrail/common.env
+      - /etc/contrail/common_analytics.env
     environment:
-      - NODE_TYPE=database
-      - CASSANDRA_CQL_PORT=9042
-      - CASSANDRA_JMX_LOCAL_PORT=7200
+      - NODE_TYPE=analytics-alarm
     network_mode: "host"
     volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
       - /etc/hosts:/etc/hosts
       - /etc/timezone:/etc/timezone
       - /etc/localtime:/etc/localtime
-      - /var/log/contrail:/var/log/contrail
-      - /var/run/docker.sock:/var/run/docker.sock
       - /var/crashes:/var/crashes
     volumes_from:
       - node-init
@@ -36,14 +35,14 @@ services:
     tty: {{ contrail_configuration.TTY }}
     depends_on:
       - node-init
-  query-engine:
-    image: "{{ container_registry }}/contrail-analytics-query-engine:{{ contrail_version_tag }}"
+  alarm-gen:
+    image: "{{ container_registry }}/contrail-analytics-alarm-gen:{{ contrail_version_tag }}"
     network_mode: "host"
     env_file:
       - /etc/contrail/common.env
       - /etc/contrail/common_analytics.env
     environment:
-      - NODE_TYPE=database
+      - NODE_TYPE=analytics-alarm
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/hosts:/etc/hosts
@@ -57,22 +56,17 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
-  cassandra:
-    image: "{{ container_registry }}/contrail-external-cassandra:{{ contrail_version_tag }}"
-    env_file: /etc/contrail/common.env
-    environment:
-      - CASSANDRA_SEEDS={{ cassandra_seeds }}
-      - CASSANDRA_START_RPC=true
-      - CASSANDRA_CLUSTER_NAME=contrail_analytics
-      - CASSANDRA_PORT=9160
-      - CASSANDRA_CQL_PORT=9042
-      - CASSANDRA_SSL_STORAGE_PORT=7011
-      - CASSANDRA_STORAGE_PORT=7010
-      - CASSANDRA_JMX_LOCAL_PORT=7200
-      - NODE_TYPE=database
-    volumes:
-     - analytics_cassandra:/var/lib/cassandra/data
-     - /etc/hosts:/etc/hosts
+  kafka:
+    image: "{{ container_registry }}/contrail-external-kafka:{{ contrail_version_tag }}"
     network_mode: "host"
+    env_file:
+      - /etc/contrail/common.env
+      - /etc/contrail/common_analytics.env
+    environment:
+      - KAFKA_NODES={{ kafka_nodes }}
+      - ZOOKEEPER_NODES={{ zookeeper_nodes }}
+      - ZOOKEEPER_PORT=2181
+      - NODE_TYPE=analytics-alarm
     restart: always
-
+    volumes:
+     - /etc/hosts:/etc/hosts
