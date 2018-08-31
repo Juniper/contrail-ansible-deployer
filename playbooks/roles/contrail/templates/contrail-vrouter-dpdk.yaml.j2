@@ -42,7 +42,6 @@ services:
       - /dev:/dev
       - /var/log/contrail:/var/log/contrail
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
-      - /bin:/host/bin
     volumes_from:
       - node-init
     depends_on:

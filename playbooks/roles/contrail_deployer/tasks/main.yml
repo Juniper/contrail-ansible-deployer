@@ -1,0 +1,35 @@
+- name: create container host group
+  include: create_container_host_group.yml
+  tags:
+    - install_contrail
+
+- name: set global variables
+  include: set_global_variables.yml
+  tags:
+    - always
+
+- name: set contrail variables
+  include: set_contrail_variables.yml
+  tags:
+    - always
+
+- name: build node lists
+  include: build_node_lists.yml
+  tags:
+    - always
+
+- name: add gce container hosts
+  include: add_gce_container_hosts.yml
+  when: item.value.provider=='gce'
+  with_dict: "{{ instances }}"
+  tags:
+    - configure_gce_instances
+    - install_contrail
+
+- name: add aws container hosts
+  include: add_aws_container_hosts.yml
+  when: item.value.provider=='aws'
+  with_dict: "{{ instances }}"
+  tags:
+    - configure_aws_instances
+    - install_contrail
