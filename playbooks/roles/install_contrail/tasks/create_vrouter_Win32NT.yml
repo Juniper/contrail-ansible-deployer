@@ -57,10 +57,23 @@
       }
     return_content: true
   register: auth_token_response
+  when: contrail_configuration.AUTH_MODE == 'keystone'
 
 - name: extract auth_token from response
   set_fact:
     auth_token: "{{ auth_token_response.json.access.token.id }}"
+  when: contrail_configuration.AUTH_MODE == 'keystone'
+
+- name: set empty headers for no authentication
+  set_fact:
+    rest_headers: {}
+  when: contrail_configuration.AUTH_MODE != 'keystone'
+
+- name: set headers with token for keystone
+  set_fact:
+    rest_headers:
+      X-Auth-Token: "{{ auth_token }}"
+  when: contrail_configuration.AUTH_MODE == 'keystone'
 
 - name: create virtual router in contrail
   delegate_to: localhost
@@ -77,5 +90,4 @@
         }
       }
     status_code: 200, 409
-    headers:
-      X-Auth-Token: "{{ auth_token }}"
+    headers: "{{ rest_headers }}"
