@@ -1,0 +1,20 @@
+---
+- name: create /etc/contrail/analytics_query_engine
+  file:
+    path: /etc/contrail/analytics_query_engine
+    state: directory
+    recurse: yes
+
+- name: update contrail-query-engine image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-analytics-query-engine
+
+- name: create contrail analytics_query_engine docker-compose file
+  template:
+    src: contrail-analytics-query-engine.yaml.j2
+    dest: /etc/contrail/analytics_query_engine/docker-compose.yaml
+
+- name: start contrail analytics_query_engine
+  docker_service:
+    project_src: /etc/contrail/analytics_query_engine

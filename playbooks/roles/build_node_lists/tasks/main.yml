@@ -44,6 +44,36 @@
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:
+    analytics_snmp_nodes_list: []
+- name: add analytics snmp nodes to the list
+  set_fact:
+    analytics_snmp_nodes_list: "{{ analytics_snmp_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.analytics_snmp is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
+    analytics_alarm_nodes_list: []
+- name: add analytics alarm nodes to the list
+  set_fact:
+    analytics_alarm_nodes_list: "{{ analytics_alarm_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.analytics_alarm is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
+    analytics_query_engine_nodes_list: []
+- name: add analytics query engine nodes to the list
+  set_fact:
+    analytics_query_engine_nodes_list: "{{ analytics_query_engine_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.analytics_query_engine is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
     analyticsdb_nodes_list: []
 - name: add analyticsdb nodes to the list
   set_fact:
@@ -52,6 +82,27 @@
     - item.value.roles is defined
     - item.value.roles.analytics_database is defined
     - contrail_configuration.CONTROLLER_NODES is not defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
+    analyticsdb_kafka_nodes_list: []
+- name: add analyticsdb kafka nodes to the list
+  set_fact:
+    analyticsdb_kafka_nodes_list: "{{ analyticsdb_kafka_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.analytics_database_kafka is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
+    analyticsdb_cassandra_nodes_list: []
+
+- name: add analyticsdb cassandra nodes to the list
+  set_fact:
+    analyticsdb_cassandra_nodes_list: "{{ analyticsdb_cassandra_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.analytics_database_cassandra is defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:

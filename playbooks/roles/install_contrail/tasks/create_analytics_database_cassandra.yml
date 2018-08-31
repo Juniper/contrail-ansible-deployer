@@ -1,0 +1,25 @@
+---
+- name: create /etc/contrail/analytics_database_cassandra
+  file:
+    path: /etc/contrail/analytics_database_cassandra
+    state: directory
+    recurse: yes
+
+- name: set cassandra seeds to ANALYTICSDB_CASSANDRA_NODES if defined
+  set_fact:
+    cassandra_seeds: "{{ contrail_configuration.ANALYTICSDB_CASSANDRA_NODES }}"
+  when: contrail_configuration.ANALYTICSDB_CASSANDRA_NODES is defined
+
+- name: update contrail analytics external cassandra image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-external-cassandra
+
+- name: create contrail analytics external cassandra database compose file
+  template:
+    src: contrail-analytics-database-cassandra.yaml.j2
+    dest: /etc/contrail/analytics_database_cassandra/docker-compose.yaml
+
+- name: start contrail analytics_database_cassandra
+  docker_service:
+    project_src: /etc/contrail/analytics_database_cassandra
