@@ -41,8 +41,7 @@
     name: contrail-docker-driver
     state: started
     start_mode: auto
-  async: 1
-  poll: 0
+  ignore_errors: yes
 
 - name: wait for connection after creating vswitch
   wait_for_connection:
