@@ -1,0 +1,38 @@
+provider_config:
+  bms:
+    ssh_pwd: c0ntrail123
+    ssh_user: root
+    ntpserver: 10.84.5.100
+    domainsuffix: local
+instances:
+  bms1:
+    provider: bms
+    ip: 10.84.30.201
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics_database_kafka:
+      analytics_database_cassandra:
+      analytics:
+      analytics_snmp:
+      analytics_alarm:
+      analytics_query_engine:
+      webui:
+      vrouter:
+      openstack:
+      openstack_compute:
+contrail_configuration:
+   AUTH_MODE: keystone
+   KEYSTONE_AUTH_URL_VERSION: /v3
+global_configuration:
+   CONTAINER_REGISTRY: opencontrailnightly
+   CONTRAIL_VERSION: latest
+kolla_config:
+  kolla_globals:
+    enable_haproxy: no
+    enable_ironic: "no"
+    enable_swift: "no"
+  kolla_passwords:
+    keystone_admin_password: c0ntrail123

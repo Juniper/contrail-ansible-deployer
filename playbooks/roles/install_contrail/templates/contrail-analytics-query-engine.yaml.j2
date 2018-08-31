@@ -1,0 +1,36 @@
+version: '2'
+services:
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file:
+      - /etc/contrail/common.env
+      - /etc/contrail/common_analytics.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    pid: host
+    network_mode: "host"
+    volumes:
+      - /usr/bin:/host/usr/bin
+      - /etc/contrail/ssl:/etc/contrail/ssl
+
+  query-engine:
+    image: "{{ container_registry }}/contrail-analytics-query-engine:{{ contrail_version_tag }}"
+    network_mode: "host"
+    env_file:
+      - /etc/contrail/common.env
+      - /etc/contrail/common_analytics.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+

@@ -51,17 +51,69 @@
   tags:
     - control_only
 
-- name: create contrail analytics database
-  include: create_analytics_database.yml
-  when: roles[instance_name].analytics_database is defined
+- name: create contrail analytics environment variables
+  include: create_analytics_environment.yml
+  when: roles[instance_name].analytics is defined or roles[instance_name].analytics_database is defined
   tags:
+    - analytics
     - analytics_database
+    - analytics_snmp
+    - analytics_alarm
+    - analytics_query_engine
+    - analytics_database_kafka
+    - analytics_database_cassandra
 
 - name: create contrail analytics
   include: create_analytics.yml
   when: roles[instance_name].analytics is defined
   tags:
     - analytics
+
+- name: create contrail analytics alarm
+  include: create_analytics_alarm.yml
+  when:
+    - roles[instance_name].analytics_alarm is defined
+  tags:
+    - analytics
+    - analytics_alarm
+
+- name: create contrail analytics snmp
+  include: create_analytics_snmp.yml
+  when:
+   - roles[instance_name].analytics_snmp is defined
+  tags:
+    - analytics
+    - analytics_snmp
+
+- name: create contrail analytics query-engine
+  include: create_analytics_query_engine.yml
+  when:
+   - roles[instance_name].analytics_query_engine is defined
+  tags:
+    - analytics
+    - analytics_query_engine
+
+- name: create contrail analytics database
+  include: create_analytics_database.yml
+  when: roles[instance_name].analytics_database is defined
+  tags:
+    - analytics_database
+
+- name: create contrail analytics database cassandra
+  include: create_analytics_database_cassandra.yml
+  when:
+   - roles[instance_name].analytics_database_cassandra is defined
+  tags:
+    - analytics_database
+    - analytics_database_cassandra
+
+- name: create contrail analytics kafka
+  include: create_analytics_database_kafka.yml
+  when:
+    - roles[instance_name].analytics_database_kafka is defined
+  tags:
+    - analytics_database
+    - analytics_database_kafka
 
 - name: create cni
   include: create_k8s_cni.yml
