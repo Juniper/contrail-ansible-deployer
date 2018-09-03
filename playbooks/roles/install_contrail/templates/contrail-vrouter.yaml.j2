@@ -60,7 +60,7 @@ services:
       - /bin:/host/bin
       - /var/log/contrail:/var/log/contrail
       - /var/lib/contrail:/var/lib/contrail
-      - /var/run/libvirt:/var/run/libvirt
+      - /var/run:/var/run
 {% if ansible_os_family == 'RedHat' %}
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
 {% endif %}
