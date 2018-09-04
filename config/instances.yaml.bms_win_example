@@ -25,7 +25,3 @@ contrail_configuration:
 
   WINDOWS_ENABLE_TEST_SIGNING:
   WINDOWS_DEBUG_DLLS_PATH: ~/dlls # this folder should contain debug DLLs
-
-  AUTH_MODE: keystone
-  KEYSTONE_AUTH_HOST: 192.168.1.100 # supply IP of keystone host
-  KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123 # supply real admin password

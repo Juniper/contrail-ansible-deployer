@@ -18,12 +18,6 @@ instances:
       analytics_database:
       analytics:
       webui:
-      vrouter:
-      openstack_control:
-      openstack_network:
-      openstack_storage:
-      openstack_monitoring:
-      openstack_compute:
 
   win_compute1:
     provider: bms_win
@@ -45,21 +39,7 @@ global_configuration:
 
 contrail_configuration:
   CONTRAIL_VERSION: latest
-  CLOUD_ORCHESTRATOR: openstack
-  RABBITMQ_NODE_PORT: 5673
   PHYSICAL_INTERFACE: ens192
   WINDOWS_PHYSICAL_INTERFACE: Ethernet1
   WINDOWS_ENABLE_TEST_SIGNING:
   WINDOWS_DEBUG_DLLS_PATH: ~/dlls
-  AUTH_MODE: keystone
-  KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123
-  KEYSTONE_AUTH_HOST: 192.168.1.100
-
-kolla_config:
-  kolla_globals:
-    network_interface: "ens192"
-    kolla_external_vip_interface: "ens192"
-    enable_haproxy: "no"
-    openstack_release: "ocata"
-  kolla_passwords:
-    keystone_admin_password: c0ntrail123
