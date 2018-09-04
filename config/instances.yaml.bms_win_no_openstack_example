@@ -1,0 +1,45 @@
+provider_config:
+  bms:
+    ssh_pwd: Contrail123!
+    ssh_user: root
+
+  bms_win:
+    ansible_user: Administrator
+    ansible_password: Contrail123!
+
+instances:
+  ctrl:
+    provider: bms
+    ip: 192.168.1.100
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+
+  win_compute1:
+    provider: bms_win
+    ip: 192.168.1.101
+    roles:
+      vrouter:
+      win_docker_driver:
+
+  win_compute2:
+    provider: bms_win
+    ip: 192.168.1.102
+    roles:
+      vrouter:
+      win_docker_driver:
+
+global_configuration:
+  CONTAINER_REGISTRY: opencontrailnightly
+  WINDOWS_CONTAINER_REGISTRY: mclapinski
+
+contrail_configuration:
+  CONTRAIL_VERSION: latest
+  PHYSICAL_INTERFACE: ens192
+  WINDOWS_PHYSICAL_INTERFACE: Ethernet1
+  WINDOWS_ENABLE_TEST_SIGNING:
+  WINDOWS_DEBUG_DLLS_PATH: ~/dlls

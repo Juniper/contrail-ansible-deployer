@@ -15,6 +15,7 @@
       - '-controllerIP {{ contrail_configuration.CONFIG_NODES }}'
       - '-adapter "{{ contrail_configuration.WINDOWS_PHYSICAL_INTERFACE }}"'
       - '-logLevel Debug'
+      - '-authMethod {{ contrail_configuration.AUTH_MODE }}'
 
 - name: add keystone args if needed
   set_fact:
