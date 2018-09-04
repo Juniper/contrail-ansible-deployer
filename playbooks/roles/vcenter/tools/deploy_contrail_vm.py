@@ -10,7 +10,7 @@ import urllib2
 
 from pyVim import connect
 from pyVmomi import vim
-from manage_dvs_pg import get_obj, is_xenial_or_above
+from manage_dvs_pg import get_obj
 
 def get_args():
     """
