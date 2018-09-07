@@ -13,3 +13,8 @@
   win_file:
     path: "{{ win_host_artifacts_dir }}"
     state: directory
+
+- name: create logs directory
+  win_file:
+    path: C:\ProgramData\Contrail\var\log\contrail
+    state: directory
