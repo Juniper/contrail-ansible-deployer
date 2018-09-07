@@ -36,6 +36,9 @@
     state: present
     app_parameters_free_form: "{{ docker_driver_args | join(' ') }}"
 
+# NOTE: Errors are ignored, because in case of single interface deployment, after Docker Driver
+# service is started Ansible might lose connectivity for a moment due to vRouter being enabled.
+# Following tasks wait for reconnection and check whether service has started.
 - name: start docker-driver service
   win_service:
     name: contrail-docker-driver
