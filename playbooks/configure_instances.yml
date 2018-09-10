@@ -16,7 +16,6 @@
     - { role: create_kolla_playbooks, when: contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' }
     - { role: install_kolla_dependencies, when: contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' }
     - generate_root_ca
-    - generate_ssh_keys
   vars_files:
     - "{{ config_file }}"
 

@@ -5,25 +5,6 @@
     state: directory
     recurse: yes
 
-- name: check ssh dir exists
-  stat:
-    path: "/tmp/contrail/ssh"
-  register: ssh
-
-- name: create /etc/contrail/config/ssh
-  file:
-    path: /etc/contrail/config/ssh
-    state: directory
-    recurse: yes
-  when: ssh.stat.exists is defined and ssh.stat.exists
-
-- name: copy ssh dir to host
-  copy:
-    src: /tmp/contrail/ssh/
-    dest: /etc/contrail/config/ssh
-    mode: 0400
-  when: ssh.stat.exists is defined and ssh.stat.exists
-
 - name: "get /etc/contrail/common_config.env stat"
   stat:
     path: "/etc/contrail/common_config.env"

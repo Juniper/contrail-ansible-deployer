@@ -41,9 +41,6 @@ services:
       - /etc/localtime:/etc/localtime
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
-{% if ssh.stat.exists is defined and ssh.stat.exists %}
-      - /etc/contrail/config/ssh:/root/.ssh
-{% endif %}
     volumes_from:
       - node-init
     depends_on:

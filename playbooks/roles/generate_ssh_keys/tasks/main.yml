@@ -1,6 +1,0 @@
-- name: Generate SSH Keys
-  include: generate_ssh_keys.yml
-  when:
-    - contrail_configuration is defined
-    - ( contrail_configuration.GENERATE_SSH is defined ) and
-      ( contrail_configuration.GENERATE_SSH|bool )
