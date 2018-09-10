@@ -62,6 +62,7 @@
   when:
     - item.value.roles is defined
     - item.value.roles.webui is defined
+    - contrail_configuration.CONTROLLER_NODES is not defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:
