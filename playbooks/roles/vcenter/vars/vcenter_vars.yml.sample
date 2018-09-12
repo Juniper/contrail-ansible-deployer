@@ -10,6 +10,9 @@ vcenter_servers:
       clusternames:
         - "kp_cluster11 sp"
         - cluster2
+      # Optional: If not specified HA and DRS are turned off on the clusters.
+      enable_ha: yes
+      enable_drs: yes
       # Optional: If not specified default vm_dvs switch is created. This is the dvswitch for providing contrail overlay networking support for vcenter guest VMs.
       #dv_switch:
       #  dv_switch_name: vm_dvs

@@ -25,3 +25,7 @@ vm_dvs_pg_type: earlyBinding
 
 # ContrailVM deploy mode
 auto_deploy: false
+
+# Cluster HA, DRS and other config
+enable_ha: no
+enable_drs: no
