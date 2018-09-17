@@ -10,6 +10,8 @@ services:
     network_mode: "host"
     volumes:
       - /usr/bin:/host/usr/bin
+      - /etc/contrail/ssl:/etc/contrail/ssl
+      - /etc/sysctl.conf:/etc/sysctl.conf
   nodemgr:
     image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common.env
