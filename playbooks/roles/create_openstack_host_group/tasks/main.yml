@@ -32,11 +32,12 @@
   add_host:
     hostname: "{{ item.value.ip }}"
     groupname: "{{ instances|openstack_host_groups(item.value.ip) }}"
-    ansible_user: "{{ provider_config.bms.ssh_user }}"
-    ansible_ssh_pass: "{{ provider_config.bms.ssh_pwd }}"
+    ansible_user: "{{ provider_config.bms.ssh_user|default(item.value.ssh_user) }}"
+    ansible_ssh_pass: "{{ provider_config.bms.ssh_pwd|default(item.value.ssh_pwd) }}"
     instance_name: "{{ item.key }}"
     private_ip: "{{ item.value.ip }}"
-  when: item.value.provider=='bms' and provider_config.bms.ssh_pwd is defined
+  when: item.value.provider=='bms' and (provider_config.bms.ssh_pwd is defined or
+        item.value.ssh_pwd is defined)
   with_dict: "{{ instances }}"
   tags:
     - configure_bms
@@ -47,10 +48,22 @@
     hostname: "{{ item.value.ip }}"
     groupname: "{{ instances|openstack_host_groups(item.value.ip) }}"
     ansible_user: "{{ provider_config.bms.ssh_user }}"
-    ansible_ssh_private_key_file: "{{ provider_config.bms.ssh_private_key }}"
+    ansible_ssh_private_key_file: "{{ provider_config.bms.ssh_private_key|default(item.value.ssh_private_key) }}"
     instance_name: "{{ item.key }}"
     private_ip: "{{ item.value.ip }}"
-  when: item.value.provider=='bms' and provider_config.bms.ssh_private_key is defined
+  when: item.value.provider=='bms' and (provider_config.bms.ssh_private_key is defined or item.value.ssh_private_key is defined)
+  with_dict: "{{ instances }}"
+  tags:
+    - configure_bms
+    - install_contrail
+
+- name: add bms container hosts without user/pwd/key
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: "{{ instances|openstack_host_groups(item.value.ip) }}"
+    instance_name: "{{ item.key }}"
+    private_ip: "{{ item.value.ip }}"
+  when: item.value.provider=='bms' and provider_config.bms.ssh_private_key is undefined and provider_config.bms.ssh_user is undefined and provider_config.bms.ssh_private_key is undefined
   with_dict: "{{ instances }}"
   tags:
     - configure_bms
