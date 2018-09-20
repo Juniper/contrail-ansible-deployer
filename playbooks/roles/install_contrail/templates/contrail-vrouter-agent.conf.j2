@@ -4,6 +4,10 @@ platform=windows
 [CONTROL-NODE]
 servers={{ contrail_configuration.CONTROLLER_NODES }}
 
+[DNS]
+dns_client_port=53
+servers={{ contrail_configuration.CONTROLLER_NODES }}:53
+
 [VIRTUAL-HOST-INTERFACE]
 name={{ adapters.vhost.interface_name }}
 ip={{ adapters.vhost.ip }}/{{ adapters.vhost.ip_mask_length }}
