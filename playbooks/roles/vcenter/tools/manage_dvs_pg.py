@@ -1,26 +1,13 @@
 #!/usr/bin/env python
+
 import platform
+
 from sys import exit
 from time import sleep
 from argparse import ArgumentParser
 from distutils.version import LooseVersion
-
 from pyVim import connect
 from pyVmomi import vim
-
-def get_linux_distro():
-    (dist, version, extra) = platform.linux_distribution()
-
-    return (dist, version, extra)
-
-def is_xenial_or_above():
-    is_xenial_or_above = False
-    (dist, version, extra) =  get_linux_distro()
-    if dist.lower() == 'ubuntu':
-       if LooseVersion(version) >= LooseVersion("16.04"):
-          is_xenial_or_above = True
-
-    return is_xenial_or_above
 
 def get_args():
     """
@@ -97,33 +84,6 @@ def update_dv_pg(args, dv_pg):
     wait_for_task(task)
     print "Successfully modified DV Port Group %s" %args.dv_pg_name
 
-def add_pvlan_config(dvs_obj):
-    pvlan_configs = []
-    dvs_config_spec = vim.dvs.VmwareDistributedVirtualSwitch.ConfigSpec()
-    for pvlan_idx in range(100,2001,2):
-        #promiscuous  pvlan config
-        pvlan_map_entry = vim.dvs.VmwareDistributedVirtualSwitch.PvlanMapEntry()
-        pvlan_config_spec = vim.dvs.VmwareDistributedVirtualSwitch.PvlanConfigSpec()
-        pvlan_map_entry.primaryVlanId = pvlan_idx
-        pvlan_map_entry.secondaryVlanId = pvlan_idx
-        pvlan_map_entry.pvlanType = "promiscuous"
-        pvlan_config_spec.pvlanEntry = pvlan_map_entry
-        pvlan_config_spec.operation = vim.ConfigSpecOperation.add
-        #isolated pvlan config
-        pvlan_map_entry2 = vim.dvs.VmwareDistributedVirtualSwitch.PvlanMapEntry()
-        pvlan_config_spec2 = vim.dvs.VmwareDistributedVirtualSwitch.PvlanConfigSpec()
-        pvlan_map_entry2.primaryVlanId = pvlan_idx
-        pvlan_map_entry2.secondaryVlanId = pvlan_idx+1
-        pvlan_map_entry2.pvlanType = "isolated"
-        pvlan_config_spec2.pvlanEntry = pvlan_map_entry2
-        pvlan_config_spec2.operation = vim.ConfigSpecOperation.add
-        pvlan_configs.append(pvlan_config_spec)
-        pvlan_configs.append(pvlan_config_spec2)
-    dvs_config_spec.pvlanConfigSpec = pvlan_configs
-    dvs_config_spec.name = dvs_obj.name
-    dvs_config_spec.configVersion = dvs_obj.config.configVersion
-    return dvs_obj.ReconfigureDvs_Task(dvs_config_spec)
-
 def main():
     args = get_args()
     try:
@@ -155,7 +115,6 @@ def main():
         print "port-group %s not present in dvs %s" %(args.dv_pg_name, args.dvs_name)
         exit(1)
     update_dv_pg(args, dv_pg)
-    add_pvlan_config(dv_switch)
     connect.Disconnect(si)
 
 if __name__ == "__main__":
