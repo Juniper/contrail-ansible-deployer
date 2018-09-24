@@ -1,0 +1,15 @@
+---
+- name: create container hostgroups for destroyer
+  hosts: localhost
+  roles:
+    - name: Generate container_host group
+      role: create_container_host_group
+    - name: Generate openstack host groups
+      role: create_openstack_host_group
+  vars_files:
+    - "{{ config_file }}"
+
+- name: Apply role destroy to contrail
+  hosts: container_hosts
+  roles:
+  - destroy
