@@ -1,0 +1,18 @@
+{% for key, value in appformix_configuration.iteritems() %}
+{% set value = value|trim %}
+{% if value is mapping %}
+{% print '\n' %}
+{{ key }}:
+{% for k, v in value.iteritems() %}
+  {{ k }}: {{ v }}
+{% endfor %}
+{% print '\n' %}
+{% elif value is iterable and value.split()|length > 1 %}
+{{ key }}:
+{% for v in value.split() %}
+  - {{ v }}
+{% endfor %}
+{% else %}
+{{ key }}: {{ value }}
+{% endif %}
+{% endfor %}

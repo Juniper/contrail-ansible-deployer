@@ -1,0 +1,25 @@
+---
+- name: add appformix hosts
+  add_host:
+    hostname: "{{ instances[item.0].ip }}"
+    groupname: "{{ cc2appformix_rolename_map[item.1] }} "
+  with_nested:
+    - "{{ instances }}"
+    - "{{ cc2appformix_rolename_map }}"
+  when:
+    - instances[item.0].roles is defined
+    - item.1 in instances[item.0].roles
+  vars:
+    cc2appformix_rolename_map: { "appformix_compute":              "compute",
+                                 "appformix_controller":           "appformix_controller",
+                                 "appformix_openstack_controller": "openstack_controller",
+                                 "appformix_controller_worker":    "appformix_controller_worker",
+                                 "appformix_load_balancer":        "appformix_load_balancer",
+                                 "appformix_bare_host":            "bare_host",
+                                 "appformix_ceph_osd":             "ceph_osd",
+                                 "appformix_ceph_monitor":         "ceph_monitor",
+                                 "appformix_remote_host":          "remote_host",
+                                 "appformix_network_agents":       "appformix_network_agents" }
+
+- name: print host groups
+  debug: msg="{{ groups }}"

@@ -1,0 +1,30 @@
+#
+- name: Create host group for Appformix
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  roles:
+    - create_appformix_host_group
+    - create_appformix_config
+  vars_files:
+    - "{{ config_file }}"
+  tags: always
+
+- name: Create config for appformix
+  hosts: localhost appformix_controller compute bare_host openstack_controller
+         appformix_controller_worker appformix_load_balancer ceph_osd
+         ceph_monitor remote_host appformix_network_agents
+  gather_facts: yes
+  roles:
+    - name: Generate appformix configurations
+      role: create_appformix_config
+      tags: always
+  vars_files:
+    - "{{ config_file }}"
+
+  tasks:
+  - name: Import appformix configuration
+    include_vars:
+      file: "/opt/software/appformix/inventory/group_vars/all"
+    tags: always
+- include: "/opt/software/appformix/appformix-{{ appformix_version }}/appformix_openstack.yml"

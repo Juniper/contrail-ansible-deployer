@@ -1,0 +1,13 @@
+---
+- name: create appformix inventory group_vars directory
+  file:
+    path: '/opt/software/appformix/inventory/group_vars'
+    state: directory
+    recurse: yes
+
+- name: Populate inventory/group_vars/all
+  template:
+    src: "{{ role_path }}/templates/appformix_configuration.yml.j2"
+    dest: "/opt/software/appformix/inventory/group_vars/all"
+  delegate_to: localhost
+  run_once: yes
