@@ -114,3 +114,8 @@
     - { name: 'imageManager_ip', is_not_defined: "{{ contrail_configuration.imageManager_ip is not defined }}" }
     - { name: 'networkManager_ip', is_not_defined: "{{ contrail_configuration.networkManager_ip is not defined }}" }
 
+- name: set stats destination path in contrail configuration
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'STATS_COLLECTOR_DESTINATION_PATH': ''}) }}"
+  when:
+    - contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname is not defined

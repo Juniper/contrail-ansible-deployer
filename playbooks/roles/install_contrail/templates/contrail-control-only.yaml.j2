@@ -25,6 +25,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/crashes:/var/crashes
+      - "{{ appformix_stats_collector_path }}:{{ appformix_stats_collector_path }}"
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
@@ -40,6 +41,7 @@ services:
       - /etc/localtime:/etc/localtime
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
+      - "{{ appformix_stats_collector_path }}:{{ appformix_stats_collector_path }}"
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}

@@ -8,6 +8,9 @@ services:
     env_file: /etc/contrail/common_kubemanager.env
     volumes:
       - /var/log/contrail:/var/log/contrail
+{% if contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | length > 1 %}
+      - {{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}:{{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH  | dirname }}
+{% endif %}
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}

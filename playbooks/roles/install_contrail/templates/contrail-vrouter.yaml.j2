@@ -24,6 +24,9 @@ services:
       - /etc/timezone:/etc/timezone
       - /etc/localtime:/etc/localtime
       - /var/crashes:/var/crashes
+{% if contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | length > 1 %}
+      - {{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}:{{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH  | dirname }}
+{% endif %}
     volumes_from:
       - node-init
     restart: on-failure
@@ -42,6 +45,9 @@ services:
       - /lib/modules:/lib/modules
       - /bin:/host/bin
       - /var/log/contrail:/var/log/contrail
+{% if contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | length > 1 %}
+      - {{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}:{{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH  | dirname }}
+{% endif %}
 {% if ansible_os_family == 'RedHat' %}
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
 {% endif %}
@@ -62,6 +68,9 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/lib/contrail:/var/lib/contrail
       - /var/run:/var/run
+{% if contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | length > 1 %}
+      - {{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}:{{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH  | dirname }}
+{% endif %}
 {% if ansible_os_family == 'RedHat' %}
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
 {% endif %}
