@@ -50,7 +50,7 @@
 
 - name: "set DNS servers if location is defined"
   set_fact:
-    contrail_configuration: "{{ contrail_configuration|default({})|combine({'DNS_NODES': contrail_configuration.CONTROLLER_NODES}) }}"
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'DNS_NODES': contrail_configuration.DNS_NODES|default(contrail_configuration.CONTROLLER_NODES)}) }}"
   when: pop_control_nodes is defined and roles[instance_name].vrouter.DNS_NODES is undefined
 
 - name: "populate cluster wide common_vrouter.env"
