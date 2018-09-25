@@ -55,6 +55,9 @@
     - kubectl
     - kubelet
     - kubeadm
+  environment:
+    - https_proxy: "{{ contrail_configuration.HTTPS_PROXY | default('') }}"
+    - http_proxy: "{{ contrail_configuration.HTTP_PROXY | default('') }}"
   when: k8s_version is defined
 
 - name: configure k8s master
