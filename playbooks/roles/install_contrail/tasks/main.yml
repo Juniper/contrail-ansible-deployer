@@ -75,6 +75,12 @@
   tags:
     - k8s
 
+- name: create contrail kube manager
+  include: create_kubemanager.yml
+  when: roles[instance_name].kubemanager is defined and k8s_master_ip is defined and k8s_master_name is defined
+  tags:
+    - k8s
+
 - name: create contrail vrouter
   include: "create_vrouter_{{ ansible_system }}.yml"
   when: roles[instance_name].vrouter is defined
@@ -84,12 +90,6 @@
 - name: Pluginize legacy compute
   include: compute_legacy.yml
   when: roles[instance_name].openstack_compute_legacy is defined
-
-- name: create contrail kube manager
-  include: create_kubemanager.yml
-  when: roles[instance_name].kubemanager is defined and k8s_master_ip is defined and k8s_master_name is defined
-  tags:
-    - k8s
 
 - name: create contrail vcenter-plugin
   include: create_vcenter_plugin.yml
