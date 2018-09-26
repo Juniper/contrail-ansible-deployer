@@ -3,39 +3,39 @@
   connection: local
   gather_facts: no
   roles:
-  - create_gce_instances
+  - gce_deployer
   vars_files:
   - "{{ config_file }}"
   tags:
-  - create_gce_instances
+  - gce_deployer
 
 - name: Create AWS instance(s)
   hosts: localhost
   connection: local
   gather_facts: no
   roles:
-  - create_aws_instances
+  - aws_deployer
   vars_files:
   - "{{ config_file }}"
   tags:
-  - create_aws_instances
+  - aws_deployer
 
-- name: Get KVM instances
+- name: Create KVM instances
   hosts: localhost
   connection: local
   gather_facts: no
   roles:
-  - get_kvm_instances
+  - kvm_deployer
   vars_files:
   - "{{ config_file }}"
   tags:
-  - create_kvm_instances
+  - kvm_deployer
 
-- name: Create KVM instances
+- name: Provision KVM instances
   hosts: kvm_instances
   roles:
-  - create_kvm_instances
+  - kvm
   vars_files:
   - "{{ hostvars['localhost'].config_file }}"
   tags:
-  - create_kvm_instances
+  - kvm

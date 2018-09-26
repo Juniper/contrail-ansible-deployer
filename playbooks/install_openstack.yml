@@ -10,10 +10,8 @@
         instances: "{{ instances }}"
       when: hostvars['localhost']['instances'] is undefined
   roles:
-    - create_container_host_group
-    - create_openstack_host_group
-    - set_global_variables
-    - build_node_lists
+    - contrail_deployer
+    - openstack_deployer
   vars_files:
     - "{{ config_file }}"
   tags: always
@@ -22,7 +20,7 @@
   gather_facts: yes
   roles:
     - name: Generate openstack configurations
-      role: create_openstack_config
+      role: openstack
       tags: always
   vars_files:
     - "{{ hostvars['localhost'].config_file }}"
