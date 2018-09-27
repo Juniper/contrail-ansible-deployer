@@ -1,0 +1,26 @@
+---
+
+- name: set api_server as first item of api_server_list
+  set_fact:
+    api_server_list: "{{ cluster_configuration.CONTROLLER_NODES.split() }}"
+
+- name: set api_server as first item of api_server_list
+  set_fact:
+    api_server: "{{ api_server_list[0] }}"
+
+- name: Make sure Vrouter container exists on this node
+  shell: >
+    docker ps | grep vrouter_vrouter-agent_1 | grep Up | awk '{print $1}'
+  run_once: yes
+  register: vrouter_exists
+
+- name: De-register vrouter from Contrail API 
+  command: >
+    docker exec vrouter_vrouter-agent_1 
+    python /opt/contrail/utils/provision_vrouter.py
+    --host_name {{ hostvars[inventory_hostname].instance_name }}
+    --host_ip {{ hostvars[inventory_hostname].ansible_default_ipv4.address }}
+    --api_server_ip {{ api_server }} 
+    --oper del
+  when: vrouter_exists.stdout
+  run_once: yes
