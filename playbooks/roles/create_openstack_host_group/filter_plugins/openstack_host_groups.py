@@ -172,7 +172,7 @@ class FilterModule(object):
             'openstack_host_groups': self.openstack_host_groups
         }
 
-    def openstack_host_groups(self, instances, ip):
+    def openstack_host_groups(self, instances, ip, contrail_configuration):
 
         for k,v in instances.iteritems():
             grp_list = []
@@ -195,4 +195,15 @@ class FilterModule(object):
 
             grp_list = grp_list + sub_grps
 
+            # New host group for deleted nodes here
+            delete_grps = []
+            for key,val in contrail_configuration.iteritems():
+                if "DELETE" in key and "NODES" in key:
+                    ips_to_delete = str(val).split(' ')
+                    role = str(key).split("DELETE_")[1].split("_NODES")[0]
+                    if ip in ips_to_delete:
+                        print role
+                        delete_grps.append("delete_" + role.lower())
+
+            grp_list = grp_list + delete_grps
             return grp_list
