@@ -70,7 +70,7 @@
     - contrail-node-init
     - contrail-nodemgr
     - contrail-controller-control-control
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 
 - name: "create contrail control {{ location.key }} compose file"
   template:

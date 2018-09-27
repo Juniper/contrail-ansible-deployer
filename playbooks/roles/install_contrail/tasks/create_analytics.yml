@@ -50,7 +50,7 @@
     - contrail-analytics-alarm-gen
     - contrail-analytics-snmp-collector
     - contrail-analytics-topology
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 
 - name: create contrail analytics file
   template:

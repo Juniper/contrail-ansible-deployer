@@ -44,7 +44,7 @@
   with_items:
     - contrail-controller-webui-web
     - contrail-controller-webui-job
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 
 - name: "create contrail webui compose file"
   template:
