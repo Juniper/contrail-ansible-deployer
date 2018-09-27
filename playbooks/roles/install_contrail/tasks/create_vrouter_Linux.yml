@@ -106,7 +106,7 @@
     - "{{ vrouter_kernel_init_img_name }}"
     - contrail-vrouter-agent
   when:
-    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+    - contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
     - roles[instance_name].vrouter.AGENT_MODE is undefined or roles[instance_name].vrouter.AGENT_MODE != 'dpdk'
 
 - name: create contrail vrouter compose file
@@ -129,7 +129,7 @@
     - contrail-vrouter-agent-dpdk
     - contrail-vrouter-agent
   when:
-    - UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+    - contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
     - roles[instance_name].vrouter.AGENT_MODE is defined
     - roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
 

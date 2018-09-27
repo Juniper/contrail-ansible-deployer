@@ -43,7 +43,7 @@
     - contrail-external-cassandra
     - contrail-external-zookeeper
     - contrail-external-rabbitmq
-  when: UPDATE_IMAGES is undefined or UPDATE_IMAGES != false
+  when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 
 - name: create contrail config database compose file
   template:
