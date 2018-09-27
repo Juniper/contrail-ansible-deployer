@@ -5,6 +5,17 @@
     state: directory
     recurse: yes
 
+- name: set alarmgen redis aggregate db offset
+  set_fact:
+    redis_db_offset: "{{ contrail_configuration.ANALYTICS_ALARM_NODES.split(',').index(instance_data.ip) }}"
+  when: contrail_configuration.ANALYTICS_ALARM_NODES is defined
+
+- name: add ALARMGEN_REDIS_AGGREGATE_DB_OFFSET environment variable in /etc/contrail/common_analytics.env
+  lineinfile:
+    dest: /etc/contrail/common_analytics.env
+    line: "ALARMGEN_REDIS_AGGREGATE_DB_OFFSET={{ redis_db_offset }}"
+  when: redis_db_offset is defined
+
 - name: set kafka nodes to ANALYTICS_ALARM_NODES if defined
   set_fact:
     kafka_nodes: "{{ contrail_configuration.ANALYTICS_ALARM_NODES }}"
