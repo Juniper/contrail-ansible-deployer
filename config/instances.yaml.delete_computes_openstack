@@ -1,0 +1,46 @@
+provider_config:
+  bms:
+    ssh_pwd: <SSH Pwd> 
+    ssh_user: <SSH User>
+    ntpserver: <NTP Server>
+instances:
+  server1:
+    provider: bms
+    ip: <IP Server 1>
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+      vrouter:
+        VROUTER_GATEWAY: <Gateway>
+      openstack:
+      openstack_compute:
+
+  server2:
+    provider: bms
+    ip: <Compute IP - Server 2>
+    roles:
+      vrouter:
+        VROUTER_GATEWAY: <Gateway>
+      openstack_compute:
+
+global_configuration:
+  CONTAINER_REGISTRY: <Registry>
+  REGISTRY_PRIVATE_INSECURE: True
+contrail_configuration:
+  DELETE_COMPUTE_NODES: <IP Of Compute to Delete>
+  VROUTER_GATEWAY: <Gateway>
+  CONTRAIL_VERSION: <version>
+  OPENSTACK_VERSION: queens
+  CLOUD_ORCHESTRATOR: openstack
+  AUTH_MODE: keystone
+  KEYSTONE_AUTH_URL_VERSION: /v3
+kolla_config:
+  kolla_globals:
+    openstack_release: queens
+    enable_haproxy: no
+  kolla_passwords:
+    keystone_admin_password: <Keystone Pwd> 
