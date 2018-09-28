@@ -23,6 +23,10 @@ instances:
     ip: 192.168.1.53
     roles:
       vrouter:
+      vcenter:
+      vcenter_manager:
+        ESXI_USERNAME:
+        ESXI_PASSWORD:
 global_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
 contrail_configuration:
@@ -38,4 +42,3 @@ contrail_configuration:
   VCENTER_DVSWITCH: test_dvs
   VCENTER_WSDL_PATH: /usr/src/contrail/contrail-web-core/webroot/js/vim.wsdl
   VCENTER_AUTH_PROTOCOL: https
-
