@@ -12,20 +12,14 @@
 - name: construct basic argument list for docker-driver
   set_fact:
     docker_driver_args:
-      - '-controllerIP {{ contrail_configuration.CONFIG_NODES }}'
-      - '-adapter "{{ contrail_configuration.WINDOWS_PHYSICAL_INTERFACE }}"'
       - '-logLevel Debug'
-      - '-authMethod {{ contrail_configuration.AUTH_MODE }}'
+      - '-config "{{ win_cnm_plugin_config_path }}"'
 
-- name: add keystone args if needed
-  set_fact:
-    docker_driver_args: >
-      {{ docker_driver_args }} + [
-      '-os_username {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_TENANT }}',
-      '-os_password {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_PASSWORD }}',
-      '-os_auth_url {{ contrail_configuration.KEYSTONE_AUTH_PROTO }}://{{ contrail_configuration.KEYSTONE_AUTH_HOST }}:{{ contrail_configuration.KEYSTONE_AUTH_PUBLIC_PORT }}{{ contrail_configuration.KEYSTONE_AUTH_URL_VERSION }}',
-      '-os_tenant_name {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_TENANT }}']
-  when: contrail_configuration.AUTH_MODE == 'keystone'
+- name: create cnm-plugin configuration file
+  win_template:
+    src: templates/contrail-cnm-plugin.conf.j2
+    dest: "{{ win_cnm_plugin_config_path }}"
+    newline_sequence: "\r\n"
 
 # We divide creation and start of Docker Driver service, because sometimes win_nssm
 # won't start it. It's a bug in win_nssm module. It should be fixed in Ansible 2.7.
