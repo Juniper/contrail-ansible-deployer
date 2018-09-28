@@ -23,6 +23,9 @@ instances:
     ip: 192.168.1.53
     roles:
       vrouter:
+      vcenter_manager:
+        ESXI_USERNAME:
+        ESXI_PASSWORD:
 
 global_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
