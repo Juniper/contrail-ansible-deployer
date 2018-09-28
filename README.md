@@ -121,7 +121,7 @@ Pulls, configures and starts Contrail containers.
 
 #### configuration
 
-Configuration for all three plays is done in a single file (default locataion:
+Configuration for all three plays is done in a single file (default location:
 config/instances.yaml)
 The configuration has multiple main sections.
 
@@ -333,3 +333,10 @@ ansible-playbook -i inventory/ -e config_file=/config/instances_gce.yml playbook
 ```
 
 yaml and json formats are supported.
+
+# Structure of the repo
+
+This repository contains several playbooks which are to be involved separately and various roles which are named acccording to the following:
+1. XXX_deployer roles (contrail_deployer, aws_deployer, kolla_deployer, ...) are the roles which are to be run on the deployment machine (the one running ansible_deployer) and to affect the whole cluster. They prepare global variables, initialize kolla or k8s cluster, etc. They are named after ansible_deployer and could've been named contrail_ansible_deployer, aws_ansible_deployer, etc.
+2. XXX roles (contrail, k8s, vcenter, ...) are the roles to be assigned to particular nodes - computes, controllers, analytics_databases and such.
+ 

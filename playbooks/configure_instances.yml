@@ -15,7 +15,6 @@
     - contrail_deployer
     - { role: windows_deployer, when: provider_config.bms_win is defined }
     - { role: kolla_deployer, when: contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' }
-    - root_ca_generator
   vars_files:
     - "{{ config_file }}"
 
