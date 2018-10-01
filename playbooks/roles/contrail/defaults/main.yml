@@ -1,3 +1,31 @@
+default_log_driver: "json-file"
+default_log_max_size: 50m
+default_log_max_file: 10
+
+config_log_driver: "{{ default_log_driver }}"
+config_log_max_size: "{{ default_log_max_size }}"
+config_log_max_file: "{{ default_log_max_file }}"
+
+webui_log_driver: "{{ default_log_driver }}"
+webui_log_max_size: "{{ default_log_max_size }}"
+webui_log_max_file: "{{ default_log_max_file }}"
+
+analytics_log_driver: "{{ default_log_driver }}"
+analytics_log_max_size: "{{ default_log_max_size }}"
+analytics_log_max_file: "{{ default_log_max_file }}"
+
+analytics_db_log_driver: "{{ default_log_driver }}"
+analytics_db_log_max_size: "{{ default_log_max_size }}"
+analytics_db_log_max_file: "{{ default_log_max_file }}"
+
+compute_log_driver: "{{ default_log_driver }}"
+compute_log_max_size: "{{ default_log_max_size }}"
+compute_log_max_file: "{{ default_log_max_file }}"
+
+control_log_driver: "{{ default_log_driver }}"
+control_log_max_size: "{{ default_log_max_size }}"
+control_log_max_file: "{{ default_log_max_file }}"
+
 win_container_artifacts_dir: C:\artifacts\
 win_host_artifacts_dir: "{{ win_container_artifacts_dir }}"
 win_vhost_name: vEthernet (HNSTransparent)
