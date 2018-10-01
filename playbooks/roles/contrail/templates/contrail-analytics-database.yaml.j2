@@ -35,6 +35,11 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ analytics_db_log_driver }}"
+      options:
+        max-size: "{{ analytics_db_log_max_size }}"
+        max-file: "{{ analytics_db_log_max_file }}"
     depends_on:
       - node-init
   kafka:
@@ -47,6 +52,11 @@ services:
       - ZOOKEEPER_PORT=2182
       - NODE_TYPE=database
     restart: always
+    logging:
+      driver: "{{ analytics_db_log_driver }}"
+      options:
+        max-size: "{{ analytics_db_log_max_size }}"
+        max-file: "{{ analytics_db_log_max_file }}"
     volumes:
      - /etc/hosts:/etc/hosts
   cassandra:
@@ -66,6 +76,11 @@ services:
      - analytics_cassandra:/var/lib/cassandra/data
      - /etc/hosts:/etc/hosts
     network_mode: "host"
+    logging:
+      driver: "{{ analytics_db_log_driver }}"
+      options:
+        max-size: "{{ analytics_db_log_max_size }}"
+        max-file: "{{ analytics_db_log_max_file }}"
     restart: always
   zookeeper:
     image: "{{ container_registry }}/contrail-external-zookeeper:{{ contrail_version_tag }}"
@@ -80,4 +95,9 @@ services:
      - analytics_zookeeper:/datalog
      - /etc/hosts:/etc/hosts
     network_mode: "host"
+    logging:
+      driver: "{{ analytics_db_log_driver }}"
+      options:
+        max-size: "{{ analytics_db_log_max_size }}"
+        max-file: "{{ analytics_db_log_max_file }}"
     restart: always
