@@ -15,7 +15,7 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/vcenter_plugin/ESXiToVRouterIp.map:/etc/contrail/ESXiToVRouterIp.map
-    restart: on-failure
+    restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
 
