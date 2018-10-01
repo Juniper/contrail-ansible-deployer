@@ -32,6 +32,11 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ control_log_driver }}"
+      options:
+        max-size: "{{ control_log_max_size }}"
+        max-file: "{{ control_log_max_file }}"
     depends_on:
       - node-init
   control:
@@ -51,6 +56,11 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ control_log_driver }}"
+      options:
+        max-size: "{{ control_log_max_size }}"
+        max-file: "{{ control_log_max_file }}"
 {% if roles[instance_name].control.location is undefined %}
   named:
     image: "{{ container_registry }}/contrail-controller-control-named:{{ contrail_version_tag }}"
@@ -67,6 +77,11 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ control_log_driver }}"
+      options:
+        max-size: "{{ control_log_max_size }}"
+        max-file: "{{ control_log_max_file }}"
   dns:
     image: "{{ container_registry }}/contrail-controller-control-dns:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -86,4 +101,9 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ control_log_driver }}"
+      options:
+        max-size: "{{ control_log_max_size }}"
+        max-file: "{{ control_log_max_file }}"
 {% endif %}
