@@ -86,4 +86,9 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: {{ control_log_driver }}
+      options:
+        max-size: {{ control_log_max_size }}
+        max-file: {{ control_log_max_file }}
 {% endif %}

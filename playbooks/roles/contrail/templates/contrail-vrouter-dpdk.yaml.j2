@@ -71,6 +71,11 @@ services:
     depends_on:
       - vrouter-kernel-init-dpdk
       - node-init
+    logging:
+      driver: {{ compute_log_driver }}
+      options:
+        max-size: {{ compute_log_max_size }}
+        max-file: {{ compute_log_max_file }}
   vrouter-agent:
     image: "{{ container_registry }}/contrail-vrouter-agent:{{ contrail_version_tag }}"
     network_mode: host
@@ -90,6 +95,11 @@ services:
       - /var/crashes:/var/crashes
     volumes_from:
       - node-init
+    logging:
+      driver: {{ compute_log_driver }}
+      options:
+        max-size: {{ compute_log_max_size }}
+        max-file: {{ compute_log_max_file }}
     restart: always
     depends_on:
       - vrouter-agent-dpdk

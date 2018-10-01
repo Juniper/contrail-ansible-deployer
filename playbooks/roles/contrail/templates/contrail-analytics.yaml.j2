@@ -49,6 +49,11 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: {{ analytics_log_driver }}
+      options:
+        max-size: {{ analytics_log_max_size }}
+        max-file: {{ analytics_log_max_file }}
   collector:
     image: "{{ container_registry }}/contrail-analytics-collector:{{ contrail_version_tag }}"
     network_mode: "host"
@@ -66,6 +71,11 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: {{ analytics_log_driver }}
+      options:
+        max-size: {{ analytics_log_max_size }}
+        max-file: {{ analytics_log_max_file }}
   query-engine:
     image: "{{ container_registry }}/contrail-analytics-query-engine:{{ contrail_version_tag }}"
     network_mode: "host"

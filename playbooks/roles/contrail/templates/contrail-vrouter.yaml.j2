@@ -71,6 +71,11 @@ services:
       - /dev/log:/dev/log
     volumes_from:
       - node-init
+    logging:
+      driver: {{ compute_log_driver }}
+      options:
+        max-size: {{ compute_log_max_size }}
+        max-file: {{ compute_log_max_file }}
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
