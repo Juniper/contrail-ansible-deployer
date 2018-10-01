@@ -30,6 +30,8 @@
     application: C:\Program Files\Juniper Networks\contrail-windows-docker.exe
     state: present
     app_parameters_free_form: "{{ docker_driver_args | join(' ') }}"
+    stdout_file: "{{ win_cnm_plugin_nssm_log_path }}"
+    stderr_file: "{{ win_cnm_plugin_nssm_log_path }}"
 
 # NOTE: Errors are ignored, because in case of single interface deployment, after Docker Driver
 # service is started Ansible might lose connectivity for a moment due to vRouter being enabled.
