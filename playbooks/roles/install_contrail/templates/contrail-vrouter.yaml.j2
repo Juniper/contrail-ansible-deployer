@@ -74,6 +74,11 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ compute_log_driver }}"
+      options:
+        max-size: "{{ compute_log_max_size }}"
+        max-file: "{{ compute_log_max_file }}"
     depends_on:
       - vrouter-kernel-init
       - node-init
