@@ -9,12 +9,6 @@
   win_package:
     path: '{{ win_host_artifacts_dir }}\docker-driver\docker-driver.msi'
 
-- name: construct basic argument list for docker-driver
-  set_fact:
-    docker_driver_args:
-      - '-logLevel Debug'
-      - '-config "{{ win_cnm_plugin_config_path }}"'
-
 - name: create cnm-plugin configuration file
   win_template:
     src: templates/contrail-cnm-plugin.conf.j2
@@ -29,7 +23,6 @@
     name: contrail-docker-driver
     application: C:\Program Files\Juniper Networks\contrail-windows-docker.exe
     state: present
-    app_parameters_free_form: "{{ docker_driver_args | join(' ') }}"
     stdout_file: "{{ win_cnm_plugin_nssm_log_path }}"
     stderr_file: "{{ win_cnm_plugin_nssm_log_path }}"
 
