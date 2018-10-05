@@ -1,4 +1,8 @@
 ---
+- name: Reset the sriov_nics set_fact per VM
+  set_fact:
+    sriov_nics: ""
+
 - name: Create sriov devices list
   set_fact:
     sriov_nics: "{{ sriov_nics | default () + nic + ',' }}"
