@@ -1,7 +1,4 @@
 ---
-- name: Prepare host to certs generation
-  include: prepare.yml
-
 - name: set default ssl dir path
   set_fact:
     ssl_dir: "/etc/contrail/ssl"
