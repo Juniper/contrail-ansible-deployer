@@ -39,3 +39,6 @@
     - roles: "{{ hostvars['localhost'].roles }}"
     - k8s_master_ip: "{{ hostvars['localhost'].k8s_master_ip }}"
     - k8s_master_name: "{{ hostvars['localhost'].k8s_master_name }}"
+  environment:
+    - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
+    - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
