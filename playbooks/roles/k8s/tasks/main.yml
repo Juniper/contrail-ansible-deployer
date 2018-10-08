@@ -43,8 +43,34 @@
     - global_configuration is defined
     - global_configuration.K8S_VERSION is defined
 
+- name: set k8s_cni version for centos/redhat if kubelet_1_9_2
+  set_fact:
+     k8s_cni_version: "-0.6.0-0"
+  when:
+    - ansible_os_family == 'RedHat'
+    - instance_data.roles is defined
+    - instance_data.roles.k8s_node is defined
+    - k8s_version == '-1.9.2-0'
+
+- name: set k8s_cni version for ubuntu if kubelet_1_9_2
+  set_fact:
+     k8s_cni_version: "=0.6.0-00"
+  when:
+    - ansible_os_family == 'Debian'
+    - instance_data.roles is defined
+    - instance_data.roles.k8s_node is defined
+    - k8s_version == '=1.9.2-00'
+
 - name: OS specific package install
   include: "{{ ansible_os_family }}.yml"
+
+- name: Install k8s cni version_0_6_0 for kubelet_1_9_2
+  package:
+    name: "{{ item }}{{ k8s_cni_version }}"
+    state: present
+  with_items:
+    - kubernetes-cni
+  when: k8s_cni_version is defined
 
 # kubetcl must be first in the list - kubeadm has dependency to kubectl without version
 - name: Install k8s packages if defined
