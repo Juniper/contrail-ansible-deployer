@@ -1,4 +1,9 @@
 ---
+- name: install netaddr
+  pip:
+    name: netaddr
+  become: yes
+
 - name: create /etc/contrail/dhcp/config
   file:
     path: /etc/contrail/dhcp/config
