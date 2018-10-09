@@ -1,4 +1,8 @@
 ---
+- name: Reset the pci_nics set_fact per VM
+  set_fact:
+    pci_nics: ""
+
 - name: Create pci devices list 
   set_fact:
     pci_nics: "{{ pci_nics | default () + nic + ',' }}"
