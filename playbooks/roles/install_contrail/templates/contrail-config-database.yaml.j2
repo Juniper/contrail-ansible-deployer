@@ -35,6 +35,11 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ config_db_log_driver }}"
+      options:
+        max-size: "{{ config_db_log_max_size }}"
+        max-file: "{{ config_db_log_max_file }}"
     depends_on:
       - node-init
   cassandra:
@@ -54,6 +59,11 @@ services:
       - /etc/hosts:/etc/hosts
       - config_cassandra:/var/lib/cassandra/data
     network_mode: "host"
+    logging:
+      driver: "{{ config_db_log_driver }}"
+      options:
+        max-size: "{{ config_db_log_max_size }}"
+        max-file: "{{ config_db_log_max_file }}"
     restart: always
   zookeeper:
     image: "{{ container_registry }}/contrail-external-zookeeper:{{ contrail_version_tag }}"
@@ -67,6 +77,11 @@ services:
      - /etc/hosts:/etc/hosts
      - config_zookeeper:/data
      - config_zookeeper:/datalog
+    logging:
+      driver: "{{ config_db_log_driver }}"
+      options:
+        max-size: "{{ config_db_log_max_size }}"
+        max-file: "{{ config_db_log_max_file }}"
     network_mode: "host"
     restart: always
   rabbitmq:
@@ -76,5 +91,10 @@ services:
      - RABBITMQ_NODES={{ rabbitmq_nodes }}
      - RABBITMQ_ERLANG_COOKIE=abcdefg
      - NODE_TYPE=config-database
+    logging:
+      driver: "{{ config_db_log_driver }}"
+      options:
+        max-size: "{{ config_db_log_max_size }}"
+        max-file: "{{ config_db_log_max_file }}"
     network_mode: "host"
     restart: always
