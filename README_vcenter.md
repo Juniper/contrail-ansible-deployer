@@ -2,7 +2,7 @@
 
 This document contains instructions to deploy a Contrail cluster with vCenter 6.5.
 
-1. Setup base host running Centos 7.4 then add 2 more hosts running Centos 7.4 for HA (if desired)
+1. Setup base host running Centos 7.5 then add 2 more hosts running Centos 7.5 for HA (if desired)
 2. Setup vCenter and 1 or more ESXi servers
 3. Deploy Contrail Containers and vRouter VMs
 
@@ -42,7 +42,7 @@ tar –xvf {Ansible deployer}.tgz
 or clone latest version from github:
 
 ```
-git clone git@github.com:Juniper/contrail-ansible-deployer.git
+git clone http://www.github.com/Juniper/contrail-ansible-deployer
 ```
 
 ## Populate vcenter_vars.yml
@@ -62,6 +62,7 @@ vcenter_servers:
       datacentername: "PS-DC1"
       clusternames:
         - "DC1-CL1"
+      vmdk: http://10.85.192.51/centos-7.5/LATEST/ContrailVM.ovf
       dv_switch:
         dv_switch_name: overlay
       dv_port_group:
@@ -85,7 +86,6 @@ esxihosts:
       - pg_name: mgmt-pg
         switch_name: vSwitch0
     contrail_vm:
-      vmdk: /var/tmp/ESXi-ContrailVMCentOS7.4-4_5.0.0-0.40-ovf.tar
       networks:
         - mac: 00:77:56:aa:bb:01
           sw_type: standard
@@ -106,7 +106,6 @@ esxihosts:
       - pg_name: mgmt-pg
         switch_name: vSwitch0
     contrail_vm:
-      vmdk: /var/tmp/ESXi-ContrailVMCentOS7.4-4_5.0.0-0.40-ovf.tar
       networks:
          - mac: 00:77:56:aa:bb:03
            sw_type: standard
@@ -195,6 +194,9 @@ instances:
     roles:
       vrouter:
         PHYSICAL_INTERFACE: ens192
+      vcenter_manager:
+        ESXI_USERNAME: root
+        ESXI_PASSWORD: c0ntrail123
   bms5:
     provider: bms
     esxi_host: 10.85.192.10
@@ -202,6 +204,9 @@ instances:
     roles:
       vrouter:
         PHYSICAL_INTERFACE: ens192
+      vcenter_manager:
+        ESXI_USERNAME: root
+        ESXI_PASSWORD: c0ntrail123
 
 contrail_configuration:
   CLOUD_ORCHESTRATOR: vcenter
