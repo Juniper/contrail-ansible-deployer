@@ -24,7 +24,7 @@ vm_dvs_num_ports: 3
 vm_dvs_pg_type: earlyBinding
 
 # ContrailVM deploy mode
-auto_deploy: false
+auto_deploy: true
 
 # Cluster HA, DRS and other config
 enable_ha: no
