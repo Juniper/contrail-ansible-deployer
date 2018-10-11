@@ -15,84 +15,84 @@
   include: "common_{{ ansible_system }}.yml"
 
 - name: create redis
-  include: create_redis.yml
+  include_role: contrail-redis
   when: roles[instance_name].webui is defined or roles[instance_name].analytics is defined
   tags:
     - webui
     - analytics
 
 - name: create contrail config database
-  include: create_config_database.yml
+  include_role: contrail-config-database
   when: roles[instance_name].config_database is defined
   tags:
     - config_database
 
 - name: create contrail config
-  include: create_config.yml
+  include_role: contrail-config
   when: roles[instance_name].config is defined
   tags:
     - config
 
 - name: create contrail webui
-  include: create_webui.yml
+  include_role: contrail-webui
   when: roles[instance_name].webui is defined
   tags:
     - webui
 
 - name: create contrail control
-  include: create_control.yml
+  include_role: contrail-control
   when: roles[instance_name].control is defined
   tags:
    - control
 
 - name: create contrail control_only
-  include: create_control_only.yml
+  include_role: contrail-control-only
   when: roles[instance_name].control_only is defined
   tags:
     - control_only
 
 - name: create contrail analytics database
-  include: create_analytics_database.yml
+  include_role: contrail-analytics-database
   when: roles[instance_name].analytics_database is defined
   tags:
     - analytics_database
 
 - name: create contrail analytics
-  include: create_analytics.yml
+  include_role: contrail-analytics
   when: roles[instance_name].analytics is defined
   tags:
     - analytics
 
 - name: create cni
-  include: create_k8s_cni.yml
+  include_role: contrail-k8s-cni
   when: roles[instance_name].k8s_node is defined
   tags:
     - k8s
 
 - name: configure k8s for Contrail
-  include: configure_k8s.yml
+  include_role: contrail-k8s-master
   when: roles[instance_name].k8s_master is defined and k8s_master_name is defined and inventory_hostname == k8s_master_name
   tags:
     - k8s
 
 - name: create contrail kube manager
-  include: create_kubemanager.yml
+  include_role: contrail-k8s-kubemanager
   when: roles[instance_name].kubemanager is defined and k8s_master_ip is defined and k8s_master_name is defined
   tags:
     - k8s
 
 - name: create contrail vrouter
-  include: "create_vrouter_{{ ansible_system }}.yml"
+  include_role: "contrail-vrouter-{{ ansible_system }}"
   when: roles[instance_name].vrouter is defined
   tags:
     - vrouter
 
 - name: Pluginize legacy compute
-  include: compute_legacy.yml
+  include_role: contrail-compute-legacy
   when: roles[instance_name].openstack_compute_legacy is defined
 
 - name: create contrail vcenter-plugin
-  include: create_vcenter_plugin.yml
+  include_role: contrail-vcenter-plugin
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'vcenter'
     - roles[instance_name].vcenter_plugin is defined
@@ -100,7 +100,7 @@
     - vcenter
 
 - name: create contrail vcenter-manager
-  include: create_vcenter_manager.yml
+  include_role: contrail-vcenter-manager
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'vcenter'
     - roles[instance_name].vcenter_manager is defined
@@ -108,5 +108,5 @@
     - vcenter
 
 - name: create win docker driver
-  include: create_win_docker_driver.yml
+  include_role: contrail-docker-windows
   when: roles[instance_name].win_docker_driver is defined
