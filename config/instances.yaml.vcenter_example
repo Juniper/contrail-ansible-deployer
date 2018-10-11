@@ -26,13 +26,16 @@ instances:
       vcenter_manager:
         ESXI_USERNAME:
         ESXI_PASSWORD:
+
+contrail_configuration:
 global_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
+  REGISTRY_PRIVATE_INSECURE: True
+
 contrail_configuration:
-  CONTRAIL_VERSION: ocata-master-20180210000007
+  CONTRAIL_VERSION: master-289
   CLOUD_ORCHESTRATOR: vcenter 
   CONTROLLER_NODES: 192.168.1.51
-  VROUTER_GATEWAY: 192.168.1.254
   RABBITMQ_NODE_PORT: 5673
   VCENTER_SERVER: 192.168.1.160
   VCENTER_USERNAME: administrator
@@ -41,3 +44,4 @@ contrail_configuration:
   VCENTER_DVSWITCH: test_dvs
   VCENTER_WSDL_PATH: /usr/src/contrail/contrail-web-core/webroot/js/vim.wsdl
   VCENTER_AUTH_PROTOCOL: https
+
