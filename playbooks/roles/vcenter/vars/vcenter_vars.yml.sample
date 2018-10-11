@@ -10,6 +10,8 @@ vcenter_servers:
       clusternames:
         - "kp_cluster11 sp"
         - cluster2
+      #path to the ovf, is needed for ESX Agent Manager to deploy ContrailVMs
+      vmdk: http://10.84.5.120/centos-7.5/LATEST/ContrailVM.ovf
       # Optional: If not specified HA and DRS are turned off on the clusters.
       enable_ha: yes
       enable_drs: yes
@@ -49,6 +51,9 @@ esxihosts:
     password: <Password> 
     # Optional: defaults to False
     #validate_certs: False
+    #network to be set in "Agent VM Settings" of the host for EAM deployment
+    #Optional: if not specified fab-pg is used
+    network: fab-pg
     datastore: ds2
     datacenter: "kp datacenter11 sp"
     cluster: "kp_cluster11 sp"
@@ -65,7 +70,6 @@ esxihosts:
     #  - pg_name: mgmt-pg
     #    switch_name: vSwitch0
     contrail_vm:
-      vmdk: /root/vmdk/vmdk.tar
       networks: 
         - mac: 00:77:56:aa:bb:01
           # options: standard/dvs, defaults to standard
