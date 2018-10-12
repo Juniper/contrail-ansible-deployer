@@ -3,8 +3,8 @@
     hostname: "{{ item.value.ip }}"
     groupname: container_hosts
     instance_name: "{{ item.key }}"
-    ansible_user: "{{ provider_config.bms_win.ansible_user|default(item.value.ansible_user) }}"
-    ansible_password: "{{provider_config.bms_win.ansible_password|default(item.value.ansible_password) }}"
+    ansible_user: "{{ item.value.ansible_user|default(provider_config.bms_win.ansible_user) }}"
+    ansible_password: "{{ item.value.ansible_password|default(provider_config.bms_win.ansible_password) }}"
     ansible_connection: winrm
     ansible_winrm_transport: credssp
     ansible_winrm_server_cert_validation: ignore
@@ -19,8 +19,8 @@
   add_host:
     hostname: "{{ item.value.ip }}"
     groupname: container_hosts
-    ansible_user: "{{ provider_config.kvm.ssh_user|default(item.value.ssh_user) }}"
-    ansible_ssh_pass: "{{ provider_config.kvm.ssh_pwd|default(item.value.ssh_pwd) }}"
+    ansible_user: "{{ item.value.ssh_user|default(provider_config.kvm.ssh_user) }}"
+    ansible_ssh_pass: "{{ item.value.ssh_pwd|default(provider_config.kvm.ssh_pwd) }}"
     ansible_become: true
     instance_name: "{{ item.key }}"
     private_ip: "{{ item.value.ip }}"
@@ -35,8 +35,8 @@
   add_host:
     hostname: "{{ item.value.ip }}"
     groupname: container_hosts
-    ansible_user: "{{ provider_config.kvm.ssh_user|default(item.value.ssh_user) }}"
-    ansible_ssh_private_key_file: "{{ provider_config.kvm.ssh_private_key|default(item.value.ssh_private_key) }}"
+    ansible_user: "{{ item.value.ssh_user|default(provider_config.kvm.ssh_user) }}"
+    ansible_ssh_private_key_file: "{{ item.value.ssh_private_key|default(provider_config.kvm.ssh_private_key) }}"
     ansible_become: true
     instance_name: "{{ item.key }}"
     private_ip: "{{ item.value.ip }}"
@@ -51,8 +51,8 @@
   add_host:
     hostname: "{{ item.value.ip }}"
     groupname: container_hosts
-    ansible_user: "{{ provider_config.bms.ssh_user|default(item.value.ssh_user) }}"
-    ansible_ssh_pass: "{{ provider_config.bms.ssh_pwd|default(item.value.ssh_pwd) }}"
+    ansible_user: "{{ item.value.ssh_user|default(provider_config.bms.ssh_user) }}"
+    ansible_ssh_pass: "{{ item.value.ssh_pwd|default(provider_config.bms.ssh_pwd) }}"
     ansible_become: true
     instance_name: "{{ item.key }}"
     private_ip: "{{ item.value.ip }}"
@@ -67,8 +67,8 @@
   add_host:
     hostname: "{{ item.value.ip }}"
     groupname: container_hosts
-    ansible_user: "{{ provider_config.bms.ssh_user|default(item.value.ssh_user) }}"
-    ansible_ssh_private_key_file: "{{ provider_config.bms.ssh_private_key|default(item.value.ssh_private_key) }}"
+    ansible_user: "{{ item.value.ssh_user|default(provider_config.bms.ssh_user) }}"
+    ansible_ssh_private_key_file: "{{ item.value.ssh_private_key|default(provider_config.bms.ssh_private_key) }}"
     ansible_become: true
     instance_name: "{{ item.key }}"
     private_ip: "{{ item.value.ip }}"
