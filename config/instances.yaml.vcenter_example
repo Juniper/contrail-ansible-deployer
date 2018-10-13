@@ -27,11 +27,13 @@ instances:
         ESXI_USERNAME:
         ESXI_PASSWORD:
 
+contrail_configuration:
 global_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
-  CONTRAIL_VERSION: ocata-master-20180210000007
+  REGISTRY_PRIVATE_INSECURE: True
 
 contrail_configuration:
+  CONTRAIL_VERSION: master-289
   CLOUD_ORCHESTRATOR: vcenter 
   CONTROLLER_NODES: 192.168.1.51
   RABBITMQ_NODE_PORT: 5673
