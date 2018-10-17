@@ -30,6 +30,8 @@ control_log_driver: "{{ contrail_configuration.CONTROL_LOG_DRIVER|default(defaul
 control_log_max_size: "{{ contrail_configuration.CONTROL_LOG_MAX_SIZE|default(default_log_max_size) }}"
 control_log_max_file: "{{ contrail_configuration.CONTROL_LOG_MAX_FILE|default(default_log_max_file) }}"
 
+win_agent_config_path: C:\ProgramData\Contrail\etc\contrail\contrail-vrouter-agent.conf
+
 contrail_configuration_default:
   AUTH_MODE: noauth
   KEYSTONE_AUTH_PROTO: http
