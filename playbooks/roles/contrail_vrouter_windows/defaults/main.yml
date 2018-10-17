@@ -1,1 +1,2 @@
+win_agent_nssm_log_path: C:\ProgramData\Contrail\var\log\contrail\contrail-vrouter-agent-service.log
 win_agent_config_path: C:\ProgramData\Contrail\etc\contrail\contrail-vrouter-agent.conf
