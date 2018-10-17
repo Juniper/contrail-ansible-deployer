@@ -1,0 +1,9 @@
+- project:
+    name: Juniper/contrail-ansible-deployer
+    experimental:
+      jobs:
+        - contrail-sanity-centos7-kolla-ocata:
+            vars:
+              contrail_version: '{{ packaging.version.public }}-latest'
+              contrail_docker_registry: '{{ docker_registry.fqdn }}:{{ docker_registry.port }}'
+              setup_docker_registry: false
