@@ -136,3 +136,18 @@
       }
     status_code: 200, 409
     headers: "{{ rest_headers }}"
+
+#TODO: remove this after msi don't create agent service anymore.
+- name: delete old vrouter-agent service
+  win_service:
+    name: ContrailAgent
+    state: started
+  ignore_errors: yes
+
+- name: create vrouter-agent service
+  win_nssm:
+    name: contrail-vrouter-agent
+    application: C:\Program Files\Juniper Networks\Agent\contrail-vrouter-agent.exe
+    state: present
+    app_parameters_free_form: >
+      --config_file="{{ win_agent_config_path }}"

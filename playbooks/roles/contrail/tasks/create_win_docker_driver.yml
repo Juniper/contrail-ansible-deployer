@@ -80,13 +80,7 @@
     newline_sequence: "\r\n"
   register: agent_config
 
-- name: restart vrouter-agent service in case of config change
-  win_service:
-    name: ContrailAgent
-    state: restarted
-  when: agent_config.changed
-
 - name: make sure vrouter-agent service is running
   win_service:
-    name: ContrailAgent
+    name: contrail-vrouter-agent
     state: started
