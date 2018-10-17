@@ -136,3 +136,13 @@
       }
     status_code: 200, 409
     headers: "{{ rest_headers }}"
+
+- name: create vrouter-agent service
+  win_nssm:
+    name: contrail-vrouter-agent
+    application: C:\Program Files\Juniper Networks\Agent\contrail-vrouter-agent.exe
+    stdout_file: "{{ win_agent_nssm_log_path }}"
+    stderr_file: "{{ win_agent_nssm_log_path }}"
+    state: present
+    app_parameters_free_form: >
+      --config_file="{{ win_agent_config_path }}"
