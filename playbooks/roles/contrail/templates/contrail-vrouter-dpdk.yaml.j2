@@ -61,6 +61,7 @@ services:
     pid: host
     volumes:
       - /lib/modules:/lib/modules
+      - /var/lib/contrail:/var/lib/contrail
       - /var/run:/var/run
       - /var/log/contrail:/var/log/contrail
       - /etc/os-release:/etc/os-release
