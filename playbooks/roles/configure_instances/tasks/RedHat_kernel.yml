@@ -24,6 +24,11 @@
     path: "/etc/default/grub"
   register: file_rc
 
+- name: check if EFI grub.cfg exists
+  stat:
+    path: "/boot/efi/EFI/redhat/grub.cfg"
+  register: efi_file_rc
+
 - name: set SRIOV data
   set_fact:
     contrail_modify_grub: 'True'
@@ -69,6 +74,16 @@
   when:
     - contrail_modify_grub is defined
     - file_rc.stat.exists == true
+    - ((contrail_grub_restored.changed == false and contrail_grub_modified.changed == true) or
+      (contrail_grub_added.changed == true))
+
+- name: execute update-grub/sys on EFI partition
+  command: grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg
+  register: gstat
+  when:
+    - contrail_modify_grub is defined
+    - file_rc.stat.exists == true
+    - efi_file_rc.stat.exists == true
     - ((contrail_grub_restored.changed == false and contrail_grub_modified.changed == true) or
       (contrail_grub_added.changed == true))
 
