@@ -18,10 +18,37 @@
   when: (contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true) or
         (instance_data.UPGRADE_KERNEL is defined and instance_data.UPGRADE_KERNEL == true)
 
+- name: set default grub file
+  set_fact:
+    default_grub_config: "/etc/default/grub"
+
+# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/sec-customizing_the_grub_2_configuration_file
+# #25.5.2
+- name: set uefi target grub file
+  set_fact:
+    uefi_grub_config: "/boot/efi/EFI/redhat/grub.cfg"
+
+- name: check if EFI config exists
+  stat:
+    path: "{{ uefi_grub_config }}"
+  register: efi_file_rc
+
+- name: set target grub file for uefi
+  set_fact:
+    target_grub_config: "{{ uefi_grub_config }}"
+  when:
+    - efi_file_rc.stat.exists == true
+
+- name: set target grub file for bios
+  set_fact:
+    target_grub_config: "/boot/grub2/grub.cfg"
+  when:
+    - efi_file_rc.stat.exists == false
+
 # enable IOMMU if sriov/vfio-dpdk is enabled
 - name: set grub file name.
   stat:
-    path: "/etc/default/grub"
+    path: "{{ default_grub_config }}"
   register: file_rc
 
 - name: set SRIOV data
@@ -41,7 +68,7 @@
 
 - name: Remove the SRIOV/VFIO config if present - to fix limiation in lineinfile
   replace:
-    path: "/etc/default/grub"
+    path: "{{ default_grub_config }}"
     regexp: '^GRUB_CMDLINE_LINUX_DEFAULT=\"((.*))(( {{ contrail_grub_cmd_line}}))\"'
     replace: 'GRUB_CMDLINE_LINUX_DEFAULT="\1"'
   register: contrail_grub_restored
@@ -49,7 +76,7 @@
 
 - name: Modify grub to include iommu for SRIOV and VFIO-DPDK
   replace:
-    path: "/etc/default/grub"
+    path: "{{ default_grub_config }}"
     regexp: '^GRUB_CMDLINE_LINUX_DEFAULT=\"((.*))(( {{ contrail_grub_cmd_line}})|(?<! {{contrail_grub_cmd_line}}))\"'
     replace: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 {{ contrail_grub_cmd_line }}"'
   register: contrail_grub_modified
@@ -57,14 +84,14 @@
 
 - name: Add iommu for grub for SRIOV and VFIO-DPDK
   lineinfile:
-    path: "/etc/default/grub"
+    path: "{{ default_grub_config }}"
     line: 'GRUB_CMDLINE_LINUX_DEFAULT=" {{contrail_grub_cmd_line}}"'
     insertafter: EOF
   register: contrail_grub_added
   when: contrail_modify_grub is defined and file_rc.stat.exists == true and contrail_grub_modified.changed == false
 
 - name: execute update-grub/sys
-  command: grub2-mkconfig -o /boot/grub2/grub.cfg
+  command: "grub2-mkconfig -o {{ target_grub_config }}"
   register: gstat
   when:
     - contrail_modify_grub is defined
