@@ -7,41 +7,43 @@
   set_fact:
     instance_name: "{{ hostvars[inventory_hostname].instance_name }}"
 
-- name: set k8s version for RedHat if not defined
+- name: set k8s version to default
   set_fact:
-    k8s_version: "-1.9.2-0"
-  when:
-    - ansible_os_family == 'RedHat'
-    - instance_data.roles is defined
-    - instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined
-
-- name: set k8s version for RedHat if defined
+    k8s_version: "1.9.2"
+- name: set k8s version from ENV if defined
   set_fact:
-    k8s_version: "-{{ global_configuration.K8S_VERSION }}-0"
+    k8s_version: "{{ global_configuration.K8S_VERSION }}"
   when:
-    - ansible_os_family == 'RedHat'
-    - instance_data.roles is defined
-    - instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined
     - global_configuration is defined
     - global_configuration.K8S_VERSION is defined
+
+# dashboard has own set of versions https://github.com/kubernetes/dashboard/tags
+# and K8S_VERSION can't be used directly
+- name: set k8s dashboard version to default
+  set_fact:
+    k8s_dashboard_version: "1.8.3"
+- name: set k8s dashboard version if not defined
+  set_fact:
+    k8s_dashboard_version: "{{ global_configuration.K8S_DASHBOARD_VERSION }}"
+  when:
+    - global_configuration is defined
+    - global_configuration.K8S_DASHBOARD_VERSION is defined
+
+- name: set k8s version for RedHat
+  set_fact:
+    k8s_package_version: "-{{ k8s_version }}-0"
+  when:
+    - ansible_os_family == 'RedHat'
+    - instance_data.roles is defined
+    - instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined
 
 - name: set k8s version for Debian if not defined
   set_fact:
-    k8s_version: "=1.9.2-00"
+    k8s_package_version: "={{ k8s_version }}-00"
   when:
     - ansible_os_family == 'Debian'
     - instance_data.roles is defined
     - instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined
-
-- name: set k8s version for Debian if defined
-  set_fact:
-    k8s_version: "={{ global_configuration.K8S_VERSION }}-00"
-  when:
-    - ansible_os_family == 'Debian'
-    - instance_data.roles is defined
-    - instance_data.roles.k8s_master is defined or instance_data.roles.k8s_node is defined
-    - global_configuration is defined
-    - global_configuration.K8S_VERSION is defined
 
 - name: OS specific package install
   include: "{{ ansible_os_family }}.yml"
@@ -49,13 +51,13 @@
 # kubetcl must be first in the list - kubeadm has dependency to kubectl without version
 - name: Install k8s packages if defined
   package:
-    name: "{{ item }}{{ k8s_version }}"
+    name: "{{ item }}{{ k8s_package_version }}"
     state: present
   with_items:
     - kubectl
     - kubelet
     - kubeadm
-  when: k8s_version is defined
+  when: k8s_package_version is defined
 
 - name: configure k8s master
   include: configure_k8s_master_node.yml
