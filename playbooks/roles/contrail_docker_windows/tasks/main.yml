@@ -82,11 +82,11 @@
 
 - name: restart vrouter-agent service in case of config change
   win_service:
-    name: ContrailAgent
+    name: contrail-vrouter-agent
     state: restarted
   when: agent_config.changed
 
 - name: make sure vrouter-agent service is running
   win_service:
-    name: ContrailAgent
+    name: contrail-vrouter-agent
     state: started
