@@ -34,6 +34,7 @@ win_container_artifacts_dir: C:\artifacts\
 win_host_artifacts_dir: "{{ win_container_artifacts_dir }}"
 win_vhost_name: vEthernet (HNSTransparent)
 win_agent_config_path: C:\ProgramData\Contrail\etc\contrail\contrail-vrouter-agent.conf
+
 contrail_configuration_default:
   AUTH_MODE: noauth
   KEYSTONE_AUTH_PROTO: http
@@ -43,3 +44,5 @@ contrail_configuration_default:
   KEYSTONE_AUTH_ADMIN_TENANT: admin
   KEYSTONE_AUTH_ADMIN_USER: admin
   CONFIG_API_PORT: 8082
+  COLLECTOR_PORT: 8086
+  DNS_SERVER_PORT: 53
