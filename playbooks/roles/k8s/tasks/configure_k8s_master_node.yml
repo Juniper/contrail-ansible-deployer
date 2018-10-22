@@ -37,17 +37,6 @@
     enabled: True
   when: master_running == false
 
-- name: set k8s version to default
-  set_fact:
-    k8s_version: "v1.9.2"
-
-- name: set k8s version if not defined
-  set_fact:
-    k8s_version: "v{{ global_configuration.K8S_VERSION }}"
-  when:
-    - global_configuration is defined
-    - global_configuration.K8S_VERSION is defined
-
 - debug:
     msg: "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
 

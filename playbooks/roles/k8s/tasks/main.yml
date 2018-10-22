@@ -7,6 +7,28 @@
   set_fact:
     instance_name: "{{ hostvars[inventory_hostname].instance_name }}"
 
+- name: set k8s version to default
+  set_fact:
+    k8s_version: "v1.9.2"
+- name: set k8s version if not defined
+  set_fact:
+    k8s_version: "v{{ global_configuration.K8S_VERSION }}"
+  when:
+    - global_configuration is defined
+    - global_configuration.K8S_VERSION is defined
+
+# dashboard has own set of versions https://github.com/kubernetes/dashboard/tags
+# and K8S_VERSION can't be used directly
+- name: set k8s dashboard version to default
+  set_fact:
+    k8s_dashboard_version: "v1.8.3"
+- name: set k8s dashboard version if not defined
+  set_fact:
+    k8s_dashboard_version: "v{{ global_configuration.K8S_DASHBOARD_VERSION }}"
+  when:
+    - global_configuration is defined
+    - global_configuration.K8S_DASHBOARD_VERSION is defined
+
 - name: set k8s version for RedHat if not defined
   set_fact:
     k8s_version: "-1.9.2-0"
