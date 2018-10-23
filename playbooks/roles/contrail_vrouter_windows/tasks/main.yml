@@ -1,9 +1,5 @@
 ---
 
-- name: enable kernel crashdumps collection (will appear in $Env:SystemRoot\Windows\)
-  win_shell: >
-    Get-WmiObject -Class Win32_OSRecoveryConfiguration -EnableAllPrivileges | Set-WmiInstance -Arguments @{ DebugInfoType=1; OverwriteExistingDebugFile=$false }
-
 - name: prepare variables for configuration files
   set_fact:
     win_dns_nodes: []
