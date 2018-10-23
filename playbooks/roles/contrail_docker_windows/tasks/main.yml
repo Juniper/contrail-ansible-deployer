@@ -3,7 +3,7 @@
 - name: extract docker-driver MSI from container
   win_shell: >
     docker run -v {{ win_host_artifacts_dir }}:{{ win_container_artifacts_dir }}
-    {{ global_configuration.WINDOWS_CONTAINER_REGISTRY }}/contrail-windows-docker-driver:{{ contrail_configuration.CONTRAIL_VERSION }}
+    {{ global_configuration.CONTAINER_REGISTRY }}/contrail-windows-docker-driver:{{ contrail_version_tag }}
 
 - name: install docker-driver
   win_package:
