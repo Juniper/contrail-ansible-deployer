@@ -38,3 +38,15 @@
   win_file:
     path: C:\ProgramData\Contrail\etc\contrail
     state: directory
+
+- name: enable kernel crashdumps collection (will appear in $Env:SystemRoot)
+  win_shell: >
+    Get-WmiObject -Class Win32_OSRecoveryConfiguration -EnableAllPrivileges | Set-WmiInstance -Arguments @{ DebugInfoType=1; OverwriteExistingDebugFile=$false }
+
+- name: enable usermode crashdumps collection (will appear in $Env:LocalAppData\CrashDumps)
+  win_shell: |
+    $DumpsPath = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps"
+    New-Item -Force -Path $DumpsPath
+    New-ItemProperty -Force -Path $DumpsPath -Name DumpFolder -Value %LOCALAPPDATA%\CrashDumps -Type ExpandString
+    New-ItemProperty -Force -Path $DumpsPath -Name DumpCount -Value 10 -Type DWord
+    New-ItemProperty -Force -Path $DumpsPath -Name DumpType -Value 2 -Type DWord
