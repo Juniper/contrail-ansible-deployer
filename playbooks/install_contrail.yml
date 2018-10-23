@@ -47,6 +47,7 @@
     - instances: "{{ hostvars['localhost'].instances }}"
     - container_registry: "{{ hostvars['localhost'].container_registry }}"
     - contrail_version_tag: "{{ hostvars['localhost'].contrail_version_tag }}"
+    - contrail_windows_version_tag: "{{ hostvars['localhost'].contrail_windows_version_tag }}"
     - roles: "{{ hostvars['localhost'].roles }}"
   environment:
     - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"

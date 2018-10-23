@@ -30,6 +30,17 @@
   tags:
    - always
 
+# contrail_windows_version_tag is different from contrail_version_tag, because Windows releases are
+# not tied to orchestrator.
+# For example, Linux containers can have tag newton-master-347, but Windows containers have just
+# master-347. However, it should still be possibe to deploy Linux containers from newton-master-347
+# and Windows services from master-347. Build number should still match though.
+- name: set windows container tag contrail version if defined
+  set_fact:
+    contrail_windows_version_tag: "{{ contrail_configuration.CONTRAIL_VERSION | default('latest') }}"
+  tags:
+   - always
+
 - name: add specific contrail version tag if defined
   set_fact:
     contrail_version_tag: "{{ contrail_configuration.CONTRAIL_CONTAINER_TAG }}"
