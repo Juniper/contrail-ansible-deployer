@@ -3,7 +3,7 @@
 - name: Create container host group for OpenStack
   hosts: localhost
   connection: local
-  gather_facts: no
+  gather_facts: yes
   pre_tasks:
     - name: Expose instances
       set_fact:
@@ -18,12 +18,16 @@
 
 - hosts: openstack_nodes
   gather_facts: yes
+  pre_tasks:
+    - name: Expose config_file
+      set_fact:
+        config_file: "{{ hostvars['localhost'].config_file }}"
   roles:
     - name: Generate openstack configurations
       role: openstack
       tags: always
   vars_files:
-    - "{{ hostvars['localhost'].config_file }}"
+    - "{{ config_file }}"
   vars:
     - container_registry: "{{ hostvars['localhost'].container_registry }}"
     - contrail_version_tag: "{{ hostvars['localhost'].contrail_version_tag }}"

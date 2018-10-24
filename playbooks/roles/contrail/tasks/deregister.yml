@@ -1,0 +1,10 @@
+---
+- name: deregister contrail vrouter - Linux
+  include_role:
+    name: contrail_vrouter
+    tasks_from: deregister
+  when:
+    - ('vrouter' in node_roles_dict[instance_name].deleted_roles)
+    - ansible_system == 'Linux'
+  tags:
+    - vrouter

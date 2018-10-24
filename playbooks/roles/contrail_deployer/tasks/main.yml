@@ -34,6 +34,11 @@
     - configure_aws_instances
     - install_contrail
 
+- name: build cluster node role lists
+  include: cluster_node_role_lists.yml
+  tags:
+    - always
+
 - name: Configure certs
   include: configure_certs.yml
   when:
