@@ -14,6 +14,16 @@
   tags:
    - always
 
+- name: verify if specified orchestrator is supported
+  fail:
+    msg: "specified CLOUD_ORCHESTRATOR is not supported (must be any of openstack, vcenter, none)"
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR != 'openstack'
+    - contrail_configuration.CLOUD_ORCHESTRATOR != 'vcenter'
+    - contrail_configuration.CLOUD_ORCHESTRATOR != 'none'
+  tags:
+  - always
+
 - name: set empty kolla_config sections in case of OpenStack
   set_fact:
     kolla_config: {}
@@ -90,6 +100,7 @@
     - not (kolla_config.kolla_globals.enable_haproxy | bool)
   tags:
    - always
+
 - name: get the internal VIP from internal_vip if haproxy is enabled
   set_fact:
     openstack_internal_vip: "{{ kolla_config.kolla_globals.kolla_internal_vip_address }}"
