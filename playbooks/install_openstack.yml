@@ -3,7 +3,7 @@
 - name: Create container host group for OpenStack
   hosts: localhost
   connection: local
-  gather_facts: no
+  gather_facts: yes
   pre_tasks:
     - name: Expose instances
       set_fact:
