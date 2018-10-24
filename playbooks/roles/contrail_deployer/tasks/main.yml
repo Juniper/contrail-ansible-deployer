@@ -18,6 +18,11 @@
   tags:
     - always
 
+- name: build cluster node role lists
+  include: cluster_node_role_lists.yml
+  tags:
+    - install_contrail
+
 - name: add gce container hosts
   include: add_gce_container_hosts.yml
   when: item.value.provider=='gce'

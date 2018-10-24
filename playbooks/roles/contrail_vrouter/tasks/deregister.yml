@@ -1,0 +1,17 @@
+---
+- name: Make sure config_api container exists on this node
+  shell: >
+    docker ps | grep config_api_1 | grep Up | awk '{print $1}'
+  run_once: yes
+  register: config_api_exists
+
+- name: De-register vrouter from Contrail API
+  command: >
+    docker exec config_api_1
+    python /opt/contrail/utils/provision_vrouter.py
+    --host_name {{ instance_name }}
+    --host_ip {{ ip_address }}
+    --api_server_ip {{ api_server }}
+    --oper del
+  when: config_api_exists.stdout
+  run_once: yes
