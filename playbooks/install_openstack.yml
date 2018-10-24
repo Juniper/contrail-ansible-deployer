@@ -31,7 +31,6 @@
     - analytics_nodes_list: "{{ hostvars['localhost'].analytics_nodes_list }}"
     - openstack_nodes_list: "{{ hostvars['localhost'].openstack_nodes_list }}"
     - webui_nodes_list: "{{ hostvars['localhost'].webui_nodes_list }}"
-
   tasks:
   - name: Import group variables
     include_vars:

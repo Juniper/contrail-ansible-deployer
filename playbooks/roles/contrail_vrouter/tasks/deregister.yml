@@ -1,0 +1,18 @@
+---
+- name: Make sure config_api container exists on this node
+  command: docker ps --filter name=config_api --format {%raw%}"{{.Names}}"{%endraw%}
+  register: config_api_exists
+  run_once: yes
+
+# Config API container already has all necessary Keystone auth params to run this script
+
+- name: De-register vrouter from Contrail API
+  command: >
+    docker exec config_api_1
+    python /opt/contrail/utils/provision_vrouter.py
+    --host_name {{ instance_name }}
+    --host_ip {{ ip_address }}
+    --api_server_ip {{ api_server }}
+    --oper del
+  when: config_api_exists.stdout
+  run_once: yes
