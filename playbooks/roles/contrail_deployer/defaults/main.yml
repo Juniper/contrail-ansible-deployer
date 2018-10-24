@@ -1,0 +1,4 @@
+supported_orchestrators:
+  - openstack
+  - vcenter
+  - none
