@@ -1,0 +1,21 @@
+---
+
+- name: delete contrail vrouter
+  include_role:
+    name: contrail_vrouter
+    tasks_from: delete
+  when:
+    - ('vrouter' in node_roles_dict[instance_name].deleted_roles)
+    - ansible_system == 'Linux'
+  tags:
+    - vrouter
+
+- name: delete contrail vrouter
+  include_role:
+    name: contrail_vrouter_windows
+    tasks_from: delete
+  when:
+    - ('vrouter' in node_roles_dict[instance_name].deleted_roles)
+    - ansible_system == 'Win32NT'
+  tags:
+    - vrouter
