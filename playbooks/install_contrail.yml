@@ -26,6 +26,52 @@
     - "{{ config_file }}"
   tags: always
 
+- name: Remove Contrail from Deleted Nodes ( Deregister )
+  hosts: container_hosts
+  gather_facts: no
+  tasks:
+  - include_role:
+      name: contrail
+      tasks_from: deregister
+    vars:
+      - contrail_configuration: "{{ hostvars['localhost'].contrail_configuration }}"
+      - node_roles_dict: "{{ hostvars['localhost'].node_roles_dict }}"
+      - instance_name: "{{ item.key }}"
+      - ip_address: "{{ item.value }}"
+      - api_server: "{{ hostvars['localhost'].api_server }}"
+    with_dict: "{{ hostvars['localhost'].deleted_nodes_dict }}"
+    when:
+      - hostvars['localhost'].api_server is defined and hostvars['localhost'].api_server
+      - inventory_hostname == hostvars['localhost'].api_server
+    run_once: yes
+
+- name: Remove Contrail from Deleted Nodes ( Cleanup )
+  hosts:  "{{ hostvars['localhost'].deleted_nodes_dict.values() }}"
+  tasks:
+  - include_role:
+      name: contrail
+      tasks_from: delete
+    vars:
+      - contrail_configuration: "{{ hostvars['localhost'].contrail_configuration }}"
+      - node_roles_dict: "{{ hostvars['localhost'].node_roles_dict }}"
+      - instance_name: "{{ item.key }}"
+      - ip_address: "{{ item.value }}"
+      - api_server: "{{ hostvars['localhost'].api_server }}"
+    with_dict: "{{ hostvars['localhost'].deleted_nodes_dict }}"
+    when: inventory_hostname == item.value
+    tags: cleanup
+  - name: Cleanup Node
+    include_role:
+      name: destroy
+    vars:
+      - contrail_configuration: "{{ hostvars['localhost'].contrail_configuration }}"
+      - node_roles_dict: "{{ hostvars['localhost'].node_roles_dict }}"
+      - instance_name: "{{ item.key }}"
+      - ip_address: "{{ item.value }}"
+    with_dict: "{{ hostvars['localhost'].deleted_nodes_dict }}"
+    when: inventory_hostname == item.value
+    tags: cleanup
+
 - name: Install Contrail
   hosts: container_hosts
   gather_facts: yes
@@ -48,8 +94,10 @@
     - container_registry: "{{ hostvars['localhost'].container_registry }}"
     - contrail_version_tag: "{{ hostvars['localhost'].contrail_version_tag }}"
     - roles: "{{ hostvars['localhost'].roles }}"
+    - node_roles_dict: "{{ hostvars['localhost'].node_roles_dict }}"
+    - api_server: "{{ hostvars['localhost'].api_server }}"
+    - reprovision: "{{ hostvars['localhost'].reprovision }}"
   environment:
     - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
     - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
   tags: always
-
