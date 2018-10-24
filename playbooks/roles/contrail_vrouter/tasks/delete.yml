@@ -1,0 +1,32 @@
+---
+- name: Get name of the vrouter container
+  command: docker ps --filter name=vrouter-agent --format {%raw%}"{{.Names}}"{%endraw%}
+  register: result_name
+  tags:
+    - cleanup
+
+- name: Send QUIT signal to vrouter
+  command:
+    docker kill -s QUIT "{{ result_name.stdout }}"
+  when:
+    - result_name.stdout
+  tags:
+    - cleanup
+
+- name: Stop and remove Vrouter Container and volumes
+  docker_service:
+    project_src: /etc/contrail/vrouter
+    state: absent
+    remove_images: all
+    remove_volumes: yes
+  when:
+    - result_name.stdout
+
+- name: Delete all files and folders used by vrouter
+  file:
+    path: /etc/contrail/common_vrouter.env
+    state: absent
+
+- file:
+    path: /etc/contrail/vrouter/
+    state: absent
