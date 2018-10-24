@@ -1,0 +1,34 @@
+---
+- set_fact:
+    cluster_roles_dict: {}
+
+- name: Calculate Existing Roles
+  set_fact:
+    cluster_roles_dict: "{{ cluster_roles_dict | calculate_contrail_roles(hostvars['localhost']) }}"
+
+- debug:
+    var: cluster_roles_dict
+
+- name: Fail if there was an Exception in getting data
+  fail:
+    msg:
+      - "There was an exception when contacting the cluster:"
+      - "{{ cluster_roles_dict['Exception'] }}"
+  when: "'Exception' in cluster_roles_dict"
+
+- name: Calculate node roles Dict
+  set_fact:
+    node_roles_dict: "{{ cluster_roles_dict['node_roles_dict'] }}"
+
+- name: Calculate deleted role Dict
+  set_fact:
+    deleted_nodes_dict: "{{ cluster_roles_dict['deleted_nodes_dict'] }}"
+
+- name: set api_server as validated active API server
+  set_fact:
+    api_server: "{{ cluster_roles_dict['api_server_ip'] }}"
+
+- name: Check if it is a re-provision scenario
+  set_fact:
+    reprovision: "{{ cluster_roles_dict['reprovision'] | default('no') | bool }}"
+
