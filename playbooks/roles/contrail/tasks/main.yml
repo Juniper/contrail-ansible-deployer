@@ -14,10 +14,23 @@
 - name: run common tasks
   include: "common_{{ ansible_system }}.yml"
 
+- name: Run De-Register Role Tasks
+  include: deregister.yml
+    instance_name="{{ hostvars[inventory_hostname].instance_name }}"
+  when: node_roles_dict[instance_name].deleted_roles | length > 0
+  delegate_to: api_server
+
+- name: Run Delete Role Tasks
+  include: delete.yml
+    instance_name="{{ hostvars[inventory_hostname].instance_name }}"
+  when: node_roles_dict[instance_name].deleted_roles | length > 0
+
 - name: create redis
   include_role:
     name: contrail_redis
-  when: roles[instance_name].webui is defined or roles[instance_name].analytics is defined
+  when: (roles[instance_name].webui is defined) or
+        ('analytics' in node_roles_dict[instance_name].new_roles) or
+        (('analytics' in node_roles_dict[instance_name].existing_roles) and (reprovision|bool))
   tags:
     - webui
     - analytics
@@ -32,7 +45,8 @@
 - name: create contrail config
   include_role:
     name: contrail_config
-  when: roles[instance_name].config is defined
+  when: ('config' in node_roles_dict[instance_name].new_roles) or
+        ('config' in node_roles_dict[instance_name].existing_roles and (reprovision|bool))
   tags:
     - config
 
@@ -46,28 +60,32 @@
 - name: create contrail control
   include_role:
     name: contrail_control
-  when: roles[instance_name].control is defined
+  when: ('control' in node_roles_dict[instance_name].new_roles ) or
+        ('control' in node_roles_dict[instance_name].existing_roles and (reprovision|bool))
   tags:
    - control
 
 - name: create contrail control_only
   include_role:
     name: contrail_control_only
-  when: roles[instance_name].control_only is defined
+  when: (node_roles_dict[instance_name].new_roles | length == 1 and 'control' in node_roles_dict[instance_name].new_roles) or
+        (node_roles_dict[instance_name].existing_roles | length == 1 and 'control' in node_roles_dict[instance_name].existing_roles and (reprovision|bool))
   tags:
     - control_only
 
 - name: create contrail analytics database
   include_role:
     name: contrail_analytics_database
-  when: roles[instance_name].analytics_database is defined
+  when: ('analytics_database' in node_roles_dict[instance_name].new_roles ) or
+        ('analytics_database' in node_roles_dict[instance_name].existing_roles and (reprovision|bool))
   tags:
     - analytics_database
 
 - name: create contrail analytics
   include_role:
     name: contrail_analytics
-  when: roles[instance_name].analytics is defined
+  when: ('analytics' in node_roles_dict[instance_name].new_roles ) or
+        ('analytics' in node_roles_dict[instance_name].existing_roles and (reprovision|bool))
   tags:
     - analytics
 
@@ -95,14 +113,20 @@
 - name: create contrail vrouter
   include_role:
     name: contrail_vrouter
-  when: roles[instance_name].vrouter is defined and ansible_system == 'Linux'
+  when:
+    - ('vrouter' in node_roles_dict[instance_name].new_roles) or
+      ('vrouter' in node_roles_dict[instance_name].existing_roles and (reprovision|bool))
+    - ansible_system == 'Linux'
   tags:
     - vrouter
 
 - name: create contrail vrouter
   include_role:
     name: contrail_vrouter_windows
-  when: roles[instance_name].vrouter is defined and ansible_system == 'Win32NT'
+  when:
+    - ('vrouter' in node_roles_dict[instance_name].new_roles) or
+      ('vrouter' in node_roles_dict[instance_name].existing_roles and (reprovision|bool))
+    - ansible_system == 'Win32NT'
   tags:
     - vrouter
 

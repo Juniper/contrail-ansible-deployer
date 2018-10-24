@@ -1,0 +1,11 @@
+---
+
+- name: deregister contrail vrouter - Windows
+  include_role:
+    name: contrail_vrouter_windows
+    tasks_from: deregister
+  when:
+    - ('vrouter' in node_roles_dict[instance_name].deleted_roles)
+    - ansible_system == 'Win32NT'
+  tags:
+    - vrouter
