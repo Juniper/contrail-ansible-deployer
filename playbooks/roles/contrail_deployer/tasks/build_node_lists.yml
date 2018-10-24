@@ -116,6 +116,16 @@
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:
+    vrouter_nodes_list: []
+- name: add Vrouter Nodes to the list
+  set_fact:
+    vrouter_nodes_list: "{{ vrouter_nodes_list + [ item.value.private_ip | default(item.value.ip) ]}}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.vrouter is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
     tsn_nodes_list: []
 - name: add TSN nodes to the list
   set_fact:
