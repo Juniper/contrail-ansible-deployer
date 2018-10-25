@@ -38,6 +38,7 @@ global_configuration:
   WINDOWS_CONTAINER_REGISTRY: mclapinski
 
 contrail_configuration:
+  CLOUD_ORCHESTRATOR: none
   CONTRAIL_VERSION: latest
   PHYSICAL_INTERFACE: ens192
   WINDOWS_PHYSICAL_INTERFACE: Ethernet1

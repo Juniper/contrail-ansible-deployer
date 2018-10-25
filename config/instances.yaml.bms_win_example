@@ -18,6 +18,7 @@ global_configuration:
   WINDOWS_CONTAINER_REGISTRY: mclapinski
 
 contrail_configuration:
+  CLOUD_ORCHESTRATOR: none
   CONTRAIL_VERSION: latest
   CONTROLLER_NODES: 192.168.1.100 # supply mgmt interface IP of controller
 
