@@ -57,6 +57,16 @@
   tags:
     - control_only
 
+- name: create contrail analytics environment variables
+  include: roles/contrail_analytics/tasks/create_analytics_environment.yml
+  when: roles[instance_name].analytics is defined or roles[instance_name].analytics_database is defined or
+        roles[instance_name].analytics_snmp is defined or roles[instance_name].analytics_alarm is defined
+  tags:
+    - analytics
+    - analytics_snmp
+    - analytics_alarm
+    - analytics_database
+
 - name: create contrail analytics database
   include_role:
     name: contrail_analytics_database
@@ -70,6 +80,24 @@
   when: roles[instance_name].analytics is defined
   tags:
     - analytics
+
+- name: create contrail analytics alarm
+  include_role:
+    name: contrail_analytics_alarm
+  when:
+    - roles[instance_name].analytics_alarm is defined
+  tags:
+    - analytics
+    - analytics_alarm
+
+- name: create contrail analytics snmp
+  include_role:
+    name: contrail_analytics_snmp
+  when:
+   - roles[instance_name].analytics_snmp is defined
+  tags:
+    - analytics
+    - analytics_snmp
 
 - name: create cni
   include_role:
