@@ -68,6 +68,7 @@
   when:
     - contrail_configuration.CONTROLLER_NODES is defined
     - provider_data.domainsuffix is defined
+    - hostvars[item.1].ansible_all_ipv4_addresses is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
 
 - name: "Build hosts file for rabbitmq with domain suffix when provided"
@@ -78,6 +79,7 @@
   when:
     - contrail_configuration.CONFIGDB_NODES is defined
     - provider_data.domainsuffix is defined
+    - hostvars[item.1].ansible_all_ipv4_addresses is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
 
 - name: "Build hosts file for rabbitmq with domain suffix"
@@ -89,6 +91,7 @@
     - contrail_configuration.CONTROLLER_NODES is defined
     - provider_data.domainsuffix is undefined
     - hostvars[item.1]['ansible_fqdn'] is defined
+    - hostvars[item.1].ansible_all_ipv4_addresses is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
 
 - name: "Build hosts file for rabbitmq with domain suffix"
@@ -100,6 +103,7 @@
     - contrail_configuration.CONFIGDB_NODES is defined
     - provider_data.domainsuffix is undefined
     - hostvars[item.1]['ansible_fqdn'] is defined
+    - hostvars[item.1].ansible_all_ipv4_addresses is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
 
 - name: "Build hosts file for rabbitmq without domain suffix"
@@ -111,6 +115,7 @@
     - contrail_configuration.CONTROLLER_NODES is defined
     - provider_data.domainsuffix is undefined
     - hostvars[item.1]['ansible_fqdn'] is undefined
+    - hostvars[item.1].ansible_all_ipv4_addresses is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
 
 - name: "Build hosts file for rabbitmq without domain suffix"
@@ -122,6 +127,7 @@
     - contrail_configuration.CONFIGDB_NODES is defined
     - provider_data.domainsuffix is undefined
     - hostvars[item.1]['ansible_fqdn'] is undefined
+    - hostvars[item.1].ansible_all_ipv4_addresses is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
 
 - name: "Build hosts file with domain suffix when provided"
@@ -227,4 +233,3 @@
 - name: accept forward
   shell: iptables -P FORWARD ACCEPT
   ignore_errors: yes
-
