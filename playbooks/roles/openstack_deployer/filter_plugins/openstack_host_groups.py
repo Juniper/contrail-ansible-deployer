@@ -179,7 +179,10 @@ class FilterModule(object):
             if v['ip'] != ip:
                 continue
 
-            for role in v.get('roles', ['openstack', 'openstack_compute']):
+            if not v.get('roles',None) or not len(v.get('roles',[])):
+                return grp_list
+
+            for role in v.get('roles', []):
                 for i,j in self.openstack_role_groups.iteritems():
                     if role in j:
                         grp_list.append(i)
