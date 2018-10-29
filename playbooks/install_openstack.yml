@@ -65,6 +65,28 @@
     when: st.stat.exists is defined and st.stat.exists
     tags: always
 
+- name: Deregister deleted Openstack Computes
+  include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/deregister_compute.yml"
+  vars:
+    dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/etc/kolla"
+    extensions: ['yml']
+    deleted_nodes_name_list: "{{ hostvars['localhost'].deleted_nodes_name_list }}"
+    openstack_controller: "{{ hostvars['localhost'].openstack_controller }}"
+  tags: nova
+
+- name: Destroy Deleted Openstack Nodes
+  hosts: "{{ hostvars['localhost'].deleted_nodes_list }}"
+  gather_facts: no
+  tasks:
+    - include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/destroy.yml"
+      vars:
+        action: delete
+        dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/etc/kolla"
+        extensions: ['yml']
+        contrail_cleanup: true
+        destroy_include_images: "{{ enable_destroy_images | default('no') }}"
+  tags: nova
+
 - include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/site.yml"
   vars:
     action: deploy

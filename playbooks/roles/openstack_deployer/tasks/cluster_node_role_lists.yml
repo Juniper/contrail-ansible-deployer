@@ -1,0 +1,37 @@
+---
+- set_fact:
+    cluster_roles_dict: {}
+
+- name: Calculate Existing Roles
+  set_fact:
+    cluster_roles_dict: "{{ cluster_roles_dict | calculate_openstack_roles(hostvars['localhost']) }}"
+
+- debug:
+    var: cluster_roles_dict
+
+- name: Fail if there was an Exception in getting data
+  fail:
+    msg:
+      - "There was an exception when contacting the cluster:"
+      - "{{ cluster_roles_dict['Exception'] }}"
+  when: "'Exception' in cluster_roles_dict"
+
+- name: Calculate node roles Dict
+  set_fact:
+    node_roles_dict: "{{ cluster_roles_dict['node_roles_dict'] }}"
+
+- name: Calculate deleted node list
+  set_fact:
+    deleted_nodes_list: "{{ cluster_roles_dict['deleted_nodes_list'] }}"
+
+- name: Calculate deleted nodes name list
+  set_fact:
+    deleted_nodes_name_list: "{{ cluster_roles_dict['deleted_nodes_name_list'] }}"
+
+- name: set openstack_controller as validated active Openstack Controller Node
+  set_fact:
+    openstack_controller: "{{ cluster_roles_dict['openstack_controller'] }}"
+
+- name: Check if it is a re-provision scenario
+  set_fact:
+    reprovision: "{{ cluster_roles_dict['reprovision'] | default('no') | bool }}"
