@@ -3,7 +3,7 @@
 - name: Create container host group for OpenStack
   hosts: localhost
   connection: local
-  gather_facts: no
+  gather_facts: yes
   pre_tasks:
     - name: Expose instances
       set_fact:
@@ -64,6 +64,30 @@
       file: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/host_vars/{{ inventory_hostname }}.yml"
     when: st.stat.exists is defined and st.stat.exists
     tags: always
+
+- name: Deregister deleted Openstack Computes
+  include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/deregister_compute.yml"
+  vars:
+    dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/etc/kolla"
+    extensions: ['yml']
+    deleted_nodes_dict: "{{ hostvars['localhost'].deleted_nodes_dict }}"
+    openstack_controller: "{{ hostvars['localhost'].openstack_controller }}"
+    contrail_configuration: "{{ hostvars['localhost'].contrail_configuration }}"
+  tags: nova
+
+- name: Destroy Deleted Openstack Nodes
+  include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/destroy.yml"
+  vars:
+    dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/etc/kolla"
+    extensions: ['yml']
+    deleted_nodes_dict: "{{ hostvars['localhost'].deleted_nodes_dict }}"
+    openstack_controller: "{{ hostvars['localhost'].openstack_controller }}"
+    contrail_cleanup: true
+    destroy_include_images: "{{ enable_destroy_images | default('no') }}"
+  when:
+    - hostvars['localhost'].deleted_nodes_dict.keys() | length > 0
+    - inventory_hostname in hostvars['localhost'].deleted_nodes_dict.values()
+  tags: nova
 
 - include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/site.yml"
   vars:
