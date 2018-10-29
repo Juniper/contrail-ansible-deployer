@@ -37,17 +37,6 @@
     enabled: True
   when: master_running == false
 
-- name: set k8s version to default
-  set_fact:
-    k8s_version: "v1.9.2"
-
-- name: set k8s version if not defined
-  set_fact:
-    k8s_version: "v{{ global_configuration.K8S_VERSION }}"
-  when:
-    - global_configuration is defined
-    - global_configuration.K8S_VERSION is defined
-
 - debug:
     msg: "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
 
@@ -77,7 +66,7 @@
 
 - name: initialize k8s master with listen ip
   shell: |
-      kubeadm init --token-ttl 0 --kubernetes-version {{ k8s_version }} --apiserver-advertise-address {{ listen_ip }} --pod-network-cidr {{ kube_pod_subnet }} &&
+      kubeadm init --token-ttl 0 --kubernetes-version v{{ k8s_version }} --apiserver-advertise-address {{ listen_ip }} --pod-network-cidr {{ kube_pod_subnet }} &&
       mkdir -p $HOME/.kube &&
       cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
       chown -R $(id -u):$(id -g) $HOME/.kube
@@ -85,7 +74,7 @@
 
 - name: initialize k8s master without listen ip
   shell: |
-      kubeadm init --token-ttl 0 --kubernetes-version {{ k8s_version }} --pod-network-cidr {{ kube_pod_subnet }} &&
+      kubeadm init --token-ttl 0 --kubernetes-version v{{ k8s_version }} --pod-network-cidr {{ kube_pod_subnet }} &&
       mkdir -p $HOME/.kube &&
       cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
       chown -R $(id -u):$(id -g) $HOME/.kube

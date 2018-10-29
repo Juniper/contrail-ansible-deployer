@@ -8,9 +8,9 @@
     gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
     repo_gpgcheck: yes
     gpgcheck: yes
-  when: k8s_version is defined
+  when: k8s_package_version is defined
 
 # using this to avoid issue https://github.com/ansible/ansible/issues/20711
 - name: make cache to import gpg keys
   command: "yum -q makecache -y --disablerepo='*' --enablerepo='Kubernetes'"
-  when: k8s_version is defined
+  when: k8s_package_version is defined
