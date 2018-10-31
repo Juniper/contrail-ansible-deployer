@@ -41,7 +41,6 @@ instances:
 
 global_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
-  WINDOWS_CONTAINER_REGISTRY: mclapinski
 
 contrail_configuration:
   CONTRAIL_VERSION: latest

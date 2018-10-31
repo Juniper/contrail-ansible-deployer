@@ -15,7 +15,6 @@ instances:
 
 global_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
-  WINDOWS_CONTAINER_REGISTRY: mclapinski
 
 contrail_configuration:
   CLOUD_ORCHESTRATOR: none
