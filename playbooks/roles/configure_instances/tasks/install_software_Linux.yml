@@ -67,6 +67,7 @@
     - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - contrail_configuration.CONTROLLER_NODES is defined
+    - contrail_configuration.CONFIGDB_NODES is defined
     - provider_data.domainsuffix is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
 
@@ -87,6 +88,7 @@
     - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - contrail_configuration.CONTROLLER_NODES is defined
+    - contrail_configuration.CONFIGDB_NODES is defined
     - provider_data.domainsuffix is undefined
     - hostvars[item.1]['ansible_fqdn'] is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
@@ -109,6 +111,7 @@
     - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - contrail_configuration.CONTROLLER_NODES is defined
+    - contrail_configuration.CONFIGDB_NODES is defined
     - provider_data.domainsuffix is undefined
     - hostvars[item.1]['ansible_fqdn'] is undefined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
