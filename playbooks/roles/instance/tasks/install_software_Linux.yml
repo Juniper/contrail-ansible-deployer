@@ -59,6 +59,7 @@
 - name: install python compose
   pip:
     name: docker-compose
+    version: 1.22.0
 
 - name: "Build hosts file for rabbitmq with domain suffix when provided"
   lineinfile: dest=/etc/hosts regexp='^{{ item.0 }}.*' line="{{ item.0 }} {{ hostvars[item.1]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item.1]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
