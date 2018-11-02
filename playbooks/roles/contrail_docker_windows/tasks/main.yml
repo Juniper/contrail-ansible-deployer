@@ -14,6 +14,7 @@
     src: templates/contrail-cnm-plugin.conf.j2
     dest: "{{ win_cnm_plugin_config_path }}"
     newline_sequence: "\r\n"
+  register: dockerdriver_cfg
 
 # We divide creation and start of Docker Driver service, because sometimes win_nssm
 # won't start it. It's a bug in win_nssm module. It should be fixed in Ansible 2.7.
@@ -29,10 +30,10 @@
 # NOTE: Errors are ignored, because in case of single interface deployment, after Docker Driver
 # service is started Ansible might lose connectivity for a moment due to vRouter being enabled.
 # Following tasks wait for reconnection and check whether service has started.
-- name: start docker-driver service
+- name: ensure docker-driver service is running with fresh configuration
   win_service:
     name: contrail-docker-driver
-    state: started
+    state: "{{ (dockerdriver_cfg.changed) | ternary('restarted', 'started') }}"
     start_mode: auto
   ignore_errors: yes
 
@@ -78,15 +79,10 @@
     src: ../contrail_vrouter_windows/templates/contrail-vrouter-agent.conf.j2
     dest: "{{ win_agent_config_path }}"
     newline_sequence: "\r\n"
-  register: agent_config
+  register: agent_cfg
 
-- name: restart vrouter-agent service in case of config change
+- name: ensure vrouter-agent service is running with fresh configuration
   win_service:
     name: contrail-vrouter-agent
-    state: restarted
-  when: agent_config.changed
-
-- name: make sure vrouter-agent service is running
-  win_service:
-    name: contrail-vrouter-agent
-    state: started
+    state: "{{ (agent_cfg.changed) | ternary('restarted', 'started') }}"
+    start_mode: auto
