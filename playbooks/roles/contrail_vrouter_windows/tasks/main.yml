@@ -61,6 +61,7 @@
     src: templates/contrail-nodemgr-win.conf.j2
     dest: C:\ProgramData\Contrail\etc\contrail\contrail-vrouter-nodemgr.conf
     newline_sequence: "\r\n"
+  register: nodemgr_cfg
 
 - name: create vrouter nodemgr service
   win_nssm:
@@ -70,11 +71,10 @@
     app_parameters_free_form: >
       --nodetype contrail-vrouter
 
-- name: start vrouter nodemgr service
+- name: ensure nodemgr service is running with fresh configuration
   win_service:
     name: contrail-vrouter-nodemgr
-    state: started
-    start_mode: auto
+    state: "{{ (nodemgr_cfg.changed) | ternary('restarted', 'started') }}"
 
 - name: run hostname command
   win_shell: "hostname"
