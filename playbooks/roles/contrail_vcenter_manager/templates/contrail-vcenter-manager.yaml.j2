@@ -6,6 +6,7 @@ services:
     env_file: /etc/contrail/common_vcmanager.env
     volumes:
       - /var/log/contrail:/var/log/contrail
+      - /var/lib/contrail:/var/lib/contrail
     restart: on-failure
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
