@@ -77,6 +77,10 @@
   set_fact:
     docker_daemon: "{{ docker_daemon | combine({\"bridge\" : \"none\"}) }}"
 
+- name: enable docker debug log
+  set_fact:
+    docker_daemon: "{{ docker_daemon | combine({\"debug\" : true}) }}"
+
 - name: write config to daemon.json
   win_copy:
     content: "{{ docker_daemon | to_nice_json }}"
