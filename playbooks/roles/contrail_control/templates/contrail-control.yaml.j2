@@ -1,0 +1,109 @@
+version: '2'
+volumes:
+  contrail_control_dns:
+services:
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_control.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    pid: host
+    network_mode: "host"
+    volumes:
+      - /usr/bin:/host/usr/bin
+      - /etc/contrail/ssl:/etc/contrail/ssl
+      - /etc/sysctl.d:/etc/sysctl.d
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_control.env
+    environment:
+      - NODE_TYPE=control
+    network_mode: "host"
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ control_log_driver }}"
+      options:
+        max-size: "{{ control_log_max_size }}"
+        max-file: "{{ control_log_max_file }}"
+    depends_on:
+      - node-init
+  control:
+    image: "{{ container_registry }}/contrail-controller-control-control:{{ contrail_version_tag }}"
+    network_mode: "host"
+    env_file: /etc/contrail/common_control.env
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/log/contrail:/var/log/contrail
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ control_log_driver }}"
+      options:
+        max-size: "{{ control_log_max_size }}"
+        max-file: "{{ control_log_max_file }}"
+{% if roles[instance_name].control.location is undefined %}
+  named:
+    image: "{{ container_registry }}/contrail-controller-control-named:{{ contrail_version_tag }}"
+    network_mode: "host"
+    env_file: /etc/contrail/common_control.env
+    privileged: true
+    pid: host
+    volumes_from:
+      - node-init
+      - dns
+    depends_on:
+      - node-init
+      - dns
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ control_log_driver }}"
+      options:
+        max-size: "{{ control_log_max_size }}"
+        max-file: "{{ control_log_max_file }}"
+  dns:
+    image: "{{ container_registry }}/contrail-controller-control-dns:{{ contrail_version_tag }}"
+    network_mode: "host"
+    env_file: /etc/contrail/common_control.env
+    pid: host
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/log/contrail:/var/log/contrail
+      - contrail_control_dns:/etc/contrail/dns
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ control_log_driver }}"
+      options:
+        max-size: "{{ control_log_max_size }}"
+        max-file: "{{ control_log_max_file }}"
+{% endif %}

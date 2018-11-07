@@ -1,0 +1,103 @@
+version: '2'
+volumes:
+  analytics_cassandra:
+  analytics_zookeeper:
+services:
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    pid: host
+    network_mode: "host"
+    volumes:
+      - /usr/bin:/host/usr/bin
+      - /etc/contrail/ssl:/etc/contrail/ssl
+      - /etc/sysctl.d:/etc/sysctl.d
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+      - NODE_TYPE=database
+      - CASSANDRA_CQL_PORT=9042
+      - CASSANDRA_JMX_LOCAL_PORT=7200
+    network_mode: "host"
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ analytics_db_log_driver }}"
+      options:
+        max-size: "{{ analytics_db_log_max_size }}"
+        max-file: "{{ analytics_db_log_max_file }}"
+    depends_on:
+      - node-init
+  kafka:
+    image: "{{ container_registry }}/contrail-external-kafka:{{ contrail_version_tag }}"
+    network_mode: "host"
+    env_file: /etc/contrail/common.env
+    environment:
+      - KAFKA_NODES={{ kafka_nodes }}
+      - ZOOKEEPER_NODES={{ zookeeper_nodes }}
+      - ZOOKEEPER_PORT=2182
+      - NODE_TYPE=database
+    restart: always
+    logging:
+      driver: "{{ analytics_db_log_driver }}"
+      options:
+        max-size: "{{ analytics_db_log_max_size }}"
+        max-file: "{{ analytics_db_log_max_file }}"
+    volumes:
+     - /etc/hosts:/etc/hosts
+  cassandra:
+    image: "{{ container_registry }}/contrail-external-cassandra:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+      - CASSANDRA_SEEDS={{ cassandra_seeds }}
+      - CASSANDRA_START_RPC=true
+      - CASSANDRA_CLUSTER_NAME=contrail_analytics
+      - CASSANDRA_PORT=9160
+      - CASSANDRA_CQL_PORT=9042
+      - CASSANDRA_SSL_STORAGE_PORT=7011
+      - CASSANDRA_STORAGE_PORT=7010
+      - CASSANDRA_JMX_LOCAL_PORT=7200
+      - NODE_TYPE=database
+    volumes:
+     - analytics_cassandra:/var/lib/cassandra/data
+     - /etc/hosts:/etc/hosts
+    network_mode: "host"
+    logging:
+      driver: "{{ analytics_db_log_driver }}"
+      options:
+        max-size: "{{ analytics_db_log_max_size }}"
+        max-file: "{{ analytics_db_log_max_file }}"
+    restart: always
+  zookeeper:
+    image: "{{ container_registry }}/contrail-external-zookeeper:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+      - ZOOKEEPER_NODES={{ zookeeper_nodes }}
+      - ZOOKEEPER_PORTS=4888:5888
+      - ZOOKEEPER_PORT=2182
+      - NODE_TYPE=database
+    volumes:
+     - analytics_zookeeper:/data
+     - analytics_zookeeper:/datalog
+     - /etc/hosts:/etc/hosts
+    network_mode: "host"
+    logging:
+      driver: "{{ analytics_db_log_driver }}"
+      options:
+        max-size: "{{ analytics_db_log_max_size }}"
+        max-file: "{{ analytics_db_log_max_file }}"
+    restart: always

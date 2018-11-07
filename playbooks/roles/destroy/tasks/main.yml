@@ -1,0 +1,38 @@
+---
+- name: find all directories
+  find:
+    path: /etc/contrail
+    file_type: directory
+  register: dir_out
+
+- debug:
+    msg="{{ item.path }}"
+  with_items: "{{ dir_out.files }}"
+
+- name: Get name of the vrouter container
+  command: docker ps --filter name=vrouter-agent --format {%raw%}"{{.Names}}"{%endraw%}
+  register: result_name
+  when: roles[instance_name].vrouter is defined
+
+- debug:
+    msg="{{ result_name.stdout }}"
+  when: roles[instance_name].vrouter is defined
+
+- name: Send QUIT signal to vrouter
+  command:
+    docker kill -s QUIT "{{ result_name.stdout }}"
+  when: roles[instance_name].vrouter is defined
+
+- name: skip invalid dir which doesn't have compose file
+  stat:
+    path: "{{ item.path }}/docker-compose.yaml"
+  register: rc
+  with_items: "{{ dir_out.files }}"
+
+- docker_service:
+    project_src: "{{ item.item.path }}"
+    state: absent
+    remove_images: all
+    remove_volumes: yes
+  with_items: "{{ rc.results }}"
+  when: item.stat.exists == true

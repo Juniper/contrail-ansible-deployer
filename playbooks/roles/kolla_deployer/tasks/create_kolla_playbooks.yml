@@ -1,0 +1,34 @@
+---
+- name: Check openstack repo is present
+  stat:
+    path: "{{ kolla_dir }}"
+  register: kolla_dir_stat
+
+- name: Clone openstack git repo
+  git:
+    repo: https://github.com/Juniper/contrail-kolla-ansible.git
+    dest: "{{ kolla_dir }}"
+    force: "{{ force_clone }}"
+  ignore_errors: yes
+  register: kolla_repo
+  when: not kolla_dir_stat.stat.exists or force_clone|bool
+
+- name: Choosing openstack branch
+  shell: "git checkout contrail/{{ openstack_sku }}"
+  args:
+    chdir: "{{ kolla_dir }}"
+  when: not skip_checkout|bool
+
+- name: Create configs customization dir
+  file:
+    path: "{{ '/etc/kolla/config/' + item.key | dirname }}"
+    state: directory
+    mode: 0755
+    recurse: yes
+  with_dict: "{{ kolla_config.customize | default({}) }}"
+
+- name: Upload configs custimization
+  copy:
+    dest: "/etc/kolla/config/{{ item.key }}"
+    content: "{{ item.value }}"
+  with_dict: "{{ kolla_config.customize | default({}) }}"

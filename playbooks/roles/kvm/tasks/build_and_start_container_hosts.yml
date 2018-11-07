@@ -1,0 +1,233 @@
+- name: set instance data
+  set_fact:
+    instance_data: "{{ instances[item.key] }}"
+
+- name: set provider data
+  set_fact:
+    provider_data: "{{ provider_config[instance_data.provider] }}"
+  when: provider_config[instance_data.provider] is defined
+
+- name: set vcpu to default if not provided
+  set_fact:
+    vcpu: 8
+
+- name: set vcpu to provider default if not provided
+  set_fact:
+    vcpu: "{{ provider_data.vcpu }}"
+  when: provider_data.vcpu is defined
+
+- name: set vcpu to host default
+  set_fact:
+    vcpu: "{{ instance_data.vcpu }}"
+  when: instance_data.vcpu is defined
+
+- name: set vram to default if not provided
+  set_fact:
+    vram: 32000
+
+- name: set vram to provider default if not provided
+  set_fact:
+    vram: "{{ provider_data.vram }}"
+  when: provider_data.vram is defined
+
+- name: set vram to host default
+  set_fact:
+    vram: "{{ instance_data.vram }}"
+  when: instance_data.vram is defined
+
+- name: set vdisk to default if not provided
+  set_fact:
+    vdisk: 100G
+
+- name: set vdisk to provider default if not provided
+  set_fact:
+    vdisk: "{{ provider_data.vdisk }}"
+  when: provider_data.vdisk is defined
+
+- name: set vdisk to host default
+  set_fact:
+    vdisk: "{{ instance_data.vdisk }}"
+  when: instance_data.vdisk is defined
+
+- name: set subnet_prefix to provider default if not provided
+  set_fact:
+    subnet_prefix: "{{ provider_data.subnet_prefix }}"
+  when: provider_data.subnet_prefix is defined
+
+- name: set subnet_prefix to host default
+  set_fact:
+    subnet_prefix: "{{ instance_data.subnet_prefix }}"
+  when: instance_data.subnet_prefix is defined
+
+- name: set subnet_netmask to provider default if not provided
+  set_fact:
+    subnet_netmask: "{{ provider_data.subnet_netmask }}"
+  when: provider_data.subnet_netmask is defined
+
+- name: set subnet_netmask to host default
+  set_fact:
+    subnet_netmask: "{{ instance_data.subnet_netmask }}"
+  when: instance_data.subnet_netmask is defined
+
+- name: set gateway to provider default if not provided
+  set_fact:
+    gateway: "{{ provider_data.gateway }}"
+  when: provider_data.gateway is defined
+
+- name: set gateway to host default
+  set_fact:
+    gateway: "{{ instance_data.gateway }}"
+  when: instance_data.gateway is defined
+
+- name: set nameserver to host default
+  set_fact:
+    nameserver: "{{ instance_data.nameserver }}"
+  when: instance_data.nameserver is defined
+
+- name: set nameserver to provider default if not provided
+  set_fact:
+    nameserver: "{{ provider_data.nameserver }}"
+  when: provider_data.nameserver is defined
+
+- name: set nameserver to host default
+  set_fact:
+    nameserver: "{{ instance_data.nameserver }}"
+  when: instance_data.nameserver is defined
+
+- name: set nameserver to host default
+  set_fact:
+    nameserver: "{{ instance_data.nameserver }}"
+  when: instance_data.nameserver is defined
+
+- name: set ntpserver to provider default if not provided
+  set_fact:
+    ntpserver: "{{ provider_data.ntpserver }}"
+  when: provider_data.ntpserver is defined
+
+- name: set ntpserver to host default
+  set_fact:
+    ntpserver: "{{ instance_data.ntpserver }}"
+  when: instance_data.ntpserver is defined
+
+- name: set domainsuffix to provider default if not provided
+  set_fact:
+    domainsuffix: "{{ provider_data.domainsuffix }}"
+  when: provider_data.domainsuffix is defined
+
+- name: set domainsuffix to host default
+  set_fact:
+    domainsuffix: "{{ instance_data.domainsuffix }}"
+  when: instance_data.domainsuffix is defined
+
+- name: set hostname to instance name if not defined
+  set_fact:
+    container_vm_hostname: "{{ item.key.replace('.','-') }}"
+  when: instance_data.hostname is not defined
+
+- name: set hostname to hostname if defined
+  set_fact:
+    container_vm_hostname: "{{ instance_data.hostname }}"
+  when: instance_data.hostname is defined
+
+- name: get container vm status
+  virt:
+    name: "{{ container_vm_hostname }}"
+    command: status
+  register: container_vm_status
+  ignore_errors: yes
+
+- name: destroy {{ container_vm_hostname }}
+  virt:
+    name: "{{ container_vm_hostname }}"
+    command: destroy
+  when: container_vm_status.status is defined and container_vm_status.status == "running"
+
+- name: get container vm status
+  virt:
+    name: "{{ container_vm_hostname }}"
+    command: status
+  register: container_vm_status
+  ignore_errors: yes
+
+- name: undefine {{ container_vm_hostname }}
+  virt:
+    name: "{{ container_vm_hostname }}"
+    command: undefine
+  when: container_vm_status.status is defined and container_vm_status.status == "shutdown"
+
+- name: Create /var/lib/libvirt/images/{{ container_vm_hostname }}.qcow image
+  command: /usr/bin/qemu-img create -f qcow2 /var/lib/libvirt/images/{{ container_vm_hostname }}.qcow2 {{ vdisk }}
+
+- name: Expand {{ container_vm_hostname }} container image size
+  shell: /usr/bin/virt-resize --expand /dev/sda1 /tmp/centos_image/{{ uncompressed_image_name }} /var/lib/libvirt/images/{{ container_vm_hostname }}.qcow2
+  environment:
+    LIBGUESTFS_BACKEND: direct
+
+- name: create ifcfg file
+  copy:
+    content: "DEVICE=eth0\nIPADDR={{ item.value.ip }}\nNETMASK={{ subnet_netmask }}\nGATEWAY={{ gateway }}\nDNS1={{ nameserver }}\nONBOOT=yes"
+    dest: "/tmp/ifcfg_{{ container_vm_hostname }}"
+#  when: ansible_os_family == "RedHat"
+
+- name: create ifcfg for additional interfaces file
+  template:
+    src: additional_interface.j2
+    dest: "/tmp/ifcfg_ext_{{interface_var.0 + 1 }}_{{ container_vm_hostname }}"
+  when: item.value.additional_interfaces is defined
+  with_indexed_items: "{{ item.value.additional_interfaces | default([]) }}"
+  loop_control:
+    loop_var: interface_var
+
+- name: read public ssh key
+  set_fact:
+    pub_key: "{{ lookup('file', item) }}"
+  with_items:
+    - "{{ provider_config.kvm.ssh_public_key }}"
+  when: provider_config.kvm.ssh_public_key is defined and provider_config.kvm.ssh_public_key is not none
+
+- name: copy virt-customize
+  template:
+    src: virt-customize.sh.j2
+    dest: /tmp/virt-customize.sh
+    mode: 0700
+
+- name: run virt-customize
+  shell: /tmp/virt-customize.sh
+
+- name: copy virt-install
+  template:
+    src: virt-install.sh.j2
+    dest: /tmp/virt-install.sh
+    mode: 0700
+
+- name: run virt-install
+  shell: /tmp/virt-install.sh
+
+- name: add container vm {{ container_vm_hostname }} to inventory when pwd is defined
+  add_host:
+    name: "{{ item.value.ip }}"
+    groups: container_hosts
+    ansible_ssh_pass: "{{ item.value.ssh_pwd|default(provider_config.kvm.ssh_pwd) }}"
+    ansible_user: "{{ item.value.ssh_user|default(provider_config.kvm.ssh_user) }}"
+    instance_name: "{{ item.key }}"
+    privat_ip: "{{ item.value.ip }}"
+  when: (provider_config.kvm.ssh_pwd is defined or item.value.ssh_pwd) and
+        (provider_config.kvm.ssh_user is defined or item.value.ssh_user is defined)
+
+- name: add container vm {{ container_vm_hostname }} to inventory when private key is defined
+  add_host:
+    name: "{{ item.value.ip }}"
+    groups: container_hosts
+    ansible_user: "{{ item.value.ssh_user|default(provider_config.kvm.ssh_user) }}"
+    ansible_ssh_private_key_file: "{{ item.value.ssh_private_key|default(provider_config.kvm.ssh_private_key) }}"
+    instance_name: "{{ item.key }}"
+    privat_ip: "{{ item.value.ip }}"
+  when: provider_config.kvm.ssh_private_key is defined or item.value.ssh_private_key is defined
+
+- name: Wait for the VM be available
+  local_action:
+    module: wait_for
+      host="{{ item.value.ip }}"
+      port=22
+      delay=1
+      timeout=300

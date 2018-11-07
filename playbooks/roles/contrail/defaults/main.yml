@@ -1,0 +1,48 @@
+default_log_driver: "{{ contrail_configuration.DEFAULT_DOCKER_LOG_DRIVER|default('json-file') }}"
+default_log_max_size: "{{ contrail_configuration.DEFAULT_DOCKER_LOG_MAX_SIZE|default('50m') }}"
+default_log_max_file: "{{ contrail_configuration.DEFAULT_DOCKER_LOG_MAX_FILE|default('10') }}"
+
+config_log_driver: "{{ contrail_configuration.CONFIG_LOG_DRIVER|default(default_log_driver) }}"
+config_log_max_size: "{{ contrail_configuration.CONFIG_LOG_MAX_SIZE|default(default_log_max_size) }}"
+config_log_max_file: "{{ contrail_configuration.CONFIG_LOG_MAX_FILE|default(default_log_max_file) }}"
+
+config_db_log_driver: "{{ contrail_configuration.CONFIG_DB_LOG_DRIVER|default(default_log_driver) }}"
+config_db_log_max_size: "{{ contrail_configuration.CONFIG_DB_LOG_MAX_SIZE|default(default_log_max_size) }}"
+config_db_log_max_file: "{{ contrail_configuration.CONFIG_DB_LOG_MAX_FILE|default(default_log_max_file) }}"
+
+webui_log_driver: "{{ contrail_configuration.WEBUI_LOG_DRIVER|default(default_log_driver) }}"
+webui_log_max_size: "{{ contrail_configuration.WEBUI_LOG_MAX_SIZE|default(default_log_max_size) }}"
+webui_log_max_file: "{{ contrail_configuration.WEBUI_LOG_MAX_FILE|default(default_log_max_file) }}"
+
+analytics_log_driver: "{{ contrail_configuration.ANALYTICS_LOG_DRIVER|default(default_log_driver) }}"
+analytics_log_max_size: "{{ contrail_configuration.ANALYTICS_LOG_MAX_SIZE|default(default_log_max_size) }}"
+analytics_log_max_file: "{{ contrail_configuration.ANALYTICS_LOG_MAX_FILE|default(default_log_max_file) }}"
+
+analytics_db_log_driver: "{{ contrail_configuration.ANALYTICS_DB_LOG_DRIVER|default(default_log_driver) }}"
+analytics_db_log_max_size: "{{ contrail_configuration.ANALYTICS_DB_LOG_MAX_SIZE|default(default_log_max_size) }}"
+analytics_db_log_max_file: "{{ contrail_configuration.ANALYTICS_DB_LOG_MAX_FILE|default(default_log_max_file) }}"
+
+compute_log_driver: "{{ contrail_configuration.COMPUTE_LOG_DRIVER|default(default_log_driver) }}"
+compute_log_max_size: "{{ contrail_configuration.COMPUTE_LOG_MAX_SIZE|default(default_log_max_size) }}"
+compute_log_max_file: "{{ contrail_configuration.COMPUTE_LOG_MAX_FILE|default(default_log_max_file) }}"
+
+control_log_driver: "{{ contrail_configuration.CONTROL_LOG_DRIVER|default(default_log_driver) }}"
+control_log_max_size: "{{ contrail_configuration.CONTROL_LOG_MAX_SIZE|default(default_log_max_size) }}"
+control_log_max_file: "{{ contrail_configuration.CONTROL_LOG_MAX_FILE|default(default_log_max_file) }}"
+
+win_container_artifacts_dir: C:\artifacts\
+win_host_artifacts_dir: "{{ win_container_artifacts_dir }}"
+win_vhost_name: vEthernet (HNSTransparent)
+win_agent_config_path: C:\ProgramData\Contrail\etc\contrail\contrail-vrouter-agent.conf
+
+contrail_configuration_default:
+  AUTH_MODE: noauth
+  KEYSTONE_AUTH_PROTO: http
+  KEYSTONE_AUTH_PUBLIC_PORT: 5000
+  KEYSTONE_AUTH_URL_VERSION: /v2.0
+  KEYSTONE_AUTH_URL_TOKENS: /v2.0/tokens
+  KEYSTONE_AUTH_ADMIN_TENANT: admin
+  KEYSTONE_AUTH_ADMIN_USER: admin
+  CONFIG_API_PORT: 8082
+  COLLECTOR_PORT: 8086
+  DNS_SERVER_PORT: 53

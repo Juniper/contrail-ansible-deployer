@@ -1,0 +1,88 @@
+---
+
+- name: extract docker-driver MSI from container
+  win_shell: >
+    docker run -v {{ win_host_artifacts_dir }}:{{ win_container_artifacts_dir }}
+    {{ container_registry }}/contrail-windows-docker-driver:{{ contrail_configuration.CONTRAIL_VERSION }}
+
+- name: install docker-driver
+  win_package:
+    path: '{{ win_host_artifacts_dir }}\docker-driver\docker-driver.msi'
+
+- name: create cnm-plugin configuration file
+  win_template:
+    src: templates/contrail-cnm-plugin.conf.j2
+    dest: "{{ win_cnm_plugin_config_path }}"
+    newline_sequence: "\r\n"
+  register: dockerdriver_cfg
+
+# We divide creation and start of Docker Driver service, because sometimes win_nssm
+# won't start it. It's a bug in win_nssm module. It should be fixed in Ansible 2.7.
+# TODO: When the bug is fixed, merge these two tasks into one.
+- name: create docker-driver service
+  win_nssm:
+    name: contrail-docker-driver
+    application: C:\Program Files\Juniper Networks\contrail-windows-docker.exe
+    state: present
+    stdout_file: "{{ win_cnm_plugin_nssm_log_path }}"
+    stderr_file: "{{ win_cnm_plugin_nssm_log_path }}"
+
+# NOTE: Errors are ignored, because in case of single interface deployment, after Docker Driver
+# service is started Ansible might lose connectivity for a moment due to vRouter being enabled.
+# Following tasks wait for reconnection and check whether service has started.
+- name: ensure docker-driver service is running with fresh configuration
+  win_service:
+    name: contrail-docker-driver
+    state: "{{ (dockerdriver_cfg.changed) | ternary('restarted', 'started') }}"
+    start_mode: auto
+  ignore_errors: yes
+
+- name: wait for connection after creating vswitch
+  wait_for_connection:
+    delay: 10
+
+# TODO: It should be investigated if win_stat is a more elegant solution.
+- name: wait for docker driver startup
+  win_shell: '[System.IO.File]::Exists("\\.\pipe\Contrail")'
+  register: docker_driver_pipe
+  until: docker_driver_pipe.stdout_lines[0] == "True"
+  retries: 5
+  delay: 20
+
+# TODO: Agent configuration should be created only if docker driver has been restared
+- name: fetch network adapters information
+  register: adapters_raw
+  win_shell: |
+    $ErrorActionPreference = "Stop"
+    $PhysicalAdapter = Get-NetAdapter -Name "{{ contrail_configuration.WINDOWS_PHYSICAL_INTERFACE }}"
+    $VHostAdapter = Get-NetAdapter -Name "{{ win_vhost_name }}"
+    $VHostIP = $VHostAdapter | Get-NetIPAddress -AddressFamily IPv4
+    $VHostGateway = ($VHostAdapter | Get-NetIPConfiguration).IPv4DefaultGateway
+    @{
+      physical = @{
+        interface_name = $PhysicalAdapter.ifName
+      }
+      vhost = @{
+        interface_name = $VHostAdapter.ifName
+        ip = $VHostIP.IPAddress
+        ip_mask_length = $VHostIP.PrefixLength
+        gateway = if ($VHostGateway) { $VHostGateway.NextHop } else { $null }
+      }
+    } | ConvertTo-Json
+
+- name: parse network adapters information
+  set_fact:
+    adapters: "{{ adapters_raw.stdout | from_json }}"
+
+- name: create vrouter-agent configuration file
+  win_template:
+    src: ../contrail_vrouter_windows/templates/contrail-vrouter-agent.conf.j2
+    dest: "{{ win_agent_config_path }}"
+    newline_sequence: "\r\n"
+  register: agent_cfg
+
+- name: ensure vrouter-agent service is running with fresh configuration
+  win_service:
+    name: contrail-vrouter-agent
+    state: "{{ (agent_cfg.changed) | ternary('restarted', 'started') }}"
+    start_mode: auto

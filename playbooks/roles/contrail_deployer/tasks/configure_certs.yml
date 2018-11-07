@@ -1,0 +1,47 @@
+---
+- name: set default ssl dir path
+  set_fact:
+    ssl_dir: "/etc/contrail/ssl"
+
+- name: set ssl dir path if defined
+  set_fact:
+    ssl_dir: "{{ hostvars['localhost'].ssl_dir }}"
+  when: hostvars['localhost'].ssl_dir is undefined
+
+- name: set certs & key dir paths
+  set_fact:
+    certs_dir: "{{ ssl_dir }}/certs"
+
+- name: set certs & key dir paths
+  set_fact:
+    private_keys_dir: "{{ ssl_dir }}/private"
+
+- name: default root CA & Key paths
+  set_fact:
+    root_ca: "{{ certs_dir }}/ca-cert.pem"
+    root_ca_csr: "{{ certs_dir }}/ca-cert.csr"
+    root_ca_key: "{{ private_keys_dir }}/ca-key.pem"
+
+- name: root CA path if defined
+  set_fact:
+    root_ca: "{{ hostvars['localhost'].root_ca }}"
+  when: hostvars['localhost'].root_ca is defined
+
+- name: root CA Key path if defined
+  set_fact:
+    root_ca_key: "{{ hostvars['localhost'].root_ca_key }}"
+  when: hostvars['localhost'].root_ca_key is defined
+
+- name: root ca path stat
+  stat:
+    path: "{{ root_ca }}"
+  register: root_ca_stat
+
+- name: root ca key path stat
+  stat:
+    path: "{{ root_ca_key }}"
+  register: root_ca_key_stat
+
+- name: generate root CA
+  include: generate_ca.yml
+  when: root_ca_stat.stat.exists == False or root_ca_key_stat.stat.exists == False

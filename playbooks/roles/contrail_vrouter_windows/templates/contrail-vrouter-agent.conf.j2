@@ -1,0 +1,17 @@
+[DEFAULT]
+platform=windows
+
+[CONTROL-NODE]
+servers={{ contrail_configuration.CONTROL_NODES }}
+
+[DNS]
+dns_client_port={{ contrail_configuration.DNS_SERVER_PORT }}
+servers={{ win_dns_nodes | join(' ') }}
+
+[VIRTUAL-HOST-INTERFACE]
+name={{ adapters.vhost.interface_name }}
+ip={{ adapters.vhost.ip }}/{{ adapters.vhost.ip_mask_length }}
+{% if adapters.vhost.gateway is not none %}
+gateway={{ adapters.vhost.gateway }}
+{% endif %}
+physical_interface={{ adapters.physical.interface_name }}

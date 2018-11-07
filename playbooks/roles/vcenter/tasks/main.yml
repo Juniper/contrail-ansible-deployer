@@ -147,11 +147,11 @@
   include: add_dvs.yml vc_server={{item}}
   with_items: "{{ vc_servers }}"
 
-- name: Fix VM DVS-PGs and add pvlan config
+- name: Fix VM DVS-PGs
   include: fix_dvs.yml vc_server={{item}}
   with_items: "{{ vc_servers }}"
 
-- name: Wait for VM DVS-PG pvlan fix task
+- name: Wait for VM DVS-PGs fix task
   async_status: jid={{ item.ansible_job_id }}
   with_items: "{{ dvs_fixed }}"
   register: t1
@@ -213,6 +213,17 @@
   with_items: "{{ esxi_servers }}"
   when: auto_deploy
 
+- name: Power off ContrailVMs
+  include: power_off_vm.yml esxi_host={{item}}
+  with_items: "{{ esxi_servers }}"
+
+- name: Wait for VM power off task complete
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ powered_off }}"
+  register: power_off
+  until: power_off.finished
+  retries: 300
+
 - name: Add nics to ContrailVM
   include: add_nic.yml esxi_host={{item}}
   with_items: "{{ esxi_servers }}"
@@ -234,6 +245,32 @@
   register: mac_fixed
   until: mac_fixed.finished
   retries: 300
+
+- name: Add pci nics to ContrailVM
+  include: add_pci_nics.yml esxi_host={{item}}
+  when: item.contrail_vm.pci_devices is defined and item.contrail_vm.pci_devices
+  with_items: "{{ esxi_servers }}"
+
+- name: Wait for pci nic add completion
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ pci_nics_added }}"
+  register: pci_nic_completed
+  until: pci_nic_completed.finished
+  retries: 300
+  when: pci_nics_added is defined and pci_nics_added
+
+- name: Add sriov nics to ContrailVM
+  include: add_sriov_nics.yml esxi_host={{item}}
+  when: item.contrail_vm.sr_iov_nics is defined and item.contrail_vm.sr_iov_nics
+  with_items: "{{ esxi_servers }}"
+
+- name: Wait for sriov nic add completion
+  async_status: jid={{ item.ansible_job_id }}
+  with_items: "{{ sriov_nics_added }}"
+  register: sriov_nic_completed
+  until: sriov_nic_completed.finished
+  retries: 300
+  when: sriov_nics_added is defined and sriov_nics_added
 
 - name: Power on ContrailVMs
   include: power_on_vm.yml esxi_host={{item}}

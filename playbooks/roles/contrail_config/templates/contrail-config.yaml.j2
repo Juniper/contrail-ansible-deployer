@@ -1,0 +1,127 @@
+version: '2'
+services:
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_config.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    pid: host
+    network_mode: "host"
+    volumes:
+      - /usr/bin:/host/usr/bin
+      - /etc/contrail/ssl:/etc/contrail/ssl
+      - /etc/sysctl.d:/etc/sysctl.d
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_config.env
+    environment:
+      - NODE_TYPE=config
+    network_mode: "host"
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ config_log_driver }}"
+      options:
+        max-size: "{{ config_log_max_size }}"
+        max-file: "{{ config_log_max_file }}"
+    depends_on:
+      - node-init
+  api:
+    image: "{{ container_registry }}/contrail-controller-config-api:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_config.env
+    network_mode: "host"
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/log/contrail:/var/log/contrail
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ config_log_driver }}"
+      options:
+        max-size: "{{ config_log_max_size }}"
+        max-file: "{{ config_log_max_file }}"
+  svcmonitor:
+    image: "{{ container_registry }}/contrail-controller-config-svcmonitor:{{ contrail_version_tag }}"
+    network_mode: "host"
+    env_file: /etc/contrail/common_config.env
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/log/contrail:/var/log/contrail
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ config_log_driver }}"
+      options:
+        max-size: "{{ config_log_max_size }}"
+        max-file: "{{ config_log_max_file }}"
+  schema:
+    image: "{{ container_registry }}/contrail-controller-config-schema:{{ contrail_version_tag }}"
+    network_mode: "host"
+    env_file: /etc/contrail/common_config.env
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/log/contrail:/var/log/contrail
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ config_log_driver }}"
+      options:
+        max-size: "{{ config_log_max_size }}"
+        max-file: "{{ config_log_max_file }}"
+  devicemgr:
+    image: "{{ container_registry }}/contrail-controller-config-devicemgr:{{ contrail_version_tag }}"
+    network_mode: "host"
+    env_file: /etc/contrail/common_config.env
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/log/contrail:/var/log/contrail
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ config_log_driver }}"
+      options:
+        max-size: "{{ config_log_max_size }}"
+        max-file: "{{ config_log_max_file }}"

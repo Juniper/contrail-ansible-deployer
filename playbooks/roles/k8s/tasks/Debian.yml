@@ -1,0 +1,13 @@
+---
+
+- name: add k8s repo key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+  when: k8s_package_version is defined
+
+- name: create k8s repo
+  apt_repository:
+    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+  when: k8s_package_version is defined

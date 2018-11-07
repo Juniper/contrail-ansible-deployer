@@ -1,0 +1,89 @@
+version: '2'
+services:
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_vrouter.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    pid: host
+    network_mode: "host"
+    volumes:
+      - /usr/bin:/host/usr/bin
+      - /etc/contrail/ssl:/etc/contrail/ssl
+      - /etc/sysctl.d:/etc/sysctl.d
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_vrouter.env
+    environment:
+      - NODE_TYPE=vrouter
+    network_mode: host
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    restart: on-failure
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ compute_log_driver }}"
+      options:
+        max-size: "{{ compute_log_max_size }}"
+        max-file: "{{ compute_log_max_file }}"
+    depends_on:
+      - node-init
+  vrouter-kernel-init:
+    image: "{{ container_registry }}/{{ vrouter_kernel_init_img_name }}:{{ contrail_version_tag }}"
+    network_mode: host
+    privileged: true
+    env_file: /etc/contrail/common_vrouter.env
+    pid: host
+    volumes:
+      - /usr/src:/usr/src
+      - /lib/modules:/lib/modules
+      - /bin:/host/bin
+      - /var/log/contrail:/var/log/contrail
+{% if ansible_os_family == 'RedHat' %}
+      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+{% endif %}
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+  vrouter-agent:
+    image: "{{ container_registry }}/contrail-vrouter-agent:{{ contrail_version_tag }}"
+    network_mode: host
+    privileged: true
+    pid: host
+    env_file: /etc/contrail/common_vrouter.env
+    volumes:
+      - /usr/src:/usr/src
+      - /lib/modules:/lib/modules
+      - /bin:/host/bin
+      - /var/log/contrail:/var/log/contrail
+      - /var/lib/contrail:/var/lib/contrail
+      - /var/run:/var/run
+{% if ansible_os_family == 'RedHat' %}
+      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+{% endif %}
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/crashes:/var/crashes
+      - /dev/log:/dev/log
+    volumes_from:
+      - node-init
+    logging:
+      driver: "{{ compute_log_driver }}"
+      options:
+        max-size: "{{ compute_log_max_size }}"
+        max-file: "{{ compute_log_max_file }}"
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    depends_on:
+      - vrouter-kernel-init
+      - node-init

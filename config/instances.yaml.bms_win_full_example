@@ -1,0 +1,64 @@
+provider_config:
+  bms:
+    ssh_pwd: Contrail123!
+    ssh_user: root
+
+  bms_win:
+    ansible_user: Administrator
+    ansible_password: Contrail123!
+
+instances:
+  ctrl:
+    provider: bms
+    ip: 192.168.1.100
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+      vrouter:
+      openstack_control:
+      openstack_network:
+      openstack_storage:
+      openstack_monitoring:
+      openstack_compute:
+
+  win_compute1:
+    provider: bms_win
+    ip: 192.168.1.101
+    roles:
+      vrouter:
+      win_docker_driver:
+
+  win_compute2:
+    provider: bms_win
+    ip: 192.168.1.102
+    roles:
+      vrouter:
+      win_docker_driver:
+
+global_configuration:
+  CONTAINER_REGISTRY: opencontrailnightly
+
+contrail_configuration:
+  CONTRAIL_VERSION: latest
+  CLOUD_ORCHESTRATOR: openstack
+  RABBITMQ_NODE_PORT: 5673
+  PHYSICAL_INTERFACE: ens192
+  WINDOWS_PHYSICAL_INTERFACE: Ethernet1
+  WINDOWS_ENABLE_TEST_SIGNING:
+  WINDOWS_DEBUG_DLLS_PATH: ~/dlls
+  AUTH_MODE: keystone
+  KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123
+  KEYSTONE_AUTH_HOST: 192.168.1.100
+
+kolla_config:
+  kolla_globals:
+    network_interface: "ens192"
+    kolla_external_vip_interface: "ens192"
+    enable_haproxy: "no"
+    openstack_release: "ocata"
+  kolla_passwords:
+    keystone_admin_password: c0ntrail123

@@ -1,0 +1,31 @@
+# lines with comments require changes/attention
+
+provider_config:
+  bms_win:
+    ansible_user: Administrator
+    ansible_password: Contrail123! # supply Administrator password
+
+instances:
+  win_compute1:
+    provider: bms_win
+    ip: 192.168.1.101 # supply mgmt interface IP
+    roles:
+      vrouter:
+      win_docker_driver:
+
+global_configuration:
+  CONTAINER_REGISTRY: opencontrailnightly
+
+contrail_configuration:
+  CLOUD_ORCHESTRATOR: none
+  CONTRAIL_VERSION: latest
+  CONTROLLER_NODES: 192.168.1.100 # supply mgmt interface IP of controller
+
+  WINDOWS_PHYSICAL_INTERFACE: Ethernet1 # supply alias of dataplane interface
+
+  WINDOWS_ENABLE_TEST_SIGNING:
+  WINDOWS_DEBUG_DLLS_PATH: ~/dlls # this folder should contain debug DLLs
+
+  AUTH_MODE: keystone # Defaults to noauth. Specify if controller uses keystone for authentication
+  KEYSTONE_AUTH_HOST: 192.168.1.100 # Optional. Supply IP of keystone host if AUTH_MODE is keystone
+  KEYSTONE_AUTH_ADMIN_PASSWORD: c0ntrail123 # Optional. Supply real admin password if AUTH_MODE is keystone

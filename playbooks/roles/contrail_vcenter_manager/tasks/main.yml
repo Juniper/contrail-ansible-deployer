@@ -1,0 +1,55 @@
+---
+- name: create /etc/contrail/vcenter_manager
+  file:
+    path: /etc/contrail/vcenter_manager
+    state: directory
+    recurse: yes
+
+- name: "get /etc/contrail/common_vcmanager.env stat"
+  stat:
+    path: "/etc/contrail/common_vcmanager.env"
+  register: st
+
+- name: "delete /etc/contrail/common_vcmanager.env if exists"
+  file:
+    path: "/etc/contrail/common_vcmanager.env"
+    state: absent
+  when: st.stat.exists is defined and st.stat.exists
+
+- name: "create /etc/contrail/common_vcmanager.env"
+  file:
+    path: "/etc/contrail/common_vcmanager.env"
+    state: touch
+
+- name: "populate cluster wide common_vcmanager.env"
+  lineinfile: dest=/etc/contrail/common_vcmanager.env regexp='.*{{ item.key }}$' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ contrail_configuration }}"
+  no_log: True
+
+- name: "populate pod specific common_vcmanager.env"
+  lineinfile: dest=/etc/contrail/common_vcmanager.env regexp='.*{{ item.key }}$' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ roles[instance_name].vcenter_manager }}"
+  ignore_errors: yes
+  no_log: True
+
+- name: add ESXI_HOST to common_vcmanager.env
+  lineinfile:
+    dest: /etc/contrail/common_vcmanager.env
+    regexp: '.*ESXI_HOST$'
+    line: "ESXI_HOST={{ instances[instance_name].esxi_host }}"
+
+- name: update image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-vcenter-manager
+  when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
+
+- name: create contrail vcenter-manager file
+  template:
+    src: contrail-vcenter-manager.yaml.j2
+    dest: /etc/contrail/vcenter_manager/docker-compose.yaml
+
+- name: start contrail vcenter-manager
+  docker_service:
+    project_src: /etc/contrail/vcenter_manager
+

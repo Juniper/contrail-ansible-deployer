@@ -1,0 +1,135 @@
+---
+- name: set instance data
+  set_fact:
+    instance_data: "{{ instances[hostvars[inventory_hostname].instance_name] }}"
+  tags:
+   - always
+
+- name: set instance name
+  set_fact:
+    instance_name: "{{ hostvars[inventory_hostname].instance_name }}"
+  tags:
+   - always
+
+- name: run common tasks
+  include: "common_{{ ansible_system }}.yml"
+
+- name: create redis
+  include_role:
+    name: contrail_redis
+  when: roles[instance_name].webui is defined or roles[instance_name].analytics is defined
+  tags:
+    - webui
+    - analytics
+
+- name: create contrail config database
+  include_role:
+    name: contrail_config_database
+  when: roles[instance_name].config_database is defined
+  tags:
+    - config_database
+
+- name: create contrail config
+  include_role:
+    name: contrail_config
+  when: roles[instance_name].config is defined
+  tags:
+    - config
+
+- name: create contrail webui
+  include_role:
+    name: contrail_webui
+  when: roles[instance_name].webui is defined
+  tags:
+    - webui
+
+- name: create contrail control
+  include_role:
+    name: contrail_control
+  when: roles[instance_name].control is defined
+  tags:
+   - control
+
+- name: create contrail control_only
+  include_role:
+    name: contrail_control_only
+  when: roles[instance_name].control_only is defined
+  tags:
+    - control_only
+
+- name: create contrail analytics database
+  include_role:
+    name: contrail_analytics_database
+  when: roles[instance_name].analytics_database is defined
+  tags:
+    - analytics_database
+
+- name: create contrail analytics
+  include_role:
+    name: contrail_analytics
+  when: roles[instance_name].analytics is defined
+  tags:
+    - analytics
+
+- name: create cni
+  include_role:
+    name: contrail_k8s_cni
+  when: roles[instance_name].k8s_node is defined
+  tags:
+    - k8s
+
+- name: configure k8s for Contrail
+  include_role:
+    name: contrail_k8s_master
+  when: roles[instance_name].k8s_master is defined and k8s_master_name is defined and inventory_hostname == k8s_master_name
+  tags:
+    - k8s
+
+- name: create contrail kube manager
+  include_role:
+    name: contrail_k8s_kubemanager
+  when: roles[instance_name].kubemanager is defined and k8s_master_ip is defined and k8s_master_name is defined
+  tags:
+    - k8s
+
+- name: create contrail vrouter
+  include_role:
+    name: contrail_vrouter
+  when: roles[instance_name].vrouter is defined and ansible_system == 'Linux'
+  tags:
+    - vrouter
+
+- name: create contrail vrouter
+  include_role:
+    name: contrail_vrouter_windows
+  when: roles[instance_name].vrouter is defined and ansible_system == 'Win32NT'
+  tags:
+    - vrouter
+
+- name: Pluginize legacy compute
+  include_role:
+    name: contrail_compute_legacy
+  when: roles[instance_name].openstack_compute_legacy is defined
+
+- name: create contrail vcenter-plugin
+  include_role:
+    name: contrail_vcenter_plugin
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'vcenter'
+    - roles[instance_name].vcenter_plugin is defined
+  tags:
+    - vcenter
+
+- name: create contrail vcenter-manager
+  include_role:
+    name: contrail_vcenter_manager
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'vcenter'
+    - roles[instance_name].vcenter_manager is defined
+  tags:
+    - vcenter
+
+- name: create win docker driver
+  include_role:
+    name: contrail_docker_windows
+  when: roles[instance_name].win_docker_driver is defined

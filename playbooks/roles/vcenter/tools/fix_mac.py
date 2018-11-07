@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 
 from pyVim import connect
 from pyVmomi import vim
-from manage_dvs_pg import wait_for_task, get_obj, is_xenial_or_above, get_dvs_pg_obj
+from manage_dvs_pg import wait_for_task, get_obj, get_dvs_pg_obj
 
 def get_args():
     """

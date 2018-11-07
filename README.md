@@ -8,6 +8,9 @@ This set of commands will configure the instance and install AIO contrail with k
 ```
 ssh-copy-id 192.168.1.100
 yum install -y ansible-2.4.2.0
+#For Contrail R5.0 use 
+git clone -b R5.0 http://github.com/Juniper/contrail-ansible-deployer
+#For master branch use
 git clone http://github.com/Juniper/contrail-ansible-deployer
 cd contrail-ansible-deployer
 ansible-playbook -i inventory/ -e orchestrator=kubernetes -e '{"instances":{"bms1":{"ip":"192.168.1.100","provider":"bms"}}}' playbooks/configure_instances.yml
@@ -28,22 +31,28 @@ in kubernetes.
                                                                    +-------------+
                                                                    |             |
                                                                    | +---------+ |
-                +------------------+                               | |nodemgr  | |
+                                                                   | |nodemgr  | |
+                                                                   | +---------+ |
+                                                                   | +---------+ |
+                                                                   | |redis    | |
+                                                                   | +---------+ |
+                                                                   | +---------+ |
+                +------------------+                               | |api      | |
                 |                  |                               | +---------+ |
                 | +--------------+ |                               | +---------+ |
-                | |nodemgr       | | +-----------+ +-------------+ | |redis    | |
+                | |nodemgr       | | +-----------+ +-------------+ | |collector| |
                 | +--------------+ | |           | |             | | +---------+ |
                 | +--------------+ | | +-------+ | | +---------+ | | +---------+ |
-+-------------+ | |api           | | | |nodemgr| | | |nodemgr  | | | |api      | | +----------+
++-------------+ | |api           | | | |nodemgr| | | |nodemgr  | | | |alarm    | | +----------+
 |             | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | |          |
 | +---------+ | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | | +------+ |
-| |rabbitmq | | | |svc monitor   | | | |control| | | |kafka    | | | |collector| | | |redis | |+-----------+
+| |rabbitmq | | | |svc monitor   | | | |control| | | |kafka    | | | |query    | | | |redis | |+-----------+
 | +---------+ | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | | +------+ ||           |
 | +---------+ | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | | +------+ || +-------+ |
-| |zookeeper| | | |device manager| | | |dns    | | | |zookeeper| | | |alarm    | | | |job   | || |nodemgr| |
+| |zookeeper| | | |device manager| | | |dns    | | | |zookeeper| | | |snmp     | | | |job   | || |nodemgr| |
 | +---------+ | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | | +------+ || +-------+ |
 | +---------+ | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | | +------+ || +-------+ |
-| |cassandra| | | |schema        | | | |named  | | | |cassandra| | | |query    | | | |server| || |agent  | |
+| |cassandra| | | |schema        | | | |named  | | | |cassandra| | | |topology | | | |server| || |agent  | |
 | +---------+ | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | | +------+ || +-------+ |
 |             | |                  | |           | |             | |             | |          ||           |
 | configdb    | |  config          | |  control  | | analyticsdb | |  analytics  | | webui    || vrouter   |
@@ -70,6 +79,10 @@ Ansible 2.4.2.0 is temporary fix for 2.5 issues with our playbooks.
 ### get the playbooks
 
 ```
+#For Contrail R5.0 use 
+git clone -b R5.0 http://github.com/Juniper/contrail-ansible-deployer
+
+#For master branch use
 git clone http://github.com/Juniper/contrail-ansible-deployer
 ```
 
@@ -108,7 +121,7 @@ Pulls, configures and starts Contrail containers.
 
 #### configuration
 
-Configuration for all three plays is done in a single file (default locataion:
+Configuration for all three plays is done in a single file (default location:
 config/instances.yaml)
 The configuration has multiple main sections.
 
@@ -321,3 +334,9 @@ ansible-playbook -i inventory/ -e config_file=/config/instances_gce.yml playbook
 
 yaml and json formats are supported.
 
+# Structure of the repo
+
+This repository contains several playbooks which are to be involved separately and various roles which are named acccording to the following:
+1. XXX_deployer roles (contrail_deployer, aws_deployer, kolla_deployer, ...) are the roles which are to be run on the deployment machine (the one running ansible_deployer) and to affect the whole cluster. They prepare global variables, initialize kolla or k8s cluster, etc. They are named after ansible_deployer and could've been named contrail_ansible_deployer, aws_ansible_deployer, etc.
+2. XXX roles (contrail, k8s, vcenter, ...) are the roles to be assigned to particular nodes - computes, controllers, analytics_databases and such.
+ 

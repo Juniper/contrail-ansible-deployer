@@ -24,6 +24,7 @@
 
 - name: add private registry
   include: private_registry.yaml
+    docker_registry="{{ global_configuration.CONTAINER_REGISTRY }}"
   when:
     - global_configuration is defined
     - global_configuration.CONTAINER_REGISTRY is defined
@@ -31,10 +32,7 @@
     - global_configuration.REGISTRY_PRIVATE_SECURE == true
 
 - name: start docker daemon
-  service:
-    enabled: yes
-    name: docker
-    state: started
+  include: "start_docker_{{ ansible_system }}.yml"
 
 - name: add Contrail's private registry authentication
   include: auth_registry.yaml

@@ -298,10 +298,10 @@ Resources:
                 if [[ "${ORCHESTRATOR}" == 'openstack' ]]; then
                   ansible-playbook -i inventory/ playbooks/install_openstack.yml
                 fi
-                ansible-playbook -i inventory/ -e orchestrator=${ORCHESTRATOR} playbooks/install_contrail.yml
                 if [[ "${ORCHESTRATOR}" == 'kubernetes' ]]; then
                   ansible-playbook -i inventory/ -e orchestrator=${ORCHESTRATOR} playbooks/install_k8s.yml
                 fi
+                ansible-playbook -i inventory/ -e orchestrator=${ORCHESTRATOR} playbooks/install_contrail.yml
               fi
             - IMAGE_ID: !FindInMap [AWSRegionArch2AMI, !Ref 'AWS::Region', !FindInMap [AWSInstanceType2Arch, !Ref 'InstanceType', Arch]]
               ACCESS_KEY: !Ref IAMUserKey

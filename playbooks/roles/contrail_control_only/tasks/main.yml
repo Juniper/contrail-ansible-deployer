@@ -1,0 +1,7 @@
+---
+- name: call control only
+  include: "step2.yml"
+  with_dict: "{{ remote_locations }}"
+  loop_control:
+    loop_var: location
+  when: remote_locations is defined

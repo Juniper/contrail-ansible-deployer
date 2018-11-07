@@ -1,0 +1,22 @@
+---
+- name: set contrail configuration to empty if absent
+  set_fact:
+   contrail_configuration: {}
+  when: contrail_configuration is undefined
+  tags:
+   - always
+
+- name: install software
+  include: "install_software_{{ ansible_system }}.yml"
+
+- name: copy root ca
+  include: copy_root_ca.yml
+  when:
+    - (( contrail_configuration.SSL_ENABLE is defined ) and
+      ( contrail_configuration.SSL_ENABLE|bool )) or
+      (( contrail_configuration.XMPP_SSL_ENABLE is defined ) and
+      ( contrail_configuration.XMPP_SSL_ENABLE|bool )) or
+      (( contrail_configuration.INTROSPECT_SSL_ENABLE is defined ) and
+      ( contrail_configuration.INTROSPECT_SSL_ENABLE|bool )) or
+      (( contrail_configuration.SANDESH_SSL_ENABLE is defined ) and
+      ( contrail_configuration.SANDESH_SSL_ENABLE|bool ))

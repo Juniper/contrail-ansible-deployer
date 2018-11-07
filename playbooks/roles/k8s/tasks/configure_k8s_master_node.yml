@@ -1,0 +1,97 @@
+---
+- name: check if master is already running
+  shell: kubectl cluster-info
+  register: master_state
+  ignore_errors: true
+
+- name: set master_running state to true if master is running
+  set_fact:
+    master_running: true
+  when: master_state is defined and master_state.rc == 0
+
+- name: set master_running state to false if master is not running
+  set_fact:
+    master_running: false
+  when: (master_state is undefined) or
+        (master_state is defined and master_state.rc == 1)
+
+- name: docker info for getting cgroup driver
+  shell: docker info 2>/dev/null |grep "Cgroup Driver" |awk '{print $3}'
+  register: docker_info
+
+- name: get cgroup driver
+  set_fact:
+    cgroup_driver: "{{ docker_info.stdout }}"
+
+- name: set cgroup driver to cgroupfs
+  lineinfile:
+    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
+    line: 'Environment="KUBELET_CGROUP_ARGS=--cgroup-driver={{ cgroup_driver }}"'
+
+- name: enable kubelet service
+  systemd:
+    name: kubelet
+    state: restarted
+    daemon_reload: yes
+    enabled: True
+  when: master_running == false
+
+- debug:
+    msg: "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
+
+- name: get controller ip from all ips
+  set_fact:
+    listen_ip: "{{ item[0] }}"
+  when: item[0] == item[1]
+  with_nested:
+    - "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
+    - "{{ contrail_configuration.KUBERNETES_API_NODES }}"
+
+#- name: initialize k8s master with listen ip
+#  shell: |
+#      kubeadm init --kubernetes-version v1.7.4 --apiserver-advertise-address {{ listen_ip }} &&
+#      mkdir -p $HOME/.kube &&
+#      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
+#      chown -R $(id -u):$(id -g) $HOME/.kube
+#  when: inventory_hostname == k8s_master_name and listen_ip is defined
+#
+#- name: initialize k8s master without listen ip
+#  shell: |
+#      kubeadm init --kubernetes-version v1.7.4 &&
+#      mkdir -p $HOME/.kube &&
+#      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
+#      chown -R $(id -u):$(id -g) $HOME/.kube
+#  when: inventory_hostname == k8s_master_name and listen_ip is undefined
+
+- name: initialize k8s master with listen ip
+  shell: |
+      kubeadm init --token-ttl 0 --kubernetes-version v{{ k8s_version }} --apiserver-advertise-address {{ listen_ip }} --pod-network-cidr {{ kube_pod_subnet }} &&
+      mkdir -p $HOME/.kube &&
+      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
+      chown -R $(id -u):$(id -g) $HOME/.kube
+  when: listen_ip is defined and master_running == false
+
+- name: initialize k8s master without listen ip
+  shell: |
+      kubeadm init --token-ttl 0 --kubernetes-version v{{ k8s_version }} --pod-network-cidr {{ kube_pod_subnet }} &&
+      mkdir -p $HOME/.kube &&
+      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
+      chown -R $(id -u):$(id -g) $HOME/.kube
+  when: listen_ip is undefined and master_running == false
+
+- name: get master token
+  shell: kubeadm token list |grep "system:bootstrappers:kubeadm:default-node-token" |grep "forever" |awk '{print $1}'
+  register: output
+
+- name: set master token
+  set_fact:
+    mastertoken: "{{ output.stdout }}"
+
+- name: get nodes
+  shell: kubectl get nodes -o yaml |grep "\- address:" |awk '{print $3}'
+  register: nodes_list_output
+
+- name: set node list
+  set_fact:
+    node_list: "{{ nodes_list_output.stdout }}"

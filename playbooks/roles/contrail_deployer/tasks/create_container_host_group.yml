@@ -1,0 +1,109 @@
+- name: add bms windows container hosts
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: container_hosts
+    instance_name: "{{ item.key }}"
+    ansible_user: "{{ item.value.ansible_user|default(provider_config.bms_win.ansible_user) }}"
+    ansible_password: "{{ item.value.ansible_password|default(provider_config.bms_win.ansible_password) }}"
+    ansible_connection: winrm
+    ansible_winrm_transport: credssp
+    ansible_winrm_server_cert_validation: ignore
+    ansible_winrm_operation_timeout_sec: 60
+    ansible_winrm_read_timeout_sec: 120
+  when: item.value.provider=='bms_win'
+  with_dict: "{{ instances }}"
+  tags:
+    - install_contrail
+
+- name: add kvm container hosts
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: container_hosts
+    ansible_user: "{{ item.value.ssh_user|default(provider_config.kvm.ssh_user) }}"
+    ansible_ssh_pass: "{{ item.value.ssh_pwd|default(provider_config.kvm.ssh_pwd) }}"
+    ansible_become: true
+    instance_name: "{{ item.key }}"
+    private_ip: "{{ item.value.ip }}"
+  when: item.value.provider=='kvm' and (provider_config.kvm.ssh_pwd is defined or
+        item.value.ssh_pwd is defined)
+  with_dict: "{{ instances }}"
+  tags:
+    - configure_kvm_instances
+    - install_contrail
+
+- name: add kvm container hosts
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: container_hosts
+    ansible_user: "{{ item.value.ssh_user|default(provider_config.kvm.ssh_user) }}"
+    ansible_ssh_private_key_file: "{{ item.value.ssh_private_key|default(provider_config.kvm.ssh_private_key) }}"
+    ansible_become: true
+    instance_name: "{{ item.key }}"
+    private_ip: "{{ item.value.ip }}"
+  when: item.value.provider=='kvm' and (provider_config.kvm.ssh_private_key is defined or
+        item.value.ssh_private_key is defined)
+  with_dict: "{{ instances }}"
+  tags:
+    - configure_kvm_instances
+    - install_contrail
+
+- name: add bms container hosts
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: container_hosts
+    ansible_user: "{{ item.value.ssh_user|default(provider_config.bms.ssh_user) }}"
+    ansible_ssh_pass: "{{ item.value.ssh_pwd|default(provider_config.bms.ssh_pwd) }}"
+    ansible_become: true
+    instance_name: "{{ item.key }}"
+    private_ip: "{{ item.value.ip }}"
+  when: item.value.provider=='bms' and (provider_config.bms.ssh_pwd is defined or
+        item.value.ssh_pwd is defined)
+  with_dict: "{{ instances }}"
+  tags:
+    - configure_bms
+    - install_contrail
+
+- name: add bms container hosts
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: container_hosts
+    ansible_user: "{{ item.value.ssh_user|default(provider_config.bms.ssh_user) }}"
+    ansible_ssh_private_key_file: "{{ item.value.ssh_private_key|default(provider_config.bms.ssh_private_key) }}"
+    ansible_become: true
+    instance_name: "{{ item.key }}"
+    private_ip: "{{ item.value.ip }}"
+  when: item.value.provider=='bms' and (provider_config.bms.ssh_private_key is defined or
+        item.value.ssh_private_key is defined)
+  with_dict: "{{ instances }}"
+  tags:
+    - configure_bms
+    - install_contrail
+
+- name: add bms container hosts without user/pwd/key
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: container_hosts
+    instance_name: "{{ item.key }}"
+    ansible_become: true
+    private_ip: "{{ item.value.ip }}"
+  when: item.value.provider=='bms' and provider_config.bms.ssh_private_key is undefined and provider_config.bms.ssh_user is undefined and provider_config.bms.ssh_private_key is undefined
+  with_dict: "{{ instances }}"
+  tags:
+    - configure_bms
+    - install_contrail
+
+- name: add gce container hosts
+  include: add_gce_container_hosts.yml
+  when: item.value.provider=='gce'
+  with_dict: "{{ instances }}"
+  tags:
+    - configure_gce_instances
+    - install_contrail
+
+- name: add aws container hosts
+  include: add_aws_container_hosts.yml
+  when: item.value.provider=='aws'
+  with_dict: "{{ instances }}"
+  tags:
+    - configure_aws_instances
+    - install_contrail
