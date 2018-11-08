@@ -6,6 +6,15 @@
     baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
     gpgkey: https://download.docker.com/linux/centos/gpg
     gpgcheck: yes
+  when: docker_mirror_url is not defined
+
+- name: configure docker mirror
+  yum_repository:
+    name: docker_mirror
+    description: Docker Mirror
+    baseurl: '{{ docker_mirror_url }}'
+    gpgcheck: no
+  when: docker_mirror_url is defined
 
 - name: install docker
   yum:
