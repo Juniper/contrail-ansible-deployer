@@ -129,7 +129,7 @@
   tags:
     - vcenter
 
-- name: create win docker driver
+- name: create win cnm plugin
   include_role:
-    name: contrail_docker_windows
-  when: roles[instance_name].win_docker_driver is defined
+    name: contrail_cnm_windows
+  when: roles[instance_name].win_cnm_plugin is defined

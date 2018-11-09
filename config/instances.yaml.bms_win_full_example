@@ -30,14 +30,14 @@ instances:
     ip: 192.168.1.101
     roles:
       vrouter:
-      win_docker_driver:
+      win_cnm_plugin:
 
   win_compute2:
     provider: bms_win
     ip: 192.168.1.102
     roles:
       vrouter:
-      win_docker_driver:
+      win_cnm_plugin:
 
 global_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
