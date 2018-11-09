@@ -11,7 +11,7 @@ instances:
     ip: 192.168.1.101 # supply mgmt interface IP
     roles:
       vrouter:
-      win_docker_driver:
+      win_cnm_plugin:
 
 global_configuration:
   CONTAINER_REGISTRY: opencontrailnightly
