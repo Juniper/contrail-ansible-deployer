@@ -1,0 +1,12 @@
+---
+
+- name: create docker config directory
+  file:
+    path: "{{ nix_docker_config_directory }}"
+    state: directory
+    mode: 0755
+
+- name: ensure docker config file exists
+  file:
+    path: "{{ nix_docker_config_file }}"
+    state: touch

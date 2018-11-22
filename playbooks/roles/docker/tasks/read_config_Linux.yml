@@ -1,0 +1,5 @@
+---
+
+- name: read docker config file
+  shell: "cat {{ nix_docker_config_file }}"
+  register: "{{ register }}"
