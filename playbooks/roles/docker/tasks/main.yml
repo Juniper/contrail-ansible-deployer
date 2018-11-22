@@ -3,8 +3,8 @@
 - include: "{{ ansible_os_family }}.yml"
 
 - name: add Contrail's insecure registry
-  include: insecure_registry.yaml
-    docker_registry="{{ global_configuration.CONTAINER_REGISTRY }}"
+  include: "insecure_registry_{{ ansible_system }}.yml
+    docker_registry={{ global_configuration.CONTAINER_REGISTRY }}"
   when:
     - global_configuration is defined
     - global_configuration.CONTAINER_REGISTRY is defined
@@ -15,8 +15,8 @@
 # therefore this code handles kolla's parameters and do not pass them into kolla-ansible
 # kolla-ansible always treat passed registy as insecure. so if config has such parameter then we should add it to the list
 - name: add kolla's insecure registry
-  include: insecure_registry.yaml
-    docker_registry="{{ kolla_config.kolla_globals.docker_registry }}"
+  include: "insecure_registry_{{ ansible_system }}.yml
+    docker_registry={{ kolla_config.kolla_globals.docker_registry }}"
   when:
     - kolla_config is defined
     - kolla_config.kolla_globals is defined
@@ -32,7 +32,7 @@
     - global_configuration.REGISTRY_PRIVATE_SECURE == true
 
 - name: start docker daemon
-  include: "start_docker_{{ ansible_system }}.yml"
+  include: "restart_docker_{{ ansible_system }}.yml"
 
 - name: add Contrail's private registry authentication
   include: auth_registry.yaml
