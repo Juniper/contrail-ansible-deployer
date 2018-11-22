@@ -1,0 +1,11 @@
+---
+
+- name: create docker config directory
+  win_file:
+    path: "{{ win_docker_config_directory }}"
+    state: directory
+
+- name: ensure docker config file exists
+  win_file:
+    path: "{{ win_docker_config_file }}"
+    state: touch

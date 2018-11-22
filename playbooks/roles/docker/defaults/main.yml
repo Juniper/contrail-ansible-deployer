@@ -1,0 +1,5 @@
+win_docker_config_directory: C:\ProgramData\Docker\config
+nix_docker_config_directory: /etc/docker
+
+win_docker_config_file: "{{ win_docker_config_directory }}\\daemon.json"
+nix_docker_config_file: "{{ nix_docker_config_directory }}/daemon.json"

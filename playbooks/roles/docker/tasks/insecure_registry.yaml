@@ -3,20 +3,12 @@
 # this file is parameterized
 # it takes 'docker_registry' as a parameter that should be added to insecure_registry list
 
-- name: create /etc/docker directory
-  file:
-    path: /etc/docker
-    state: directory
-    mode: 0755
+- name: ensure docker config exists
+  include: "ensure_config_exists_{{ ansible_system }}.yml"
 
-- name: ensure /etc/docker/daemon.json exists
-  file:
-    path: /etc/docker/daemon.json
-    state: touch
-
-- name: read /etc/docker/daemon.json
-  shell: cat /etc/docker/daemon.json
-  register: docker_daemon_file
+- include: "read_config_{{ ansible_system }}.yml"
+  vars:
+    destination_variable: docker_daemon_file
 
 - name: convert entries to json
   set_fact:
@@ -32,19 +24,13 @@
       set_fact:
         docker_daemon: "{{ docker_daemon | combine({ 'insecure-registries': insecure_registries + [docker_registry] }) }}"
 
-    - name: write config to /etc/docker/daemon.json
-      copy:
-        content: "{{ docker_daemon | to_nice_json }}"
-        dest: /etc/docker/daemon.json
+    - include: "write_config_{{ ansible_system }}.yml"
 
     - name: reload systemd
       shell: systemctl daemon-reload
       when: ansible_os_family == 'RedHat'
 
-    - name: start docker daemon
-      service:
-        enabled: yes
-        name: docker
-        state: restarted
+    - name: restart docker daemon
+      include: "restart_docker_{{ ansible_system }}.yml"
 
   when: docker_registry not in insecure_registries

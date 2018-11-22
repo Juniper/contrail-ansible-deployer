@@ -1,0 +1,5 @@
+---
+
+- name: read docker config file
+  win_shell: "Get-Content {{ win_docker_config_file }}"
+  register: "{{ destination_variable }}"

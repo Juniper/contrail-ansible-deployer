@@ -32,7 +32,7 @@
     - global_configuration.REGISTRY_PRIVATE_SECURE == true
 
 - name: start docker daemon
-  include: "start_docker_{{ ansible_system }}.yml"
+  include: "restart_docker_{{ ansible_system }}.yml"
 
 - name: add Contrail's private registry authentication
   include: auth_registry.yaml
