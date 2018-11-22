@@ -1,0 +1,6 @@
+---
+
+- name: write config to daemon.json
+  win_copy:
+    content: "{{ docker_daemon | to_nice_json }}"
+    dest: "{{ win_docker_config_file }}"
