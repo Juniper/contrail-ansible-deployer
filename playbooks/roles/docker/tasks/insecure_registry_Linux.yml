@@ -3,19 +3,19 @@
 # this file is parameterized
 # it takes 'docker_registry' as a parameter that should be added to insecure_registry list
 
-- name: create /etc/docker directory
+- name: create docker config directory
   file:
-    path: /etc/docker
+    path: "{{ nix_docker_config_directory }}"
     state: directory
     mode: 0755
 
-- name: ensure /etc/docker/daemon.json exists
+- name: ensure docker config file exists
   file:
-    path: /etc/docker/daemon.json
+    path: "{{ nix_docker_config_file }}"
     state: touch
 
-- name: read /etc/docker/daemon.json
-  shell: cat /etc/docker/daemon.json
+- name: read docker config file
+  shell: "cat {{ nix_docker_config_file }}"
   register: docker_daemon_file
 
 - name: convert entries to json
@@ -32,10 +32,10 @@
       set_fact:
         docker_daemon: "{{ docker_daemon | combine({ 'insecure-registries': insecure_registries + [docker_registry] }) }}"
 
-    - name: write config to /etc/docker/daemon.json
+    - name: write config to daemon.json
       copy:
         content: "{{ docker_daemon | to_nice_json }}"
-        dest: /etc/docker/daemon.json
+        dest: "{{ nix_docker_config_file }}"
 
     - name: reload systemd
       shell: systemctl daemon-reload
