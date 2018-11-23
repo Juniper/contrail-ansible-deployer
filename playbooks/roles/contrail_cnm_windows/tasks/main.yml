@@ -2,7 +2,7 @@
 
 - name: extract CNM plugin MSI from container
   win_shell: >
-    docker run -v {{ win_host_artifacts_dir }}:{{ win_container_artifacts_dir }}
+    docker run --rm -v {{ win_host_artifacts_dir }}:{{ win_container_artifacts_dir }}
     {{ container_registry }}/contrail-windows-cnm-plugin:{{ contrail_configuration.CONTRAIL_VERSION }}
 
 - name: install CNM plugin
