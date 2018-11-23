@@ -68,6 +68,7 @@
   when:
     - contrail_configuration.CONTROLLER_NODES is defined
     - provider_data.domainsuffix is defined
+    - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item.1].ansible_all_ipv4_addresses is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
 
@@ -79,6 +80,7 @@
   when:
     - contrail_configuration.CONFIGDB_NODES is defined
     - provider_data.domainsuffix is defined
+    - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item.1].ansible_all_ipv4_addresses is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
 
@@ -90,6 +92,7 @@
   when:
     - contrail_configuration.CONTROLLER_NODES is defined
     - provider_data.domainsuffix is undefined
+    - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item.1]['ansible_fqdn'] is defined
     - hostvars[item.1].ansible_all_ipv4_addresses is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
@@ -102,6 +105,7 @@
   when:
     - contrail_configuration.CONFIGDB_NODES is defined
     - provider_data.domainsuffix is undefined
+    - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item.1]['ansible_fqdn'] is defined
     - hostvars[item.1].ansible_all_ipv4_addresses is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
@@ -114,6 +118,7 @@
   when:
     - contrail_configuration.CONTROLLER_NODES is defined
     - provider_data.domainsuffix is undefined
+    - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item.1]['ansible_fqdn'] is undefined
     - hostvars[item.1].ansible_all_ipv4_addresses is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
@@ -126,6 +131,7 @@
   when:
     - contrail_configuration.CONFIGDB_NODES is defined
     - provider_data.domainsuffix is undefined
+    - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item.1]['ansible_fqdn'] is undefined
     - hostvars[item.1].ansible_all_ipv4_addresses is defined
     - item.0 in hostvars[item.1].ansible_all_ipv4_addresses
@@ -136,6 +142,7 @@
   when:
     - instance_data.provider == 'bms'
     - provider_data.domainsuffix is defined
+    - provider_data.manage_etc_hosts | default("True") | bool
 
 - name: "Build hosts file with domain suffix"
   lineinfile: dest=/etc/hosts regexp='^{{ item }}.*' line="{{ item }} {{ hostvars[item]['ansible_fqdn'] }} {{ hostvars[item]['ansible_hostname'] }}" state=present
@@ -143,6 +150,7 @@
   when:
     - instance_data.provider == 'bms'
     - provider_data.domainsuffix is undefined
+    - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item]['ansible_fqdn'] is defined
 
 - name: "Build hosts file without domain suffix when not provided (bad bad)"
@@ -151,6 +159,7 @@
   when:
     - instance_data.provider == 'bms'
     - provider_data.domainsuffix is undefined
+    - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item]['ansible_fqdn'] is undefined
 
 - name: "Build hosts file with domain suffix when provided"
@@ -159,6 +168,7 @@
   when:
     - instance_data.provider == 'kvm'
     - provider_data.domainsuffix is defined
+    - provider_data.manage_etc_hosts | default("True") | bool
 
 - name: "Build hosts file wit domain suffix when not provided (bad bad)"
   lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ item }} {{ hostvars[item]['ansible_fqdn'] }} {{ hostvars[item]['ansible_hostname'] }}" state=present
@@ -166,6 +176,7 @@
   when:
     - instance_data.provider == 'kvm'
     - provider_data.domainsuffix is undefined
+    - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item]['ansible_fqdn'] is defined
 
 - name: "Build hosts file without domain suffix when not provided (bad bad)"
@@ -174,12 +185,15 @@
   when:
     - instance_data.provider == 'kvm'
     - provider_data.domainsuffix is undefined
+    - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item]['ansible_fqdn'] is undefined
 
 - name: "Build hosts file for aws instances"
   lineinfile: dest=/etc/hosts regexp='.*{{ hostvars[item]['private_ip'] }}$' line="{{ hostvars[item]['private_ip'] }} {{ hostvars[item]['ansible_hostname'] }} {{ hostvars[item]['private_dns_name'] }}" state=present
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
-  when: instance_data.provider == 'aws'
+  when:
+    - instance_data.provider == 'aws'
+    - provider_data.manage_etc_hosts | default("True") | bool
 
 - name: create log file directory
   file:

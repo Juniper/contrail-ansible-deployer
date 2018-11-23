@@ -129,6 +129,7 @@
   when:
     - provider_data is defined
     - provider_data.domainsuffix is defined
+    - provider_data.manage_etc_hosts | default("True") | bool
     - host_intf_dict is defined
     - host_intf_dict.get(item)
 
@@ -138,6 +139,7 @@
   when:
     - provider_data is defined
     - provider_data.domainsuffix is not defined
+    - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item].ansible_fqdn is defined
     - host_intf_dict is defined
     - host_intf_dict.get(item)
@@ -148,6 +150,7 @@
   when:
     - provider_data is defined
     - provider_data.domainsuffix is not defined
+    - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item].ansible_fqdn is not defined
     - host_intf_dict is defined
     - host_intf_dict.get(item)
