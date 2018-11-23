@@ -1,5 +1,5 @@
 - name: start docker service
   win_service:
     name: docker
-    start_mode: auto
+    start_mode: manual
     state: started
