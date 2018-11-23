@@ -20,6 +20,9 @@
     docker run -v {{ win_host_artifacts_dir }}:{{ win_container_artifacts_dir }}
     {{ container_registry }}/contrail-windows-vrouter:{{ contrail_configuration.CONTRAIL_VERSION }}
 
+- name: remove container
+  win_shell: docker rm $(docker ps -lq)
+
 - name: copy debug dlls to compute node
   win_copy:
     src: '{{ contrail_configuration.WINDOWS_DEBUG_DLLS_PATH }}/'
@@ -144,5 +147,3 @@
     stdout_file: "{{ win_agent_nssm_log_path }}"
     stderr_file: "{{ win_agent_nssm_log_path }}"
     state: present
-    app_parameters_free_form: >
-      --config_file="{{ win_agent_config_path }}"

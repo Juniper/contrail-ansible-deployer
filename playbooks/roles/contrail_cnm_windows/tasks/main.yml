@@ -5,6 +5,9 @@
     docker run -v {{ win_host_artifacts_dir }}:{{ win_container_artifacts_dir }}
     {{ container_registry }}/contrail-windows-cnm-plugin:{{ contrail_configuration.CONTRAIL_VERSION }}
 
+- name: remove container
+  win_shell: docker rm $(docker ps -lq)
+
 - name: install CNM plugin
   win_package:
     path: '{{ win_host_artifacts_dir }}\cnm-plugin\contrail-cnm-plugin.msi'
