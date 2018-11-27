@@ -22,6 +22,7 @@
   roles:
     - contrail_deployer
     - k8s_deployer
+    - mesos_deployer
   vars_files:
     - "{{ config_file }}"
   tags: always

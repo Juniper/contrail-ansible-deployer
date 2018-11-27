@@ -1,0 +1,55 @@
+---
+- name: init mesos master_ip list
+  set_fact:
+    mesos_master_ip_list: []
+
+- name: init mesos master_name list
+  set_fact:
+    mesos_master_name_list: []
+
+- name: fill mesos master lists
+  set_fact:
+    mesos_master_ip_list: "{{ mesos_master_ip_list + [ hostvars[item]['private_ip'] ] }}"
+    mesos_master_name_list: "{{ mesos_master_name_list + [ item ] }}"
+  when:
+    - roles[hostvars[item]['instance_name']].mesos_master is defined
+  with_items:
+    - "{{ groups['container_hosts'] }}"
+
+- name: show master_ip list
+  debug:
+    msg: "{{ mesos_master_ip_list }}"
+
+- name: show master_name list
+  debug:
+    msg: "{{ mesos_master_name_list }}"
+
+- name: set master_ip as first item of master_ip list
+  set_fact:
+    mesos_master_ip: "{{ mesos_master_ip_list[0] }}"
+  when: mesos_master_ip_list | length > 0
+
+- name: set master_name as first item of master_name list
+  set_fact:
+    mesos_master_name: "{{ mesos_master_name_list[0] }}"
+  when: mesos_master_name_list | length > 0
+
+- name: create mesos_master_host host group
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: mesos_master_host
+    instance_name: "{{ item.key }}"
+  when:
+    - mesos_master_ip is defined
+    - item.value.ip == mesos_master_ip
+  with_dict: "{{ instances }}"
+
+- name: create mesos_hosts host group
+  add_host:
+    hostname: "{{ item.value.ip }}"
+    groupname: mesos_hosts
+    instance_name: "{{ item.key }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.mesos_master is defined or item.value.roles.mesos_agent_public is defined or item.value.roles.mesos_agent_private is defined
+  with_dict: "{{ instances }}"
