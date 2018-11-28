@@ -34,7 +34,7 @@
   win_service:
     name: contrail-cnm-plugin
     state: "{{ (cnm_plugin_cfg.changed) | ternary('restarted', 'started') }}"
-    start_mode: auto
+    start_mode: manual
   ignore_errors: yes
 
 - name: wait for connection after creating vswitch
@@ -85,4 +85,3 @@
   win_service:
     name: contrail-vrouter-agent
     state: "{{ (agent_cfg.changed) | ternary('restarted', 'started') }}"
-    start_mode: auto

@@ -68,6 +68,7 @@
     name: contrail-vrouter-nodemgr
     application: C:\Python27\Scripts\contrail-nodemgr.exe
     state: present
+    start_mode: auto
     app_parameters_free_form: >
       --nodetype contrail-vrouter
 
@@ -143,4 +144,5 @@
     application: C:\Program Files\Juniper Networks\Agent\contrail-vrouter-agent.exe
     stdout_file: "{{ win_agent_nssm_log_path }}"
     stderr_file: "{{ win_agent_nssm_log_path }}"
+    start_mode: manual
     state: present
