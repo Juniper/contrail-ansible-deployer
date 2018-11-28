@@ -23,8 +23,8 @@
     - kolla_config.kolla_globals.docker_registry is defined
 
 - name: add private registry
-  include: private_registry.yaml
-    docker_registry="{{ global_configuration.CONTAINER_REGISTRY }}"
+  include: "private_registry_{{ ansible_system }}.yml
+    docker_registry={{ global_configuration.CONTAINER_REGISTRY }}"
   when:
     - global_configuration is defined
     - global_configuration.CONTAINER_REGISTRY is defined
