@@ -1,0 +1,89 @@
+---
+- name: create /etc/contrail/cni
+  file:
+    path: /etc/contrail/cni
+    state: directory
+    recurse: yes
+
+- name: "get /etc/contrail/common_cni.env stat"
+  stat:
+    path: "/etc/contrail/common_cni.env"
+  register: st
+
+- name: "delete /etc/contrail/common_cni.env if exists"
+  file:
+    path: "/etc/contrail/common_cni.env"
+    state: absent
+  when: st.stat.exists is defined and st.stat.exists
+
+- name: "create /etc/contrail/common_cni.env"
+  file:
+    path: "/etc/contrail/common_cni.env"
+    state: touch
+
+- name: "populate cluster wide common_cni.env"
+  lineinfile: dest=/etc/contrail/common_cni.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ contrail_configuration }}"
+  no_log: True
+
+- name: "populate instance specific common_cni.env"
+  lineinfile: dest=/etc/contrail/common_cni.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ instances[instance_name].contrail_configuration }}"
+  when: instances[instance_name].contrail_configuration is defined
+  ignore_errors: yes
+  no_log: True
+
+- name: "populate pod specific common_cni.env"
+  lineinfile: dest=/etc/contrail/common_cni.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ roles[instance_name].mesos_master }}"
+  ignore_errors: yes
+  no_log: True
+
+- name: create /var/lib/contrail
+  file:
+    path: /var/lib/contrail
+    state: directory
+    recurse: yes
+
+- name: create /opt/mesosphere/etc/dcos/network/
+  file:
+    path: /opt/mesosphere/etc/dcos/network/
+    state: directory
+    recurse: yes
+
+- name: create /opt/mesosphere/active/cni/
+  file:
+    path: /opt/mesosphere/active/cni/
+    state: directory
+    recurse: yes
+
+- name: create /var/log/contrail/cni
+  file:
+    path: /var/log/contrail/cni
+    state: directory
+    recurse: yes
+
+- name: update image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-mesosphere-cni-init
+  when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
+
+- name: "create contrail cni compose file"
+  template:
+    src: contrail-cni.yaml.j2
+    dest: "/etc/contrail/cni/docker-compose.yaml"
+
+- name: "start contrail cni"
+  docker_service:
+    project_src: /etc/contrail/cni
+
+- name: restart dcos public agent
+  shell: systemctl restart dcos-mesos-slave-public
+  ignore_errors: no
+  when: roles[instance_name].mesos_agent_public is defined
+
+- name: restart dcos private agent
+  shell: systemctl restart dcos-mesos-slave
+  ignore_errors: no
+  when: roles[instance_name].mesos_agent_private is defined

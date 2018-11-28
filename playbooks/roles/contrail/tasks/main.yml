@@ -85,7 +85,7 @@
   tags:
     - analytics
 
-- name: create cni
+- name: create k8s cni
   include_role:
     name: contrail_k8s_cni
   when: roles[instance_name].k8s_node is defined
@@ -105,6 +105,20 @@
   when: roles[instance_name].kubemanager is defined and k8s_master_ip is defined and k8s_master_name is defined
   tags:
     - k8s
+
+- name: create contrail mesos manager
+  include_role:
+    name: contrail_mesos_mesosmanager
+  when: roles[instance_name].mesosmanager is defined
+  tags:
+    - mesos
+
+- name: create mesos cni
+  include_role:
+    name: contrail_mesos_cni
+  when: roles[instance_name].mesos_agent_private is defined or roles[instance_name].mesos_agent_public is defined
+  tags:
+    - mesos
 
 - name: create contrail vrouter
   include_role:

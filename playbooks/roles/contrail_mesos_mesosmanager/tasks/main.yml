@@ -1,0 +1,56 @@
+---
+- name: create /etc/contrail/mesosmanager
+  file:
+    path: /etc/contrail/mesosmanager
+    state: directory
+    recurse: yes
+
+- name: "get /etc/contrail/common_mesosmanager.env stat"
+  stat:
+    path: "/etc/contrail/common_mesosmanager.env"
+  register: st
+
+- name: "delete /etc/contrail/common_mesosmanager.env if exists"
+  file:
+    path: "/etc/contrail/common_mesosmanager.env"
+    state: absent
+  when: st.stat.exists is defined and st.stat.exists
+
+- name: "create /etc/contrail/common_mesosmanager.env"
+  file:
+    path: "/etc/contrail/common_mesosmanager.env"
+    state: touch
+
+- name: "populate global common_mesosmanager.env"
+  lineinfile: dest=/etc/contrail/common_mesosmanager.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ contrail_configuration }}"
+  no_log: True
+
+- name: "populate instance specific common_mesosmanager.env"
+  lineinfile: dest=/etc/contrail/common_mesosmanager.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ instances[instance_name].contrail_configuration }}"
+  when: instances[instance_name].contrail_configuration is defined
+  ignore_errors: yes
+  no_log: True
+
+- name: "populate pod specific common_mesosmanager.env"
+  lineinfile: dest=/etc/contrail/common_mesosmanager.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
+  with_dict: "{{ roles[instance_name].mesosmanager }} | default ({})"
+  when: roles[instance_name].mesosmanager is defined
+  ignore_errors: yes
+  no_log: True
+
+- name: update image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-mesosphere-mesos-manager
+  when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
+
+- name: create contrail mesosmanager compose file
+  template:
+    src: contrail-mesosmanager.yaml.j2
+    dest: /etc/contrail/mesosmanager/docker-compose.yaml
+
+- name: start contrail mesosmanager
+  docker_service:
+    project_src: /etc/contrail/mesosmanager
