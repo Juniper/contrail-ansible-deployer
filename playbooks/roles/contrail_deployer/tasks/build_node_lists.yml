@@ -106,6 +106,16 @@
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:
+    kubemanager_nodes_list: []
+- name: add kubemanager nodes to the list
+  set_fact:
+    kubemanager_nodes_list: "{{ kubemanager_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.kubemanager is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
     openstack_nodes_list: []
 - name: add openstack nodes to the list
   set_fact:

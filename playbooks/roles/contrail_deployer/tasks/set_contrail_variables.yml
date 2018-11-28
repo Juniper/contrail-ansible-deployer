@@ -77,6 +77,7 @@
     - {'name': 'VROUTER_NODES', 'nodes': "{{vrouter_nodes_list}}"}
     - {'name': 'TSN_NODES', 'nodes': "{{tsn_nodes_list}}"}
     - {'name': 'KUBERNETES_API_NODES', 'nodes': "{{k8s_master_nodes_list}}"}
+    - {'name': 'KUBEMANAGER_NODES', 'nodes': "{{kubemanager_nodes_list}}"}
 
 - name: explicitly set OpenStack secrets for Contrail
   set_fact:
