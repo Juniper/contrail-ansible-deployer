@@ -13,13 +13,13 @@
 
 - name: create docker cert directory
   file:
-    path: "/etc/docker/certs.d/{{ docker_registry }}"
+    path: "{{ nix_docker_certs_directory }}/{{ docker_registry }}"
     state: directory
 
 - name: copy cert to docker cert directory
   copy:
     src: "{{ fqdn_name }}.crt"
-    dest: "/etc/docker/certs.d/{{ docker_registry }}/{{ fqdn_name }}.crt"
+    dest: "{{ nix_docker_certs_directory }}/{{ docker_registry }}/{{ fqdn_name }}.crt"
   register: docker_cert
 
 - name: copy cert to trust directory
