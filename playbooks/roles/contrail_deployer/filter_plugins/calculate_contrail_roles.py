@@ -217,8 +217,9 @@ class FilterModule(object):
                     instance_name] or \
                         not len(instances_nodes_dict[instance_name][
                                     'instance_roles']):
-                    deleted_nodes_dict[instance_name] = \
-                        self.node_name_ip_map[instance_name]
+                    if instance_name not in deleted_nodes_dict:
+                        deleted_nodes_dict[instance_name] = \
+                            self.node_name_ip_map[instance_name]
 
                 if 'existing_roles' not in instances_nodes_dict[
                     instance_name]:
