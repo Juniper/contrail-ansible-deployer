@@ -86,6 +86,26 @@
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:
+    mesos_master_nodes_list: []
+- name: add mesos_master nodes to the list
+  set_fact:
+    mesos_master_nodes_list: "{{ mesos_master_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.mesos_master is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
+    mesos_agent_nodes_list: []
+- name: add mesos_agent nodes to the list
+  set_fact:
+    mesos_node_nodes_list: "{{ mesos_agent_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.mesos_agent_private is defined or item.value.roles.mesos_agent_public is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
     openstack_nodes_list: []
 - name: add openstack nodes to the list
   set_fact:
