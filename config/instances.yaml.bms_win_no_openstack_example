@@ -39,7 +39,8 @@ global_configuration:
 contrail_configuration:
   CLOUD_ORCHESTRATOR: none
   CONTRAIL_VERSION: latest
-  PHYSICAL_INTERFACE: ens192
+ #CONTROL_NODES: 172.0.0.1
+ #PHYSICAL_INTERFACE: ens192 #this is needed if CONTROL_NODES aren't specified
   WINDOWS_PHYSICAL_INTERFACE: Ethernet1
   WINDOWS_ENABLE_TEST_SIGNING:
   WINDOWS_DEBUG_DLLS_PATH: ~/dlls
