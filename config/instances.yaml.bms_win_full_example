@@ -45,8 +45,8 @@ global_configuration:
 contrail_configuration:
   CONTRAIL_VERSION: latest
   CLOUD_ORCHESTRATOR: openstack
+  #CONTROL_NODES: 172.0.0.100 # fill if ctrl/data plane is separate from mgmt
   RABBITMQ_NODE_PORT: 5673
-  PHYSICAL_INTERFACE: ens192
   WINDOWS_PHYSICAL_INTERFACE: Ethernet1
   WINDOWS_ENABLE_TEST_SIGNING:
   WINDOWS_DEBUG_DLLS_PATH: ~/dlls
