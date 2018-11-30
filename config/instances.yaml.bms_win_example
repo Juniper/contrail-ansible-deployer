@@ -20,7 +20,7 @@ contrail_configuration:
   CLOUD_ORCHESTRATOR: none
   CONTRAIL_VERSION: latest
   CONTROLLER_NODES: 192.168.1.100 # supply mgmt interface IP of controller
-
+  #CONTROL_NODES: 172.0.0.100 # supply ctrl/data interface IP of controller if its separate from mgmt
   WINDOWS_PHYSICAL_INTERFACE: Ethernet1 # supply alias of dataplane interface
 
   WINDOWS_ENABLE_TEST_SIGNING:
