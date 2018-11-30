@@ -1,10 +1,50 @@
 provider_config:
   bms:
+    ssh_pwd: Contrail123!
+    ssh_user: root
+
+  bms_win:
+    ansible_user: Administrator
+    ansible_password: Contrail123!
+
 instances:
-  bms1:
+  ctrl:
     provider: bms
-    ip: 192.168.1.100
+    ip: 10.7.0.60
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+      vrouter:
+
+  bms_win1:
+    provider: bms_win
+    ip: 10.7.0.69
+    roles:
+      vrouter:
+      win_cnm_plugin:
+
+  bms_win2:
+    provider: bms_win
+    ip: 10.7.0.79
+    roles:
+      vrouter:
+      win_cnm_plugin:
+
 global_configuration:
-  CONTAINER_REGISTRY: michaelhenkel
+  CONTAINER_REGISTRY: opencontrailnightly
+
 contrail_configuration:
-  CONTRAIL_VERSION: ocata-5.0-20180219195722
+  CONTRAIL_VERSION: latest
+  CLOUD_ORCHESTRATOR: none
+  WINDOWS_PHYSICAL_INTERFACE: Ethernet1
+  WINDOWS_ENABLE_TEST_SIGNING:
+  WINDOWS_DEBUG_DLLS_PATH: /mnt/c/source/xd/dlls
+  AUTH_MODE: noauth
+  CONTROL_NODES: 172.16.0.10
+  UPGRADE_KERNEL: true
+  JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"
+
