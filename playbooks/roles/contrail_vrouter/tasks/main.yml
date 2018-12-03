@@ -133,6 +133,12 @@
     - roles[instance_name].vrouter.AGENT_MODE is defined
     - roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
 
+- name: "Set variables for DPDK plugins"
+  set_fact:
+    plugin_os: "{{ 'ubuntu' if (ansible_os_family == 'Debian') else 'redhat' }}"
+    mellanox: "{{ true if (roles[instance_name].vrouter.DPDK_UIO_DRIVER is defined
+                  and roles[instance_name].vrouter.DPDK_UIO_DRIVER == 'mlnx') else false }}"
+
 - name: "create contrail dpdk vrouter compose file"
   template:
     src: contrail-vrouter-dpdk.yaml.j2

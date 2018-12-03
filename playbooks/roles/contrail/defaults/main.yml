@@ -22,6 +22,14 @@ analytics_db_log_driver: "{{ contrail_configuration.ANALYTICS_DB_LOG_DRIVER|defa
 analytics_db_log_max_size: "{{ contrail_configuration.ANALYTICS_DB_LOG_MAX_SIZE|default(default_log_max_size) }}"
 analytics_db_log_max_file: "{{ contrail_configuration.ANALYTICS_DB_LOG_MAX_FILE|default(default_log_max_file) }}"
 
+analytics_alarm_log_driver: "{{ contrail_configuration.ANALYTICS_ALARM_LOG_DRIVER|default(default_log_driver) }}"
+analytics_alarm_log_max_size: "{{ contrail_configuration.ANALYTICS_ALARM_LOG_MAX_SIZE|default(default_log_max_size) }}"
+analytics_alarm_log_max_file: "{{ contrail_configuration.ANALYTICS_ALARM_LOG_MAX_FILE|default(default_log_max_file) }}"
+
+analytics_snmp_log_driver: "{{ contrail_configuration.ANALYTICS_SNMP_LOG_DRIVER|default(default_log_driver) }}"
+analytics_snmp_log_max_size: "{{ contrail_configuration.ANALYTICS_SNMP_LOG_MAX_SIZE|default(default_log_max_size) }}"
+analytics_snmp_log_max_file: "{{ contrail_configuration.ANALYTICS_SNMP_LOG_MAX_FILE|default(default_log_max_file) }}"
+
 compute_log_driver: "{{ contrail_configuration.COMPUTE_LOG_DRIVER|default(default_log_driver) }}"
 compute_log_max_size: "{{ contrail_configuration.COMPUTE_LOG_MAX_SIZE|default(default_log_max_size) }}"
 compute_log_max_file: "{{ contrail_configuration.COMPUTE_LOG_MAX_FILE|default(default_log_max_file) }}"
@@ -34,6 +42,16 @@ win_container_artifacts_dir: C:\artifacts\
 win_host_artifacts_dir: "{{ win_container_artifacts_dir }}"
 win_vhost_name: vEthernet (HNSTransparent)
 win_agent_config_path: C:\ProgramData\Contrail\etc\contrail\contrail-vrouter-agent.conf
+
+common_volumes:
+  - "/usr/bin:/host/usr/bin"
+  - "/etc/contrail/ssl:/etc/contrail/ssl"
+  - "/etc/sysctl.d:/etc/sysctl.d"
+  - "/etc/hosts:/etc/hosts"
+  - "/etc/timezone:/etc/timezone"
+  - "/etc/localtime:/etc/localtime"
+  - "/var/log/contrail:/var/log/contrail"
+  - "/var/crashes:/var/crashes"
 
 contrail_configuration_default:
   AUTH_MODE: noauth

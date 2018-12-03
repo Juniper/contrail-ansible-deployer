@@ -25,7 +25,7 @@ class FilterModule(object):
     node_ip_name_map = {}
 
     valid_roles = ["config", "control", "analytics_database",
-                   "analytics", "vrouter"]
+                   "analytics", "analytics_alarm", "analytics_snmp", "vrouter"]
 
     def get_ks_token_request(self):
         keystone_token_request = {
@@ -78,7 +78,9 @@ class FilterModule(object):
         "config-nodes": "config",
         "database-nodes": "analytics_database",
         "bgp-routers": "control",
-        "analytics-nodes": "analytics"
+        "analytics-nodes": "analytics",
+        "analytics-alarm-nodes": "analytics_alarm",
+        "analytics-alarm-nodes": "analytics_snmp"
     }
 
     ip_role_map = {
@@ -86,7 +88,9 @@ class FilterModule(object):
         "config-nodes": "config_node_ip_address",
         "database-nodes": "database_node_ip_address",
         "bgp-routers": "bgp_router_parameters.address",
-        "analytics-nodes": "analytics_node_ip_address"
+        "analytics-nodes": "analytics_node_ip_address",
+        "analytics-alarm-nodes": "analytics_alarm_node_ip_address",
+        "analytics-snmp-nodes": "analytics_snmp_node_ip_address"
     }
 
     def filters(self):
@@ -153,12 +157,9 @@ class FilterModule(object):
     def get_ip_for_contrail_node(self, instance_name, uuid, contrail_object,
                                  url, headers):
         node_url = url + str(contrail_object[:-1]) + "/" + str(uuid)
-        try:
-            response = self.get_rest_api_response(node_url,
-                                                  self.contrail_auth_headers,
-                                                  request_type="get")
-        except Exception as e:
-            raise e
+        response = self.get_rest_api_response(node_url,
+                                              self.contrail_auth_headers,
+                                              request_type="get")
         node_object_dict = response.json()
         node_object_dict = node_object_dict[contrail_object[:-1]]
         if "." in self.ip_role_map[contrail_object]:
@@ -184,12 +185,9 @@ class FilterModule(object):
             self.contrail_object_map.iteritems():
 
             contrail_object_url = self.contrail_auth_url + str(contrail_object)
-            try:
-                response = self.get_rest_api_response(contrail_object_url,
-                                                      self.contrail_auth_headers,
-                                                      request_type="get")
-            except Exception as e:
-                return str({"Exception": e.message})
+            response = self.get_rest_api_response(contrail_object_url,
+                                                  self.contrail_auth_headers,
+                                                  request_type="get")
             object_dict = response.json()
             object_list = object_dict[contrail_object]
 
@@ -197,16 +195,15 @@ class FilterModule(object):
                 if len(object_to_process.get("fq_name", [])) < 2:
                     continue
                 instance_name = str(object_to_process.get("fq_name")[-1])
+                if '.' in instance_name:
+                    instance_name = instance_name.split('.')[0]
                 uuid = str(object_to_process.get("uuid"))
-                try:
-                    ip_address = self.get_ip_for_contrail_node(
-                        instance_name,
-                        uuid,
-                        contrail_object,
-                        self.contrail_auth_url,
-                        self.contrail_auth_headers)
-                except Exception as e:
-                    return str({"Exception": e.message})
+                ip_address = self.get_ip_for_contrail_node(
+                    instance_name,
+                    uuid,
+                    contrail_object,
+                    self.contrail_auth_url,
+                    self.contrail_auth_headers)
 
                 # Check if this is a deleted instance
                 # Either not in instances.yml or has empty role list in instances
@@ -256,8 +253,19 @@ class FilterModule(object):
         if hostvars.get("contrail_configuration", None):
             contrail_config = hostvars["contrail_configuration"]
             # Check if Controller Nodes was given
-            controller_role_list = contrail_config.get('CONTROLLER_NODES',
-                                                       None).split(' ')
+            if contrail_config.get('CONFIG_NODES', None):
+                controller_node_list = contrail_config.get(
+                    'CONFIG_NODES').split(',')
+            elif contrail_config.get('CONTROLLER_NODES', None):
+                controller_node_list = contrail_config.get(
+                    'CONTROLLER_NODES').split(',')
+            else:
+                controller_node_list = None
+            if isinstance(controller_node_list, list) and \
+                    len(controller_node_list):
+                api_server_list = controller_node_list
+            else:
+                api_server_list = []
 
             if contrail_config.get("CLOUD_ORCHESTRATOR",None) == "openstack":
                 self.auth_token = self.get_ks_auth_token(contrail_config)

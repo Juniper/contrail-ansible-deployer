@@ -15,6 +15,11 @@
     win_collector_nodes: "{{ win_collector_nodes + [item ~ ':' ~ contrail_configuration.COLLECTOR_PORT] }}"
   with_items: "{{ contrail_configuration.ANALYTICS_NODES.split(',') }}"
 
+- name: start Docker
+  win_service:
+    name: docker
+    state: started
+
 - name: extract vrouter artifacts from container
   win_shell: >
     docker run --rm -v {{ win_host_artifacts_dir }}:{{ win_container_artifacts_dir }}
@@ -81,9 +86,17 @@
   win_shell: "hostname"
   register: hostname_output
 
-- name: extract real hostname
+# ansible_hostname returns whole hostname in upper case (eg. "HOSTNAME").
+# nodemgr sends hostname with original letter case (eg. "hostNAME") and
+# we want to use the same case, so we have to extract it ourselves.
+- name: extract hostname with original letter case
   set_fact:
-    hostname: "{{ hostname_output.stdout_lines | last}}"
+    fqdn: "{{ hostname_output.stdout_lines | last}}"
+
+- name: append DNS suffix to FQDN if supplied
+  set_fact:
+    fqdn: "{{ fqdn }}.{{ provider_config.bms_win.domainsuffix }}"
+  when: provider_config.bms_win.domainsuffix is defined
 
 - name: get auth token from keystone
   delegate_to: localhost
@@ -131,7 +144,7 @@
       {
         "virtual-router": {
           "virtual_router_ip_address": "{{ inventory_hostname }}",
-          "fq_name": ["default-global-system-config", "{{ hostname }}"],
+          "fq_name": ["default-global-system-config", "{{ fqdn }}"],
           "parent_type": "global-system-config"
         }
       }
@@ -141,8 +154,21 @@
 - name: create vrouter-agent service
   win_nssm:
     name: contrail-vrouter-agent
-    application: C:\Program Files\Juniper Networks\Agent\contrail-vrouter-agent.exe
+    application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+    app_parameters_free_form: >-
+      -NoProfile
+      -File entrypoint.ps1
     stdout_file: "{{ win_agent_nssm_log_path }}"
     stderr_file: "{{ win_agent_nssm_log_path }}"
     start_mode: manual
     state: present
+
+# Unfortunately currently it's not possible to set those fields with win_nssm module
+- name: change vrouter-agent service start directory
+  win_shell: nssm set contrail-vrouter-agent AppDirectory "C:\Program Files\Juniper Networks\Agent"
+
+- name: stop vrouter-agent service from replacing stdout log file
+  win_shell: nssm reset contrail-vrouter-agent AppStdoutCreationDisposition
+
+- name: stop vrouter-agent service from replacing stderr log file
+  win_shell: nssm reset contrail-vrouter-agent AppStderrCreationDisposition

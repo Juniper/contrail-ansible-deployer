@@ -11,6 +11,11 @@
   tags:
    - always
 
+- name: update common_volumes
+  set_fact:
+    common_volumes: "{{ common_volumes + [ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH|dirname + ':' + contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH|dirname ] }}"
+  when: contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH is defined
+
 - name: run common tasks
   include: "common_{{ ansible_system }}.yml"
 
@@ -84,6 +89,24 @@
   when: roles[instance_name].analytics is defined
   tags:
     - analytics
+
+- name: create contrail analytics alarm
+  include_role:
+    name: contrail_analytics_alarm
+  when:
+    - roles[instance_name].analytics_alarm is defined
+  tags:
+    - analytics
+    - analytics_alarm
+
+- name: create contrail analytics snmp
+  include_role:
+    name: contrail_analytics_snmp
+  when:
+   - roles[instance_name].analytics_snmp is defined
+  tags:
+    - analytics
+    - analytics_snmp
 
 - name: create k8s cni
   include_role:

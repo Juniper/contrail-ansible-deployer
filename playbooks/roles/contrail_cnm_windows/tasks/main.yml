@@ -1,4 +1,8 @@
 ---
+- name: start Docker
+  win_service:
+    name: docker
+    state: started
 
 - name: extract CNM plugin MSI from container
   win_shell: >

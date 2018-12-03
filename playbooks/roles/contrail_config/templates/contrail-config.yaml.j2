@@ -1,4 +1,13 @@
 version: '2'
+volumes:
+  dnsmasq:
+{% if use_external_tftp %}
+  ironic_pxe:
+    external: true
+{% else %}
+  tftp:
+{% endif %}
+  dhcp_leases:
 services:
   node-init:
     image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
@@ -8,10 +17,7 @@ services:
     privileged: true
     pid: host
     network_mode: "host"
-    volumes:
-      - /usr/bin:/host/usr/bin
-      - /etc/contrail/ssl:/etc/contrail/ssl
-      - /etc/sysctl.d:/etc/sysctl.d
+    volumes: {{ common_volumes | to_yaml }}
   nodemgr:
     image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_config.env
@@ -19,13 +25,10 @@ services:
       - NODE_TYPE=config
     network_mode: "host"
     volumes:
-      - /etc/hosts:/etc/hosts
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-      - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
-      - /var/crashes:/var/crashes
     volumes_from:
+      - node-init
+    depends_on:
       - node-init
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
@@ -35,18 +38,10 @@ services:
       options:
         max-size: "{{ config_log_max_size }}"
         max-file: "{{ config_log_max_file }}"
-    depends_on:
-      - node-init
   api:
     image: "{{ container_registry }}/contrail-controller-config-api:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_config.env
     network_mode: "host"
-    volumes:
-      - /etc/hosts:/etc/hosts
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-      - /var/log/contrail:/var/log/contrail
-      - /var/crashes:/var/crashes
     volumes_from:
       - node-init
     depends_on:
@@ -63,12 +58,6 @@ services:
     image: "{{ container_registry }}/contrail-controller-config-svcmonitor:{{ contrail_version_tag }}"
     network_mode: "host"
     env_file: /etc/contrail/common_config.env
-    volumes:
-      - /etc/hosts:/etc/hosts
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-      - /var/log/contrail:/var/log/contrail
-      - /var/crashes:/var/crashes
     volumes_from:
       - node-init
     depends_on:
@@ -85,12 +74,6 @@ services:
     image: "{{ container_registry }}/contrail-controller-config-schema:{{ contrail_version_tag }}"
     network_mode: "host"
     env_file: /etc/contrail/common_config.env
-    volumes:
-      - /etc/hosts:/etc/hosts
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-      - /var/log/contrail:/var/log/contrail
-      - /var/crashes:/var/crashes
     volumes_from:
       - node-init
     depends_on:
@@ -107,14 +90,42 @@ services:
     image: "{{ container_registry }}/contrail-controller-config-devicemgr:{{ contrail_version_tag }}"
     network_mode: "host"
     env_file: /etc/contrail/common_config.env
-    volumes:
-      - /etc/hosts:/etc/hosts
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-      - /var/log/contrail:/var/log/contrail
-      - /var/crashes:/var/crashes
     volumes_from:
       - node-init
+      - dnsmasq
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - node-init
+      - dnsmasq
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ config_log_driver }}"
+      options:
+        max-size: "{{ config_log_max_size }}"
+        max-file: "{{ config_log_max_file }}"
+  dnsmasq:
+    image: "{{ container_registry }}/contrail-external-dnsmasq:{{ contrail_version_tag }}"
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    env_file: /etc/contrail/common_config.env
+    environment:
+      - NODE_TYPE=device-manager
+      - USE_EXTERNAL_TFTP={{ use_external_tftp }}
+    volumes_from:
+      - node-init
+    volumes:
+      - dnsmasq:/etc/dnsmasq
+{% if use_external_tftp %}
+      - ironic_pxe:/etc/tftp
+{% else %}
+      - tftp:/etc/tftp
+{% endif %}
+      - dhcp_leases:/var/lib/dnsmasq
     depends_on:
       - node-init
     restart: always
