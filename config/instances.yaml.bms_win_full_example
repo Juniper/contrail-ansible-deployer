@@ -2,10 +2,12 @@ provider_config:
   bms:
     ssh_pwd: Contrail123!
     ssh_user: root
+    domainsuffix: example.com
 
   bms_win:
     ansible_user: Administrator
     ansible_password: Contrail123!
+    domainsuffix: example.com
 
 instances:
   ctrl:
@@ -59,6 +61,5 @@ kolla_config:
     network_interface: "ens192"
     kolla_external_vip_interface: "ens192"
     enable_haproxy: "no"
-    openstack_release: "ocata"
   kolla_passwords:
     keystone_admin_password: c0ntrail123

@@ -65,11 +65,13 @@ vcenter_servers:
       vmdk: http://10.85.192.51/centos-7.5/LATEST/ContrailVM.ovf
       dv_switch:
         dv_switch_name: overlay
+        dv_switch_version: 6.5.0
       dv_port_group:
         dv_portgroup_name: VM_pg
         number_of_ports: 1800
       dv_switch_control_data:
         dv_switch_name: underlay
+        dv_switch_version: 6.5.0
       dv_port_group_control_data:
         dv_portgroup_name: data_pg
         number_of_ports: 3

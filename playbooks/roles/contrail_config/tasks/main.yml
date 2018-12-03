@@ -51,6 +51,22 @@
     - contrail-controller-config-devicemgr
   when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 
+- name: initialize use_external_tftp variable
+  set_fact:
+    use_external_tftp: false
+
+- name: check if ironic_pxe is deployed on node
+  shell: "docker inspect ironic_pxe"
+  register: ironic_pxe_container
+  ignore_errors: yes
+
+- name: set use_external_tftp if ironic_pxe is present
+  set_fact:
+    use_external_tftp: true
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+    - ironic_pxe_container.rc == 0
+
 - name: create contrail config compose file
   template:
     src: contrail-config.yaml.j2

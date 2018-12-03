@@ -29,17 +29,6 @@
     regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
     line: 'Environment="KUBELET_CGROUP_ARGS=--cgroup-driver={{ cgroup_driver }}"'
 
-- name: enable kubelet service
-  systemd:
-    name: kubelet
-    state: restarted
-    daemon_reload: yes
-    enabled: True
-  when: master_running == false
-
-- debug:
-    msg: "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
-
 - name: get controller ip from all ips
   set_fact:
     listen_ip: "{{ item[0] }}"
@@ -48,21 +37,20 @@
     - "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
     - "{{ contrail_configuration.KUBERNETES_API_NODES }}"
 
-#- name: initialize k8s master with listen ip
-#  shell: |
-#      kubeadm init --kubernetes-version v1.7.4 --apiserver-advertise-address {{ listen_ip }} &&
-#      mkdir -p $HOME/.kube &&
-#      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
-#      chown -R $(id -u):$(id -g) $HOME/.kube
-#  when: inventory_hostname == k8s_master_name and listen_ip is defined
-#
-#- name: initialize k8s master without listen ip
-#  shell: |
-#      kubeadm init --kubernetes-version v1.7.4 &&
-#      mkdir -p $HOME/.kube &&
-#      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
-#      chown -R $(id -u):$(id -g) $HOME/.kube
-#  when: inventory_hostname == k8s_master_name and listen_ip is undefined
+- name: set InternalIP to listen_ip
+  lineinfile:
+    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
+    line: 'Environment="KUBELET_EXTRA_ARGS=--node-ip={{ listen_ip }}"'
+  when: listen_ip is defined
+
+- name: enable kubelet service
+  systemd:
+    name: kubelet
+    state: restarted
+    daemon_reload: yes
+    enabled: True
+  when: master_running == false
 
 - name: initialize k8s master with listen ip
   shell: |

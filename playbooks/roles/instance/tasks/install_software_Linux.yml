@@ -31,15 +31,25 @@
   - NetworkManager
   ignore_errors: yes
 
+# we need to remove python-requests installed by distutils
+# cause it conflicts with requests lib installed by pip during docker-compose install
+- name: remove python-requests installed by distutils
+  package:
+    name: python-requests
+    state: absent
+
 - name: OS specific package install
   include: "{{ ansible_os_family }}.yml"
 
-- name: Install common pre-requisites
+- name: install easy_install
   package:
-    name: "{{ item }}"
+    name: python-setuptools
     state: present
-  with_items:
-    - python-pip
+
+- name: Install common pre-requisites
+  easy_install:
+    name: pip
+    state: latest
 
 - name: install rsyslogd
   package:

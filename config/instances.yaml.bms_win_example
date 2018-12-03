@@ -4,9 +4,10 @@ provider_config:
   bms_win:
     ansible_user: Administrator
     ansible_password: Contrail123! # supply Administrator password
+    #domainsuffix: example.com # supply DNS suffix if it's present on mgmt interface
 
 instances:
-  win_compute1:
+  win_compute1: # supply compute's hostname
     provider: bms_win
     ip: 192.168.1.101 # supply mgmt interface IP
     roles:
@@ -20,7 +21,7 @@ contrail_configuration:
   CLOUD_ORCHESTRATOR: none
   CONTRAIL_VERSION: latest
   CONTROLLER_NODES: 192.168.1.100 # supply mgmt interface IP of controller
-  #CONTROL_NODES: 172.0.0.100 # supply ctrl/data interface IP of controller if its separate from mgmt
+  #CONTROL_NODES: 172.0.0.100 # supply ctrl/data interface IP of controller if it's separate from mgmt
   WINDOWS_PHYSICAL_INTERFACE: Ethernet1 # supply alias of dataplane interface
 
   WINDOWS_ENABLE_TEST_SIGNING:

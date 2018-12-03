@@ -41,7 +41,7 @@
       shell: systemctl daemon-reload
       when: ansible_os_family == 'RedHat'
 
-    - name: start docker daemon
+    - name: restart docker daemon
       service:
         enabled: yes
         name: docker

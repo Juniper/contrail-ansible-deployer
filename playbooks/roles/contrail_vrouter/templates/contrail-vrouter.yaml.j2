@@ -8,10 +8,7 @@ services:
     privileged: true
     pid: host
     network_mode: "host"
-    volumes:
-      - /usr/bin:/host/usr/bin
-      - /etc/contrail/ssl:/etc/contrail/ssl
-      - /etc/sysctl.d:/etc/sysctl.d
+    volumes: {{ common_volumes | to_yaml }}
   nodemgr:
     image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common_vrouter.env
@@ -19,12 +16,10 @@ services:
       - NODE_TYPE=vrouter
     network_mode: host
     volumes:
-      - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-      - /var/crashes:/var/crashes
     volumes_from:
+      - node-init
+    depends_on:
       - node-init
     restart: on-failure
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
@@ -34,8 +29,6 @@ services:
       options:
         max-size: "{{ compute_log_max_size }}"
         max-file: "{{ compute_log_max_file }}"
-    depends_on:
-      - node-init
   vrouter-kernel-init:
     image: "{{ container_registry }}/{{ vrouter_kernel_init_img_name }}:{{ contrail_version_tag }}"
     network_mode: host
@@ -46,7 +39,6 @@ services:
       - /usr/src:/usr/src
       - /lib/modules:/lib/modules
       - /bin:/host/bin
-      - /var/log/contrail:/var/log/contrail
 {% if ansible_os_family == 'RedHat' %}
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
 {% endif %}
@@ -64,17 +56,16 @@ services:
       - /usr/src:/usr/src
       - /lib/modules:/lib/modules
       - /bin:/host/bin
-      - /var/log/contrail:/var/log/contrail
       - /var/lib/contrail:/var/lib/contrail
       - /var/run:/var/run
 {% if ansible_os_family == 'RedHat' %}
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
 {% endif %}
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-      - /var/crashes:/var/crashes
       - /dev/log:/dev/log
     volumes_from:
+      - node-init
+    depends_on:
+      - vrouter-kernel-init
       - node-init
     logging:
       driver: "{{ compute_log_driver }}"
@@ -84,6 +75,3 @@ services:
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
-    depends_on:
-      - vrouter-kernel-init
-      - node-init
