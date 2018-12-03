@@ -34,7 +34,7 @@
 - name: install epel on RedHat distribution
   yum:
     name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
-    state: latest
+    state: installed
   when: ansible_distribution == 'RedHat'
 
 - name: set selinux to permissive
