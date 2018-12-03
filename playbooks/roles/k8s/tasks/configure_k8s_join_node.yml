@@ -22,6 +22,22 @@
     regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
     line: 'Environment="KUBELET_CGROUP_ARGS=--cgroup-driver={{ cgroup_driver }}"'
 
+- name: get listen interface
+  shell: ip route get {{ k8s_master_ip }} | grep -o "dev.*" | awk '{print $2}'
+  register: listen_nic
+
+- name: get listen ip
+  set_fact:
+    listen_ip: "{{ hostvars[inventory_hostname]['ansible_%s' % listen_nic.stdout].ipv4.address }}"
+  when: listen_nic is defined
+
+- name: set InternalIP to listen_ip
+  lineinfile:
+    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
+    line: 'Environment="KUBELET_EXTRA_ARGS=--node-ip={{ listen_ip }}"'
+  when: listen_ip is defined
+
 - name: enable kubelet service
   systemd:
     name: kubelet
