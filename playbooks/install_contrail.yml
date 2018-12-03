@@ -28,7 +28,7 @@
 
 - name: Remove Contrail from Deleted Nodes ( Deregister )
   hosts: container_hosts
-  gather_facts: no
+  gather_facts: yes
   tasks:
   - include_role:
       name: contrail
