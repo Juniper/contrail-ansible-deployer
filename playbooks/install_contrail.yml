@@ -25,6 +25,8 @@
   vars_files:
     - "{{ config_file }}"
   tags: always
+  environment:
+    - "{{ ansible_environment | default({})}}"
 
 - name: Remove Contrail from Deleted Nodes ( Deregister )
   hosts: container_hosts
@@ -43,6 +45,8 @@
     when:
       - hostvars['localhost'].api_server is defined
       - inventory_hostname == hostvars['localhost'].api_server
+  environment:
+    - "{{ ansible_environment | default({})}}"
 
 - name: Remove Contrail from Deleted Nodes ( Cleanup )
   hosts:  "{{ hostvars['localhost'].deleted_nodes_dict.values() }}"
@@ -70,6 +74,8 @@
     when:
       - hostvars['localhost'].deleted_nodes_dict.keys() | length > 0
       - inventory_hostname in hostvars['localhost'].deleted_nodes_dict.values()
+  environment:
+    - "{{ ansible_environment | default({})}}"
 
 - name: Install Contrail
   hosts: container_hosts
@@ -99,4 +105,5 @@
   environment:
     - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
     - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
+    - "{{ ansible_environment | default({}) }}"
   tags: always
