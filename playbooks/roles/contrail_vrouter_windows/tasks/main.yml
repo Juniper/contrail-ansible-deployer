@@ -141,8 +141,14 @@
 - name: create vrouter-agent service
   win_nssm:
     name: contrail-vrouter-agent
-    application: C:\Program Files\Juniper Networks\Agent\contrail-vrouter-agent.exe
+    application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+    app_parameters_free_form: >-
+      -NoProfile
+      -File entrypoint.ps1
     stdout_file: "{{ win_agent_nssm_log_path }}"
     stderr_file: "{{ win_agent_nssm_log_path }}"
     start_mode: manual
     state: present
+
+- name: change vrouter-agent service start directory
+  win_shell: 'nssm set contrail-vrouter-agent AppDirectory "C:\Program Files\Juniper Networks\Agent"'
