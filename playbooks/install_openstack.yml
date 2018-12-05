@@ -1,5 +1,6 @@
 # ansible-playbook -i inventory/ playbook/install_openstack.yml
 #
+
 - name: Create container host group for OpenStack
   hosts: localhost
   connection: local
