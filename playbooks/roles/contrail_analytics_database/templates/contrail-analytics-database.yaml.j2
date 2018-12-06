@@ -28,8 +28,10 @@ services:
       - /etc/timezone:/etc/timezone
       - /etc/localtime:/etc/localtime
       - /var/log/contrail:/var/log/contrail
-      - /var/run/docker.sock:/var/run/docker.sock
       - /var/crashes:/var/crashes
+{% if contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | length > 1 %}
+      - {{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}:{{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH  | dirname }}
+{% endif %}
     volumes_from:
       - node-init
     restart: always

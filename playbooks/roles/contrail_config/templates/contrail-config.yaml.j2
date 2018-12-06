@@ -25,6 +25,7 @@ services:
       - /var/log/contrail:/var/log/contrail
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/crashes:/var/crashes
+      - {{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}:{{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}
     volumes_from:
       - node-init
     restart: always
@@ -47,6 +48,7 @@ services:
       - /etc/localtime:/etc/localtime
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
+      - {{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}:{{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}
     volumes_from:
       - node-init
     depends_on:
@@ -69,6 +71,7 @@ services:
       - /etc/localtime:/etc/localtime
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
+      - {{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}:{{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}
     volumes_from:
       - node-init
     depends_on:
@@ -91,6 +94,7 @@ services:
       - /etc/localtime:/etc/localtime
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
+      - {{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}:{{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}
     volumes_from:
       - node-init
     depends_on:
@@ -113,6 +117,7 @@ services:
       - /etc/localtime:/etc/localtime
       - /var/log/contrail:/var/log/contrail
       - /var/crashes:/var/crashes
+      - {{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}:{{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}
     volumes_from:
       - node-init
     depends_on:
