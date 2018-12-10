@@ -15,6 +15,11 @@
     win_collector_nodes: "{{ win_collector_nodes + [item ~ ':' ~ contrail_configuration.COLLECTOR_PORT] }}"
   with_items: "{{ contrail_configuration.ANALYTICS_NODES.split(',') }}"
 
+- name: start Docker
+  win_service:
+    name: docker
+    state: started
+
 - name: extract vrouter artifacts from container
   win_shell: >
     docker run --rm -v {{ win_host_artifacts_dir }}:{{ win_container_artifacts_dir }}
