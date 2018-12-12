@@ -8,21 +8,13 @@ services:
     privileged: true
     pid: host
     network_mode: "host"
-    volumes:
-      - /usr/bin:/host/usr/bin
-      - /etc/contrail/ssl:/etc/contrail/ssl
-      - /etc/sysctl.d:/etc/sysctl.d
+    volumes: {{ common_volumes }}
   kubemanager:
     image: "{{ container_registry }}/contrail-kubernetes-kube-manager:{{ contrail_version_tag }}"
     network_mode: host
     environment:
       - K8S_TOKEN={{ hostvars[k8s_master_name].kubemanagertoken }}
     env_file: /etc/contrail/common_kubemanager.env
-    volumes:
-      - /var/log/contrail:/var/log/contrail
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-      - /var/crashes:/var/crashes
     volumes_from:
       - node-init
     depends_on:

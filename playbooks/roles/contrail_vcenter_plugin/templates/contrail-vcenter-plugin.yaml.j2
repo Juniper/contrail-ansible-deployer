@@ -15,6 +15,7 @@ services:
     volumes:
       - /var/log/contrail:/var/log/contrail
       - /etc/contrail/vcenter_plugin/ESXiToVRouterIp.map:/etc/contrail/ESXiToVRouterIp.map
+      - {{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}:{{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH  | dirname }}
     restart: always
     stdin_open: {{ contrail_configuration.STDIN_OPEN }}
     tty: {{ contrail_configuration.TTY }}
