@@ -35,6 +35,16 @@ win_host_artifacts_dir: "{{ win_container_artifacts_dir }}"
 win_vhost_name: vEthernet (HNSTransparent)
 win_agent_config_path: C:\ProgramData\Contrail\etc\contrail\contrail-vrouter-agent.conf
 
+common_volumes:
+  - "/usr/bin:/host/usr/bin"
+  - "/etc/contrail/ssl:/etc/contrail/ssl"
+  - "/etc/sysctl.d:/etc/sysctl.d"
+  - "/etc/hosts:/etc/hosts"
+  - "/etc/timezone:/etc/timezone"
+  - "/etc/localtime:/etc/localtime"
+  - "/var/log/contrail:/var/log/contrail"
+  - "/var/crashes:/var/crashes"
+
 contrail_configuration_default:
   AUTH_MODE: noauth
   KEYSTONE_AUTH_PROTO: http
