@@ -9,3 +9,4 @@ services:
       - /etc/cni:/host/etc_cni
       - /opt/cni/bin:/host/opt_cni_bin
       - /var/log/contrail/cni:/var/log/contrail/cni
+      - {{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH | dirname }}:{{ contrail_configuration.STATS_COLLECTOR_DESTINATION_PATH  | dirname }}
