@@ -87,6 +87,9 @@ class FilterModule(object):
 
         keystone_auth_url = 'http://' + str(
             self.keystone_auth_host) + ':35357' + str(keystone_auth_url_tokens)
+        keystone_endpoint_url = 'http://' + str(self.keystone_auth_host) + \
+                                ':35357' + str(self.keystone_auth_url_version) \
+                                + '/endpoints'
         try:
             response = self.get_rest_api_response(keystone_auth_url,
                                                   self.keystone_auth_headers,
@@ -94,6 +97,13 @@ class FilterModule(object):
                                                     self.get_ks_token_request()
                                                   ),
                                                   request_type="post")
+            # Check if endpoint URL is also reachable
+            # To protect against re-run after failed provision
+
+            endpoint_response = self.get_rest_api_response(
+                keystone_endpoint_url,
+                self.keystone_auth_headers,
+                request_type="get")
         except Exception as e:
             auth_token = None
         else:
@@ -189,8 +199,6 @@ class FilterModule(object):
                             deleted_nodes_dict[deleted_server_name] = \
                                 endpoint_ip
             return instances_nodes_dict, deleted_nodes_dict
-
-
 
     def calculate_openstack_roles(self, existing_dict, hostvars):
         instances_nodes_dict = {}
