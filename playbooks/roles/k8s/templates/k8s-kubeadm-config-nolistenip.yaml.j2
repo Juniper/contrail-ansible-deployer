@@ -1,0 +1,8 @@
+apiVersion: kubeadm.k8s.io/v1alpha3
+kubernetesVersion: v{{ k8s_version }}
+tokenTTL: 0
+kind: ClusterConfiguration
+networking:
+  podSubnet: {{ kube_pod_subnet }}
+apiServerExtraArgs:
+  feature-gates: SCTPSupport=true
