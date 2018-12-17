@@ -52,9 +52,31 @@
     enabled: True
   when: master_running == false
 
+- name: create kubeadm config file
+  include: create_k8s_kubeadm_config.yaml
+
+- name: create kubeadm config file without listen ip
+  include: create_k8s_kubeadm_config-nolistenip.yaml
+
+#- name: initialize k8s master with listen ip
+#  shell: |
+#      kubeadm init --kubernetes-version v1.7.4 --apiserver-advertise-address {{ listen_ip }} &&
+#      mkdir -p $HOME/.kube &&
+#      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
+#      chown -R $(id -u):$(id -g) $HOME/.kube
+#  when: inventory_hostname == k8s_master_name and listen_ip is defined
+#
+#- name: initialize k8s master without listen ip
+#  shell: |
+#      kubeadm init --kubernetes-version v1.7.4 &&
+#      mkdir -p $HOME/.kube &&
+#      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
+#      chown -R $(id -u):$(id -g) $HOME/.kube
+#  when: inventory_hostname == k8s_master_name and listen_ip is undefined
+
 - name: initialize k8s master with listen ip
   shell: |
-      kubeadm init --token-ttl 0 --kubernetes-version v{{ k8s_version }} --apiserver-advertise-address {{ listen_ip }} --pod-network-cidr {{ kube_pod_subnet }} &&
+      kubeadm init --config /tmp/k8s-kubeadm-config.yaml.j2 &&
       mkdir -p $HOME/.kube &&
       cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
       chown -R $(id -u):$(id -g) $HOME/.kube
@@ -62,7 +84,7 @@
 
 - name: initialize k8s master without listen ip
   shell: |
-      kubeadm init --token-ttl 0 --kubernetes-version v{{ k8s_version }} --pod-network-cidr {{ kube_pod_subnet }} &&
+      kubeadm init --config /tmp/k8s-kubeadm-config-nolistenip.yaml.j2 &&
       mkdir -p $HOME/.kube &&
       cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
       chown -R $(id -u):$(id -g) $HOME/.kube
