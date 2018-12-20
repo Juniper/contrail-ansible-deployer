@@ -50,6 +50,7 @@ services:
     volumes:
       - /etc/hosts:/etc/hosts
       - config_cassandra:/var/lib/cassandra/data
+      - /etc/contrail/ssl:/etc/contrail/ssl
     network_mode: "host"
     logging:
       driver: "{{ config_db_log_driver }}"
@@ -83,6 +84,8 @@ services:
      - RABBITMQ_NODES={{ rabbitmq_nodes }}
      - RABBITMQ_ERLANG_COOKIE=abcdefg
      - NODE_TYPE=config-database
+    volumes:
+     - /etc/contrail/ssl:/etc/contrail/ssl
     logging:
       driver: "{{ config_db_log_driver }}"
       options:

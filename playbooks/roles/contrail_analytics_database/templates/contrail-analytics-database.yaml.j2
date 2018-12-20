@@ -68,6 +68,7 @@ services:
     volumes:
      - analytics_cassandra:/var/lib/cassandra/data
      - /etc/hosts:/etc/hosts
+     - /etc/contrail/ssl:/etc/contrail/ssl
     network_mode: "host"
     logging:
       driver: "{{ analytics_db_log_driver }}"
