@@ -10,39 +10,13 @@
     cassandra_seeds: "{{ contrail_configuration.ANALYTICSDB_NODES }}"
   when: contrail_configuration.ANALYTICSDB_NODES is defined
 
-- name: set cassandra seeds to CONTROLLER_NODES if ANALYTICSDB_NODES not defined
-  set_fact:
-    cassandra_seeds: "{{ contrail_configuration.CONTROLLER_NODES }}"
-  when: contrail_configuration.CONTROLLER_NODES is defined and contrail_configuration.ANALYTICSDB_NODES is undefined
-
-- name: set zookeeper nodes to ANALYTICSDB_NODES if defined
-  set_fact:
-    zookeeper_nodes: "{{ contrail_configuration.ANALYTICSDB_NODES }}"
-  when: contrail_configuration.ANALYTICSDB_NODES is defined
-
-- name: set zookeeper nodes to CONTROLLER_NODES if ANALYTICSDB_NODES not defined
-  set_fact:
-    zookeeper_nodes: "{{ contrail_configuration.CONTROLLER_NODES }}"
-  when: contrail_configuration.CONTROLLER_NODES is defined and contrail_configuration.ANALYTICSDB_NODES is undefined
-
-- name: set kafka nodes to ANALYTICSDB_NODES if defined
-  set_fact:
-    kafka_nodes: "{{ contrail_configuration.ANALYTICSDB_NODES }}"
-  when: contrail_configuration.ANALYTICSDB_NODES is defined
-
-- name: set kafka nodes to CONTROLLER_NODES if ANALYTICSDB_NODES not defined
-  set_fact:
-    kafka_nodes: "{{ contrail_configuration.CONTROLLER_NODES }}"
-  when: contrail_configuration.CONTROLLER_NODES is defined and contrail_configuration.ANALYTICSDB_NODES is undefined
-
-- name: update image
+- name: update contrail analytics database image
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
   with_items:
     - contrail-node-init
     - contrail-nodemgr
-    - contrail-external-kafka
+    - contrail-analytics-query-engine
     - contrail-external-cassandra
-    - contrail-external-zookeeper
   when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 
 - name: create contrail analytics database compose file

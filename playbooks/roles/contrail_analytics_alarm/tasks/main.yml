@@ -1,0 +1,28 @@
+---
+- name: create /etc/contrail/analytics_alarm
+  file:
+    path: /etc/contrail/analytics_alarm
+    state: directory
+    recurse: yes
+
+- name: set kafka nodes to ANALYTICS_ALARM_NODES if defined
+  set_fact:
+    kafka_nodes: "{{ contrail_configuration.ANALYTICS_ALARM_NODES }}"
+  when: contrail_configuration.ANALYTICS_ALARM_NODES is defined
+
+- name: update alarm, external-kafka image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-node-init
+    - contrail-nodemgr
+    - contrail-analytics-alarm-gen
+    - contrail-external-kafka
+
+- name: create contrail analytics_alarm docker-compose file
+  template:
+    src: contrail-analytics-alarm.yaml.j2
+    dest: /etc/contrail/analytics_alarm/docker-compose.yaml
+
+- name: start contrail analytics_alarm
+  docker_service:
+    project_src: /etc/contrail/analytics_alarm
