@@ -1,0 +1,64 @@
+version: '2'
+services:
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    pid: host
+    network_mode: "host"
+    volumes: {{ common_volumes | to_yaml }}
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+      - NODE_TYPE=analytics-alarm
+    network_mode: "host"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    volumes_from:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ analytics_alarm_log_driver }}"
+      options:
+        max-size: "{{ analytics_alarm_log_max_size }}"
+        max-file: "{{ analytics_alarm_log_max_file }}"
+    depends_on:
+      - node-init
+  alarm-gen:
+    image: "{{ container_registry }}/contrail-analytics-alarm-gen:{{ contrail_version_tag }}"
+    network_mode: "host"
+    env_file: /etc/contrail/common.env
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ analytics_alarm_log_driver }}"
+      options:
+        max-size: "{{ analytics_alarm_log_max_size }}"
+        max-file: "{{ analytics_alarm_log_max_file }}"
+  kafka:
+    image: "{{ container_registry }}/contrail-external-kafka:{{ contrail_version_tag }}"
+    network_mode: "host"
+    env_file: /etc/contrail/common.env
+    environment:
+      - ZOOKEEPER_NODES={{ zookeeper_nodes }}
+      - ZOOKEEPER_PORT=2181
+      - NODE_TYPE=analytics-alarm
+    restart: always
+    logging:
+      driver: "{{ analytics_alarm_log_driver }}"
+      options:
+        max-size: "{{ analytics_alarm_log_max_size }}"
+        max-file: "{{ analytics_alarm_log_max_file }}"
+    volumes:
+     - /etc/hosts:/etc/hosts
+     - /etc/contrail/ssl:/etc/contrail/ssl
