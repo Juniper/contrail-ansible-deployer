@@ -1,0 +1,83 @@
+version: '2'
+services:
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    pid: host
+    network_mode: "host"
+    volumes:
+      - /usr/bin:/host/usr/bin
+      - /etc/contrail/ssl:/etc/contrail/ssl
+      - /etc/sysctl.d:/etc/sysctl.d
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+      - NODE_TYPE=analytics-snmp
+    network_mode: "host"
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ analytics_snmp_log_driver }}"
+      options:
+        max-size: "{{ analytics_snmp_log_max_size }}"
+        max-file: "{{ analytics_snmp_log_max_file }}"
+    depends_on:
+      - node-init
+  snmp-collector:
+    image: "{{ container_registry }}/contrail-analytics-snmp-collector:{{ contrail_version_tag }}"
+    network_mode: "host"
+    env_file: /etc/contrail/common.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ analytics_snmp_log_driver }}"
+      options:
+        max-size: "{{ analytics_snmp_log_max_size }}"
+        max-file: "{{ analytics_snmp_log_max_file }}"
+  topology:
+    image: "{{ container_registry }}/contrail-analytics-topology:{{ contrail_version_tag }}"
+    network_mode: "host"
+    env_file: /etc/contrail/common.env
+    volumes:
+      - /var/log/contrail:/var/log/contrail
+      - /etc/hosts:/etc/hosts
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - /var/crashes:/var/crashes
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ analytics_snmp_log_driver }}"
+      options:
+        max-size: "{{ analytics_snmp_log_max_size }}"
+        max-file: "{{ analytics_snmp_log_max_file }}"
