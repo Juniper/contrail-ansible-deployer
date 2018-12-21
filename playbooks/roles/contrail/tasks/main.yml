@@ -90,6 +90,24 @@
   tags:
     - analytics
 
+- name: create contrail analytics alarm
+  include_role:
+    name: contrail_analytics_alarm
+  when:
+    - roles[instance_name].analytics_alarm is defined
+  tags:
+    - analytics
+    - analytics_alarm
+
+- name: create contrail analytics snmp
+  include_role:
+    name: contrail_analytics_snmp
+  when:
+   - roles[instance_name].analytics_snmp is defined
+  tags:
+    - analytics
+    - analytics_snmp
+
 - name: create k8s cni
   include_role:
     name: contrail_k8s_cni
