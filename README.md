@@ -28,37 +28,65 @@ The containers are grouped together into services, similiar to PODs
 in kubernetes.
 
 ```
-                                                                   +-------------+
-                                                                   |             |
-                                                                   | +---------+ |
-                                                                   | |nodemgr  | |
-                                                                   | +---------+ |
-                                                                   | +---------+ |
-                                                                   | |redis    | |
-                                                                   | +---------+ |
-                                                                   | +---------+ |
-                +------------------+                               | |api      | |
-                |                  |                               | +---------+ |
-                | +--------------+ |                               | +---------+ |
-                | |nodemgr       | | +-----------+ +-------------+ | |collector| |
-                | +--------------+ | |           | |             | | +---------+ |
-                | +--------------+ | | +-------+ | | +---------+ | | +---------+ |
-+-------------+ | |api           | | | |nodemgr| | | |nodemgr  | | | |alarm    | | +----------+
-|             | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | |          |
-| +---------+ | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | | +------+ |
-| |rabbitmq | | | |svc monitor   | | | |control| | | |kafka    | | | |query    | | | |redis | |+-----------+
-| +---------+ | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | | +------+ ||           |
-| +---------+ | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | | +------+ || +-------+ |
-| |zookeeper| | | |device manager| | | |dns    | | | |zookeeper| | | |snmp     | | | |job   | || |nodemgr| |
-| +---------+ | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | | +------+ || +-------+ |
-| +---------+ | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | | +------+ || +-------+ |
-| |cassandra| | | |schema        | | | |named  | | | |cassandra| | | |topology | | | |server| || |agent  | |
-| +---------+ | | +--------------+ | | +-------+ | | +---------+ | | +---------+ | | +------+ || +-------+ |
-|             | |                  | |           | |             | |             | |          ||           |
-| configdb    | |  config          | |  control  | | analyticsdb | |  analytics  | | webui    || vrouter   |
-|             | |                  | |           | |             | |             | |          ||           |
-+-------------+ +------------------+ +-----------+ +-------------+ +-------------+ +----------++-----------+
+
+                +------------------+
+                |                  |
+                | +--------------+ |
+                | |nodemgr       | | +-----------+
+                | +--------------+ | |           |
+                | +--------------+ | | +-------+ |
++-------------+ | |api           | | | |nodemgr| | +----------+
+|             | | +--------------+ | | +-------+ | |          |
+| +---------+ | | +--------------+ | | +-------+ | | +------+ |
+| |rabbitmq | | | |svc monitor   | | | |control| | | |redis | |+-----------+
+| +---------+ | | +--------------+ | | +-------+ | | +------+ ||           |
+| +---------+ | | +--------------+ | | +-------+ | | +------+ || +-------+ |
+| |zookeeper| | | |device manager| | | |dns    | | | |job   | || |nodemgr| |
+| +---------+ | | +--------------+ | | +-------+ | | +------+ || +-------+ |
+| +---------+ | | +--------------+ | | +-------+ | | +------+ || +-------+ |
+| |cassandra| | | |schema        | | | |named  | | | |server| || |agent  | |
+| +---------+ | | +--------------+ | | +-------+ | | +------+ || +-------+ |
+|             | |                  | |           | |          ||           |
+| configdb    | |  config          | |  control  | | webui    || vrouter   |
+|             | |                  | |           | |          ||           |
++-------------+ +------------------+ +-----------+ +----------++-----------+
 ```
+
+Analytics components are as below:
+```
++-------------+ +-------------+
+|             | |             |
+| +---------+ | | +---------+ |
+| |nodemgr  | | | |nodemgr  | | +-------------+ +---------------+
+| +---------+ | | +---------+ | |             | |               |
+| +---------+ | | +---------+ | | +---------+ | | +-----------+ |
+| |redis    | | | |alarm    | | | |nodemgr  | | | |nodemgr    | |
+| +---------+ | | +---------+ | | +---------+ | | +-----------+ |
+| +---------+ | | +---------+ | | +---------+ | | +-----------+ |
+| |api      | | | |kafka    | | | |snmp     | | | | query     | |
+| +---------+ | | +---------+ | | +---------+ | | +-----------+ |
+| +---------+ | | +---------+ | | +---------+ | | +-----------+ |
+| |collector| | | |zookeeper| | | |topology | | | | cassandra | |
+| +---------+ | | +---------+ | | +---------+ | | +-----------+ |
+|             | |             | |             | |               |
+|  analytics  | |  analytics_ | | analytics_  | | analytics_    |
+|             | |  alarm      | | snmp        | | database      |
++-------------+ +-------------+ +-------------+ +---------------+
+
+```
+
+Please note that the below components in analytics are optional
+```
+  alarm
+  query-engine
+  snmp
+  topology
+  cassandra
+  kafka
+  zookeeper
+```
+
+Please check [Optional Contrail Analytics Components](https://github.com/Juniper/contrail-ansible-deployer/blob/master/README.md#optional-contrail-analytics-component
 
 ## Prerequisites
 
@@ -215,6 +243,23 @@ contrail_configuration:     # Contrail service configuration section
   CONTRAIL_VERSION: latest
   UPGRADE_KERNEL: true
 ```
+
+### Optional Contrail Analytics Components
+By default, the below analytics components will be not be installed.
+```
+  alarm
+  query-engine
+  snmp
+  topology
+  cassandra
+  kafka
+```
+They are tied with below five roles.
+```analytics_alarm``` - If added, alarm-gen will be installed
+```analytics_query_engine``` - If added, query-engine will be installed
+```analytics_snmp``` - If added, snmp-collector and topology will be installed
+```analytics_database_cassandra``` - If added, cassandra will be installed
+```analytics_database_kafka``` - If added, kafka and zookeeper will be installed
 
 [Complete list of contrail_configuration](contrail_configuration.md)
 
