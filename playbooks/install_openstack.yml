@@ -64,6 +64,31 @@
     when: st.stat.exists is defined and st.stat.exists
     tags: always
 
+- name: Create certificates for haproxy
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  pre_tasks:
+    - name: Import group variables
+      include_vars:
+        dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/group_vars"
+        extensions: ['yml']
+    - name: Import global variables
+      include_vars:
+        dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/etc/kolla"
+        extensions: ['yml']
+        ignore_files:
+          - passwords.yml.original
+          - globals.yml.original
+    - name: Generate certificates for openstack
+      include_role:
+        name: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/roles/certificates"
+      when:
+        - kolla_config is defined
+        - kolla_config.kolla_globals is defined
+        - kolla_config.kolla_globals.generate_self_signed_certs is defined
+        - kolla_config.kolla_globals.generate_self_signed_certs|bool
+
 - name: Deregister deleted Openstack Computes
   include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/deregister_compute.yml"
   vars:
