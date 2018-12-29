@@ -9,6 +9,15 @@
       set_fact:
         instances: "{{ instances }}"
       when: hostvars['localhost']['instances'] is undefined
+    - name: Import global variables
+      include_vars:
+        dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/etc/kolla"
+        extensions: ['yml']
+        ignore_files:
+          - passwords.yml.original
+          - globals.yml.original
+      tags: always
+
   roles:
     - contrail_deployer
     - openstack_deployer
@@ -87,6 +96,8 @@
     - hostvars['localhost'].deleted_nodes_dict.keys() | length > 0
     - inventory_hostname in hostvars['localhost'].deleted_nodes_dict.values()
   tags: nova
+
+- include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/certificates.yml"
 
 - include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/site.yml"
   vars:
