@@ -19,6 +19,10 @@
       set_fact:
           remote_locations: "{{ remote_locations | default({}) }}"
       when: hostvars['localhost']['remote_locations'] is undefined
+    - name: Expose provider config
+      set_fact:
+          provider_config: "{{ provider_config | default({}) }}"
+      when: hostvars['localhost']['provider_config'] is undefined
   roles:
     - contrail_deployer
     - k8s_deployer
@@ -92,6 +96,7 @@
   roles:
     - contrail
   vars:
+    - provider_config: "{{ hostvars['localhost']['provider_config'] }}"
     - contrail_configuration: "{{ hostvars['localhost'].contrail_configuration }}"
     - global_configuration: "{{ hostvars['localhost'].global_configuration }}"
     - remote_locations: "{{ hostvars['localhost'].remote_locations }}"
