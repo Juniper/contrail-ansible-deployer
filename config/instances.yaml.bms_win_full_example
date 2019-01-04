@@ -59,6 +59,5 @@ kolla_config:
     network_interface: "ens192"
     kolla_external_vip_interface: "ens192"
     enable_haproxy: "no"
-    openstack_release: "ocata"
   kolla_passwords:
     keystone_admin_password: c0ntrail123

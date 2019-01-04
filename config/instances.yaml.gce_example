@@ -46,4 +46,4 @@ instances:
 global_configuration:
   CONTAINER_REGISTRY: michaelhenkel
 contrail_configuration:
-  CONTRAIL_VERSION: ocata-5.0.0-134
+  CONTRAIL_VERSION: queens-5.0.0-134
