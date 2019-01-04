@@ -5,7 +5,7 @@ inventory_name: "my_inventory"
 kolla_passwd: "{{ kolla_config.get('kolla_passwords', {}) }}"
 gen_passwords: yes
 
-default_openstack_sku: ocata
+default_openstack_sku: queens
 openstack_sku: >-
     {%- if contrail_configuration.OPENSTACK_VERSION is defined -%}
       {{ contrail_configuration.OPENSTACK_VERSION }}
