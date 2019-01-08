@@ -64,6 +64,10 @@
     when: st.stat.exists is defined and st.stat.exists
     tags: always
 
+- include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/certificates.yml"
+  when:
+    - (((kolla_config | default({})).kolla_globals | default({})).generate_signed_certs | default(false)) | bool
+
 - name: Deregister deleted Openstack Computes
   include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/deregister_compute.yml"
   vars:
