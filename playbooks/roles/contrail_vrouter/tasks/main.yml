@@ -149,6 +149,24 @@
   when: roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
   ignore_errors: yes
 
+- name: "clean contrail-flow.conf"
+  shell: "rm -f /etc/rsyslog.d/contrail-flow.conf"
+  ignore_errors: yes
+
+- name: "create/update contrail-flow.conf"
+  copy:
+    dest: /etc/rsyslog.d/contrail-flow.conf
+    content: |
+      :msg, contains, "SessionData" @"{{ contrail_configuration.FLOW_COLLECTOR_IP }}":9898
+  when: contrail_configuration.FLOW_COLLECTOR_IP is defined and contrail_configuration.FLOW_COLLECTOR_IP != ""
+
+- name: "Ignore SessionData in syslog"
+  lineinfile:
+    dest:  /etc/rsyslog.conf
+    line: ":msg, contains, \"SessionData\"                           ~"
+    insertafter: #### RULES ####
+  when: contrail_configuration.FLOW_COLLECTOR_IP is defined and contrail_configuration.FLOW_COLLECTOR_IP != ""
+
 - name: "create /var/log/contrail/lbaas"
   file:
     path: /var/log/contrail/lbaas
