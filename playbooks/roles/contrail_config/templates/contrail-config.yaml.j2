@@ -104,6 +104,9 @@ services:
   dnsmasq:
     image: "{{ container_registry }}/contrail-external-dnsmasq:{{ contrail_version_tag }}"
     network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     env_file: /etc/contrail/common_config.env
     environment:
       - NODE_TYPE=device-manager
