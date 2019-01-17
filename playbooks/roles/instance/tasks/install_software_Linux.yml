@@ -35,11 +35,9 @@
   include: "{{ ansible_os_family }}.yml"
 
 - name: Install common pre-requisites
-  package:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - python-pip
+  easy_install:
+    name: pip
+    state: latest
 
 - name: install rsyslogd
   package:
