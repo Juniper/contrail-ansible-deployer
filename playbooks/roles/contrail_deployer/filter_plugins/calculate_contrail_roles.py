@@ -197,6 +197,8 @@ class FilterModule(object):
                 if len(object_to_process.get("fq_name", [])) < 2:
                     continue
                 instance_name = str(object_to_process.get("fq_name")[-1])
+                if '.' in instance_name:
+                    instance_name = instance_name.split('.')[0]
                 uuid = str(object_to_process.get("uuid"))
                 try:
                     ip_address = self.get_ip_for_contrail_node(
@@ -256,8 +258,22 @@ class FilterModule(object):
         if hostvars.get("contrail_configuration", None):
             contrail_config = hostvars["contrail_configuration"]
             # Check if Controller Nodes was given
-            controller_role_list = contrail_config.get('CONTROLLER_NODES',
-                                                       None).split(' ')
+            if contrail_config.get('CONFIG_NODES', None):
+                controller_node_list = contrail_config.get(
+                    'CONFIG_NODES').split(',')
+            elif contrail_config.get('CONTROL_NODES', None):
+                controller_node_list = contrail_config.get(
+                    'CONTROL_NODES').split(',')
+            elif contrail_config.get('CONTROLLER_NODES', None):
+                controller_node_list = contrail_config.get(
+                    'CONTROLLER_NODES').split(',')
+            else:
+                controller_node_list = None
+            if isinstance(controller_node_list, list) and \
+                    len(controller_node_list):
+                api_server_list = controller_node_list
+            else:
+                api_server_list = []
 
             if contrail_config.get("CLOUD_ORCHESTRATOR",None) == "openstack":
                 self.auth_token = self.get_ks_auth_token(contrail_config)
