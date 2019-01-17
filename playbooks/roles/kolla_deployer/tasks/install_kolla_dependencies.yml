@@ -3,13 +3,18 @@
   include: RedHat.yml
   when: ansible_os_family == 'RedHat'
 
+- name: check if pip present
+  shell: pip --version
+  ignore_errors: true
+  register: pip_check
+
 - name: install common packages required by kolla playbooks
   package:
-    name: "{{ item }}"
+    name: python-pip
     state: latest
-  with_items:
-    - python-pip
-  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Debian'
+  when:
+    - pip_check.rc != 0
+    - ansible_os_family == 'RedHat' or ansible_os_family == 'Debian'
 
 - name: install right version of jinja2 for kolla
   pip:

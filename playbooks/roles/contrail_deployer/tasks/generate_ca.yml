@@ -1,9 +1,16 @@
 ---
+- name: check if pip present
+  shell: pyp --version
+  ignore_errors: true
+  register: pip_check
+
 - name: install python-pip for further tasks
   package:
     name: python-pip
     state: latest
-  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Debian'
+  when:
+    - pip_check.rc != 0
+    - ansible_os_family == 'RedHat' or ansible_os_family == 'Debian'
 
 - name: install pyopenssl tools
   pip:
