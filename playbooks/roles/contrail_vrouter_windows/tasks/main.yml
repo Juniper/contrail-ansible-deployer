@@ -82,9 +82,16 @@
     name: contrail-vrouter-nodemgr
     state: "{{ (nodemgr_cfg.changed) | ternary('restarted', 'started') }}"
 
-- name: set basic FQDN (without DNS suffix)
+- name: run hostname command
+  win_shell: "hostname"
+  register: hostname_output
+
+# ansible_hostname returns whole hostname in upper case (eg. "HOSTNAME").
+# nodemgr sends hostname with original letter case (eg. "hostNAME") and
+# we want to use the same case, so we have to extract it ourselves.
+- name: extract hostname with original letter case
   set_fact:
-    fqdn: "{{ ansible_hostname | lower }}"
+    fqdn: "{{ hostname_output.stdout_lines | last}}"
 
 - name: append DNS suffix to FQDN if supplied
   set_fact:
