@@ -211,7 +211,7 @@
     ansible_user: "{{ item.value.ssh_user|default(provider_config.kvm.ssh_user) }}"
     instance_name: "{{ item.key }}"
     privat_ip: "{{ item.value.ip }}"
-  when: (provider_config.kvm.ssh_pwd is defined or item.value.ssh_pwd) and
+  when: (provider_config.kvm.ssh_pwd is defined or item.value.ssh_pwd is defined) and
         (provider_config.kvm.ssh_user is defined or item.value.ssh_user is defined)
 
 - name: add container vm {{ container_vm_hostname }} to inventory when private key is defined
