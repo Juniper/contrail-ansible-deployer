@@ -91,5 +91,6 @@
 - include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/site.yml"
   vars:
     action: deploy
+    kolla_action: deploy
 
 - include: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/post-deploy-contrail.yml"

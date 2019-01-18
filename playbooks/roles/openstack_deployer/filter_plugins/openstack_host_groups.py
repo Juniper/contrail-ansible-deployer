@@ -75,6 +75,8 @@ class FilterModule(object):
         "neutron-server": ["control"],
         "neutron-dhcp-agent": ["neutron"],
         "neutron-l3-agent": ["neutron"],
+        "ironic-neutron-agent": ["neutron"],
+        "neutron-infoblox-ipam-agent": ["neutron"],
         "neutron-lbaas-agent": ["neutron"],
         "neutron-metadata-agent": ["neutron"],
         "neutron-vpnaas-agent": ["neutron"],
