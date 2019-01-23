@@ -1,15 +1,4 @@
 ---
-- name: install python-pip for further tasks
-  package:
-    name: python-pip
-    state: latest
-  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Debian'
-
-- name: install pyopenssl tools
-  pip:
-    name: pyopenssl
-    state: latest
-
 - name: install openssl tools
   package:
     name: openssl
