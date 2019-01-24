@@ -8,6 +8,14 @@
   ignore_errors: true
   register: pip_check
 
+- name: install easy_install
+  package:
+    name: python-setuptools
+    state: present
+  when:
+    - pip_check.rc != 0
+    - ansible_os_family == 'RedHat' or ansible_os_family == 'Debian'
+
 - name: install common packages required by kolla playbooks
   easy_install:
     name: pip
