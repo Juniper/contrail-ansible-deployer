@@ -137,7 +137,21 @@
   template:
     src: contrail-vrouter-dpdk.yaml.j2
     dest: "/etc/contrail/vrouter/docker-compose.yaml"
-  when: roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
+  when:
+    - roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
+    - roles[instance_name].vrouter.DPDK_UIO_DRIVER is undefined or roles[instance_name].vrouter.DPDK_UIO_DRIVER != 'mlnx'
+
+- name: "Variable for plugin name"
+  set_fact:
+    plugin_os: "{{ 'ubuntu' if (ansible_os_family == 'Debian') else 'redhat' }}"
+
+- name: "create contrail dpdk vrouter compose file for mellanox"
+  template:
+    src: contrail-vrouter-dpdk-mlnx.yaml.j2
+    dest: "/etc/contrail/vrouter/docker-compose.yaml"
+  when:
+    - roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
+    - roles[instance_name].vrouter.DPDK_UIO_DRIVER is defined and roles[instance_name].vrouter.DPDK_UIO_DRIVER == 'mlnx'
 
 - name: "start contrail dpdk vrouter"
   docker_service:
