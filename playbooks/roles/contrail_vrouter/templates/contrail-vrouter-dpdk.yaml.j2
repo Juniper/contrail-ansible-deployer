@@ -45,6 +45,27 @@ services:
       - node-init
     depends_on:
       - node-init
+{% if mellanox %}
+  vrouter-plugin-mellanox-init:
+    image: "{{ container_registry }}/contrail-vrouter-plugin-mellanox-init-{{plugin_os}}:{{ contrail_version_tag }}"
+    network_mode: host
+    privileged: true
+    env_file: /etc/contrail/common_vrouter.env
+    pid: host
+    volumes:
+      - /lib/modules:/lib/modules
+      - /var/run:/var/run
+      - /etc/os-release:/etc/os-release
+      - /etc/lsb-release:/etc/lsb-release
+      - /dev:/dev
+      - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
+      - /bin:/host/bin
+    volumes_from:
+      - node-init
+    depends_on:
+      - vrouter-kernel-init-dpdk
+      - node-init
+{% endif %}
   vrouter-agent-dpdk:
     image: "{{ container_registry }}/contrail-vrouter-agent-dpdk:{{ contrail_version_tag }}"
     network_mode: host
@@ -62,6 +83,9 @@ services:
     volumes_from:
       - node-init
     depends_on:
+{% if mellanox %}
+      - vrouter-plugin-mellanox-init
+{% endif %}
       - vrouter-kernel-init-dpdk
       - node-init
     restart: always
