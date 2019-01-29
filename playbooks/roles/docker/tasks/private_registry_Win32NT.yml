@@ -38,5 +38,8 @@
   register: cert_store
 
 - name: restart docker
-  include: "restart_docker_Win32NT.yml"
+  win_service:
+    name: docker
+    start_mode: manual
+    state: restarted
   when: docker_cert.changed or cert_store.changed

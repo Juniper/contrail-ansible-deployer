@@ -41,6 +41,9 @@
       when: ansible_os_family == 'RedHat'
 
     - name: restart docker daemon
-      include: restart_docker_Win32NT.yml
+      win_service:
+        name: docker
+        start_mode: manual
+        state: restarted
 
   when: docker_registry not in insecure_registries

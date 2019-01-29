@@ -1,6 +1,6 @@
 ---
-- name: restart docker service
+- name: start docker service
   win_service:
     name: docker
     start_mode: manual
-    state: restarted
+    state: started
