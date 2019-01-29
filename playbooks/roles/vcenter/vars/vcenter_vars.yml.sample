@@ -18,12 +18,14 @@ vcenter_servers:
       # Optional: If not specified default vm_dvs switch is created. This is the dvswitch for providing contrail overlay networking support for vcenter guest VMs.
       #dv_switch:
       #  dv_switch_name: vm_dvs
+      #  dv_switch_version: 6.5.0
       #dv_port_group:
       #  dv_portgroup_name: vm_pg
       #  number_of_ports: 1800
       # Optional: Specify the control-data DVswitch and PG
       #dv_switch_control_data:
       #  dv_switch_name:
+      #  dv_switch_version: 6.5.0
       #dv_port_group_control_data:
       #  dv_portgroup_name:
       #  number_of_ports:
@@ -33,6 +35,7 @@ vcenter_servers:
       # Optional: Specify the mgmt DVswitch and PG
       #dv_switch_mgmt:
       #  dv_switch_name:
+      #  dv_switch_version: 6.5.0
       #dv_port_group_mgmt:
       #  dv_portgroup_name:
       #  number_of_ports:
@@ -42,6 +45,7 @@ vcenter_servers:
       # Optional: The user is exepcted to pre-create this switch and pre-configure sriov related items in vcenter/esxi, PG is created by the playbook
       #dv_switch_sr_iov:
       #  dv_switch_name:
+      #  dv_switch_version: 6.5.0
       #dv_port_group_sriov:
       #  dv_portgroup_name:
       #  number_of_ports:
