@@ -10,6 +10,7 @@ vcenter_servers:
         - test-cluster
       dv_switch:
         dv_switch_name: amudha_dvs
+        dv_switch_version: 6.5.0
       dv_port_group:
         dv_portgroup_name: amudha_pg
         number_of_ports: 1800
@@ -35,4 +36,3 @@ esxihosts:
     contrail_vm:
       networks:
         - mac: 00:50:56:00:d0:0b
-
