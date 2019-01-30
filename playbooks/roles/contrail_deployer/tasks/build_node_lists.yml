@@ -11,6 +11,17 @@
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:
+    device_manager_nodes_list: []
+- name: add device_manager nodes to the list
+  set_fact:
+    device_manager_nodes_list: "{{ device_manager_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.device_manager is defined
+    - contrail_configuration.CONTROLLER_NODES is not defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
     control_nodes_list: []
 - name: add control nodes to the list
   set_fact:
