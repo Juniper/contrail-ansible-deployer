@@ -25,7 +25,7 @@ class FilterModule(object):
     node_ip_name_map = {}
 
     valid_roles = ["config", "control", "analytics_database",
-                   "analytics", "analytics_alarm", "analytics_snmp", "vrouter"]
+                   "analytics", "vrouter"]
 
     def get_ks_token_request(self):
         keystone_token_request = {
@@ -78,9 +78,7 @@ class FilterModule(object):
         "config-nodes": "config",
         "database-nodes": "analytics_database",
         "bgp-routers": "control",
-        "analytics-nodes": "analytics",
-        "analytics-alarm-nodes": "analytics_alarm",
-        "analytics-alarm-nodes": "analytics_snmp"
+        "analytics-nodes": "analytics"
     }
 
     ip_role_map = {
@@ -88,9 +86,7 @@ class FilterModule(object):
         "config-nodes": "config_node_ip_address",
         "database-nodes": "database_node_ip_address",
         "bgp-routers": "bgp_router_parameters.address",
-        "analytics-nodes": "analytics_node_ip_address",
-        "analytics-alarm-nodes": "analytics_alarm_node_ip_address",
-        "analytics-snmp-nodes": "analytics_snmp_node_ip_address"
+        "analytics-nodes": "analytics_node_ip_address"
     }
 
     def filters(self):
