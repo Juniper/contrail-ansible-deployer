@@ -68,6 +68,7 @@
   when: contrail_configuration.get(item.name, 0) == 0 and item.nodes | length > 0
   with_items:
     - {'name': 'CONFIG_NODES', 'nodes': "{{config_nodes_list}}"}
+    - {'name': 'DEVICE_MANAGER_NODES', 'nodes': "{{device_manager_nodes_list}}"}
     - {'name': 'CONTROL_NODES', 'nodes': "{{control_nodes_list}}"}
     - {'name': 'CONTROLLER_NODES', 'nodes': "{{control_nodes_list}}"}
     - {'name': 'CONFIGDB_NODES', 'nodes': "{{configdb_nodes_list}}"}

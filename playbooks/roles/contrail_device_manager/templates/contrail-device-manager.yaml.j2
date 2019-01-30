@@ -1,0 +1,80 @@
+version: '2'
+volumes:
+  dnsmasq:
+  tftp:
+  dhcp_leases:
+services:
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_device_manager.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    pid: host
+    network_mode: "host"
+    volumes: {{ common_volumes | to_yaml }}
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_device_manager.env
+    environment:
+      - NODE_TYPE=device-manager
+    network_mode: "host"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ device_manager_log_driver }}"
+      options:
+        max-size: "{{ device_manager_log_max_size }}"
+        max-file: "{{ device_manager_log_max_file }}"
+  devicemgr:
+    image: "{{ container_registry }}/contrail-controller-devicemgr:{{ contrail_version_tag }}"
+    network_mode: "host"
+    env_file: /etc/contrail/common_device_manager.env
+    volumes_from:
+      - node-init
+      - dnsmasq
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - node-init
+      - dnsmasq
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ device_manager_log_driver }}"
+      options:
+        max-size: "{{ device_manager_log_max_size }}"
+        max-file: "{{ device_manager_log_max_file }}"
+  dnsmasq:
+    image: "{{ container_registry }}/contrail-external-dnsmasq:{{ contrail_version_tag }}"
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    env_file: /etc/contrail/common_device_manager.env
+    environment:
+      - NODE_TYPE=device-manager
+    volumes_from:
+      - node-init
+    volumes:
+      - dnsmasq:/etc/dnsmasq
+      - tftp:/etc/tftp
+      - dhcp_leases:/var/lib/misc
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ device_manager_log_driver }}"
+      options:
+        max-size: "{{ device_manager_log_max_size }}"
+        max-file: "{{ device_manager_log_max_file }}"
