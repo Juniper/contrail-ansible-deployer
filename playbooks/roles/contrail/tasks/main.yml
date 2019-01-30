@@ -55,6 +55,13 @@
   tags:
     - config
 
+- name: create contrail device manager
+  include_role:
+    name: contrail_device_manager
+  when: roles[instance_name].device_manager is defined
+  tags:
+    - device_manager
+
 - name: create contrail webui
   include_role:
     name: contrail_webui
