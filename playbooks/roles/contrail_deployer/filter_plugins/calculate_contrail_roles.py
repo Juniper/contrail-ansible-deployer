@@ -24,7 +24,7 @@ class FilterModule(object):
     node_name_ip_map = {}
     node_ip_name_map = {}
 
-    valid_roles = ["config", "control", "analytics_database",
+    valid_roles = ["config", "device_manager", "control", "analytics_database",
                    "analytics", "analytics_alarm", "analytics_snmp", "vrouter"]
 
     def get_ks_token_request(self):
@@ -76,16 +76,18 @@ class FilterModule(object):
     contrail_object_map = {
         "virtual-routers": "vrouter",
         "config-nodes": "config",
+        "device-manager-nodes": "device_manager",
         "database-nodes": "analytics_database",
         "bgp-routers": "control",
         "analytics-nodes": "analytics",
         "analytics-alarm-nodes": "analytics_alarm",
-        "analytics-alarm-nodes": "analytics_snmp"
+        "analytics-alarm-nodes": "analytics_snmp",
     }
 
     ip_role_map = {
         "virtual-routers": "virtual_router_ip_address",
         "config-nodes": "config_node_ip_address",
+        "device-manager-nodes": "device_manager_node_ip_address",
         "database-nodes": "database_node_ip_address",
         "bgp-routers": "bgp_router_parameters.address",
         "analytics-nodes": "analytics_node_ip_address",

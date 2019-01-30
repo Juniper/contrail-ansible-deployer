@@ -38,6 +38,10 @@ control_log_driver: "{{ contrail_configuration.CONTROL_LOG_DRIVER|default(defaul
 control_log_max_size: "{{ contrail_configuration.CONTROL_LOG_MAX_SIZE|default(default_log_max_size) }}"
 control_log_max_file: "{{ contrail_configuration.CONTROL_LOG_MAX_FILE|default(default_log_max_file) }}"
 
+device_manager_log_driver: "{{ contrail_configuration.DEVICE_MANAGER_LOG_DRIVER|default(default_log_driver) }}"
+device_manager_log_max_size: "{{ contrail_configuration.DEVICE_MANAGER_LOG_MAX_SIZE|default(default_log_max_size) }}"
+device_manager_log_max_file: "{{ contrail_configuration.DEVICE_MANAGER_LOG_MAX_FILE|default(default_log_max_file) }}"
+
 win_container_artifacts_dir: C:\artifacts\
 win_host_artifacts_dir: "{{ win_container_artifacts_dir }}"
 win_vhost_name: vEthernet (HNSTransparent)
