@@ -83,7 +83,7 @@
     dest: "{{ win_docker_daemon_file }}"
 
 - name: install Docker-EE
-  win_shell: "Install-Package Docker -ProviderName DockerMsftProvider -Force"
+  win_shell: "Install-Package Docker -ProviderName DockerMsftProvider -RequiredVersion 18.03 -Force"
 
 # DockerProvider by default starts Docker.
 # However, in this role we don't care in what state Docker is right now.
