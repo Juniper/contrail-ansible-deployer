@@ -1,0 +1,22 @@
+version: '2'
+volumes:
+  dnsmasq:
+  tftp:
+  dhcp_leases:
+services:
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file: /etc/kolla/node_init/common_config.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    pid: host
+    network_mode: "host"
+    volumes:
+      - "/usr/bin:/host/usr/bin"
+      - "/etc/contrail/ssl:/etc/contrail/ssl"
+      - "/etc/hosts:/etc/hosts"
+      - "/etc/timezone:/etc/timezone"
+      - "/etc/localtime:/etc/localtime"
+      - "/var/log/contrail:/var/log/contrail"
+      - "/var/crashes:/var/crashes"
