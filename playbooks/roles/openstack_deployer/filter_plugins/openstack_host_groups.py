@@ -117,6 +117,7 @@ class FilterModule(object):
         "ironic-conductor": ["ironic"],
         "ironic-inspector": ["ironic"],
         "ironic-pxe": ["ironic"],
+        "ironic-ipxe": ["ironic"],
         "magnum-api": ["magnum"],
         "magnum-conductor": ["magnum"],
         "sahara-api": ["sahara"],
