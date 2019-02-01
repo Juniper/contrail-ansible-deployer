@@ -157,12 +157,9 @@ class FilterModule(object):
     def get_ip_for_contrail_node(self, instance_name, uuid, contrail_object,
                                  url, headers):
         node_url = url + str(contrail_object[:-1]) + "/" + str(uuid)
-        try:
-            response = self.get_rest_api_response(node_url,
-                                                  self.contrail_auth_headers,
-                                                  request_type="get")
-        except Exception as e:
-            raise e
+        response = self.get_rest_api_response(node_url,
+                                              self.contrail_auth_headers,
+                                              request_type="get")
         node_object_dict = response.json()
         node_object_dict = node_object_dict[contrail_object[:-1]]
         if "." in self.ip_role_map[contrail_object]:
@@ -188,12 +185,9 @@ class FilterModule(object):
             self.contrail_object_map.iteritems():
 
             contrail_object_url = self.contrail_auth_url + str(contrail_object)
-            try:
-                response = self.get_rest_api_response(contrail_object_url,
-                                                      self.contrail_auth_headers,
-                                                      request_type="get")
-            except Exception as e:
-                return str({"Exception": e.message})
+            response = self.get_rest_api_response(contrail_object_url,
+                                                  self.contrail_auth_headers,
+                                                  request_type="get")
             object_dict = response.json()
             object_list = object_dict[contrail_object]
 
@@ -204,15 +198,12 @@ class FilterModule(object):
                 if '.' in instance_name:
                     instance_name = instance_name.split('.')[0]
                 uuid = str(object_to_process.get("uuid"))
-                try:
-                    ip_address = self.get_ip_for_contrail_node(
-                        instance_name,
-                        uuid,
-                        contrail_object,
-                        self.contrail_auth_url,
-                        self.contrail_auth_headers)
-                except Exception as e:
-                    return str({"Exception": e.message})
+                ip_address = self.get_ip_for_contrail_node(
+                    instance_name,
+                    uuid,
+                    contrail_object,
+                    self.contrail_auth_url,
+                    self.contrail_auth_headers)
 
                 # Check if this is a deleted instance
                 # Either not in instances.yml or has empty role list in instances
