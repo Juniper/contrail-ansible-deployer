@@ -1,0 +1,49 @@
+---
+- hosts: openstack_nodes
+  gather_facts: yes
+  roles:
+    - name: Generate openstack configurations
+      role: openstack
+      tags: always
+  vars_files:
+    - "{{ hostvars['localhost'].config_file }}"
+  vars:
+    - container_registry: "{{ hostvars['localhost'].container_registry }}"
+    - contrail_version_tag: "{{ hostvars['localhost'].contrail_version_tag }}"
+    - config_nodes_list: "{{ hostvars['localhost'].config_nodes_list }}"
+    - analytics_nodes_list: "{{ hostvars['localhost'].analytics_nodes_list }}"
+    - openstack_nodes_list: "{{ hostvars['localhost'].openstack_nodes_list }}"
+    - webui_nodes_list: "{{ hostvars['localhost'].webui_nodes_list }}"
+  tasks:
+  - name: Import group variables
+    include_vars:
+      dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/group_vars"
+      extensions: ['yml']
+    tags: always
+
+  - name: Import global variables
+    include_vars:
+      dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/etc/kolla"
+      extensions: ['yml']
+      ignore_files:
+        - passwords.yml.original
+        - globals.yml.original
+    tags: always
+
+  - name: set tmphost
+    set_fact:
+      tmp_host: "{{ inventory_hostname }}"
+    tags: always
+
+  - stat:
+      path: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/host_vars/{{ tmp_host }}.yml"
+    register: st
+    delegate_to: localhost
+    tags: always
+
+  - name: Import host variables
+    include_vars:
+      file: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/host_vars/{{ inventory_hostname }}.yml"
+    when: st.stat.exists is defined and st.stat.exists
+    tags: always
+

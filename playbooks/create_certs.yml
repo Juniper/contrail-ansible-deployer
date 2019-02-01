@@ -1,0 +1,48 @@
+---
+# include playbook may not be trivial as the playbooks will not have access to
+# the global variables. To avoid changes to kolla playbooks, including the role
+# directly
+- name: Create certificates for haproxy
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  pre_tasks:
+    - name: Import group variables
+      include_vars:
+        dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/group_vars"
+        extensions: ['yml']
+    - name: Import global variables
+      include_vars:
+        dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/etc/kolla"
+        extensions: ['yml']
+        ignore_files:
+          - passwords.yml.original
+          - globals.yml.original
+    - name: Generate certificates for openstack
+      include_role:
+        name: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/roles/certificates"
+      when:
+        - kolla_config is defined
+        - kolla_config.kolla_globals is defined
+        - kolla_config.kolla_globals.generate_self_signed_certs is defined
+        - kolla_config.kolla_globals.generate_self_signed_certs|bool
+
+- name: Create certificates for contrail-api access
+  hosts: openstack_nodes
+  gather_facts: yes
+  roles:
+    - name: Generate openstack configurations
+      role: openstack_node_init
+      when:
+        - contrail_configuration.SSL_ENABLE is defined
+        - contrail_configuration.SSL_ENABLE|bool
+      tags: always
+  vars_files:
+    - "{{ hostvars['localhost'].config_file }}"
+  vars:
+    - container_registry: "{{ hostvars['localhost'].container_registry }}"
+    - contrail_version_tag: "{{ hostvars['localhost'].contrail_version_tag }}"
+    - config_nodes_list: "{{ hostvars['localhost'].config_nodes_list }}"
+    - analytics_nodes_list: "{{ hostvars['localhost'].analytics_nodes_list }}"
+    - openstack_nodes_list: "{{ hostvars['localhost'].openstack_nodes_list }}"
+    - webui_nodes_list: "{{ hostvars['localhost'].webui_nodes_list }}"
