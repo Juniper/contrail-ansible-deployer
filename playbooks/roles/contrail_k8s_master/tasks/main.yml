@@ -15,7 +15,10 @@
 
 - name: get kubemanager token name from serviceaccount
   shell: kubectl describe sa contrail-kubemanager -n contrail  | grep -i 'Tokens' | awk '{print $2}'
+  retries: 5
+  delay: 5
   register: output
+  until: output.rc == 0
 
 - name: get kubemanager token
   shell: kubectl describe secret "{{ output.stdout }}" -n contrail  | grep -i 'token:' | awk '{print $2}'
