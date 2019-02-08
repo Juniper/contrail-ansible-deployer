@@ -51,6 +51,24 @@
     - contrail-controller-config-devicemgr
   when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 
+- name: initialize use_external_tftp variable
+  set_fact:
+    use_external_tftp: false
+
+- name: check if openstack_control is defined on node
+  set_fact:
+    use_external_tftp: true
+  when: roles[instance_name].openstack is defined or roles[instance_name].openstack_control is defined
+
+- name: check if ironic is enabled
+  set_fact:
+    use_external_tftp: "{{ kolla_config.kolla_globals.enable_ironic | bool }}"
+  when:
+    - use_external_tftp
+    - kolla_config is defined
+    - kolla_config.kolla_globals is defined
+    - kolla_config.kolla_globals.enable_ironic is defined
+
 - name: create contrail config compose file
   template:
     src: contrail-config.yaml.j2

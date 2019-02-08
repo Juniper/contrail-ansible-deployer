@@ -1,7 +1,12 @@
 version: '2'
 volumes:
   dnsmasq:
+{% if use_external_tftp %}
+  ironic_pxe:
+    external: true
+{% else %}
   tftp:
+{% endif %}
   dhcp_leases:
 services:
   node-init:
@@ -110,12 +115,17 @@ services:
     env_file: /etc/contrail/common_config.env
     environment:
       - NODE_TYPE=device-manager
+      - USE_EXTERNAL_TFTP={{ use_external_tftp }}
     volumes_from:
       - node-init
     volumes:
       - dnsmasq:/etc/dnsmasq
+{% if use_external_tftp %}
+      - ironic_pxe:/etc/tftp
+{% else %}
       - tftp:/etc/tftp
-      - dhcp_leases:/var/lib/misc
+{% endif %}
+      - dhcp_leases:/var/lib/dnsmasq
     depends_on:
       - node-init
     restart: always
