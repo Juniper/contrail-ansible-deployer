@@ -1,0 +1,8 @@
+log-facility=/var/log/contrail/dnsmasq.log
+keep-in-foreground
+bogus-priv
+log-dhcp
+{% if not openstack_control_defined %}
+enable-tftp
+tftp-root=/etc/tftpboot
+{% endif %}
