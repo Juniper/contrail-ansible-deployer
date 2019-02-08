@@ -156,3 +156,11 @@
     - { name: 'imageManager_ip', is_not_defined: "{{ contrail_configuration.imageManager_ip is not defined }}" }
     - { name: 'networkManager_ip', is_not_defined: "{{ contrail_configuration.networkManager_ip is not defined }}" }
 
+- name: add HAS_EXTERNAL_TFTP
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'HAS_EXTERNAL_TFTP': True}) }}"
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+    - (kolla_config.kolla_globals.enable_ironic is not defined) or (kolla_config.kolla_globals.enable_ironic | bool)
+  tags:
+    - always
