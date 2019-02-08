@@ -51,6 +51,15 @@
     - contrail-controller-config-devicemgr
   when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 
+- name: initialize use_openstack_tftp variable
+  set_fact:
+    use_openstack_tftp: false
+
+- name: check if openstack_control is defined on node
+  set_fact:
+    use_openstack_tftp: true
+  when: roles[instance_name].openstack is defined or roles[instance_name].openstack_control is defined
+
 - name: create contrail config compose file
   template:
     src: contrail-config.yaml.j2
