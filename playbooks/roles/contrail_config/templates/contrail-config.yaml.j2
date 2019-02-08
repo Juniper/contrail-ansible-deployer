@@ -1,7 +1,17 @@
 version: '2'
 volumes:
   dnsmasq:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/etc/contrail/config/dnsmasq'
+{% if openstack_control_defined %}
+  ironic_pxe:
+    external: true
+{% else %}
   tftp:
+{% endif %}
   dhcp_leases:
 services:
   node-init:
@@ -114,8 +124,12 @@ services:
       - node-init
     volumes:
       - dnsmasq:/etc/dnsmasq
+{% if openstack_control_defined %}
+      - ironic_pxe:/etc/tftp
+{% else %}
       - tftp:/etc/tftp
-      - dhcp_leases:/var/lib/misc
+{% endif %}
+      - dhcp_leases:/var/lib/dnsmasq
     depends_on:
       - node-init
     restart: always

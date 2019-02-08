@@ -51,6 +51,26 @@
     - contrail-controller-config-devicemgr
   when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 
+- name: initialize openstack_contrail variable
+  set_fact:
+    openstack_control_defined: false
+
+- name: check if openstack_contrail is installed on node
+  set_fact:
+    openstack_control_defined: true
+  when: roles[instance_name].openstack_control is defined
+
+- name: create /etc/contrail/config/dnsmasq
+  file:
+    path: /etc/contrail/config/dnsmasq
+    state: directory
+    recurse: yes
+
+- name: create dnsmasq base config
+  template:
+    src: contrail-config-dnsmasq-base.conf.j2
+    dest: /etc/contrail/config/dnsmasq/base.conf
+
 - name: create contrail config compose file
   template:
     src: contrail-config.yaml.j2
