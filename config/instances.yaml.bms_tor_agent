@@ -1,0 +1,108 @@
+provider_config:
+  bms:
+    ssh_pwd: c0ntrail123
+    ssh_user: root
+    ntpserver: 10.84.5.100
+    domainsuffix: local
+instances:
+  bms1:
+    provider: bms
+    ip: 10.0.0.3
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+      openstack:
+  bms2:
+    provider: bms
+    ip: 10.0.0.4
+    roles:
+      vrouter:
+        PHYSICAL_INTERFACE: eno1
+        VROUTER_GATEWAY: 192.168.2.254
+        TSN_MODE: true
+        TOR_AGENTS: [tor_agent1, tor_agent2, tor_agent3, tor_agent4]
+ 
+global_configuration:
+  CONTAINER_REGISTRY: opencontrailnightly
+  REGISTRY_PRIVATE_INSECURE: True
+contrail_configuration:
+  CONTRAIL_VERSION: queens-dev
+  CLOUD_ORCHESTRATOR: openstack
+  RABBITMQ_NODE_PORT: 5673
+  AUTH_MODE: keystone
+  KEYSTONE_AUTH_HOST: 10.0.0.3
+  KEYSTONE_AUTH_URL_VERSION: /v3
+  SSL_ENABLE: True
+kolla_config:
+  kolla_globals:
+    kolla_internal_vip_address: 10.0.0.3
+    contrail_api_interface_address: 10.0.0.3
+    enable_haproxy: no
+  kolla_passwords:
+    keystone_admin_password: c0ntrail123
+
+tor_agent_config:
+  tor_agent1:
+        TOR_IP: 192.168.1.100
+        TOR_AGENT_ID: 1
+        TOR_AGENT_NAME: a1s16-1
+        TOR_TYPE: ovs
+        TOR_OVS_PORT: 4321
+        TOR_OVS_PROTOCOL: pssl
+        TOR_TSN_IP: 192.168.2.1
+        TOR_TSN_NAME: a1s16
+        TOR_NAME: a2-qfx1
+        TOR_TUNNEL_IP: 34.34.34.34
+        TOR_VENDOR_NAME: Juniper
+        TOR_PRODUCT_NAME: QFX5100
+        TOR_HTTP_SERVER_PORT: 9090
+        TOR_AGENT_OVS_KA: 10000
+  tor_agent2:
+        TOR_IP: 192.168.1.100
+        TOR_AGENT_ID: 2
+        TOR_AGENT_NAME: a1s16-2
+        TOR_TYPE: ovs
+        TOR_OVS_PORT: 4321
+        TOR_OVS_PROTOCOL: pssl
+        TOR_TSN_IP: 192.168.2.1
+        TOR_TSN_NAME: a1s16
+        TOR_NAME: a2-afx1
+        TOR_TUNNEL_IP: 35.35.35.35
+        TOR_VENDOR_NAME: Juniper
+        TOR_PRODUCT_NAME: QFX5100
+        TOR_HTTP_SERVER_PORT: 9091
+        TOR_AGENT_OVS_KA: 10000
+  tor_agent3:
+        TOR_IP: 192.168.1.102
+        TOR_AGENT_ID: 3
+        TOR_AGENT_NAME: a1s16-3
+        TOR_TYPE: ovs
+        TOR_OVS_PORT: 6321
+        TOR_OVS_PROTOCOL: tcp
+        TOR_TSN_IP: 192.168.2.1
+        TOR_TSN_NAME: a1s16
+        TOR_NAME: a3-afx1
+        TOR_TUNNEL_IP: 36.36.36.36
+        TOR_VENDOR_NAME: Juniper
+        TOR_PRODUCT_NAME: QFX5100
+        TOR_HTTP_SERVER_PORT: 9092
+        TOR_AGENT_OVS_KA: 10000
+  tor_agent4:
+        TOR_IP: 192.168.1.103
+        TOR_AGENT_ID: 4
+        TOR_AGENT_NAME: a1s16-4
+        TOR_TYPE: ovs
+        TOR_OVS_PORT: 7321
+        TOR_OVS_PROTOCOL: pssl
+        TOR_TSN_IP: 192.168.2.1
+        TOR_TSN_NAME: a1s16
+        TOR_NAME: a2-afx2
+        TOR_TUNNEL_IP: 37.37.37.37
+        TOR_VENDOR_NAME: Juniper
+        TOR_PRODUCT_NAME: QFX5100
+        TOR_HTTP_SERVER_PORT: 9094
+        TOR_AGENT_OVS_KA: 10000

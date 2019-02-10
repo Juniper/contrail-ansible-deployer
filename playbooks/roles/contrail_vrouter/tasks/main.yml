@@ -38,7 +38,7 @@
   with_dict: "{{ roles }}"
   ignore_errors: yes
 
-- name: "create controler host list if not defined"
+- name: "create controller host list if not defined"
   set_fact:
     pop_control_nodes: "{{ pop_control_list|join(',') }}"
   when: pop_control_list is defined
@@ -118,7 +118,9 @@
 - name: "start contrail vrouter"
   docker_service:
     project_src: /etc/contrail/vrouter
-  when: roles[instance_name].vrouter.AGENT_MODE is undefined or roles[instance_name].vrouter.AGENT_MODE != 'dpdk'
+  when:
+    - roles[instance_name].vrouter.AGENT_MODE is undefined or roles[instance_name].vrouter.AGENT_MODE != 'dpdk'
+    - roles[instance_name].vrouter.TSN_MODE is undefined or roles[instance_name].vrouter.TSN_MODE != true
 
 - name: update image for dpdk vrouter
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
@@ -148,6 +150,97 @@
   shell: "docker restart nova_compute"
   when: roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
   ignore_errors: yes
+
+- name: "create /etc/contrail/vrouter_tor_agent"
+  file:
+    path: /etc/contrail/vrouter_tor_agent
+    state: directory
+    recurse: yes
+  when:
+    - roles[instance_name].vrouter.TSN_MODE is defined and roles[instance_name].vrouter.TSN_MODE == true
+
+- name: "Make list of env files for tor agent containers"
+  set_fact:
+    tor_agent_id_list: "{{ tor_agent_id_list | default([]) }} + [ '{{tor_agent_config[item].get('TOR_AGENT_ID') | string}}' ]"
+    tor_agent_env_list: "{{ tor_agent_env_list |default([]) }} + [ '{{'/etc/contrail/vrouter_tor_agent/tor_agent_'}}{{tor_agent_config[item].get('TOR_AGENT_ID') | string}}{{'.env'}}' ]"
+  with_items: "{{ roles[instance_name].vrouter.TOR_AGENTS }}"
+  when:
+    - roles[instance_name].vrouter.TOR_AGENTS is defined
+    - roles[instance_name].vrouter.TSN_MODE is defined and roles[instance_name].vrouter.TSN_MODE == true
+  ignore_errors: yes
+  no_log: True
+
+- name: "get /etc/contrail/vrouter_tor_agent/tor_agent.env stat"
+  stat:
+    path: "{{ item }}"
+  register: st_tor_env
+  with_items: "{{ tor_agent_env_list }}"
+
+- name: "delete /etc/contrail/vrouter_tor_agent/tor_agent.env if exists"
+  file:
+    path: "{{ item.0 }}"
+    state: absent
+  with_together:
+    - "{{ tor_agent_env_list }}"
+    - "{{ st_tor_env.results }}"
+  when:
+    - item.1.stat.exists is defined and item.1.stat.exists
+
+- name: "create tor agent env files"
+  file:
+    path: "{{ item }}"
+    state: touch
+  with_items:
+    - "{{ tor_agent_env_list }}"
+  when:
+    - roles[instance_name].vrouter.TOR_AGENTS is defined
+    - roles[instance_name].vrouter.TSN_MODE is defined and roles[instance_name].vrouter.TSN_MODE == true
+
+- name: "Populate env files for tor agent containers"
+  template:
+    src: tor-agent-env.yaml.j2
+    dest: "{{item.1}}"
+  with_together:
+    - "{{ roles[instance_name].vrouter.TOR_AGENTS }}"
+    - "{{ tor_agent_env_list }}"
+  when:
+    - roles[instance_name].vrouter.TOR_AGENTS is defined
+    - roles[instance_name].vrouter.TSN_MODE is defined and roles[instance_name].vrouter.TSN_MODE == true
+
+- name: "update image for tor agent"
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-vrouter-tor-agent
+  when:
+    - contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
+    - roles[instance_name].vrouter.TSN_MODE is defined and roles[instance_name].vrouter.TSN_MODE == true
+
+- name: "create contrail tor agent compose files"
+  template:
+    src: contrail-vrouter-tor-agent.yaml.j2
+    dest: "{{'/etc/contrail/vrouter_tor_agent/docker-compose-tor-agent-'}}{{item.1}}{{'.yaml'}}"
+  with_together:
+    - "{{ tor_agent_env_list }}"
+    - "{{ tor_agent_id_list }}"
+  when:
+    - roles[instance_name].vrouter.TOR_AGENTS is defined
+    - roles[instance_name].vrouter.TSN_MODE is defined and roles[instance_name].vrouter.TSN_MODE == true
+
+- name: "get tor agent compose file list"
+  set_fact:
+    tor_agent_compose_list: "{{ tor_agent_compose_list | default(['/etc/contrail/vrouter/docker-compose.yaml']) }} + ['{{'/etc/contrail/vrouter_tor_agent/docker-compose-tor-agent-'}}{{ item }}{{'.yaml'}}']"
+  with_items: "{{ tor_agent_id_list }}"
+  when:
+    - roles[instance_name].vrouter.TOR_AGENTS is defined
+    - roles[instance_name].vrouter.TSN_MODE is defined and roles[instance_name].vrouter.TSN_MODE == true
+
+- name: "start contrail tsn node containers"
+  docker_service:
+    project_src: /etc/contrail/vrouter_tor_agent
+    files: "{{ tor_agent_compose_list }}"
+  when:
+    - roles[instance_name].vrouter.TOR_AGENTS is defined
+    - roles[instance_name].vrouter.TSN_MODE is defined and roles[instance_name].vrouter.TSN_MODE == true
 
 - name: "create /var/log/contrail/lbaas"
   file:
