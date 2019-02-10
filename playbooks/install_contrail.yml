@@ -23,6 +23,10 @@
       set_fact:
           provider_config: "{{ provider_config | default({}) }}"
       when: hostvars['localhost']['provider_config'] is undefined
+    - name: Expose tor_agent_config config
+      set_fact:
+          tor_agent_config: "{{ tor_agent_config | default({}) }}"
+      when: hostvars['localhost']['tor_agent_config'] is undefined
   roles:
     - contrail_deployer
     - k8s_deployer
@@ -107,6 +111,7 @@
     - node_roles_dict: "{{ hostvars['localhost'].node_roles_dict }}"
     - api_server: "{{ hostvars['localhost'].api_server }}"
     - reprovision: "{{ hostvars['localhost'].reprovision }}"
+    - tor_agent_config: "{{ hostvars['localhost'].tor_agent_config }}"
   environment:
     - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
     - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
