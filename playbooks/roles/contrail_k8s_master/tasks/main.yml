@@ -13,15 +13,21 @@
 - name: excute contrail kubemanager serviceaccount yaml
   shell: kubectl apply -f /etc/contrail/contrail-kubemanager-serviceaccount.yaml
 
-- name: get kubemanager token name from serviceaccount
-  shell: kubectl describe sa contrail-kubemanager -n contrail  | grep -i 'Tokens' | awk '{print $2}'
+# in some situation kubectl needs some time to get answer with non-empty token
+# and because pipefail can't be used here then we need to wait in separate task
+- name: wait for kubemanager token name from serviceaccount
+  shell: kubectl describe sa contrail-kubemanager -n contrail
   retries: 5
   delay: 5
   register: output
   until: output.rc == 0
 
+- name: get kubemanager token name from serviceaccount
+  shell: kubectl describe sa contrail-kubemanager -n contrail | grep -i 'Tokens' | awk '{print $2}'
+  register: output
+
 - name: get kubemanager token
-  shell: kubectl describe secret "{{ output.stdout }}" -n contrail  | grep -i 'token:' | awk '{print $2}'
+  shell: kubectl describe secret "{{ output.stdout }}" -n contrail | grep -i 'token:' | awk '{print $2}'
   register: output
 
 - name: set kubemanager token
