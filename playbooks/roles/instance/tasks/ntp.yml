@@ -6,6 +6,9 @@
   with_items:
     - ntpdate
     - ntp
+  register: res
+  retries: 5
+  until: res | success
 
 - name: set ntp service name
   set_fact:

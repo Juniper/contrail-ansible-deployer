@@ -6,6 +6,8 @@
     state: latest
     install_recommends: yes
   register: upgrade_kernel
+  retries: 5
+  until: upgrade_kernel | success
   when: (contrail_configuration.UPGRADE_KERNEL is defined and contrail_configuration.UPGRADE_KERNEL == true) or
         (instance_data.UPGRADE_KERNEL is defined and instance_data.UPGRADE_KERNEL == true)
 

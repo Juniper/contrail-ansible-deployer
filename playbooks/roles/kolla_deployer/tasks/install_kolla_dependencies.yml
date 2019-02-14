@@ -15,6 +15,9 @@
   when:
     - pip_check.rc != 0
     - ansible_os_family == 'RedHat' or ansible_os_family == 'Debian'
+  register: res
+  retries: 5
+  until: res | success
 
 - name: install common packages required by kolla playbooks
   easy_install:

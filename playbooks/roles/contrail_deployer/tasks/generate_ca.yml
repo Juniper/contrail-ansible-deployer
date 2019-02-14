@@ -3,6 +3,9 @@
   package:
     name: openssl
     state: present
+  register: res
+  retries: 5
+  until: res | success
 
 - name: create certs directories
   become: yes

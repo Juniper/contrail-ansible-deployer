@@ -37,6 +37,9 @@
   package:
     name: python-requests
     state: absent
+  register: res
+  retries: 5
+  until: res | success
 
 - name: OS specific package install
   include: "{{ ansible_os_family }}.yml"
@@ -45,6 +48,9 @@
   package:
     name: python-setuptools
     state: present
+  register: res
+  retries: 5
+  until: res | success
 
 - name: Install common pre-requisites
   easy_install:
@@ -58,6 +64,9 @@
   when:
     - instance_data.roles is defined
     - instance_data.roles.vrouter is defined
+  register: res
+  retries: 5
+  until: res | success
 
 - name: Set up ntp
   include: ntp.yml

@@ -2,6 +2,9 @@
 - name: Install pre-requisites
   apt:
     name: "{{ item }}"
+  register: res
+  retries: 5
+  until: res | success
   with_items:
     - apt-transport-https
     - ca-certificates
@@ -25,6 +28,9 @@
     state: present
     update_cache: yes
   when: ansible_distribution_release in ('trusty', 'xenial', 'artful')
+  register: res
+  retries: 5
+  until: res | success
 
 # all other releases don't have 18.x at all
 
@@ -35,3 +41,6 @@
     state: present
     update_cache: yes
   when: ansible_distribution_release == 'bionic'
+  register: res
+  retries: 5
+  until: res | success

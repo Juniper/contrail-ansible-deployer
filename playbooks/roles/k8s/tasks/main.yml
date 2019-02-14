@@ -58,6 +58,9 @@
     - kubelet
     - kubeadm
   when: k8s_package_version is defined
+  register: res
+  retries: 5
+  until: res | success
 
 - name: configure k8s master
   include: configure_k8s_master_node.yml
