@@ -14,6 +14,8 @@
   when:
     - (( contrail_configuration.SSL_ENABLE is defined ) and
       ( contrail_configuration.SSL_ENABLE|bool )) or
+      (( contrail_configuration.CONFIG_API_SSL_ENABLE is defined ) and
+      ( contrail_configuration.CONFIG_API_SSL_ENABLE|bool )) or
       (( contrail_configuration.XMPP_SSL_ENABLE is defined ) and
       ( contrail_configuration.XMPP_SSL_ENABLE|bool )) or
       (( contrail_configuration.INTROSPECT_SSL_ENABLE is defined ) and
