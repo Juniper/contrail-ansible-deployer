@@ -26,6 +26,38 @@
   set_fact:
     insecure_registries: "{{ docker_daemon['insecure-registries'] | default([]) }}"
 
+- name: insert updated max-concurrent-downloads to docker daemon
+  set_fact:
+    new_docker_daemon: "{{ docker_daemon | combine({ 'max-concurrent-downloads': 1 }) }}"
+  when: docker_daemon['max-concurrent-downloads'] is not defined
+
+- name: write config to daemon.json
+  copy:
+    content: "{{ new_docker_daemon | to_nice_json }}"
+    dest: "{{ nix_docker_config_file }}"
+  when: new_docker_daemon is defined
+
+- name: reload systemd
+  shell: systemctl daemon-reload
+  when:
+    - ansible_os_family == 'RedHat'
+    - new_docker_daemon is defined
+
+- name: read docker config file
+  shell: "cat {{ nix_docker_config_file }}"
+  register: docker_daemon_file
+
+- name: convert entries to json
+  set_fact:
+    docker_daemon: "{{ docker_daemon_file.stdout | default('{}', true) | from_json }}"
+
+- name: restart docker daemon
+  service:
+    enabled: yes
+    name: docker
+    state: restarted
+  when: new_docker_daemon is defined
+
 - name: add new docker_registry to docker config
   block:
     - name: insert updated insecure-registries to docker daemon
