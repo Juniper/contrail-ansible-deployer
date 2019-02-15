@@ -1,6 +1,4 @@
 ---
-- set_fact:
-    config_nodes_list: []
 - name: add config nodes to the list
   set_fact:
     config_nodes_list: "{{ config_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -10,8 +8,6 @@
     - contrail_configuration.CONTROLLER_NODES is not defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    control_nodes_list: []
 - name: add control nodes to the list
   set_fact:
     control_nodes_list: "{{ control_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -21,8 +17,6 @@
     - contrail_configuration.CONTROLLER_NODES is not defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    configdb_nodes_list: []
 - name: add configdb nodes to the list
   set_fact:
     configdb_nodes_list: "{{ configdb_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -32,8 +26,6 @@
     - contrail_configuration.CONTROLLER_NODES is not defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    analytics_nodes_list: []
 - name: add analytics nodes to the list
   set_fact:
     analytics_nodes_list: "{{ analytics_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -54,8 +46,6 @@
     - contrail_configuration.CONTROLLER_NODES is not defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    analytics_alarm_nodes_list: []
 - name: add analytics alarm nodes to the list
   set_fact:
     analytics_alarm_nodes_list: "{{ analytics_alarm_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -67,6 +57,7 @@
 
 - set_fact:
     analyticsdb_nodes_list: []
+
 - name: add analyticsdb nodes to the list
   set_fact:
     analyticsdb_nodes_list: "{{ analyticsdb_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -76,8 +67,6 @@
     - contrail_configuration.CONTROLLER_NODES is not defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    webui_nodes_list: []
 - name: add webui nodes to the list
   set_fact:
     webui_nodes_list: "{{ webui_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -87,8 +76,6 @@
     - contrail_configuration.CONTROLLER_NODES is not defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    k8s_master_nodes_list: []
 - name: add k8s_master nodes to the list
   set_fact:
     k8s_master_nodes_list: "{{ k8s_master_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -97,8 +84,6 @@
     - item.value.roles.k8s_master is defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    k8s_node_nodes_list: []
 - name: add k8s_node nodes to the list
   set_fact:
     k8s_node_nodes_list: "{{ k8s_node_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -107,8 +92,6 @@
     - item.value.roles.k8s_node is defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    mesos_master_nodes_list: []
 - name: add mesos_master nodes to the list
   set_fact:
     mesos_master_nodes_list: "{{ mesos_master_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -117,8 +100,6 @@
     - item.value.roles.mesos_master is defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    mesos_agent_nodes_list: []
 - name: add mesos_agent nodes to the list
   set_fact:
     mesos_node_nodes_list: "{{ mesos_agent_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -127,8 +108,6 @@
     - item.value.roles.mesos_agent_private is defined or item.value.roles.mesos_agent_public is defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    kubemanager_nodes_list: []
 - name: add kubemanager nodes to the list
   set_fact:
     kubemanager_nodes_list: "{{ kubemanager_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -137,8 +116,6 @@
     - item.value.roles.kubemanager is defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    openstack_nodes_list: []
 - name: add openstack nodes to the list
   set_fact:
     openstack_nodes_list: "{{ openstack_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -147,8 +124,6 @@
     - item.value.roles.openstack is defined or item.value.roles.openstack_control is defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    vcenter_plugin_nodes_list: []
 - name: add vcenter_plugin nodes to the list
   set_fact:
     vcenter_plugin_nodes_list: "{{ vcenter_plugin_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -157,8 +132,6 @@
     - item.value.roles.vcenter_plugin is defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    vcenter_manager_nodes_list: []
 - name: add vcenter_manager nodes to the list
   set_fact:
     vcenter_manager_nodes_list: "{{ vcenter_manager_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
@@ -167,8 +140,6 @@
     - item.value.roles.vcenter_manager is defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    vrouter_nodes_list: []
 - name: add Vrouter Nodes to the list
   set_fact:
     vrouter_nodes_list: "{{ vrouter_nodes_list + [ item.value.private_ip | default(item.value.ip) ]}}"
@@ -177,8 +148,6 @@
     - item.value.roles.vrouter is defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- set_fact:
-    tsn_nodes_list: []
 - name: add TSN nodes to the list
   set_fact:
     tsn_nodes_list: "{{ tsn_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
