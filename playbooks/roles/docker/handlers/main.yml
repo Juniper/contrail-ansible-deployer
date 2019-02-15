@@ -1,0 +1,12 @@
+---
+- name: reload systemd
+  shell: systemctl daemon-reload
+  when:
+    - ansible_os_family == 'RedHat'
+
+- name: restart docker daemon
+  service:
+    enabled: yes
+    name: docker
+    state: restarted
+

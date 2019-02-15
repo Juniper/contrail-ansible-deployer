@@ -103,9 +103,6 @@
       state: active
   register: gce
 
-- debug:
-    msg: "{{ gce.instance_data }}"
-
 - set_fact:
     ip_key: "{{ {} | combine({'ip': gce.instance_data[0].public_ip, 'private_ip': gce.instance_data[0].private_ip}) }}"
 
