@@ -99,9 +99,6 @@
       "instance-state-name": "running"
   register: aws
 
-- debug:
-    msg: "{{ aws }}"
-
 - set_fact:
     ip_key: "{{ {} | combine({'ip': aws.instances[0].public_ip_address, 'private_ip': aws.instances[0].private_ip_address}) }}"
 
