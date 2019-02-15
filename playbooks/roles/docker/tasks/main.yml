@@ -2,6 +2,11 @@
 
 - include: "{{ ansible_os_family }}.yml"
 
+- include: scale_options.yml
+  when:
+    - contrail_configuration.USE_DOCKER_SCALE_OPTIONS is defined
+    - contrail_configuration.USE_DOCKER_SCALE_OPTIONS|bool
+
 - name: add Contrail's insecure registry
   include: "insecure_registry_{{ ansible_system }}.yml
     docker_registry={{ global_configuration.CONTAINER_REGISTRY }}"
