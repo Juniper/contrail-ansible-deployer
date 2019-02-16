@@ -80,7 +80,7 @@ class FilterModule(object):
         "bgp-routers": "control",
         "analytics-nodes": "analytics",
         "analytics-alarm-nodes": "analytics_alarm",
-        "analytics-alarm-nodes": "analytics_snmp"
+        "analytics-snmp-nodes": "analytics_snmp"
     }
 
     ip_role_map = {
