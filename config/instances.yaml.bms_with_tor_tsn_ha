@@ -1,0 +1,129 @@
+provider_config:
+  bms:
+    ssh_pwd: c0ntrail123
+    ssh_user: root
+    ntpserver: 10.84.5.100
+    domainsuffix: local
+instances:
+  bms1:
+    provider: bms
+    ip: 10.204.217.11
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      webui:
+      openstack:
+      tsn_haproxy:
+         IP_LIST: "10.204.217.15,10.204.217.23"
+         PORT_LIST: "4321"
+  bms2:
+    provider: bms
+    ip: 10.204.217.12
+    roles:
+      openstack_compute:
+      vrouter:
+        PHYSICAL_INTERFACE: enp2s0f1
+  bms3:
+    provider: bms
+    ip: 10.204.217.15
+    roles:
+      vrouter:
+        PHYSICAL_INTERFACE: enp2s0f1
+        TSN_MODE: true
+        TOR_AGENTS: [tor_agent1, tor_agent2]
+  bms4:
+    provider: bms
+    ip: 10.204.217.23
+    roles:
+      vrouter:
+        PHYSICAL_INTERFACE: enp2s0f1
+        TSN_MODE: true
+        TOR_AGENTS: [tor_agent3, tor_agent4]
+ 
+global_configuration:
+  CONTAINER_REGISTRY: 10.204.216.66:6666
+  REGISTRY_PRIVATE_INSECURE: True
+contrail_configuration:
+  CONTRAIL_VERSION: queens-dev
+  CLOUD_ORCHESTRATOR: openstack
+  RABBITMQ_NODE_PORT: 5673
+  AUTH_MODE: keystone
+  KEYSTONE_AUTH_HOST: 10.204.217.11
+  KEYSTONE_AUTH_URL_VERSION: /v3
+  SSL_ENABLE: True
+  VROUTER_GATEWAY: 192.16.2.254
+  CONTROLLER_NODES: 10.204.217.11
+  OPENSTACK_NODES: 10.204.217.11
+  CONTROL_NODES: 10.204.217.11
+kolla_config:
+  kolla_globals:
+    kolla_internal_vip_address: 10.204.217.11
+    contrail_api_interface_address: 10.204.217.11
+    enable_haproxy: no
+  kolla_passwords:
+    keystone_admin_password: c0ntrail123
+
+tor_agent_config:
+  tor_agent1:
+        TOR_IP: 192.16.3.2
+        TOR_AGENT_ID: 1
+        TOR_AGENT_NAME: noden5-1
+        TOR_TYPE: ovs
+        TOR_OVS_PORT: 4321
+        TOR_OVS_PROTOCOL: pssl
+        TOR_TSN_IP: 192.16.2.3
+        TOR_TSN_NAME: noden5
+        TOR_NAME: bng-contrail-qfx51-10
+        TOR_TUNNEL_IP: 192.16.1.2
+        TOR_VENDOR_NAME: Juniper
+        TOR_PRODUCT_NAME: QFX5100
+        TOR_HTTP_SERVER_PORT: 9090
+        TOR_AGENT_OVS_KA: 10000
+  tor_agent2:
+        TOR_IP: 192.16.3.3
+        TOR_AGENT_ID: 2
+        TOR_AGENT_NAME: noden5-2
+        TOR_TYPE: ovs
+        TOR_OVS_PORT: 5321
+        TOR_OVS_PROTOCOL: pssl
+        TOR_TSN_IP: 192.16.2.3
+        TOR_TSN_NAME: noden5
+        TOR_NAME: bng-contrail-qfx51-12
+        TOR_TUNNEL_IP: 192.16.1.3
+        TOR_VENDOR_NAME: Juniper
+        TOR_PRODUCT_NAME: QFX5100
+        TOR_HTTP_SERVER_PORT: 9091
+        TOR_AGENT_OVS_KA: 10000
+  tor_agent3:
+        TOR_IP: 192.16.3.2
+        TOR_AGENT_ID: 3
+        TOR_AGENT_NAME: noden6-3
+        TOR_TYPE: ovs
+        TOR_OVS_PORT: 4321
+        TOR_OVS_PROTOCOL: pssl
+        TOR_TSN_IP: 192.16.2.4
+        TOR_TSN_NAME: noden6
+        TOR_NAME: bng-contrail-qfx51-10
+        TOR_TUNNEL_IP: 192.16.1.2
+        TOR_VENDOR_NAME: Juniper
+        TOR_PRODUCT_NAME: QFX5100
+        TOR_HTTP_SERVER_PORT: 9090
+        TOR_AGENT_OVS_KA: 10000
+  tor_agent4:
+        TOR_IP: 192.16.3.3
+        TOR_AGENT_ID: 4
+        TOR_AGENT_NAME: noden6-4
+        TOR_TYPE: ovs
+        TOR_OVS_PORT: 5321
+        TOR_OVS_PROTOCOL: pssl
+        TOR_TSN_IP: 192.16.2.4
+        TOR_TSN_NAME: noden6
+        TOR_NAME: bng-contrail-qfx51-12
+        TOR_TUNNEL_IP: 192.16.1.3
+        TOR_VENDOR_NAME: Juniper
+        TOR_PRODUCT_NAME: QFX5100
+        TOR_HTTP_SERVER_PORT: 9091
+        TOR_AGENT_OVS_KA: 10000

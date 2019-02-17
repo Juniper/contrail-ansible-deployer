@@ -184,3 +184,8 @@
   include_role:
     name: contrail_cnm_windows
   when: roles[instance_name].win_cnm_plugin is defined
+
+- name: create tsn haproxy
+  include_role:
+    name: haproxy
+  when: roles[instance_name].tsn_haproxy is defined and ansible_system == 'Linux'
