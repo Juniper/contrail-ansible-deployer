@@ -1,0 +1,33 @@
+version: '2'
+services:
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/tsn_haproxy.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    network_mode: "host"
+    volumes: {{ common_volumes | to_yaml }}
+  tsn_haproxy:
+    image: "{{ container_registry }}/contrail-external-haproxy:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/tsn_haproxy.env
+    network_mode: "host"
+    privileged: true
+    pid: host
+    volumes:
+      - /dev/:/dev/
+      - /var/lib/:/var/lib/
+      - /var/run/:/var/run/
+      - /run/:/run/
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ control_log_driver }}"
+      options:
+        max-size: "{{ control_log_max_size }}"
+        max-file: "{{ control_log_max_file }}"
