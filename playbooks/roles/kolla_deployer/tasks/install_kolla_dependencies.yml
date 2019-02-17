@@ -8,24 +8,35 @@
   ignore_errors: true
   register: pip_check
 
-- name: install easy_install
-  package:
-    name: python-setuptools
-    state: present
+- name: Install pip on RedHat family
+  block:
+    - name: install easy_install
+      package:
+        name: python-setuptools
+        state: present
+    - name: install pip package required by kolla playbooks
+      easy_install:
+        name: pip
+        state: latest
   when:
     - pip_check.rc != 0
-    - ansible_os_family == 'RedHat' or ansible_os_family == 'Debian'
-  register: res
-  retries: 5
-  until: res | success
+    - ansible_os_family == 'RedHat'
 
-- name: install common packages required by kolla playbooks
-  easy_install:
-    name: pip
-    state: latest
+- name: Install pip on Debian family
+  block:
+    - name: install package
+      apt:
+        name: "{{ item }}"
+        state: present
+      register: res
+      retries: 5
+      until: res | success
+      with_items:
+        - python-setuptools
+        - python-pip
   when:
     - pip_check.rc != 0
-    - ansible_os_family == 'RedHat' or ansible_os_family == 'Debian'
+    - ansible_os_family == 'Debian'
 
 - name: install right version of jinja2 for kolla
   pip:

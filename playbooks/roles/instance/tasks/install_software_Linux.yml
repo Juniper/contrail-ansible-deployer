@@ -44,19 +44,6 @@
 - name: OS specific package install
   include: "{{ ansible_os_family }}.yml"
 
-- name: install easy_install
-  package:
-    name: python-setuptools
-    state: present
-  register: res
-  retries: 5
-  until: res | success
-
-- name: Install common pre-requisites
-  easy_install:
-    name: pip
-    state: latest
-
 - name: install rsyslogd
   package:
     name: rsyslog
