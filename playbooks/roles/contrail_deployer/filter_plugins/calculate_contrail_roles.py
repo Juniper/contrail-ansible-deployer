@@ -93,9 +93,14 @@ class FilterModule(object):
         "analytics-snmp-nodes": "analytics_snmp_node_ip_address"
     }
 
+    indexed_roles = [
+        'toragent',
+    ]
+
     def filters(self):
         return {
-            'calculate_contrail_roles': self.calculate_contrail_roles
+            'calculate_contrail_roles': self.calculate_contrail_roles,
+            'extract_roles': self.extract_roles,
         }
 
     def get_ks_auth_token(self, contrail_config):
@@ -302,3 +307,17 @@ class FilterModule(object):
         return str({"node_roles_dict": instances_nodes_dict,
                     "deleted_nodes_dict": deleted_nodes_dict,
                     "api_server_ip": self.api_server_ip})
+
+    def extract_roles(self, existing_roles, instance_data):
+        existing_roles[instance_data["key"]] = dict()
+        for role, data in instance_data["value"]["roles"].iteritems():
+            ix_name = next((s for s in self.indexed_roles if s in role), None)
+            if not ix_name:
+                existing_roles[instance_data["key"]][role] = data
+            else:
+                # indexed role name must be equal to pattern ROLENAME_INDEX
+                index = role[len(ix_name) + 1:]
+                if index:
+                    existing_roles[instance_data["key"]].setdefault(ix_name, dict())[index] = data
+
+        return existing_roles

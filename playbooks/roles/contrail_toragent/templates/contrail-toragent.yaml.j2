@@ -1,0 +1,47 @@
+version: '2'
+services:
+  node-init:
+    image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/{{ toragent_name }}.env
+    environment:
+      - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
+    privileged: true
+    pid: host
+    network_mode: "host"
+    volumes: {{ common_volumes | to_yaml }}
+  nodemgr:
+    image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
+    env_file: "/etc/contrail/{{ toragent_name }}.env"
+    environment:
+      - NODE_TYPE=toragent
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: on-failure
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ compute_log_driver }}"
+      options:
+        max-size: "{{ compute_log_max_size }}"
+        max-file: "{{ compute_log_max_file }}"
+  toragent:
+    image: "{{ container_registry }}/contrail-tor-agent:{{ contrail_version_tag }}"
+    network_mode: host
+    env_file: "/etc/contrail/{{ toragent_name }}.env"
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ compute_log_driver }}"
+      options:
+        max-size: "{{ compute_log_max_size }}"
+        max-file: "{{ compute_log_max_file }}"

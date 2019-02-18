@@ -58,6 +58,6 @@
     roles: {}
 - name: add roles if defined
   set_fact:
-     roles: "{{ roles | combine({item.key: item.value.roles}, recursive=True) }}"
+    roles: "{{ roles | extract_roles(item) }}"
   when: item.value.roles is defined
   with_dict: "{{ instances }}"
