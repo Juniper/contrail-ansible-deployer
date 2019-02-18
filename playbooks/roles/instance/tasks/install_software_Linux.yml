@@ -59,7 +59,7 @@
   include: ntp.yml
   when: provider_data.ntpserver is defined
 
-- name: OS specific kernel install, grub midifications, reboot
+- name: OS specific kernel install, grub modifications, reboot
   include: "{{ ansible_os_family }}_kernel.yml"
 
 - name: install python compose

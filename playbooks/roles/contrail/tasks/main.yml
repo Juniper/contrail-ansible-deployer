@@ -143,19 +143,24 @@
   tags:
     - mesos
 
-- name: create contrail vrouter
+- name: create contrail vrouter for Linux
   include_role:
     name: contrail_vrouter
   when: roles[instance_name].vrouter is defined and ansible_system == 'Linux'
   tags:
     - vrouter
 
-- name: create contrail vrouter
+- name: create contrail vrouter for Win32NT
   include_role:
     name: contrail_vrouter_windows
   when: roles[instance_name].vrouter is defined and ansible_system == 'Win32NT'
   tags:
     - vrouter
+
+- name: create contrail tor agents
+  include_role:
+    name: contrail_toragent
+  when: roles[instance_name].toragent
 
 - name: Pluginize legacy compute
   include_role:
