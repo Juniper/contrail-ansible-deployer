@@ -1,0 +1,44 @@
+---
+- name: "create /etc/contrail/tsn_haproxy"
+  file:
+    path: /etc/contrail/tsn_haproxy
+    state: directory
+    recurse: yes
+
+- name: "get /etc/contrail/tsn_haproxy.env stat"
+  stat:
+    path: "/etc/contrail/tsn_haproxy.env"
+  register: st
+
+- name: "delete /etc/contrail/tsn_haproxy.env if exists"
+  file:
+    path: "/etc/contrail/tsn_haproxy.env"
+    state: absent
+  when: st.stat.exists is defined and st.stat.exists
+
+- name: "create /etc/contrail/tsn_haproxy.env"
+  file:
+    path: "/etc/contrail/tsn_haproxy.env"
+    state: touch
+
+- name: "populate tsn_haproxy.env"
+  lineinfile: dest=/etc/contrail/tsn_haproxy.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value | string }}" state=present
+  with_dict:
+    "{{ roles[instance_name].tsn_haproxy }}"
+
+- name: "update image"
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-node-init
+    - contrail-external-haproxy
+  when:
+    - contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
+
+- name: "create tsn_haproxy compose file"
+  template:
+    src: haproxy.yaml.j2
+    dest: "/etc/contrail/tsn_haproxy/docker-compose.yaml"
+
+- name: "start tsn_haproxy container"
+  docker_service:
+    project_src: /etc/contrail/tsn_haproxy
