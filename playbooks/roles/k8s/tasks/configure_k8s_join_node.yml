@@ -6,7 +6,7 @@
 - name: check if node already exists
   set_fact:
     node_exists: true
-  when: ansible_hostname in hostvars[k8s_master_name].node_list
+  when: ansible_hostname.lower() in hostvars[k8s_master_name].node_list
 
 - name: docker info for getting cgroup driver
   shell: docker info 2>/dev/null |grep "Cgroup Driver" |awk '{print $3}'
