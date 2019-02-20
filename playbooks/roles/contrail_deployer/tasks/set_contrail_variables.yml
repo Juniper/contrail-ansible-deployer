@@ -155,3 +155,11 @@
     - { name: 'computeManager_ip', is_not_defined: "{{ contrail_configuration.computeManager_ip is not defined }}" }
     - { name: 'imageManager_ip', is_not_defined: "{{ contrail_configuration.imageManager_ip is not defined }}" }
     - { name: 'networkManager_ip', is_not_defined: "{{ contrail_configuration.networkManager_ip is not defined }}" }
+
+- name: combine contrail configuration defaults with contrail configuration
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration_keystone_default | combine(contrail_configuration) }}"
+  tags:
+    - always
+  when:
+    - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'

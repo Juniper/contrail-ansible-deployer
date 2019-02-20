@@ -14,5 +14,24 @@
     --host_ip {{ ip_address }}
     --api_server_ip {{ api_server }}
     --oper del
-  when: config_api_name.stdout
+  when:
+    - config_api_name.stdout
+    - contrail_configuration.AAA_MODE is not defined or contrail_configuration.AAA_MODE == 'no-auth'
+  run_once: yes
+
+- name: De-register vrouter from Contrail API in Auth mode
+  command: >
+    docker exec config_api_1
+    python /opt/contrail/utils/provision_vrouter.py
+    --host_name {{ instance_name }}
+    --host_ip {{ ip_address }}
+    --api_server_ip {{ api_server }}
+    --oper del
+    --admin_user {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_USER }}
+    --admin_tenant_name {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_TENANT }}
+    --admin_password {{ contrail_configuraion.KEYSTONE_AUTH_ADMIN_PASSWORD }}
+  when:
+    - config_api_name.stdout
+    - contrail_configuration.AAA_MODE is defined
+    - (contrail_configuration.AAA_MODE == 'rbac') or (contrail_configuration.AAA_MODE == 'cloud-admin')
   run_once: yes
