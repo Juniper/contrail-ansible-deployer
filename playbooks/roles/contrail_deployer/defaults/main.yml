@@ -4,3 +4,6 @@ supported_orchestrators:
   - mesos
   - vcenter
   - none
+contrail_configuration_keystone_default:
+  KEYSTONE_AUTH_ADMIN_TENANT: admin
+  KEYSTONE_AUTH_ADMIN_USER: admin
