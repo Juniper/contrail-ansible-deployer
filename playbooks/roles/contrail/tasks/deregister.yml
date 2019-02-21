@@ -4,6 +4,7 @@
     name: contrail_vrouter
     tasks_from: deregister
   when:
+    - instance_name in node_roles_dict
     - ('vrouter' in node_roles_dict[instance_name].deleted_roles)
     - ansible_system == 'Linux'
   tags:

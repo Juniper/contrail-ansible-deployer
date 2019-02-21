@@ -6,6 +6,21 @@
   tags:
    - always
 
+- name: set contrail configuration param
+  set_fact:
+    global_configuration: {}
+  when: global_configuration is undefined
+  tags:
+   - always
+
+- name: set ENABLE_DESTROY flag if absent
+  set_fact:
+    global_configuration: "{{ global_configuration | combine({'ENABLE_DESTROY': false}) }}"
+  when:
+    - global_configuration.ENABLE_DESTROY is not defined
+  tags:
+    - always
+
 - name: set container tag contrail version if defined
   set_fact:
     contrail_version_tag: "{{ contrail_configuration.CONTRAIL_VERSION | default('latest') }}"
