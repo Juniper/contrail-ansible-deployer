@@ -20,11 +20,3 @@
 - name: Calculate deleted nodes Dict
   set_fact:
     deleted_nodes_dict: "{{ cluster_roles_dict['deleted_nodes_dict'] }}"
-
-- name: set openstack_controller as validated active Openstack Controller Node
-  set_fact:
-    openstack_controller: "{{ cluster_roles_dict['openstack_controller'] }}"
-
-- name: Check if it is a re-provision scenario
-  set_fact:
-    reprovision: "{{ cluster_roles_dict['reprovision'] | default('no') | bool }}"

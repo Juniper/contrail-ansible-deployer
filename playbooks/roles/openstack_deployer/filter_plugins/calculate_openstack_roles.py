@@ -17,7 +17,6 @@ class FilterModule(object):
 
     auth_token = None
     aaa_mode = None
-    controller_ip = None
     node_name_ip_map = {}
     node_ip_name_map = {}
 
@@ -201,12 +200,17 @@ class FilterModule(object):
             return instances_nodes_dict, deleted_nodes_dict
 
     def calculate_openstack_roles(self, existing_dict, hostvars):
+        # don't calculate anything if global_configuration.ENABLE_DESTROY is not set
+        gc = hostvars.get("global_configuration"):
+        if not gc or gc.get("ENABLE_DESTROY", 'false').lower() != 'true':
+            return str({"node_roles_dict": dict(),
+                        "deleted_nodes_dict": dict()})
+
         instances_nodes_dict = {}
         deleted_nodes_dict = {}
         valid_cluster_node_lists = "yes"
         invalid_role = None
         cluster_role_set = set()
-        reprovision = "yes"
 
         if hostvars.get("instances",None):
             instances_dict = hostvars.get("instances")
@@ -232,7 +236,6 @@ class FilterModule(object):
                 self.aaa_mode = contrail_config.get("AAA_MODE", None)
 
         if self.auth_token:
-            self.controller_ip = self.keystone_auth_host
             if self.aaa_mode != "no-auth":
                 self.keystone_auth_headers['X-Auth-Token'] = self.auth_token
             try:
@@ -272,15 +275,10 @@ class FilterModule(object):
                 set(instances_nodes_dict[server]['instance_roles'])
             ))
 
-            if len(instances_nodes_dict[server]['new_roles']) != 0 \
-                    or len(instances_nodes_dict[server]['deleted_roles']) != 0:
-                reprovision = "no"
             if len(instances_nodes_dict[server]['deleted_roles']) and\
                     (instances_nodes_dict[server]['deleted_roles'] ==
                          instances_nodes_dict[server]['existing_roles']):
                 deleted_nodes_dict[server] = self.node_name_ip_map[server]
 
         return str({"node_roles_dict": instances_nodes_dict,
-                    "deleted_nodes_dict": deleted_nodes_dict,
-                    "openstack_controller": self.controller_ip,
-                    "reprovision": reprovision})
+                    "deleted_nodes_dict": deleted_nodes_dict})

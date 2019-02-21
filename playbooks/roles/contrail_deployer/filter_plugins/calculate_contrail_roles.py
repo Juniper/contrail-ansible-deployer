@@ -234,6 +234,13 @@ class FilterModule(object):
 
     def calculate_contrail_roles(self, existing_dict, api_server_list,
                                  hostvars):
+        # don't calculate anything if global_configuration.ENABLE_DESTROY is not set
+        gc = hostvars.get("global_configuration")
+        if not gc or gc.get("ENABLE_DESTROY", 'false').lower() != 'true':
+            return str({"node_roles_dict": dict(),
+                        "deleted_nodes_dict": dict(),
+                        "api_server_ip": None})
+
         instances_nodes_dict = {}
         deleted_nodes_dict = {}
         invalid_role = None
