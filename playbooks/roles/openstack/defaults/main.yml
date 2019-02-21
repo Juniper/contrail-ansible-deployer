@@ -33,4 +33,4 @@ default_kolla_globals:
   neutron_plugin_agent: opencontrail
   config_api_ssl_enable: "{{ contrail_configuration.CONFIG_API_SSL_ENABLE | default(contrail_configuration.SSL_ENABLE | default('no')) | bool }}"
   contrail_ca_file: "{{ contrail_configuration.SERVER_CA_CERTFILE | default('/etc/contrail/ssl/certs/ca-cert.pem') }}"
-
+  neutron_fwaas_version: v2
