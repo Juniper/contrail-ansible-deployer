@@ -25,13 +25,16 @@
     contrail_configuration="{{ hostvars[inventory_hostname].contrail_configuration }}"
     ip_address="{{ hostvars['localhost'].deleted_nodes_dict[instance_name] }}"
   when:
+    - instance_name in node_roles_dict
     - node_roles_dict[instance_name].deleted_roles | length > 0
   delegate_to: "{{ api_server }}"
 
 - name: Run Delete Role Tasks
   include: delete.yml
     instance_name="{{ hostvars[inventory_hostname].instance_name }}"
-  when: node_roles_dict[instance_name].deleted_roles | length > 0
+  when:
+    - instance_name in node_roles_dict
+    - node_roles_dict[instance_name].deleted_roles | length > 0
 
 - name: create redis
   include_role:
