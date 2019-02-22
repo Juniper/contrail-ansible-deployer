@@ -8,6 +8,9 @@ ControllerIP = {{ contrail_configuration.CONFIG_NODES }}
 # Port of Contrail Controller API
 ControllerPort = 8082
 
+# Windows Server Version
+WSVersion = {{ windows_server_version }}
+
 [AUTH]
 # Auth method. Available values: (keystone|noauth). If keystone. [KEYSTONE] section must be filled.
 AuthMethod = {{ contrail_configuration.AUTH_MODE }}
@@ -16,7 +19,7 @@ AuthMethod = {{ contrail_configuration.AUTH_MODE }}
 # Log verbosity (possible values: Debug|Info|Warn|Error|Fatal|Panic)")
 LogLevel = Debug
 
-{% if contrail_configuration.AUTH_MODE == 'keystone'%}
+{% if contrail_configuration.AUTH_MODE == 'keystone' %}
 [KEYSTONE]
 # Keystone auth url. If empty, will read from environment variable.
 Os_auth_url = {{ contrail_configuration.KEYSTONE_AUTH_PROTO }}://{{ contrail_configuration.KEYSTONE_AUTH_HOST }}:{{ contrail_configuration.KEYSTONE_AUTH_PUBLIC_PORT }}{{ contrail_configuration.KEYSTONE_AUTH_URL_VERSION }}
