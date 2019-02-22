@@ -110,17 +110,18 @@
     - item.value.roles.analytics_snmp is defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
-- name: explicitly set OpenStack secrets for Contrail
+- name: explicitly set OpenStack variables for Contrail
   set_fact:
-    contrail_configuration: "{{ contrail_configuration | combine({item.name: kolla_config.kolla_passwords.get(item.os_key) }) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: item.dictionary.get(item.os_key) }) }}"
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
     - item.is_defined | bool
   tags:
    - always
   with_items:
-    - { name: 'KEYSTONE_AUTH_ADMIN_PASSWORD', os_key: 'keystone_admin_password', is_defined: "{{ kolla_config.kolla_passwords.keystone_admin_password is defined }}" }
-    - { name: 'METADATA_PROXY_SECRET', os_key: 'metadata_secret', is_defined: "{{ kolla_config.kolla_passwords.metadata_secret is defined }}" }
+    - { name: 'KEYSTONE_AUTH_ADMIN_PASSWORD', os_key: 'keystone_admin_password', is_defined: "{{ kolla_config.kolla_passwords.keystone_admin_password is defined }}", dictionary: "{{ kolla_config.kolla_passwords }}" }
+    - { name: 'METADATA_PROXY_SECRET', os_key: 'metadata_secret', is_defined: "{{ kolla_config.kolla_passwords.metadata_secret is defined }}", dictionary: "{{ kolla_config.kolla_passwords }}" }
+    - { name: 'FWAAS_ENABLE', os_key: 'enable_neutron_fwaas', is_defined: "{{ kolla_config.kolla_globals.enable_neutron_fwaas is defined }}", dictionary: "{{ kolla_config.kolla_globals }}" }
 
 - name: get the internal VIP from openstack node if haproxy is disabled
   set_fact:
