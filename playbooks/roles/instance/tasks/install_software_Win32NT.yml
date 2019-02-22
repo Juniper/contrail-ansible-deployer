@@ -1,4 +1,7 @@
 ---
+- name: set Windows Server version var
+  set_fact:
+    windows_server_version: "{{ ansible_distribution | regex_findall('Windows Server (\\d{4})') | first }}"
 
 - name: install feature Windows-Containers
   win_feature:
@@ -104,13 +107,16 @@
 # For environment cleanup in tests it is acceptable to just ignore this error
 # (-ErrorAction SilentlyContinue). However, this is not acceptable for
 # template creation (we don't want to have unreliable template).
-- name: remove container networks (first attempt)
+- name: remove container networks on Windows Server 2016
   win_shell: |
     Get-ContainerNetwork | Remove-ContainerNetwork -ErrorAction SilentlyContinue -Force
-
-- name: remove container networks (final attempt)
-  win_shell: |
     Get-ContainerNetwork | Remove-ContainerNetwork -Force
+  when: windows_server_version == '2016'
+
+- name: remove container networks on Windows Server 2019
+  win_shell: |
+    Get-HnsNetwork | Remove-HnsNetwork
+  when: windows_server_version == '2019'
 
 # Workaround (#1) for Docker/Windows behavior:
 # When WinNAT is enabled and NetNat object associated with default bridge
