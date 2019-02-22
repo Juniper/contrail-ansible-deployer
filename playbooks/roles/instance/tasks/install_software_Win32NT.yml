@@ -104,13 +104,15 @@
 # For environment cleanup in tests it is acceptable to just ignore this error
 # (-ErrorAction SilentlyContinue). However, this is not acceptable for
 # template creation (we don't want to have unreliable template).
-- name: remove container networks (first attempt)
+- name: remove container networks (first attempt) on Windows Server 2016
   win_shell: |
-    Get-ContainerNetwork | Remove-ContainerNetwork -ErrorAction SilentlyContinue -Force
+    Get-ContainerNetwork | Remove-ContainerNetwork -ErrorAction SilentlyContinue -Force; Get-ContainerNetwork | Remove-ContainerNetwork -Force
+  when: contrail_configuration.WINDOWS_SERVER_VERSION is undefined or contrail_configuration.WINDOWS_SERVER_VERSION == '2016'
 
-- name: remove container networks (final attempt)
+- name: remove container networks (final attempt) on Windows Server 2019
   win_shell: |
-    Get-ContainerNetwork | Remove-ContainerNetwork -Force
+    Get-HnsNetwork | Remove-HnsNetwork
+  when: contrail_configuration.WINDOWS_SERVER_VERSION is defined and contrail_configuration.WINDOWS_SERVER_VERSION == '2019'
 
 # Workaround (#1) for Docker/Windows behavior:
 # When WinNAT is enabled and NetNat object associated with default bridge
