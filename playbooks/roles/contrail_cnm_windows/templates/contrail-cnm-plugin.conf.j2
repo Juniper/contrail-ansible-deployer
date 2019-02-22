@@ -8,6 +8,16 @@ ControllerIP = {{ contrail_configuration.CONFIG_NODES }}
 # Port of Contrail Controller API
 ControllerPort = 8082
 
+{% if contrail_configuration.WINDOWS_VSWITCH_NAME is defined %}
+# Name of Transparent virtual switch.
+VSwitchName = {{ contrail_configuration.WINDOWS_VSWITCH_NAME }}
+{% endif %}
+
+{% if contrail_configuration.WINDOWS_VSWITCH_ADAPTER_NAME is defined %}
+# Name of virtual switch adapter
+VAdapterName = {{ contrail_configuration.WINDOWS_VSWITCH_ADAPTER_NAME }}
+{% endif %}
+
 [AUTH]
 # Auth method. Available values: (keystone|noauth). If keystone. [KEYSTONE] section must be filled.
 AuthMethod = {{ contrail_configuration.AUTH_MODE }}
