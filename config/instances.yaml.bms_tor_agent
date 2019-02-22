@@ -22,6 +22,7 @@ instances:
     contrail_configuration:
       TOR_TSN_IP: 192.16.2.3
       TOR_TSN_NAME: a1s16
+      TSN_AGENT_MODE: 'tsn'
     roles:
       openstack_compute:
       vrouter:
@@ -57,6 +58,7 @@ instances:
       TOR_TSN_IP: 192.16.2.4
       TOR_TSN_NAME: noden7
       TOR_OVS_PROTOCOL: pssl
+      TSN_AGENT_MODE: 'tsn'
     roles:
       vrouter:
         PHYSICAL_INTERFACE: enp2s0f1
@@ -93,6 +95,7 @@ contrail_configuration:
   TOR_VENDOR_NAME: Juniper
   TOR_PRODUCT_NAME: QFX5100
   TOR_AGENT_OVS_KA: 10000
+  TSN_SSL_ENABLE: True
 kolla_config:
   kolla_globals:
     kolla_internal_vip_address: 192.168.1.1

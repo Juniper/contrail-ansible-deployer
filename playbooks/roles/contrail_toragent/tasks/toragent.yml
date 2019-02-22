@@ -21,6 +21,13 @@
     path: "/etc/contrail/{{ toragent_name }}.env"
     state: touch
 
+- name: "create contrail_configuration.TORAGENT_SSL_ENABLE"
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration|default({})|combine({'TORAGENT_SSL_ENABLE': True}) }}"
+  with_dict: "{{ toragent_data }}"
+  when:
+    - item.get('TOR_OVS_PROTOCOL', '') == 'pssl'
+
 - name: "populate cluster wide {{ toragent_name }}.env"
   lineinfile: dest=/etc/contrail/{{ toragent_name }}.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ contrail_configuration }}"
