@@ -9,6 +9,15 @@
 - name: install software
   include: "install_software_{{ ansible_system }}.yml"
 
+- set_fact:
+    copy_ssl_certs: false
+- name: Enable ssl on tsn node
+  copy_ssl_certs: true
+  with_dict: "{{ roles[instance_name].toragent }}"
+  when:
+    - roles[instance_name].toragent is defined
+    - item.value.get('TOR_OVS_PROTOCOL', '') == 'pssl'
+
 - name: copy root ca
   include: copy_root_ca.yml
   when:
@@ -21,4 +30,5 @@
       (( contrail_configuration.INTROSPECT_SSL_ENABLE is defined ) and
       ( contrail_configuration.INTROSPECT_SSL_ENABLE|bool )) or
       (( contrail_configuration.SANDESH_SSL_ENABLE is defined ) and
-      ( contrail_configuration.SANDESH_SSL_ENABLE|bool ))
+      ( contrail_configuration.SANDESH_SSL_ENABLE|bool )) or
+      ( copy_ssl_certs|bool )
