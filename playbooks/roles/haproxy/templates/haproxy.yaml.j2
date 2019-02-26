@@ -15,12 +15,8 @@ services:
     network_mode: "host"
     privileged: true
     volumes:
-      - /dev:/dev
-      - /var/lib:/var/lib
-      - /var/run:/var/run
-      - /run:/run
-    volumes_from:
-      - node-init
+      - /etc/contrail/ssl:/etc/contrail/ssl
+      - /etc/hosts:/etc/hosts
     depends_on:
       - node-init
     restart: always
