@@ -68,6 +68,13 @@ def get_obj(content, vimtype, name):
             break
     return obj
 
+def get_clusters_from_datacenter(datacenter):
+    clusters = {}
+    for child in datacenter.hostFolder.childEntity:
+        if isinstance(child, vim.ClusterComputeResource):
+            clusters[child.name] = child
+    return clusters
+
 def CreateAgencyConfig(si, args, scope):
     content = si.RetrieveContent()
 
@@ -113,10 +120,15 @@ def CreateAgencyConfig(si, args, scope):
     agency_config.agentName = "ContrailVM"
 
     compute_scope = eam.Agency.ComputeResourceScope()
-    cluster_list = args.cluster_list.rstrip(',')
-    cluster_list = cluster_list.split(',')
-    for cluster in cluster_list:
-        compute = get_obj(content, [vim.ClusterComputeResource], cluster)
+    datacenter = get_obj(content, [vim.Datacenter], args.datacenter)
+    cluster_names = args.cluster_list.rstrip(',')
+    cluster_names = cluster_names.split(',')
+    clusters = get_clusters_from_datacenter(datacenter)
+    for cluster_name in cluster_names:
+        compute = clusters.get(cluster_name)
+        if compute is None:
+            print "Unable to find cluster %s in %s datacenter" % (cluster_name, args.datacenter)
+            continue
         if scope and scope.computeResource:
            compute_scope = scope
            if compute not in scope.computeResource:
