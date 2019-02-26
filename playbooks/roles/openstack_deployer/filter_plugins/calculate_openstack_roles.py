@@ -201,15 +201,16 @@ class FilterModule(object):
 
     def calculate_openstack_roles(self, existing_dict, hostvars):
         # don't calculate anything if global_configuration.ENABLE_DESTROY is not set
+        empty_result = {"node_roles_dict": dict(),
+                        "deleted_nodes_dict": dict()}
         gc = hostvars.get("global_configuration")
         if not gc:
-            return
+            return str(empty_result)
         enable_destroy = gc.get("ENABLE_DESTROY", False)
         if not isinstance(enable_destroy, bool):
             enable_destroy = str(enable_destroy).lower() == 'true'
         if not enable_destroy:
-            return str({"node_roles_dict": dict(),
-                        "deleted_nodes_dict": dict()})
+            return str(empty_result)
 
         instances_nodes_dict = {}
         deleted_nodes_dict = {}
