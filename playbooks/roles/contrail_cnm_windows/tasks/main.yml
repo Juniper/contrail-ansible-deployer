@@ -59,7 +59,10 @@
   win_shell: |
     $ErrorActionPreference = "Stop"
     $PhysicalAdapter = Get-NetAdapter -Name "{{ contrail_configuration.WINDOWS_PHYSICAL_INTERFACE }}"
-    $VHostAdapter = Get-NetAdapter -Name "{{ win_vhost_name }}"
+    $VHostAdapter = Get-NetAdapter | Where-Object {
+        ($_.Name -eq "vEthernet (HNSTransparent)") -or
+        ($_.Name -eq "vEthernet ({{ contrail_configuration.WINDOWS_PHYSICAL_INTERFACE }})")
+    }
     $VHostIP = $VHostAdapter | Get-NetIPAddress -AddressFamily IPv4
     $VHostGateway = ($VHostAdapter | Get-NetIPConfiguration).IPv4DefaultGateway
     @{
