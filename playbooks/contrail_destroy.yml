@@ -1,5 +1,5 @@
 ---
-- name: create container hostgroups for destroyer
+- name: create container host group for Contrail destroyer
   hosts: localhost
   connection: local
   gather_facts: no
@@ -16,19 +16,18 @@
       set_fact:
           remote_locations: "{{ remote_locations | default({}) }}"
       when: hostvars['localhost']['remote_locations'] is undefined
+    - name: Expose provider config
+      set_fact:
+          provider_config: "{{ provider_config | default({}) }}"
+      when: hostvars['localhost']['provider_config'] is undefined
   roles:
-    - name: Generate container_host group
-      role: create_container_host_group
-    - name: Generate openstack host groups
-      role: create_openstack_host_group
+    - contrail_deployer
   vars_files:
     - "{{ config_file }}"
 
-- name: Apply role destroy to contrail
+- name: Apply role destroy to Contrail
   hosts: container_hosts
   roles:
-    - set_global_variables
-    - build_node_lists
     - destroy
   vars:
     - instances: "{{ hostvars['localhost'].instances }}"
