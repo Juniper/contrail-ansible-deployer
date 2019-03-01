@@ -27,3 +27,6 @@
 - name: "start contrail compute-legacy"
   docker_service:
     project_src: /etc/contrail/compute-legacy
+  environment:
+    - COMPOSE_HTTP_TIMEOUT: 600
+    - DOCKER_CLIENT_TIMEOUT: 600

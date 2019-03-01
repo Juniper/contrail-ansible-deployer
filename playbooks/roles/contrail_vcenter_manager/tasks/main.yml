@@ -52,4 +52,7 @@
 - name: start contrail vcenter-manager
   docker_service:
     project_src: /etc/contrail/vcenter_manager
+  environment:
+    - COMPOSE_HTTP_TIMEOUT: 600
+    - DOCKER_CLIENT_TIMEOUT: 600
 

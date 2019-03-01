@@ -80,3 +80,6 @@
 - name: "start contrail control {{ location.key }}"
   docker_service:
     project_src: "/etc/contrail/control_only_{{ location.key }}"
+  environment:
+    - COMPOSE_HTTP_TIMEOUT: 600
+    - DOCKER_CLIENT_TIMEOUT: 600

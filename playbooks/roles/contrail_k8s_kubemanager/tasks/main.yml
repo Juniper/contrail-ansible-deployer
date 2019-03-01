@@ -54,3 +54,6 @@
 - name: start contrail kubemanager
   docker_service:
     project_src: /etc/contrail/kubemanager
+  environment:
+    - COMPOSE_HTTP_TIMEOUT: 600
+    - DOCKER_CLIENT_TIMEOUT: 600

@@ -92,3 +92,6 @@
 - name: start contrail vcenter-plugin
   docker_service:
     project_src: /etc/contrail/vcenter_plugin
+  environment:
+    - COMPOSE_HTTP_TIMEOUT: 600
+    - DOCKER_CLIENT_TIMEOUT: 600

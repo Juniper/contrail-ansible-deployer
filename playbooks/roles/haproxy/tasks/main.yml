@@ -42,3 +42,6 @@
 - name: "start tsn_haproxy container"
   docker_service:
     project_src: /etc/contrail/tsn_haproxy
+  environment:
+    - COMPOSE_HTTP_TIMEOUT: 600
+    - DOCKER_CLIENT_TIMEOUT: 600

@@ -119,6 +119,9 @@
   docker_service:
     project_src: /etc/contrail/vrouter
   when: roles[instance_name].vrouter.AGENT_MODE is undefined or roles[instance_name].vrouter.AGENT_MODE != 'dpdk'
+  environment:
+    - COMPOSE_HTTP_TIMEOUT: 600
+    - DOCKER_CLIENT_TIMEOUT: 600
 
 - name: update image for dpdk vrouter
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
@@ -148,6 +151,9 @@
 - name: "start contrail dpdk vrouter"
   docker_service:
     project_src: /etc/contrail/vrouter
+  environment:
+    - COMPOSE_HTTP_TIMEOUT: 600
+    - DOCKER_CLIENT_TIMEOUT: 600
   when: roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
 
 - name: "Restart nova-compute"
