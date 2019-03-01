@@ -54,3 +54,6 @@
 - name: start contrail mesosmanager
   docker_service:
     project_src: /etc/contrail/mesosmanager
+  environment:
+    - COMPOSE_HTTP_TIMEOUT: 600
+    - DOCKER_CLIENT_TIMEOUT: 600

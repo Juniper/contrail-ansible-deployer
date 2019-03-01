@@ -55,3 +55,6 @@
 - name: "start contrail {{ toragent_name }}"
   docker_service:
     project_src: /etc/contrail/{{ toragent_name }}
+  environment:
+    - COMPOSE_HTTP_TIMEOUT: 600
+    - DOCKER_CLIENT_TIMEOUT: 600

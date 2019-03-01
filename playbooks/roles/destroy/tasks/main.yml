@@ -16,5 +16,8 @@
     state: absent
     remove_images: all
     remove_volumes: yes
+  environment:
+    - COMPOSE_HTTP_TIMEOUT: 600
+    - DOCKER_CLIENT_TIMEOUT: 600
   with_items: "{{ rc.results }}"
   when: item.stat.exists == true
