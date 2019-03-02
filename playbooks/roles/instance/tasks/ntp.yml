@@ -1,11 +1,10 @@
 ---
 - name: install ntp packages
   package:
-    name: "{{ item }}"
+    name:
+      - ntpdate
+      - ntp
     state: latest
-  with_items:
-    - ntpdate
-    - ntp
   register: res
   retries: 5
   until: res | success
