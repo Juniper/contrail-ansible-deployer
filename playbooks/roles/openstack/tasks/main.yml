@@ -115,6 +115,8 @@
   lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}.*' line="{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}  {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data is defined
     - provider_data.domainsuffix is defined
     - provider_data.manage_etc_hosts | default("True") | bool
@@ -125,6 +127,8 @@
   lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}.*' line="{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}  {{ hostvars[item]['ansible_fqdn'] }} {{ hostvars[item]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data is defined
     - provider_data.domainsuffix is not defined
     - provider_data.manage_etc_hosts | default("True") | bool
@@ -136,6 +140,8 @@
   lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}.*' line="{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }} {{ hostvars[item]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data is defined
     - provider_data.domainsuffix is not defined
     - provider_data.manage_etc_hosts | default("True") | bool
