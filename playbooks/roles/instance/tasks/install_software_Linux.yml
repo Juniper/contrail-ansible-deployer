@@ -73,6 +73,8 @@
     - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - contrail_configuration.CONTROLLER_NODES is defined
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.analytics_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data.domainsuffix is defined
     - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item.1].ansible_all_ipv4_addresses is defined
@@ -85,6 +87,8 @@
     - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - contrail_configuration.CONFIGDB_NODES is defined
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.analytics_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data.domainsuffix is defined
     - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item.1].ansible_all_ipv4_addresses is defined
@@ -97,6 +101,8 @@
     - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - contrail_configuration.CONTROLLER_NODES is defined
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.analytics_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data.domainsuffix is undefined
     - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item.1]['ansible_fqdn'] is defined
@@ -110,6 +116,8 @@
     - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - contrail_configuration.CONFIGDB_NODES is defined
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.analytics_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data.domainsuffix is undefined
     - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item.1]['ansible_fqdn'] is defined
@@ -123,6 +131,8 @@
     - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - contrail_configuration.CONTROLLER_NODES is defined
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.analytics_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data.domainsuffix is undefined
     - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item.1]['ansible_fqdn'] is undefined
@@ -136,6 +146,8 @@
     - "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - contrail_configuration.CONFIGDB_NODES is defined
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.analytics_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data.domainsuffix is undefined
     - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item.1]['ansible_fqdn'] is undefined
@@ -146,6 +158,8 @@
   lineinfile: dest=/etc/hosts regexp='^{{ item }}.*' line="{{ item }} {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.analytics_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - instance_data.provider == 'bms'
     - provider_data.domainsuffix is defined
     - provider_data.manage_etc_hosts | default("True") | bool
@@ -155,6 +169,8 @@
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - instance_data.provider == 'bms'
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.analytics_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data.domainsuffix is undefined
     - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item]['ansible_fqdn'] is defined
@@ -164,6 +180,8 @@
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - instance_data.provider == 'bms'
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.analytics_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data.domainsuffix is undefined
     - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item]['ansible_fqdn'] is undefined
@@ -173,6 +191,8 @@
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - instance_data.provider == 'kvm'
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.analytics_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data.domainsuffix is defined
     - provider_data.manage_etc_hosts | default("True") | bool
 
@@ -181,6 +201,8 @@
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - instance_data.provider == 'kvm'
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.analytics_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data.domainsuffix is undefined
     - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item]['ansible_fqdn'] is defined
@@ -190,6 +212,8 @@
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - instance_data.provider == 'kvm'
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.analytics_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data.domainsuffix is undefined
     - provider_data.manage_etc_hosts | default("True") | bool
     - hostvars[item]['ansible_fqdn'] is undefined
@@ -199,6 +223,8 @@
   with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
   when:
     - instance_data.provider == 'aws'
+    - instance_data.roles is defined
+    - instance_data.roles.config_database is defined or instance_data.roles.analytics_database is defined or instance_data.roles.openstack_controller is defined or instance_data.roles.openstack is defined
     - provider_data.manage_etc_hosts | default("True") | bool
 
 - name: create log file directory
