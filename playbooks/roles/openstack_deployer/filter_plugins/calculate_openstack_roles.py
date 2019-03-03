@@ -199,14 +199,12 @@ class FilterModule(object):
                                 endpoint_ip
             return instances_nodes_dict, deleted_nodes_dict
 
-    def calculate_openstack_roles(self, existing_dict, hostvars):
+    def calculate_openstack_roles(self, existing_dict,
+            instances_dict, global_configuration, contrail_configuration):
         # don't calculate anything if global_configuration.ENABLE_DESTROY is not set
         empty_result = {"node_roles_dict": dict(),
                         "deleted_nodes_dict": dict()}
-        gc = hostvars.get("global_configuration")
-        if not gc:
-            return str(empty_result)
-        enable_destroy = gc.get("ENABLE_DESTROY", False)
+        enable_destroy = global_configuration.get("ENABLE_DESTROY", False)
         if not isinstance(enable_destroy, bool):
             enable_destroy = str(enable_destroy).lower() == 'true'
         if not enable_destroy:
@@ -218,28 +216,23 @@ class FilterModule(object):
         invalid_role = None
         cluster_role_set = set()
 
-        if hostvars.get("instances",None):
-            instances_dict = hostvars.get("instances")
-            for instance_name, instance_config in \
-                    instances_dict.iteritems():
-                instances_nodes_dict[instance_name] = {}
-                self.node_name_ip_map[instance_name] = instance_config["ip"]
-                self.node_ip_name_map[instance_config["ip"]] = instance_name
-                if "roles" in instance_config \
-                        and isinstance(instance_config["roles"], dict):
-                    instances_nodes_dict[instance_name]['instance_roles'] = \
-                        list(
-                            set(
-                                instance_config["roles"].keys()
-                            ).intersection(set(self.valid_roles))
-                        )
-                    cluster_role_set.update(instance_config["roles"].keys())
+        for instance_name, instance_config in instances_dict.iteritems():
+            instances_nodes_dict[instance_name] = {}
+            self.node_name_ip_map[instance_name] = instance_config["ip"]
+            self.node_ip_name_map[instance_config["ip"]] = instance_name
+            if "roles" in instance_config \
+                    and isinstance(instance_config["roles"], dict):
+                instances_nodes_dict[instance_name]['instance_roles'] = \
+                    list(
+                        set(
+                            instance_config["roles"].keys()
+                        ).intersection(set(self.valid_roles))
+                    )
+                cluster_role_set.update(instance_config["roles"].keys())
 
-        if hostvars.get("contrail_configuration", None):
-            contrail_config = hostvars.get("contrail_configuration")
-            if contrail_config.get("CLOUD_ORCHESTRATOR",None) == "openstack":
-                self.auth_token = self.get_ks_auth_token(contrail_config)
-                self.aaa_mode = contrail_config.get("AAA_MODE", None)
+        if contrail_configuration.get("CLOUD_ORCHESTRATOR") == "openstack":
+            self.auth_token = self.get_ks_auth_token(contrail_configuration)
+            self.aaa_mode = contrail_configuration.get("AAA_MODE", None)
 
         if self.auth_token:
             if self.aaa_mode != "no-auth":
