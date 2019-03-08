@@ -83,3 +83,9 @@
 - name: set node list
   set_fact:
     node_list: "{{ nodes_list_output.stdout }}"
+
+#Need to upgrade CoreDNS to 1.2.6 for fix of Loop crash issue
+#Remove once k8s_version version bumped up to 1.13.1 or higher
+- name: upgrade CoreDNS to 1.2.6
+  shell: "kubectl patch deployment -n=kube-system coredns -p \'{\"spec\": {\"template\": {\"spec\":{\"containers\":[{\"image\":\"k8s.gcr.io/coredns:1.2.6\", \"name\":\"coredns\",\"resources\":{\"limits\":{\"memory\":\"1Gi\"},\"requests\":{\"cpu\":\"100m\",\"memory\":\"70Mi\"}}}]}}}}\'"
+  when: k8s_version == "1.12.3"
