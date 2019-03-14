@@ -52,4 +52,5 @@
     - pycrypto
     - oslo.config
     - oslo.utils
+    - pyyaml==3.13
   become: yes
