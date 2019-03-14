@@ -1,0 +1,79 @@
+---
+- name: Make sure config_api container exists on this node
+  command: docker ps --filter name=config_api --format {%raw%}"{{.Names}}"{%endraw%}
+  register: config_api_name
+  run_once: yes
+
+# Config API container already has all necessary Keystone auth params to run this script
+
+- name : set params
+  set_fact:
+     tor_name: "{{ toragent.value.tor_name }}"
+     pr_vendor: "{{ toragent.value.pr_vendor }}"
+     tor_agent_name: "{{ instance_name + '-' + (toragent.key.split('_'))[1]  }}"
+  when:
+     - toragent_config is defined
+     - toragent.key is defined
+  with_dict: "{{ toragent_config |  default({}) }}"
+  loop_control:
+    loop_var: toragent
+
+- name: De-register physical router for toragent from Contrail API
+  command: >
+    docker exec config_api_1
+    python /opt/contrail/utils/provision_physical_device.py
+    --device_name {{ tor_name }}
+    --vendor_name {{ pr_vendor }}
+    --api_server_ip {{ api_server }}
+    --oper del
+  when:
+    - config_api_name.stdout
+    - contrail_configuration.AAA_MODE is not defined or contrail_configuration.AAA_MODE == 'no-auth'
+  run_once: yes
+
+- name: De-register physical router for toragent from Contrail API in Auth mode
+  command: >
+    docker exec config_api_1
+    python /opt/contrail/utils/provision_physical_device.py
+    --device_name {{ tor_name }}
+    --vendor_name {{ pr_vendor }}
+    --api_server_ip {{ api_server }}
+    --oper del
+    --admin_user {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_USER }}
+    --admin_tenant_name {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_TENANT }}
+    --admin_password {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_PASSWORD }}
+  when:
+    - config_api_name.stdout
+    - contrail_configuration.AAA_MODE is defined
+    - (contrail_configuration.AAA_MODE == 'rbac') or (contrail_configuration.AAA_MODE == 'cloud-admin')
+  run_once: yes
+
+- name: De-register toragent from Contrail API
+  command: >
+    docker exec config_api_1
+    python /opt/contrail/utils/provision_vrouter.py
+    --host_name {{ tor_agent_name }}
+    --host_ip {{ ip_address }}
+    --api_server_ip {{ api_server }}
+    --oper del
+  when:
+    - config_api_name.stdout
+    - contrail_configuration.AAA_MODE is not defined or contrail_configuration.AAA_MODE == 'no-auth'
+  run_once: yes
+
+- name: De-register toragent from Contrail API
+  command: >
+    docker exec config_api_1
+    python /opt/contrail/utils/provision_vrouter.py
+    --host_name {{ tor_agent_name }}
+    --host_ip {{ ip_address }}
+    --api_server_ip {{ api_server }}
+    --oper del
+    --admin_user {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_USER }}
+    --admin_tenant_name {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_TENANT }}
+    --admin_password {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_PASSWORD }}
+  when:
+    - config_api_name.stdout
+    - contrail_configuration.AAA_MODE is defined
+    - (contrail_configuration.AAA_MODE == 'rbac') or (contrail_configuration.AAA_MODE == 'cloud-admin')
+  run_once: yes
