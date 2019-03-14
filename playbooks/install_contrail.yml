@@ -47,9 +47,6 @@
       - api_server: "{{ hostvars['localhost'].api_server }}"
     with_dict: "{{ hostvars['localhost'].deleted_nodes_dict }}"
     when:
-      - global_configuration is defined
-      - global_configuration.ENABLE_DESTROY is defined
-      - global_configuration.ENABLE_DESTROY | bool
       - hostvars['localhost'].api_server is defined
       - inventory_hostname == hostvars['localhost'].api_server
   environment:
@@ -68,9 +65,6 @@
       - ip_address: "{{ inventory_hostname }}"
       - api_server: "{{ hostvars['localhost'].api_server }}"
     when:
-      - global_configuration is defined
-      - global_configuration.ENABLE_DESTROY is defined
-      - global_configuration.ENABLE_DESTROY | bool
       - hostvars['localhost'].deleted_nodes_dict.keys() | length > 0
       - inventory_hostname in hostvars['localhost'].deleted_nodes_dict.values()
   - name: Cleanup Node
@@ -82,9 +76,6 @@
       - instance_name: "{{ ansible_hostname }}"
       - ip_address: "{{ inventory_hostname }}"
     when:
-      - global_configuration is defined
-      - global_configuration.ENABLE_DESTROY is defined
-      - global_configuration.ENABLE_DESTROY | bool
       - hostvars['localhost'].deleted_nodes_dict.keys() | length > 0
       - inventory_hostname in hostvars['localhost'].deleted_nodes_dict.values()
   environment:
@@ -115,6 +106,7 @@
     - roles: "{{ hostvars['localhost'].roles }}"
     - node_roles_dict: "{{ hostvars['localhost'].node_roles_dict }}"
     - api_server: "{{ hostvars['localhost'].api_server }}"
+    - reprovision: "{{ hostvars['localhost'].reprovision }}"
   environment:
     - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
     - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
