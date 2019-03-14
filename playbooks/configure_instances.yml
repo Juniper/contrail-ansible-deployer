@@ -17,6 +17,16 @@
     - { role: kolla_deployer, when: contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' }
   vars_files:
     - "{{ config_file }}"
+  post_tasks:
+    # FIXME:
+    # PyYAML 5.1 gets installed as a dependency to ansible or the oslo.config
+    # package, but this version has a bug that prevents proper rendering of
+    # lists when generating docker-compose files.
+    # Till it gets fixed, install specific version of PyYAML required for the
+    # install_contrail.yml playbook. Can be removed after its fixed upstream
+    - name: Install required PyYAML version
+      pip:
+        name: pyyaml==3.13
 
 - name: Configure instance(s)
   hosts: container_hosts
