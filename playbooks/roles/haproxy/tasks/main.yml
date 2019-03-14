@@ -1,4 +1,80 @@
 ---
+- set_fact:
+    toragent_list: []
+    temp_map: {}
+    temp_list: []
+- name: Build tor-agents list with all data needed to infer redundant pairs
+  set_fact:
+    toragent_list: |
+      {%- for key in hostvars['localhost']['instances'].keys() -%}
+        {%- set bmsvalue = hostvars['localhost']['instances'][key] -%}
+        {%- if bmsvalue.roles is defined -%}
+          {%- for rolename in bmsvalue.roles.keys() -%}
+            {%- if 'toragent' in rolename -%}
+              {%- set rolevalue = bmsvalue.roles[rolename] -%}
+              {%- set temp_map = {} -%}
+
+              {%- if rolevalue.TOR_AGENT_ID is defined -%}
+                {{ temp_map.update({'TOR_AGENT_ID': rolevalue.TOR_AGENT_ID}) }}
+              {%- elif bmsvalue.contrail_configuration is defined and bmsvalue.contrail_configuration.TOR_AGENT_ID is defined -%}
+                {{ temp_map.update({'TOR_AGENT_ID': bmsvalue.contrail_configuration.TOR_AGENT_ID}) }}
+              {%- else -%}
+                {{ temp_map.update({'TOR_AGENT_ID': hostvars['localhost']['contrail_configuration'].TOR_AGENT_ID}) }}
+              {%- endif -%}
+
+              {%- if rolevalue.TOR_NAME is defined -%}
+                {{ temp_map.update({'TOR_NAME': rolevalue.TOR_NAME}) }}
+              {%- elif bmsvalue.contrail_configuration is defined and bmsvalue.contrail_configuration.TOR_NAME is defined -%}
+                {{ temp_map.update({'TOR_NAME': bmsvalue.contrail_configuration.TOR_NAME}) }}
+              {%- else -%}
+                {{ temp_map.update({'TOR_NAME': hostvars['localhost']['contrail_configuration'].TOR_NAME}) }}
+              {%- endif -%}
+
+              {%- if rolevalue.TOR_OVS_PORT is defined -%}
+                {{ temp_map.update({'TOR_OVS_PORT': rolevalue.TOR_OVS_PORT}) }}
+              {%- elif bmsvalue.contrail_configuration is defined and bmsvalue.contrail_configuration.TOR_OVS_PORT is defined -%}
+                {{ temp_map.update({'TOR_OVS_PORT': bmsvalue.contrail_configuration.TOR_OVS_PORT}) }}
+              {%- else -%}
+                {{ temp_map.update({'TOR_OVS_PORT': hostvars['localhost']['contrail_configuration'].TOR_OVS_PORT}) }}
+              {%- endif -%}
+
+              {%- if rolevalue.TOR_TSN_IP is defined -%}
+                {{ temp_map.update({'TOR_TSN_IP': rolevalue.TOR_TSN_IP}) }}
+              {%- elif bmsvalue.contrail_configuration is defined and bmsvalue.contrail_configuration.TOR_TSN_IP is defined -%}
+                {{ temp_map.update({'TOR_TSN_IP': bmsvalue.contrail_configuration.TOR_TSN_IP}) }}
+              {%- else -%}
+                {{ temp_map.update({'TOR_TSN_IP': hostvars['localhost']['contrail_configuration'].TOR_TSN_IP}) }}
+              {%- endif -%}
+
+              {%- if bmsvalue.ip is defined -%}
+                {{ temp_map.update({'HOST_IP': bmsvalue.ip}) }}
+              {%- endif -%}
+
+              {{ temp_map.update({'HOST_NAME': key}) }}
+
+              {%- if temp_map != {} -%}
+                {{ temp_list.extend( [temp_map] ) }}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {{ temp_list }}
+
+- set_fact:
+    toragent_pairs: []
+- name: Get all redundant TOR agent pairs
+  set_fact:
+      toragent_pairs: "{{ toragent_pairs + [ {'tsn1': item.0.TOR_TSN_IP, 'tsn2': item.1.TOR_TSN_IP, 'port' : item.0.TOR_OVS_PORT} ] }}"
+  when:
+    - item.0.HOST_NAME != item.1.HOST_NAME
+    - item.0.HOST_NAME < item.1.HOST_NAME
+    - item.0.TOR_NAME == item.1.TOR_NAME
+    - item.0.TOR_OVS_PORT == item.1.TOR_OVS_PORT
+  with_nested:
+    - "{{ toragent_list }}"
+    - "{{ toragent_list }}"
+
 - name: "create /etc/contrail/tsn_haproxy"
   file:
     path: /etc/contrail/tsn_haproxy
@@ -21,10 +97,26 @@
     path: "/etc/contrail/tsn_haproxy.env"
     state: touch
 
-- name: "populate tsn_haproxy.env"
-  lineinfile: dest=/etc/contrail/tsn_haproxy.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value | string }}" state=present
-  with_dict:
-    "{{ roles[instance_name].tsn_haproxy }}"
+- set_fact:
+    iplist: 'IP_LIST='
+    portlist: 'PORT_LIST='
+- name: populate ip and ports list in tsn_haproxy.env
+  set_fact:
+    iplist: "{{ iplist + item['tsn1'] + ',' + item['tsn2'] + ',' }}"
+    portlist: "{{ portlist ~ item['port'] + ',' }}"
+  with_items: "{{ toragent_pairs }}"
+
+- name: printlists
+  debug:
+    msg: "iplist = {{ iplist }} portlist = {{ portlist }}"
+
+- lineinfile:
+    path: /etc/contrail/tsn_haproxy.env
+    line: "{{ iplist.strip(',') }}"
+
+- lineinfile:
+    path: /etc/contrail/tsn_haproxy.env
+    line: "{{ portlist.strip(',') }}"
 
 - name: "update image"
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
