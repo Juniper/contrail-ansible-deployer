@@ -1,4 +1,120 @@
 ---
+- set_fact:
+    toragent_to_tsnip_map: {}
+    temp_map: {}
+- name: Build tor-agent id to TSN IP map
+  set_fact:
+    toragent_to_tsnip_map: |
+      {% for bmsvalue in hostvars['localhost']['instances'].values() -%}
+        {% if bmsvalue.roles is defined %}
+          {%- for rolevalue in bmsvalue.roles.values() -%}
+            {%- if rolevalue.TOR_AGENT_ID is defined -%}
+              {%- if rolevalue.TOR_TSN_IP is defined -%}
+                {{ temp_map.update({rolevalue.TOR_AGENT_ID: rolevalue.TOR_TSN_IP}) }}
+              {%- elif bmsvalue.contrail_configuration is defined and bmsvalue.contrail_configuration.TOR_TSN_IP is defined -%}
+                {{ temp_map.update({rolevalue.TOR_AGENT_ID: bmsvalue.contrail_configuration.TOR_TSN_IP}) }}
+              {%- else %}
+                {{ temp_map.update({rolevalue.TOR_AGENT_ID: hostvars['localhost']['contrail_configuration'].TOR_TSN_IP}) }}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {{ temp_map }}
+
+- set_fact:
+    toragent_to_torname_map: {}
+    temp_map: {}
+- name: build tor agent id to torname map
+  set_fact:
+    toragent_to_torname_map: |
+      {% for bmsvalue in hostvars['localhost']['instances'].values() -%}
+        {% if bmsvalue.roles is defined %}
+          {%- for rolevalue in bmsvalue.roles.values() -%}
+            {%- if rolevalue.TOR_AGENT_ID is defined -%}
+              {%- if rolevalue.TOR_NAME is defined -%}
+                {{ temp_map.update({rolevalue.TOR_AGENT_ID: rolevalue.TOR_NAME}) }}
+              {%- elif bmsvalue.contrail_configuration is defined and bmsvalue.contrail_configuration.TOR_NAME is defined -%}
+                {{ temp_map.update({rolevalue.TOR_AGENT_ID: bmsvalue.contrail_configuration.TOR_NAME}) }}
+              {%- else -%}
+                {{ temp_map.update({rolevalue.TOR_AGENT_ID: hostvars['localhost']['contrail_configuration'].TOR_NAME}) }}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {{ temp_map }}
+
+- set_fact:
+    toragent_to_torport_map: {}
+    temp_map: {}
+- name: build tor agent id to ovsport map
+  set_fact:
+    toragent_to_torport_map: |
+      {% for bmsvalue in hostvars['localhost']['instances'].values() -%}
+        {% if bmsvalue.roles is defined %}
+          {%- for rolevalue in bmsvalue.roles.values() -%}
+            {%- if rolevalue.TOR_AGENT_ID is defined -%}
+              {%- if rolevalue.TOR_OVS_PORT is defined -%}
+                {{ temp_map.update({rolevalue.TOR_AGENT_ID: rolevalue.TOR_OVS_PORT}) }}
+              {%- elif bmsvalue.contrail_configuration is defined and bmsvalue.contrail_configuration.TOR_OVS_PORT is defined -%}
+                {{ temp_map.update({rolevalue.TOR_AGENT_ID: bmsvalue.contrail_configuration.TOR_OVS_PORT}) }}
+              {%- else -%}
+                {{ temp_map.update({rolevalue.TOR_AGENT_ID: hostvars['localhost']['contrail_configuration'].TOR_OVS_PORT}) }}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {{ temp_map }}
+
+- set_fact:
+    roles_list: []
+- name: Build a list of all roles
+  set_fact:
+    roles_list: "{{ roles_list + [ item.value.roles ] }}"
+  when:
+    - item.value.roles is defined
+  with_dict:
+     "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
+    rolevalue_list: []
+- name: Build a list of all role values
+  set_fact:
+    rolevalue_list: "{{ rolevalue_list + [ item.values() ] }}"
+  when:
+  with_items: "{{ roles_list }}"
+
+- set_fact:
+    toragent_list: []
+- name: Build a list of all TOR agents
+  set_fact:
+    toragent_list: "{{ toragent_list + [ item ] }}"
+  when:
+    - item.TOR_AGENT_ID is defined
+  with_items: "{{ rolevalue_list }}"
+
+- set_fact:
+    toragent_pairs: []
+- name: Get all redundant TOR agent pairs
+  set_fact:
+      toragent_pairs: "{{ toragent_pairs + [ {'tsn1': toragent_to_tsnip_map[item.0.TOR_AGENT_ID], 'tsn2': toragent_to_tsnip_map[item.1.TOR_AGENT_ID], 'port' : toragent_to_torport_map[item.0.TOR_AGENT_ID]}] }}"
+  when:
+    - item.0.TOR_AGENT_ID != item.1.TOR_AGENT_ID
+    - toragent_to_torname_map[item.0.TOR_AGENT_ID] == toragent_to_torname_map[item.1.TOR_AGENT_ID]
+    - toragent_to_torport_map[item.0.TOR_AGENT_ID] == toragent_to_torport_map[item.1.TOR_AGENT_ID]
+    - item.0.TOR_AGENT_ID < item.1.TOR_AGENT_ID
+  with_nested:
+    - "{{ toragent_list }}"
+    - "{{ toragent_list }}"
+
+- set_fact:
+- name: printtagentpairs
+  debug:
+    msg: "entry = {{ item }}"
+  with_items: "{{ toragent_pairs }}"
+
 - name: "create /etc/contrail/tsn_haproxy"
   file:
     path: /etc/contrail/tsn_haproxy
@@ -21,10 +137,26 @@
     path: "/etc/contrail/tsn_haproxy.env"
     state: touch
 
-- name: "populate tsn_haproxy.env"
-  lineinfile: dest=/etc/contrail/tsn_haproxy.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value | string }}" state=present
-  with_dict:
-    "{{ roles[instance_name].tsn_haproxy }}"
+- set_fact:
+    iplist: 'IP_LIST: '
+    portlist: 'PORT_LIST: '
+- name: populate ip and ports list in tsn_haproxy.env
+  set_fact:
+    iplist: "{{ iplist + item['tsn1'] + ',' + item['tsn2'] + ',' }}"
+    portlist: "{{ portlist ~ item['port'] + ',' }}"
+  with_items: "{{ toragent_pairs }}"
+
+- name: printlists
+  debug:
+    msg: "iplist = {{ iplist }} portlist = {{ portlist }}"
+
+- lineinfile:
+    path: /etc/contrail/tsn_haproxy.env
+    line: "{{ iplist.strip(',') }}"
+
+- lineinfile:
+    path: /etc/contrail/tsn_haproxy.env
+    line: "{{ portlist.strip(',') }}"
 
 - name: "update image"
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
