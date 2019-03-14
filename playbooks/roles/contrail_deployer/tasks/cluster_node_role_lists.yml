@@ -6,6 +6,14 @@
   set_fact:
     cluster_roles_dict: "{{ cluster_roles_dict | calculate_contrail_roles(config_nodes_list, instances, global_configuration, contrail_configuration) }}"
 
+- name: build deleted toragent roles
+  set_fact:
+      cluster_roles_dict: "{{ cluster_roles_dict | calculate_deleted_toragent_roles(item) }}"
+  with_dict: "{{ instances }}"
+  when:
+    - global_configuration.ENABLE_DESTROY is defined
+    - global_configuration.ENABLE_DESTROY | bool
+
 - name: Fail if there was an Exception in getting data
   fail:
     msg:

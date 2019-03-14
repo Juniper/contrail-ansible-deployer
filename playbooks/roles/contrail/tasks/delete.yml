@@ -1,4 +1,18 @@
 ---
+- name: delete contrail toragent
+  include_role:
+    name: contrail_toragent
+    tasks_from: delete
+  vars:
+    - toragent_config: "{{ toragent_dict }}"
+  with_items: "{{ node_roles_dict[instance_name].deleted_roles }}"
+  loop_control:
+    loop_var: toragent_dict
+  when:
+    - instance_name in node_roles_dict
+    - (toragent_dict != 'vrouter' )
+    - ansible_system == 'Linux'
+
 - name: delete contrail vrouter
   include_role:
     name: contrail_vrouter
