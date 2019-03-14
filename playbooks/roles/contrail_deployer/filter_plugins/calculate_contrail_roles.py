@@ -23,6 +23,7 @@ class FilterModule(object):
     aaa_mode = ""
     node_name_ip_map = {}
     node_ip_name_map = {}
+    existing_tor_agents = {}
 
     valid_roles = ["config", "control", "analytics_database",
                    "analytics", "analytics_alarm", "analytics_snmp", "vrouter"]
@@ -101,6 +102,7 @@ class FilterModule(object):
         return {
             'calculate_contrail_roles': self.calculate_contrail_roles,
             'extract_roles': self.extract_roles,
+            'calculate_deleted_toragent_roles': self.calculate_deleted_toragent_roles
         }
 
     def get_ks_auth_token(self, contrail_config):
@@ -195,7 +197,34 @@ class FilterModule(object):
                                                   request_type="get")
             object_dict = response.json()
             object_list = object_dict[contrail_object]
-
+            vr_obj_list = []
+            if contrail_role == 'vrouter':
+                for vr_obj in object_list:
+                     vr_href= vr_obj.get('href')
+                     response = self.get_rest_api_response(vr_href,
+                                                  self.contrail_auth_headers,
+                                                  request_type="get")
+                     vr_object_dict = response.json()
+                     vr_dict = vr_object_dict.get('virtual-router')
+                     vr_type = vr_dict.get('virtual_router_type')
+                     if  vr_type == 'tor-agent':
+                        tor_config = {}
+                        toragent_fq_name = vr_dict.get('fq_name')[-1]
+                        toragent_ip = vr_dict.get('virtual_router_ip_address')
+                        pr_href = vr_dict['physical_router_back_refs'][0].get('href')
+                        response = self.get_rest_api_response(pr_href,
+                                                  self.contrail_auth_headers,
+                                                  request_type="get")
+                        pr_object_dict = response.json()
+                        pr_name = pr_object_dict['physical-router']['name']
+                        pr_vendor = pr_object_dict['physical-router']['physical_router_vendor_name']
+                        tor_config['tor_name'] = pr_name
+                        tor_config['pr_vendor'] = pr_vendor
+                        tor_config['toragent_ip'] = toragent_ip
+                        self.existing_tor_agents[toragent_fq_name] = tor_config
+                     else:
+                        vr_obj_list.append(vr_obj)
+                object_list = vr_obj_list
             for object_to_process in object_list:
                 if len(object_to_process.get("fq_name", [])) < 2:
                     continue
@@ -310,20 +339,47 @@ class FilterModule(object):
                 set(instances_nodes_dict[server]['instance_roles'])
             ))
 
+        if self.existing_tor_agents:
+            for toragent in self.existing_tor_agents.keys():
+                server = toragent.split('-')[0]
+                tor_agent_id = toragent.split('-')[-1]
+                toragent_roles = {}
+                toragent_roles[('toragent_' + str(tor_agent_id))] = self.existing_tor_agents[toragent]
+                if server in instances_nodes_dict.keys():
+                    instances_nodes_dict[server]['existing_roles'].append(toragent_roles)
+
         return str({"node_roles_dict": instances_nodes_dict,
                     "deleted_nodes_dict": deleted_nodes_dict,
                     "api_server_ip": self.api_server_ip})
 
     def extract_roles(self, existing_roles, instance_data):
         existing_roles[instance_data["key"]] = dict()
-        for role, data in instance_data["value"]["roles"].iteritems():
-            ix_name = next((s for s in self.indexed_roles if s in role), None)
-            if not ix_name:
-                existing_roles[instance_data["key"]][role] = data
-            else:
-                # indexed role name must be equal to pattern ROLENAME_INDEX
-                index = role[len(ix_name) + 1:]
-                if index:
-                    existing_roles[instance_data["key"]].setdefault(ix_name, dict())[index] = data
+        if instance_data["value"]["roles"]:
+            for role, data in instance_data["value"]["roles"].iteritems():
+                ix_name = next((s for s in self.indexed_roles if s in role), None)
+                if not ix_name:
+                    existing_roles[instance_data["key"]][role] = data
+                else:
+                    # indexed role name must be equal to pattern ROLENAME_INDEX
+                    index = role[len(ix_name) + 1:]
+                    if index:
+                        existing_roles[instance_data["key"]].setdefault(ix_name, dict())[index] = data
 
         return existing_roles
+
+    def calculate_deleted_toragent_roles(self, cluster_roles_dict, instance_data):
+        node_roles_dict = cluster_roles_dict['node_roles_dict']
+        deleted_nodes_dict = cluster_roles_dict['deleted_nodes_dict']
+        instance_roles = []
+        if instance_data["value"]["roles"]:
+           instance_roles = instance_data["value"]["roles"].keys()
+        for role in node_roles_dict[instance_data['key']]['existing_roles']:
+            if isinstance(role,dict):
+                for key, value in role.items():
+                    if key not in instance_roles:
+                        node_roles_dict[instance_data['key']]['deleted_roles'].append(role)
+                        if instance_data['key'] not in deleted_nodes_dict:
+                            deleted_nodes_dict[instance_data['key']] = instance_data["value"]["ip"]
+        return str({"node_roles_dict": node_roles_dict,
+                    "deleted_nodes_dict": deleted_nodes_dict,
+                    "api_server_ip": cluster_roles_dict["api_server_ip"]})
