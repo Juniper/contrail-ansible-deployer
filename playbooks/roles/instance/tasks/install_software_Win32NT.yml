@@ -43,6 +43,25 @@
 - name: wait for reconnection
   wait_for_connection:
 
+# Chocolatey 0.10.13 released on March 15, 2019 has changed meaning of
+# exit codes and is incompatible with win_chocolatey module (it's a new
+# feature called "enhanced exit codes").
+# Normally chocolatey is installed with first invocation of win_chocolatey
+# module. To overcome the problem, we install chocolatey separately (step
+# "install chocolatey" below) and disable the new feature (step "disable
+# enhanced exit codes in chocolatey" below) before actually installing anything
+# with chocolatey.
+#
+# TODO: Those two steps should be eventually removed once win_chocolatey
+# module handles enhanced exit codes properly.
+- name: install chocolatey
+  win_shell: |
+    Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+- name: disable enhanced exit codes in chocolatey
+  win_shell: |
+    choco feature disable --name="useEnhancedExitCodes"
+
 - name: install python 2.7.13
   win_chocolatey:
     name: python2
