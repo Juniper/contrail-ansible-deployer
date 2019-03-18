@@ -1,0 +1,43 @@
+---
+
+- name : set params
+  set_fact:
+     toragent_name: "{{ toragent.key }}"
+  with_dict: "{{ toragent_config |  default({}) }}"
+  loop_control:
+    loop_var: toragent
+  when:
+     - toragent_config is defined
+     - toragent.key is defined
+
+- name: Get name of the toragent container
+  command: docker ps --filter name=^/{{toragent_name}} --format {%raw%}"{{.Names}}"{%endraw%}
+  register: result_name
+  tags:
+    - cleanup
+
+- name: Send QUIT signal to toragent
+  command:
+    docker kill -s QUIT "{{ result_name.stdout }}"
+  when:
+    - result_name.stdout
+  tags:
+    - cleanup
+
+- name: Stop and remove toragent Container and volumes
+  docker_service:
+    project_src: /etc/contrail/{{ toragent_name }}
+    state: absent
+    remove_images: all
+    remove_volumes: yes
+  when:
+    - result_name.stdout
+
+- name: Delete all files and folders used by toragent
+  file:
+    path: /etc/contrail/{{ toragent_name }}.env
+    state: absent
+
+- file:
+    path: /etc/contrail/{{ toragent_name }}/
+    state: absent
