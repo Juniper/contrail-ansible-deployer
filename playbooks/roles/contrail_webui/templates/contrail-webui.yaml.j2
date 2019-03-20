@@ -8,7 +8,8 @@ services:
     privileged: true
     pid: host
     network_mode: "host"
-    volumes: {{ common_volumes | to_yaml }}
+    volumes:
+      {{ common_volumes | to_yaml | indent(width=6) }}
   web:
     image: "{{ container_registry }}/contrail-controller-webui-web:{{ contrail_version_tag }}"
     network_mode: "host"

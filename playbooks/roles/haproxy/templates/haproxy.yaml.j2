@@ -8,7 +8,8 @@ services:
     privileged: true
     pid: host
     network_mode: "host"
-    volumes: {{ common_volumes | to_yaml }}
+    volumes:
+      {{ common_volumes | to_yaml | indent(width=6) }}
   tsn_haproxy:
     image: "{{ container_registry }}/contrail-external-haproxy:{{ contrail_version_tag }}"
     env_file: /etc/contrail/tsn_haproxy.env
