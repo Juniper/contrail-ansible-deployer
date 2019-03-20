@@ -1,0 +1,121 @@
+- project:
+    name: Juniper/contrail-ansible-deployer
+    vars:
+      setup_docker_registry: false
+    check:
+      jobs:
+        - contrail-vnc-build-package-centos74:
+            vars:
+              setup_docker_registry: false
+        - contrail-build-test-containers:
+            voting: false
+            dependencies:
+              - contrail-vnc-build-package-centos74
+            vars:
+              setup_docker_registry: false
+        - contrail-build-containers-centos7-ocata:
+            dependencies:
+              - contrail-vnc-build-package-centos74
+            # XXX experiment: it should picks up `false` from project-level variable
+            #vars:
+            #  setup_docker_registry: false
+            voting: false
+        - contrail-build-containers-centos7-queens:
+            dependencies:
+              - contrail-vnc-build-package-centos74
+            vars:
+              setup_docker_registry: false
+        - contrail-build-containers-centos7-rocky:
+            voting: false
+            dependencies:
+              - contrail-vnc-build-package-centos74
+            vars:
+              setup_docker_registry: false
+        - contrail-sanity-centos7-kolla-ocata:
+            voting: false
+            dependencies:
+              - contrail-build-test-containers
+              - contrail-build-containers-centos7-ocata
+            vars:
+              setup_docker_registry: false
+        - contrail-sanity-centos7-kolla-queens:
+            dependencies:
+              - contrail-build-test-containers
+              - contrail-build-containers-centos7-queens
+            vars:
+              setup_docker_registry: false
+        - contrail-sanity-centos7-kolla-rocky:
+            voting: false
+            dependencies:
+              - contrail-build-test-containers
+              - contrail-build-containers-centos7-rocky
+            vars:
+              setup_docker_registry: false
+        - contrail-sanity-centos7-k8s:
+            dependencies:
+              - contrail-build-test-containers
+              - contrail-build-containers-centos7-queens
+            vars:
+              setup_docker_registry: false
+        - contrail-sanity-centos7-kolla-queens-multinode:
+            dependencies:
+              - contrail-build-containers-centos7-queens
+              - contrail-build-test-containers
+            vars:
+              setup_docker_registry: false
+        - contrail-windows-test-cad:
+             voting: false
+    experimental-sanity:
+      jobs:
+        - contrail-vnc-build-package-centos74:
+            vars:
+              setup_docker_registry: false
+        - contrail-build-containers-centos7-ocata:
+            dependencies:
+              - contrail-vnc-build-package-centos74
+            vars:
+              setup_docker_registry: false
+        - contrail-build-test-containers:
+            dependencies:
+              - contrail-vnc-build-package-centos74
+            vars:
+              setup_docker_registry: false
+        - contrail-sanity-centos7-kolla-ocata:
+            dependencies:
+              - contrail-build-containers-centos7-ocata
+              - contrail-build-test-containers
+            vars:
+              setup_docker_registry: false
+        - contrail-sanity-centos7-k8s:
+            dependencies:
+              - contrail-build-containers-centos7-ocata
+              - contrail-build-test-containers
+            vars:
+              setup_docker_registry: false
+    experimental:
+      jobs:
+        - contrail-vnc-build-package-centos74:
+            vars:
+              setup_docker_registry: false
+        - contrail-build-containers-centos7-ocata:
+            dependencies:
+              - contrail-vnc-build-package-centos74
+            vars:
+              setup_docker_registry: false
+        - contrail-build-test-containers:
+            dependencies:
+              - contrail-vnc-build-package-centos74
+            vars:
+              setup_docker_registry: false
+        - contrail-sanity-centos7-kolla-ocata:
+            dependencies:
+              - contrail-build-containers-centos7-ocata
+              - contrail-build-test-containers
+            vars:
+              setup_docker_registry: false
+        - contrail-sanity-centos7-k8s:
+            dependencies:
+              - contrail-build-containers-centos7-ocata
+              - contrail-build-test-containers
+            vars:
+              setup_docker_registry: false
