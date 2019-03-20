@@ -1,0 +1,77 @@
+- project:
+    name: Juniper/contrail-ansible-deployer
+    check:
+      jobs:
+        # We mock it initially. TODO: restore
+        #- contrail-vnc-build-package-centos74:
+        #    vars:
+        #      setup_docker_registry: false
+        - contrail-build-test-containers:
+            voting: false
+            #dependencies:
+            #  - contrail-vnc-build-package-centos74
+            vars:
+              # just a mock, it worked with contrail-vnc-build-package-centos74 normally
+              contrail_container_tag: '{{ zuul.change }}-{{ zuul.patchset }}'
+              # This is a mock to avoid building packages.
+              contrail_package_repository: 'http://{{ nexus.fqdn }}/repository/{{ nexus.repos.yum_nightly }}/master-538-centos'
+              setup_docker_registry: false
+        - contrail-build-containers-centos7-ocata:
+            voting: false
+#            dependencies:
+#              - contrail-vnc-build-package-centos74
+            vars:
+              # XXX part of workaround, not a mock
+              contrail_container_tag: '{{ zuul.change }}-{{ zuul.patchset }}'
+              # This is a mock to avoid building packages.
+              contrail_package_repository: 'http://{{ nexus.fqdn }}/repository/{{ nexus.repos.yum_nightly }}/master-538-centos'
+              setup_docker_registry: false
+        - contrail-build-containers-centos7-queens:
+#            dependencies:
+#              - contrail-vnc-build-package-centos74
+            vars:
+              # This is a mock to avoid building packages.
+              contrail_package_repository: 'http://{{ nexus.fqdn }}/repository/{{ nexus.repos.yum_nightly }}/master-538-centos'
+              setup_docker_registry: false
+        - contrail-build-containers-centos7-rocky:
+            voting: false
+#            dependencies:
+#              - contrail-vnc-build-package-centos74
+            vars:
+              # This is a mock to avoid building packages.
+              contrail_package_repository: 'http://{{ nexus.fqdn }}/repository/{{ nexus.repos.yum_nightly }}/master-538-centos'
+              setup_docker_registry: false
+        - contrail-sanity-centos7-kolla-ocata:
+            voting: false
+            dependencies:
+              - contrail-build-test-containers
+              - contrail-build-containers-centos7-ocata
+            vars:
+              setup_docker_registry: false
+        - contrail-sanity-centos7-kolla-queens:
+            dependencies:
+              - contrail-build-test-containers
+              - contrail-build-containers-centos7-queens
+            vars:
+              setup_docker_registry: false
+        - contrail-sanity-centos7-kolla-rocky:
+            voting: false
+            dependencies:
+              - contrail-build-test-containers
+              - contrail-build-containers-centos7-rocky
+            vars:
+              setup_docker_registry: false
+        - contrail-sanity-centos7-k8s:
+            dependencies:
+              - contrail-build-test-containers
+              - contrail-build-containers-centos7-queens
+            vars:
+              setup_docker_registry: false
+        - contrail-sanity-centos7-kolla-queens-multinode:
+            dependencies:
+              - contrail-build-test-containers
+              - contrail-build-containers-centos7-queens
+            vars:
+              setup_docker_registry: false
+        - contrail-windows-test-cad:
+             voting: false
