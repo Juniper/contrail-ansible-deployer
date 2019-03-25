@@ -104,8 +104,13 @@
     content: "{{ docker_daemon | to_nice_json }}"
     dest: "{{ win_docker_daemon_file }}"
 
-- name: install Docker-EE
+- name: install Docker-EE 18.03
   win_shell: "Install-Package Docker -ProviderName DockerMsftProvider -RequiredVersion 18.03 -Force"
+  when: windows_server_version == '2016'
+
+- name: install Docker-EE 18.09
+  win_shell: "Install-Package Docker -ProviderName DockerMsftProvider -RequiredVersion 18.09 -Force"
+  when: windows_server_version == '2019'
 
 # DockerProvider by default starts Docker.
 # However, in this role we don't care in what state Docker is right now.
