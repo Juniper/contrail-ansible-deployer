@@ -28,7 +28,6 @@
   - cloud-init-local
   - cloud-init
   - cloud-config
-  - NetworkManager
   ignore_errors: yes
 
 # we need to remove python-requests installed by distutils
