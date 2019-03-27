@@ -28,7 +28,6 @@
   - cloud-init-local
   - cloud-init
   - cloud-config
-  - NetworkManager
   ignore_errors: yes
 
 - name: OS specific package install
