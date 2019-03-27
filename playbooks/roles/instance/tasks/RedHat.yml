@@ -1,18 +1,4 @@
 ---
-- name: remove interfaces from Network Manager
-  lineinfile:
-    path: "/etc/sysconfig/network-scripts/ifcfg-{{ item }}"
-    line: "NM_CONTROLLED=no"
-  register: net_config
-  with_items: "{{ ansible_interfaces }}"
-  ignore_errors: yes
-
-- name: restart network service
-  service:
-    name: network
-    state: restarted
-  when: net_config.changed
-
 - name: set selinux to permissive
   selinux:
     policy: targeted
