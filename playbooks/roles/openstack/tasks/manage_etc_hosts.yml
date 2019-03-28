@@ -1,0 +1,42 @@
+---
+# evaluate mgmt IP for all hosts in deployment to be able to create /etc/hosts
+- name: Build host_intf_dict
+  set_fact:
+    host_intf_dict: "{{ host_intf_dict | combine({item.value['ip'] : hostvars[item.value['ip']]['network_interface_detected']}) }}"
+  with_dict: "{{ instances }}"
+  when:
+    - item.value['ip'] in groups['rabbitmq']
+    - inventory_hostname in groups['rabbitmq']
+
+- name: "Build hosts file with ctrl-data and domain suffix when provided"
+  lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}.*' line="{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}  {{ hostvars[item]['ansible_hostname'] }}.{{ provider_data.domainsuffix }} {{ hostvars[item]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - inventory_hostname in groups['rabbitmq']
+    - provider_data is defined
+    - provider_data.domainsuffix is defined
+    - host_intf_dict is defined
+    - host_intf_dict.get(item)
+
+- name: Build hosts file with ctrl-data using ansible_fqdn
+  lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}.*' line="{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}  {{ hostvars[item]['ansible_fqdn'] }} {{ hostvars[item]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - inventory_hostname in groups['rabbitmq']
+    - provider_data is defined
+    - provider_data.domainsuffix is not defined
+    - hostvars[item].ansible_fqdn is defined
+    - host_intf_dict is defined
+    - host_intf_dict.get(item)
+
+- name: Build hosts file with ctrl-data without domain suffix
+  lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }}.*' line="{{ hostvars[item]['ansible_' + host_intf_dict.get(item)]['ipv4']['address'] }} {{ hostvars[item]['ansible_hostname'] }}" state=present insertafter='127.0.0.1'
+  with_items: "{{ hostvars[inventory_hostname].groups.container_hosts }}"
+  when:
+    - inventory_hostname in groups['rabbitmq']
+    - provider_data is defined
+    - provider_data.domainsuffix is not defined
+    - hostvars[item].ansible_fqdn is not defined
+    - host_intf_dict is defined
+    - host_intf_dict.get(item)
+
