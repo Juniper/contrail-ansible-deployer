@@ -137,3 +137,20 @@ services:
       options:
         max-size: "{{ config_log_max_size }}"
         max-file: "{{ config_log_max_file }}"
+  stats:
+    image: "{{ container_registry }}/contrail-controller-config-stats:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_config.env
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    network_mode: "host"
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ config_log_driver }}"
+      options:
+        max-size: "{{ config_log_max_size }}"
+        max-file: "{{ config_log_max_file }}"
+
