@@ -1,10 +1,42 @@
 provider_config:
   bms:
+    ssh_user: root
+    ssh_private_key: /home/deremeev/.ssh/id_rsa
+    domainsuffix: juniper.net 
 instances:
-  bms1:
+  kolla-aio:
     provider: bms
-    ip: 192.168.1.100
+    ip: 192.168.30.157
+    roles:
+      config_database: null
+      config: null
+      control: null
+      analytics_database: null
+      analytics: null
+      webui: null
+      k8s_master: null
+      kubemanager: null
+      k8s_node: null
 global_configuration:
-  CONTAINER_REGISTRY: michaelhenkel
+#  CONTAINER_REGISTRY: opencontrailnightly
+  CONTAINER_REGISTRY: 192.168.30.157:5000
+  REGISTRY_PRIVATE_INSECURE: true
 contrail_configuration:
-  CONTRAIL_VERSION: queens-5.0-20180219195722
+#  CONTRAIL_VERSION: master-latest
+  CONTRAIL_VERSION: queens-5.1.0-553
+#  OPENSTACK_VERSION: ocata
+  CLOUD_ORCHESTRATOR: kubernetes
+  CONTROLLER_NODES: 192.168.30.157
+  CONTROL_NODES: 192.168.30.157
+  LOG_LEVEL: SYS_DEBUG
+  JVM_EXTRA_OPTS: -Xms1g -Xmx2g
+  KUBERNETES_PUBLIC_FIP_POOL:
+    domain: default-domain
+    name: __fip_pool_public__
+    network: __public__
+    project: k8s-default
+  RABBITMQ_NODE_PORT: 5673
+  CONFIG_DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
+  DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
+deployment:
+  orchestrator: kubernetes
