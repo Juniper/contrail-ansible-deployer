@@ -68,7 +68,8 @@
 
 - name: Manage /etc/hosts
   include: manage_etc_hosts.yml
-  when: provider_data.manage_etc_hosts | default("True") | bool
+  when:
+    - provider_data.manage_etc_hosts | default("True") | bool
 
 - name: create log file directory
   file:
