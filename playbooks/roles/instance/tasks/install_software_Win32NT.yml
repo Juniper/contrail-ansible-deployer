@@ -160,9 +160,11 @@
 - name: disable winnat
   win_shell: Set-Service -Name winnat -StartupType Disabled
 
-- name: install MS Visual C++ Redist 14
+- name: install MS Visual C++ Redists
   win_chocolatey:
-    name: vcredist140
+    name:
+    - vcredist2013
+    - vcredist2015
     state: present
 
 # This is needed by nodemgr.
