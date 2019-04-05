@@ -33,6 +33,8 @@
 
 # we need to remove python-requests installed by distutils
 # cause it conflicts with requests lib installed by pip during docker-compose install
+# Workaround for Ubuntu: do not touch installed library. Because for ISSU it will
+# remove nova-compute on exiting node.
 - name: remove python-requests installed by distutils
   package:
     name: python-requests
@@ -40,6 +42,7 @@
   register: res
   retries: 5
   until: res | success
+  when: ansible_os_family == 'RedHat'
 
 - name: OS specific package install
   include: "{{ ansible_os_family }}.yml"
