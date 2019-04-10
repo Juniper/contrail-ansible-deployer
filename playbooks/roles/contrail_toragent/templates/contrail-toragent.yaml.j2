@@ -34,6 +34,10 @@ services:
     image: "{{ container_registry }}/contrail-tor-agent:{{ contrail_version_tag }}"
     network_mode: host
     env_file: "/etc/contrail/{{ toragent_name }}.env"
+    environment:
+      - SERVICE_NAME={{ toragent_name }}
+    labels:
+      - "net.juniper.contrail.service={{toragent_name}}"
     volumes_from:
       - node-init
     depends_on:
