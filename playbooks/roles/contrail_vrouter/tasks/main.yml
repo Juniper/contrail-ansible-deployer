@@ -139,15 +139,3 @@
   service:
     name: rsyslog
     state: restarted
-
-# Create contrail-vrouter-agent.conf with platform=dpdk for vif command to work on host
-- name: Set 'platform=dpdk' in agent.conf for vif to work for dpdk compute
-  ini_file:
-    path: "/etc/contrail/contrail-vrouter-agent.conf"
-    section: DEFAULT
-    option: platform
-    value: dpdk
-    mode: 0644
-  when:
-    - roles[instance_name].vrouter.AGENT_MODE is defined
-    - roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
