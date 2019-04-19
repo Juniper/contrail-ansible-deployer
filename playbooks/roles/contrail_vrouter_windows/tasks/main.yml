@@ -24,6 +24,13 @@
   win_shell: >
     docker run --rm -v {{ win_host_artifacts_dir }}:{{ win_container_artifacts_dir }}
     {{ container_registry }}/contrail-windows-vrouter:{{ contrail_configuration.CONTRAIL_VERSION }}
+  when: contrail_configuration.WINDOWS_USE_SIGNED_VROUTER is not defined
+
+- name: extract vrouter artifacts from container (with signed vRouter)
+  win_shell: >
+    docker run --rm -v {{ win_host_artifacts_dir }}:{{ win_container_artifacts_dir }}
+    {{ container_registry }}/contrail-windows-vrouter-signed:{{ contrail_configuration.CONTRAIL_VERSION }}
+  when: contrail_configuration.WINDOWS_USE_SIGNED_VROUTER is defined
 
 - name: copy debug dlls to compute node
   win_copy:
