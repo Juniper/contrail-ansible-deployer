@@ -121,8 +121,10 @@
     ansible_become: true
     private_ip: "{{ gce.instance_data[0].private_ip }}"
     instance_name: "{{ item.key }}"
-  when: (provider_config.gce.ssh_pwd is defined or item.value.ssh_pwd is defined) and 
-        (provider_config.gce.ssh_private_key is undefined and item.value.ssh_private_key is undefined)
+  when:
+    - provider_config.gce.ssh_pwd is defined or item.value.ssh_pwd is defined
+    - provider_config.gce.ssh_private_key is undefined
+    - item.value.ssh_private_key is undefined
 
 - name: add gce container hosts with ssh key
   add_host:
