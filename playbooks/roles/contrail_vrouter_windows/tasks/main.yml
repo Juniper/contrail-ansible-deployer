@@ -20,10 +20,20 @@
     name: docker
     state: started
 
+- name: select image with unsigned vRouter
+  set_fact:
+    contrail_windows_vrouter_image: "contrail-windows-vrouter"
+  when: contrail_configuration.WINDOWS_USE_SIGNED_VROUTER is not defined
+
+- name: select image with signed vRouter
+  set_fact:
+    contrail_windows_vrouter_image: "contrail-windows-vrouter-signed"
+  when: contrail_configuration.WINDOWS_USE_SIGNED_VROUTER is defined
+
 - name: extract vrouter artifacts from container
   win_shell: >
     docker run --rm -v {{ win_host_artifacts_dir }}:{{ win_container_artifacts_dir }}
-    {{ container_registry }}/contrail-windows-vrouter:{{ contrail_configuration.CONTRAIL_VERSION }}
+    {{ container_registry }}/{{ contrail_windows_vrouter_image }}:{{ contrail_configuration.CONTRAIL_VERSION }}
 
 - name: copy debug dlls to compute node
   win_copy:
