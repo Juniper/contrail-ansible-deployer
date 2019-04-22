@@ -99,9 +99,7 @@
     extensions: ['yml']
     deleted_nodes_dict: "{{ hostvars['localhost'].deleted_nodes_dict }}"
   when:
-    - global_configuration is defined
-    - global_configuration.ENABLE_DESTROY is defined
-    - global_configuration.ENABLE_DESTROY | bool
+    - global_configuration.ENABLE_DESTROY | default('True') | bool
   tags: nova
 
 - name: Destroy Deleted Openstack Nodes
@@ -113,9 +111,7 @@
     contrail_cleanup: true
     destroy_include_images: "{{ enable_destroy_images | default('no') }}"
   when:
-    - global_configuration is defined
-    - global_configuration.ENABLE_DESTROY is defined
-    - global_configuration.ENABLE_DESTROY | bool
+    - global_configuration.ENABLE_DESTROY | default('True') | bool
     - hostvars['localhost'].deleted_nodes_dict.keys() | length > 0
     - inventory_hostname in hostvars['localhost'].deleted_nodes_dict.values()
   tags: nova
