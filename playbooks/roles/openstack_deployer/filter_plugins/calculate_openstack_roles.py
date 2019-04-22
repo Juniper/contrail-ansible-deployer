@@ -96,6 +96,15 @@ class FilterModule(object):
                                                     self.get_ks_token_request()
                                                   ),
                                                   request_type="post")
+        except Exception as e:
+            self.auth_token = None
+            return
+
+        header = response.headers
+        self.auth_token = header['X-Subject-Token']
+        self.keystone_auth_headers['X-Auth-Token'] = self.auth_token
+
+        try:
             # Check if endpoint URL is also reachable
             # To protect against re-run after failed provision
 
@@ -103,13 +112,11 @@ class FilterModule(object):
                 keystone_endpoint_url,
                 self.keystone_auth_headers,
                 request_type="get")
+
         except Exception as e:
-            auth_token = None
-        else:
-            header = response.headers
-            token = header['X-Subject-Token']
-            auth_token = token
-        return auth_token
+            self.auth_token = None
+            self.keystone_auth_headers.pop('X-Auth-Token', None)
+
 
     def filters(self):
         return {
@@ -141,6 +148,8 @@ class FilterModule(object):
         except Exception as e:
             raise e
         else:
+            #import sys; sys.stdin = open('/dev/tty')
+            #import pdb; pdb.set_trace()
             response_dict = response.json()
             if "hypervisors" in response_dict:
                 for hyp in response_dict["hypervisors"]:
@@ -204,7 +213,7 @@ class FilterModule(object):
         # don't calculate anything if global_configuration.ENABLE_DESTROY is not set
         empty_result = {"node_roles_dict": dict(),
                         "deleted_nodes_dict": dict()}
-        enable_destroy = global_configuration.get("ENABLE_DESTROY", False)
+        enable_destroy = global_configuration.get("ENABLE_DESTROY", True)
         if not isinstance(enable_destroy, bool):
             enable_destroy = str(enable_destroy).lower() == 'true'
         if not enable_destroy:
@@ -231,7 +240,7 @@ class FilterModule(object):
                 cluster_role_set.update(instance_config["roles"].keys())
 
         if contrail_configuration.get("CLOUD_ORCHESTRATOR") == "openstack":
-            self.auth_token = self.get_ks_auth_token(contrail_configuration)
+            self.get_ks_auth_token(contrail_configuration)
             self.aaa_mode = contrail_configuration.get("AAA_MODE", None)
 
         if self.auth_token:

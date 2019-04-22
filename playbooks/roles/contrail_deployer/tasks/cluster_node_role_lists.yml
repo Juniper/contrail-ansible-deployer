@@ -11,8 +11,7 @@
       cluster_roles_dict: "{{ cluster_roles_dict | calculate_deleted_toragent_roles(item) }}"
   with_dict: "{{ instances }}"
   when:
-    - global_configuration.ENABLE_DESTROY is defined
-    - global_configuration.ENABLE_DESTROY | bool
+    - global_configuration.ENABLE_DESTROY | default('True') | bool
 
 - name: Fail if there was an Exception in getting data
   fail:

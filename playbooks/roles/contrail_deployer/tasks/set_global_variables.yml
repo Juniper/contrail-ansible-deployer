@@ -15,7 +15,7 @@
 
 - name: set ENABLE_DESTROY flag if absent
   set_fact:
-    global_configuration: "{{ global_configuration | ternary(global_configuration, {}) | combine({'ENABLE_DESTROY': false}) }}"
+    global_configuration: "{{ global_configuration | ternary(global_configuration, {}) | combine({'ENABLE_DESTROY': true}) }}"
   when:
     - global_configuration.ENABLE_DESTROY is not defined
   tags:

@@ -20,3 +20,11 @@
 - name: Calculate deleted nodes Dict
   set_fact:
     deleted_nodes_dict: "{{ cluster_roles_dict['deleted_nodes_dict'] }}"
+
+- name: DEBUG 1
+  debug:
+    var: deleted_nodes_dict
+
+- name: DEBUG 2
+  debug:
+    var: node_roles_dict
