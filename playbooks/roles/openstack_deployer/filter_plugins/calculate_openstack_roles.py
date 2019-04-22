@@ -204,7 +204,7 @@ class FilterModule(object):
         # don't calculate anything if global_configuration.ENABLE_DESTROY is not set
         empty_result = {"node_roles_dict": dict(),
                         "deleted_nodes_dict": dict()}
-        enable_destroy = global_configuration.get("ENABLE_DESTROY", False)
+        enable_destroy = global_configuration.get("ENABLE_DESTROY", True)
         if not isinstance(enable_destroy, bool):
             enable_destroy = str(enable_destroy).lower() == 'true'
         if not enable_destroy:
