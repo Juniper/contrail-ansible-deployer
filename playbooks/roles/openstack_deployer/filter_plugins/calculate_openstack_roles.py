@@ -8,18 +8,11 @@ for all the Openstack nodes in the instances file.
 import requests
 import json
 
+# class that handles parameters required to talk to openstack and detect
+# existing roles
+class OpenStackParams:
 
-class FilterModule(object):
-
-    keystone_auth_host = ""
-    keystone_admin_password = ""
-    keystone_auth_url_version = "/v2.0"
-
-    auth_token = None
-    aaa_mode = None
-    node_name_ip_map = {}
-    node_ip_name_map = {}
-
+    # static params
     endpoint_port_role_map = {
         "5000": "control",
         "9696": "network",
@@ -27,15 +20,57 @@ class FilterModule(object):
         "3000": "monitoring",
         "8774": "compute"
     }
+
+    ks_auth_url_endpoint_dict = {
+        "/v3": "/auth/tokens",
+        "/v2.0": "/auth/tokens"
+    }
+
     openstack_controller_roles = [
         "openstack_control", "openstack_network", "openstack_storage",
         "openstack_monitoring"
     ]
 
-    valid_roles = [
-        "openstack_control", "openstack_network", "openstack_storage",
-        "openstack_monitoring", "openstack_compute", "openstack"
-    ]
+    # Non-static data
+    ks_auth_headers = {
+        'Content-Type': 'application/json'
+    }
+
+    ks_auth_url = None
+    os_hypervisors_url = None
+    os_endpoints_url = None
+
+    ks_auth_host = None
+    ks_admin_password = ""
+    ks_auth_url_version = "/v3" # default for openstack queens is "/v3"
+    auth_token = None
+    aaa_mode = None
+
+    def __init__(self, contrail_config):
+        self.ks_auth_host = contrail_config.get("KEYSTONE_AUTH_HOST", None)
+        self.ks_admin_password = contrail_config.get(
+            "KEYSTONE_AUTH_ADMIN_PASSWORD", "")
+        self.ks_auth_url_version = contrail_config.get(
+            "KEYSTONE_AUTH_URL_VERSION",
+            "/v3")
+        ks_tokens_url = self.ks_auth_url_endpoint_dict.get(self.ks_auth_url_version,
+                self.ks_auth_url_endpoint_dict["/v3"])
+
+        # TODO: Add support for https and non-default port
+        if self.ks_auth_host:
+            self.ks_auth_url = 'http://' + str(self.ks_auth_host) + \
+                ':35357/v3' +\
+                str(ks_tokens_url)
+            self.os_endpoints_url = 'http://' + str(self.ks_auth_host) + \
+                                    ':35357' + str(self.ks_auth_url_version) \
+                                    + '/endpoints'
+            self.os_hypervisors_url = 'http://' + str(self.ks_auth_host) + \
+                                ':8774/v2.1/os-hypervisors/detail'
+
+        if contrail_config.get("CLOUD_ORCHESTRATOR") == "openstack":
+            self.get_ks_auth_token(contrail_config)
+            self.aaa_mode = contrail_config.get("AAA_MODE", None)
+
 
     def get_ks_token_request(self):
         keystone_token_request = {
@@ -47,10 +82,10 @@ class FilterModule(object):
                     'password': {
                         'user': {
                             'domain': {
-                                'name': 'default'
+                                'id': 'default'
                             },
                             'name': 'admin',
-                            'password': self.keystone_admin_password
+                            'password': self.ks_admin_password
                         }
                     }
                 },
@@ -64,60 +99,33 @@ class FilterModule(object):
                 }
             }
         }
+
+        keystone_v2_token_request = {
+        }
         return keystone_token_request
 
-    keystone_auth_headers = {
-        'Content-Type': 'application/json'
-    }
-
     def get_ks_auth_token(self, contrail_config):
-        self.keystone_auth_host = contrail_config.get("KEYSTONE_AUTH_HOST", "")
-        self.keystone_admin_password = contrail_config.get(
-            "KEYSTONE_AUTH_ADMIN_PASSWORD", "")
-        keystone_auth_url_version = contrail_config.get(
-            "KEYSTONE_AUTH_URL_VERSION",
-            "")
-        if keystone_auth_url_version == '/v2.0':
-            keystone_auth_url_tokens = '/v2.0/tokens'
-        else:
-            keystone_auth_url_tokens = '/v3/auth/tokens'
-
-        # TODO: Add support for https and non-default port
-
-        keystone_auth_url = 'http://' + str(
-            self.keystone_auth_host) + ':35357' + str(keystone_auth_url_tokens)
-        keystone_endpoint_url = 'http://' + str(self.keystone_auth_host) + \
-                                ':35357' + str(self.keystone_auth_url_version) \
-                                + '/endpoints'
         try:
-            response = self.get_rest_api_response(keystone_auth_url,
-                                                  self.keystone_auth_headers,
+            response = self.get_rest_api_response(self.ks_auth_url,
+                                                  self.ks_auth_headers,
                                                   data=json.dumps(
                                                     self.get_ks_token_request()
                                                   ),
                                                   request_type="post")
-            # Check if endpoint URL is also reachable
-            # To protect against re-run after failed provision
-
-            endpoint_response = self.get_rest_api_response(
-                keystone_endpoint_url,
-                self.keystone_auth_headers,
-                request_type="get")
         except Exception as e:
-            auth_token = None
+            self.auth_token = None
         else:
             header = response.headers
-            token = header['X-Subject-Token']
-            auth_token = token
-        return auth_token
+            self.auth_token = header['X-Subject-Token']
+            if self.aaa_mode != "no-auth":
+                self.ks_auth_headers['X-Auth-Token'] = self.auth_token
 
-    def filters(self):
-        return {
-            'calculate_openstack_roles': self.calculate_openstack_roles
-        }
-
-    def get_ops_hostname(self, ip_address):
-        return "fqdn"
+            try:
+                # Check if endpoint URL is also reachable
+                # To protect against re-run after failed provision
+                endpoint_response = self.get_os_endpoints()
+            except Exception as e:
+                self.auth_token = None
 
     def get_rest_api_response(self, url, headers, data=None, request_type=None):
         response = None
@@ -128,95 +136,45 @@ class FilterModule(object):
         response.raise_for_status()
         return response
 
-    def discover_openstack_computes(self,instances_nodes_dict,
-                                    deleted_nodes_dict):
-        # Read Openstack Computes
-        keystone_auth_url = 'http://' + str(self.keystone_auth_host) + \
-                            ':8774/v2.1/os-hypervisors/detail'
-        try:
-            response = self.get_rest_api_response(
-                keystone_auth_url,
-                self.keystone_auth_headers,
+    def get_os_hypervisors(self):
+        return self.get_rest_api_response(
+                self.os_hypervisors_url,
+                self.ks_auth_headers,
                 request_type="get")
-        except Exception as e:
-            raise e
-        else:
-            response_dict = response.json()
-            if "hypervisors" in response_dict:
-                for hyp in response_dict["hypervisors"]:
-                    if hyp["host_ip"] in self.node_ip_name_map:
-                        server_name = self.node_ip_name_map[hyp["host_ip"]]
-                        if "existing_roles" not \
-                                in instances_nodes_dict[server_name]:
-                            instances_nodes_dict[server_name][
-                                'existing_roles'] = []
-                        instances_nodes_dict[server_name][
-                            'existing_roles'].append("openstack_compute")
-                    else:
-                        hostname = hyp["hypervisor_hostname"].split('.')[0]
-                        deleted_nodes_dict[hostname] = hyp["host_ip"]
-            return instances_nodes_dict, deleted_nodes_dict
 
-    def discover_openstack_controllers(self, instances_nodes_dict,
-                                    deleted_nodes_dict):
-        # Read Openstack Controllers
-        keystone_auth_url = 'http://' + str(self.keystone_auth_host) + \
-                            ':35357' + str(self.keystone_auth_url_version) \
-                            + '/endpoints'
-        try:
-            response = self.get_rest_api_response(
-                keystone_auth_url,
-                self.keystone_auth_headers,
+    def get_os_endpoints(self):
+        return self.get_rest_api_response(
+                self.os_endpoints_url,
+                self.ks_auth_headers,
                 request_type="get")
-        except Exception as e:
-            raise e
-        else:
-            response_dict = response.json()
-            if "endpoints" in response_dict:
-                for endpoint_dict in response_dict["endpoints"]:
-                    endpoint_ip = endpoint_dict["publicurl"].strip(
-                        "http://").split(":")
-                    endpoint_ip, endpoint_port = endpoint_ip
-                    endpoint_port = endpoint_port.split("/")[0]
-                    if endpoint_port in self.endpoint_port_role_map:
-                        openstack_role = "openstack_" + \
-                                         self.endpoint_port_role_map[
-                                             endpoint_port]
-                        if endpoint_ip in self.node_ip_name_map:
-                            server_name = self.node_ip_name_map[endpoint_ip]
-                            if "existing_roles" not \
-                                    in instances_nodes_dict[server_name]:
-                                instances_nodes_dict[server_name][
-                                    'existing_roles'] = []
-                            instances_nodes_dict[server_name][
-                                'existing_roles'].append(openstack_role)
-                        else:
-                            # TODO: Implement
-                            deleted_server_name = self.get_ops_hostname(
-                                endpoint_ip
-                            )
-                            deleted_nodes_dict[deleted_server_name] = \
-                                endpoint_ip
-            return instances_nodes_dict, deleted_nodes_dict
 
-    def calculate_openstack_roles(self, existing_dict,
-            instances_dict, global_configuration, contrail_configuration):
-        # don't calculate anything if global_configuration.ENABLE_DESTROY is not set
-        empty_result = {"node_roles_dict": dict(),
-                        "deleted_nodes_dict": dict()}
-        enable_destroy = global_configuration.get("ENABLE_DESTROY", False)
-        if not isinstance(enable_destroy, bool):
-            enable_destroy = str(enable_destroy).lower() == 'true'
-        if not enable_destroy:
-            return str(empty_result)
 
+class OpenstackCluster(object):
+    # OpenStackParams object
+    os_params = None
+    e = None
+
+    node_name_ip_map = {}
+    node_ip_name_map = {}
+    valid_roles = [
+        "openstack_control", "openstack_network", "openstack_storage",
+        "openstack_monitoring", "openstack_compute", "openstack"
+    ]
+
+
+    def __init__(self, instances, contrail_configuration):
+        # Initialize the openstack params
+        self.os_params = OpenStackParams(contrail_configuration)
+        self.instances_dict = instances
+
+    def discover_openstack_roles(self):
         instances_nodes_dict = {}
         deleted_nodes_dict = {}
         valid_cluster_node_lists = "yes"
         invalid_role = None
         cluster_role_set = set()
 
-        for instance_name, instance_config in instances_dict.iteritems():
+        for instance_name, instance_config in self.instances_dict.iteritems():
             instances_nodes_dict[instance_name] = {}
             self.node_name_ip_map[instance_name] = instance_config["ip"]
             self.node_ip_name_map[instance_config["ip"]] = instance_name
@@ -230,29 +188,22 @@ class FilterModule(object):
                     )
                 cluster_role_set.update(instance_config["roles"].keys())
 
-        if contrail_configuration.get("CLOUD_ORCHESTRATOR") == "openstack":
-            self.auth_token = self.get_ks_auth_token(contrail_configuration)
-            self.aaa_mode = contrail_configuration.get("AAA_MODE", None)
-
-        if self.auth_token:
-            if self.aaa_mode != "no-auth":
-                self.keystone_auth_headers['X-Auth-Token'] = self.auth_token
-            try:
-                instances_nodes_dict, deleted_nodes_dict = \
-                    self.discover_openstack_computes(instances_nodes_dict,
-                                                     deleted_nodes_dict)
-                instances_nodes_dict, deleted_nodes_dict = \
-                    self.discover_openstack_controllers(instances_nodes_dict,
-                                                        deleted_nodes_dict)
-            except Exception as e:
-                return str({"Exception": e.message})
+        try:
+            instances_nodes_dict, deleted_nodes_dict = \
+                self.discover_openstack_computes(instances_nodes_dict,
+                                                 deleted_nodes_dict)
+            #instances_nodes_dict, deleted_nodes_dict = \
+            #    self.discover_openstack_controllers(instances_nodes_dict,
+            #                                        deleted_nodes_dict)
+        except Exception as e:
+            return dict(), dict()
 
         for server in instances_nodes_dict:
             for role_list, list_of_roles in \
                     instances_nodes_dict[server].iteritems():
                 if len(list_of_roles) and "openstack" in list_of_roles:
                     list_of_roles.remove("openstack")
-                    list_of_roles += self.openstack_controller_roles
+                    list_of_roles += self.os_params.openstack_controller_roles
                     instances_nodes_dict[server][role_list] = list_of_roles
 
             if "instance_roles" not in instances_nodes_dict[server]:
@@ -279,5 +230,103 @@ class FilterModule(object):
                          instances_nodes_dict[server]['existing_roles']):
                 deleted_nodes_dict[server] = self.node_name_ip_map[server]
 
+        self.node_roles_dict = instances_nodes_dict
+        self.deleted_nodes_dict = deleted_nodes_dict
+        return instances_nodes_dict, deleted_nodes_dict
+
+    def get_ops_hostname(self, ip_address):
+        return "fqdn"
+
+    def discover_openstack_computes(self,instances_nodes_dict,
+                                    deleted_nodes_dict):
+        # Read Openstack Computes
+        try:
+            response = self.os_params.get_os_hypervisors()
+        except Exception as e:
+            raise e
+        else:
+            response_dict = response.json()
+            if "hypervisors" in response_dict:
+                for hyp in response_dict["hypervisors"]:
+                    if hyp["host_ip"] in self.node_ip_name_map:
+                        server_name = self.node_ip_name_map[hyp["host_ip"]]
+                        if "existing_roles" not \
+                                in instances_nodes_dict[server_name]:
+                            instances_nodes_dict[server_name][
+                                'existing_roles'] = []
+                        instances_nodes_dict[server_name][
+                            'existing_roles'].append("openstack_compute")
+                    else:
+                        hostname = hyp["hypervisor_hostname"].split('.')[0]
+                        deleted_nodes_dict[hostname] = hyp["host_ip"]
+            return instances_nodes_dict, deleted_nodes_dict
+
+    def discover_openstack_controllers(self, instances_nodes_dict,
+                                    deleted_nodes_dict):
+        import sys; sys.stdin = open('/dev/tty')
+        import pdb; pdb.set_trace()
+        # Read Openstack Controllers
+        try:
+            response = self.os_params.get_os_endpoints()
+        except Exception as e:
+            raise e
+        else:
+            response_dict = response.json()
+            if "endpoints" in response_dict:
+                for endpoint_dict in response_dict["endpoints"]:
+                    endpoint_ip = endpoint_dict["url"].strip(
+                        "http://").split(":")
+                    endpoint_ip, endpoint_port = endpoint_ip
+                    endpoint_port = endpoint_port.split("/")[0]
+                    if endpoint_port in self.endpoint_port_role_map:
+                        openstack_role = "openstack_" + \
+                                         self.endpoint_port_role_map[
+                                             endpoint_port]
+                        if endpoint_ip in self.node_ip_name_map:
+                            server_name = self.node_ip_name_map[endpoint_ip]
+                            if "existing_roles" not \
+                                    in instances_nodes_dict[server_name]:
+                                instances_nodes_dict[server_name][
+                                    'existing_roles'] = []
+                            instances_nodes_dict[server_name][
+                                'existing_roles'].append(openstack_role)
+                        else:
+                            # TODO: Implement
+                            deleted_server_name = self.get_ops_hostname(
+                                endpoint_ip
+                            )
+                            deleted_nodes_dict[deleted_server_name] = \
+                                endpoint_ip
+            return instances_nodes_dict, deleted_nodes_dict
+
+
+class FilterModule(object):
+
+    # OpenstackCluster object
+    os_roles = None
+
+    def filters(self):
+        return {
+            'calculate_openstack_roles': self.calculate_openstack_roles
+        }
+
+    def calculate_openstack_roles(self, existing_dict,
+            instances_dict, global_configuration, contrail_configuration):
+        # don't calculate anything if global_configuration.ENABLE_DESTROY is not set
+        empty_result = {"node_roles_dict": dict(),
+                        "deleted_nodes_dict": dict()}
+        enable_destroy = global_configuration.get("ENABLE_DESTROY", True)
+        if not isinstance(enable_destroy, bool):
+            enable_destroy = str(enable_destroy).lower() == 'true'
+        if not enable_destroy:
+            return str(empty_result)
+
+        self.os_roles = OpenstackCluster(instances_dict, contrail_configuration)
+        instances_nodes_dict, deleted_nodes_dict = \
+                self.os_roles.discover_openstack_roles()
+        if self.os_roles.e is not None:
+            return str({"Exception": self.os_roles.e})
+
         return str({"node_roles_dict": instances_nodes_dict,
                     "deleted_nodes_dict": deleted_nodes_dict})
+

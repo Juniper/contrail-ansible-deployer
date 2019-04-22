@@ -11,8 +11,7 @@
       cluster_roles_dict: "{{ cluster_roles_dict | calculate_deleted_toragent_roles(item) }}"
   with_dict: "{{ instances }}"
   when:
-    - global_configuration.ENABLE_DESTROY is defined
-    - global_configuration.ENABLE_DESTROY | bool
+    - global_configuration.ENABLE_DESTROY | default('True') | bool
 
 - name: Fail if there was an Exception in getting data
   fail:
@@ -32,3 +31,12 @@
 - name: set api_server as validated active API server
   set_fact:
     api_server: "{{ cluster_roles_dict['api_server_ip'] }}"
+
+- name: DEBUG 3
+  debug:
+    var: node_roles_dict
+
+- name: DEBUG 4
+  debug:
+    var: deleted_nodes_dict
+

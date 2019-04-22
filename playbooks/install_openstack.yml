@@ -9,6 +9,10 @@
       set_fact:
         instances: "{{ instances }}"
       when: hostvars['localhost']['instances'] is undefined
+    - name: Expose global_configuration
+      set_fact:
+        global_configuration: "{{ global_configuration | default({}) }}"
+      when: hostvars['localhost']['global_configuration'] is undefined
   roles:
     - contrail_deployer
     - openstack_deployer
@@ -72,6 +76,9 @@
   connection: local
   gather_facts: no
   pre_tasks:
+    - name: DEBUG 1
+      debug:
+        var: hostvars['localhost'].deleted_nodes_dict
     - name: Import group variables
       include_vars:
         dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/group_vars"
@@ -98,10 +105,9 @@
     dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/etc/kolla"
     extensions: ['yml']
     deleted_nodes_dict: "{{ hostvars['localhost'].deleted_nodes_dict }}"
+    global_configuration: "{{ hostvars['localhost'].global_configuration }}"
   when:
-    - global_configuration is defined
-    - global_configuration.ENABLE_DESTROY is defined
-    - global_configuration.ENABLE_DESTROY | bool
+    - hostvars['localhost'].global_configuration.ENABLE_DESTROY | default('True') | bool
   tags: nova
 
 - name: Destroy Deleted Openstack Nodes
@@ -112,10 +118,9 @@
     deleted_nodes_dict: "{{ hostvars['localhost'].deleted_nodes_dict }}"
     contrail_cleanup: true
     destroy_include_images: "{{ enable_destroy_images | default('no') }}"
+    global_configuration: "{{ hostvars['localhost'].global_configuration }}"
   when:
-    - global_configuration is defined
-    - global_configuration.ENABLE_DESTROY is defined
-    - global_configuration.ENABLE_DESTROY | bool
+    - hostvars['localhost'].global_configuration.ENABLE_DESTROY | default('True') | bool
     - hostvars['localhost'].deleted_nodes_dict.keys() | length > 0
     - inventory_hostname in hostvars['localhost'].deleted_nodes_dict.values()
   tags: nova
