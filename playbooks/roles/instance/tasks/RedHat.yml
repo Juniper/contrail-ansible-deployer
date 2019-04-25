@@ -36,7 +36,32 @@
   retries: 5
   until: res | success
 
+# Do not use easy_install for RedHat. There is a bug that might cause
+# easy_install to hang:
+# https://github.com/ansible/ansible/issues/15769
+# https://bugzilla.redhat.com/show_bug.cgi?id=1702797
+# Use epel pip for RedHat to work around the bug
+- name: download epel-release for RedHat
+  get_url:
+    url: http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    dest: /tmp/epel-release-latest-7.noarch.rpm
+  when: (ansible_distribution == "RedHat" or ansible_distribution == "Red Hat Enterprise Linux")
+
+- name: install epel-release for RedHat
+  yum:
+    name: /tmp/epel-release-latest-7.noarch.rpm
+    state: present
+  when: (ansible_distribution == "RedHat" or ansible_distribution == "Red Hat Enterprise Linux")
+
+- name: Install pip for RedHat
+  yum:
+    name: python-pip
+  when: (ansible_distribution == "RedHat" or ansible_distribution == "Red Hat Enterprise Linux")
+
 - name: Install common pre-requisites
   easy_install:
     name: pip
     state: latest
+  when:
+    - ansible_distribution != "RedHat"
+    - ansible_distribution != "Red Hat Enterprise Linux"
