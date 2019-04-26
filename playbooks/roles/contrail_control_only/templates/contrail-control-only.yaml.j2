@@ -2,7 +2,7 @@ version: '2'
 services:
   node-init:
     image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
-    env_file: /etc/contrail/common.env
+    env_file: /etc/contrail/common_control_only_{{ location.key }}.env
     environment:
       - CONTRAIL_STATUS_IMAGE="{{ container_registry }}/contrail-status:{{ contrail_version_tag }}"
     privileged: true
@@ -12,7 +12,7 @@ services:
       {{ common_volumes | to_yaml | indent(width=6) }}
   nodemgr:
     image: "{{ container_registry }}/contrail-nodemgr:{{ contrail_version_tag }}"
-    env_file: /etc/contrail/common.env
+    env_file: /etc/contrail/common_control_only_{{ location.key }}.env
     environment:
       - NODE_TYPE=control
     network_mode: "host"
@@ -33,7 +33,7 @@ services:
   control:
     image: "{{ container_registry }}/contrail-controller-control-control:{{ contrail_version_tag }}"
     network_mode: "host"
-    env_file: "/etc/contrail/common_control_only_{{ location.key }}.env"
+    env_file: /etc/contrail/common_control_only_{{ location.key }}.env
     volumes_from:
       - node-init
     depends_on:
