@@ -57,9 +57,15 @@
 - name: "add BGP_PORT to common_control_only_{{ location.key }}.env"
   lineinfile: dest=/etc/contrail/common_control_only_{{ location.key }}.env regexp='.*BGP_PORT$' line="BGP_PORT={{ bgp_port }}" state=present
 
-- name: calculate control introspect port
+- name: calculate control introspect port if not assigned
   set_fact:
     introspect_port: "{{ location.value.CLUSTER_ID|int + 18082 }}"
+  when: location.value.CONTROL_INTROSPECT_LISTEN_PORT is undefined
+
+- name: add control introspect port if assigned
+  set_fact:
+    introspect_port: "{{ location.value.CONTROL_INTROSPECT_LISTEN_PORT }}"
+  when: location.value.CONTROL_INTROSPECT_LISTEN_PORT is defined
 
 - name: "add control introspect to common_control_only_{{ location.key }}.env"
   lineinfile: dest=/etc/contrail/common_control_only_{{ location.key }}.env regexp='.*CONTROL_INTROSPECT_LISTEN_PORT$' line="CONTROL_INTROSPECT_LISTEN_PORT={{ introspect_port }}" state=present
