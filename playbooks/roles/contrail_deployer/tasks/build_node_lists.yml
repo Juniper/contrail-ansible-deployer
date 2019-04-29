@@ -168,6 +168,16 @@
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:
+    vcenter_fabric_manager_nodes_list: []
+- name: add vcenter_fabric_manager nodes to the list
+  set_fact:
+    vcenter_fabric_manager_nodes_list: "{{ vcenter_fabric_manager_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.vcenter_fabric_manager is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
     vrouter_nodes_list: []
 - name: add Vrouter Nodes to the list
   set_fact:
