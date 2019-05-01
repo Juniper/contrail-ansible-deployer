@@ -229,6 +229,7 @@ class FilterModule(object):
                 if len(object_to_process.get("fq_name", [])) < 2:
                     continue
                 instance_name = str(object_to_process.get("fq_name")[-1])
+                fq_name = instance_name
                 if '.' in instance_name:
                     instance_name = instance_name.split('.')[0]
                 uuid = str(object_to_process.get("uuid"))
@@ -243,13 +244,13 @@ class FilterModule(object):
                 # Either not in instances.yml or has empty role list in instances
                 if instance_name not in instances_nodes_dict:
                     instances_nodes_dict[instance_name] = {}
-                    deleted_nodes_dict[instance_name] = ip_address
+                    deleted_nodes_dict[fq_name] = ip_address
                 elif 'instance_roles' not in instances_nodes_dict[
                     instance_name] or \
                         not len(instances_nodes_dict[instance_name][
                                     'instance_roles']):
                     if instance_name not in deleted_nodes_dict:
-                        deleted_nodes_dict[instance_name] = \
+                        deleted_nodes_dict[fq_name] = \
                             self.node_name_ip_map[instance_name]
 
                 if 'existing_roles' not in instances_nodes_dict[
