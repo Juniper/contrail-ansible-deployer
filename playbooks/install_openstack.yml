@@ -72,6 +72,9 @@
   connection: local
   gather_facts: no
   pre_tasks:
+    - name: DEBUG 1
+      debug:
+        var: hostvars['localhost'].deleted_nodes_dict
     - name: Import group variables
       include_vars:
         dir: "{{ playbook_dir }}/../../contrail-kolla-ansible/ansible/group_vars"

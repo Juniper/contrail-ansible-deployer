@@ -42,16 +42,13 @@
     vars:
       - contrail_configuration: "{{ hostvars['localhost'].contrail_configuration }}"
       - node_roles_dict: "{{ hostvars['localhost'].node_roles_dict }}"
-      - instance_name: "{{ item.key }}"
-      - ip_address: "{{ item.value }}"
       - api_server: "{{ hostvars['localhost'].api_server }}"
-    with_dict: "{{ hostvars['localhost'].deleted_nodes_dict }}"
+      - deleted_nodes_dict: "{{ hostvars['localhost'].deleted_nodes_dict }}"
     when:
       - global_configuration is defined
       - global_configuration.ENABLE_DESTROY is defined
       - global_configuration.ENABLE_DESTROY | bool
       - hostvars['localhost'].api_server is defined
-      - inventory_hostname == hostvars['localhost'].api_server
   environment:
     - "{{ contrail_ansible_environment | default({})}}"
 
@@ -67,6 +64,7 @@
       - instance_name: "{{ ansible_hostname }}"
       - ip_address: "{{ inventory_hostname }}"
       - api_server: "{{ hostvars['localhost'].api_server }}"
+      - deleted_nodes_dict: "{{ hostvars['localhost'].deleted_nodes_dict }}"
     when:
       - global_configuration is defined
       - global_configuration.ENABLE_DESTROY is defined
@@ -115,6 +113,7 @@
     - roles: "{{ hostvars['localhost'].roles }}"
     - node_roles_dict: "{{ hostvars['localhost'].node_roles_dict }}"
     - api_server: "{{ hostvars['localhost'].api_server }}"
+    - deleted_nodes_dict: "{{ hostvars['localhost'].deleted_nodes_dict }}"
   environment:
     - https_proxy: "{{ contrail_configuration.HTTPS_PROXY|default('') }}"
     - http_proxy: "{{ contrail_configuration.HTTP_PROXY|default('') }}"
