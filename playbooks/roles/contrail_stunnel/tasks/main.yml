@@ -1,0 +1,15 @@
+---
+- name: create /etc/contrail/stunnel
+  file:
+    path: /etc/contrail/stunnel
+    state: directory
+    recurse: yes
+
+- name: "create stunnel compose file"
+  template:
+    src: contrail-stunnel.yaml.j2
+    dest: "/etc/contrail/stunnel/docker-compose.yaml"
+
+- name: "start stunnel"
+  docker_service:
+    project_src: /etc/contrail/stunnel

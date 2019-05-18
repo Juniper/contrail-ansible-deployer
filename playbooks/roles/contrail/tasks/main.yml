@@ -44,6 +44,16 @@
     - webui
     - analytics
 
+- name: create stunnel
+  include_role:
+    name: contrail_stunnel
+  when: 
+    - roles[instance_name].analytics is defined
+    - (( contrail_configuration.SSL_ENABLE is defined ) and
+      ( contrail_configuration.SSL_ENABLE|bool ))
+  tags:
+    - analytics
+
 - name: create contrail config database
   include_role:
     name: contrail_config_database
