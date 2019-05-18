@@ -30,6 +30,10 @@ analytics_snmp_log_driver: "{{ contrail_configuration.ANALYTICS_SNMP_LOG_DRIVER|
 analytics_snmp_log_max_size: "{{ contrail_configuration.ANALYTICS_SNMP_LOG_MAX_SIZE|default(default_log_max_size) }}"
 analytics_snmp_log_max_file: "{{ contrail_configuration.ANALYTICS_SNMP_LOG_MAX_FILE|default(default_log_max_file) }}"
 
+stunnel_log_driver: "{{ contrail_configuration.STUNNEL_LOG_DRIVER|default(default_log_driver) }}"
+stunnel_log_max_size: "{{ contrail_configuration.STUNNEL_LOG_MAX_SIZE|default(default_log_max_size) }}"
+stunnel_log_max_file: "{{ contrail_configuration.STUNNEL_LOG_MAX_FILE|default(default_log_max_file) }}"
+
 compute_log_driver: "{{ contrail_configuration.COMPUTE_LOG_DRIVER|default(default_log_driver) }}"
 compute_log_max_size: "{{ contrail_configuration.COMPUTE_LOG_MAX_SIZE|default(default_log_max_size) }}"
 compute_log_max_file: "{{ contrail_configuration.COMPUTE_LOG_MAX_FILE|default(default_log_max_file) }}"
