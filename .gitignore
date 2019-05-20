@@ -3,3 +3,4 @@ playbooks/*.retry
 playbooks/test.yml
 .project
 .vscode
+test
