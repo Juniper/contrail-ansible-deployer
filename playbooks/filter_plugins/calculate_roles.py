@@ -451,13 +451,17 @@ class ContrailCluster(object):
     e = None
 
     contrail_object_map = {
-        "virtual-routers": "vrouter",
-        "config-nodes": "config",
-        "database-nodes": "analytics_database",
-        "bgp-routers": "control",
-        "analytics-nodes": "analytics",
-        "analytics-alarm-nodes": "analytics_alarm",
-        "analytics-snmp-nodes": "analytics_snmp"
+        #FIXME:  Currently we support add/delete of only vrouter nodes. When
+        # adding support for add/del of other roles, this should be uncommented
+        # and look up the ip_role_map only for objects that have 'router_type'
+        # set to 'control_node' and ignore other 'bgp-routers' objects
+        #"config-nodes": "config",
+        #"database-nodes": "analytics_database",
+        #"bgp-routers": "control",
+        #"analytics-nodes": "analytics",
+        #"analytics-alarm-nodes": "analytics_alarm",
+        #"analytics-snmp-nodes": "analytics_snmp",
+        "virtual-routers": "vrouter"
     }
 
     ip_role_map = {
