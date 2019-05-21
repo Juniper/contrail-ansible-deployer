@@ -8,7 +8,7 @@
 
 - name: set orchestrator param
   set_fact:
-    contrail_configuration: "{{ contrail_configuration | combine({'CLOUD_ORCHESTRATOR': orchestrator | default('none')}) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({'CLOUD_ORCHESTRATOR': orchestrator | default('none'), 'ANALYTICS_API_SSL_ENABLE': no}) }}"
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR is not defined
   tags:

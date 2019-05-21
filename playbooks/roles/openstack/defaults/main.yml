@@ -33,5 +33,7 @@ default_kolla_globals:
   opencontrail_webui_ip: "{{ contrail_configuration.WEBUI_NODES | default(contrail_configuration.CONTROLLER_NODES | default(webui_nodes_list | join(','))) | replace (',', ' ') }}"
   neutron_plugin_agent: opencontrail
   config_api_ssl_enable: "{{ contrail_configuration.CONFIG_API_SSL_ENABLE | default(contrail_configuration.SSL_ENABLE | default('no')) | bool }}"
+  analytics_api_ssl_enable: no
+  #analytics_api_ssl_enable: "{{ contrail_configuration.ANALYTICS_API_SSL_ENABLE | default(contrail_configuration.SSL_ENABLE | default('no')) | bool }}"
   contrail_ca_file: "{{ contrail_configuration.SERVER_CA_CERTFILE | default('/etc/contrail/ssl/certs/ca-cert.pem') }}"
   neutron_fwaas_version: v2

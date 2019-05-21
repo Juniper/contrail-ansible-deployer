@@ -5,7 +5,7 @@
   pre_tasks:
     - name: Set orchestrator if not passed
       set_fact:
-          contrail_configuration: "{{ contrail_configuration | default({}) | combine({'CLOUD_ORCHESTRATOR': orchestrator if orchestrator is defined else 'openstack'}) }}"
+          contrail_configuration: "{{ contrail_configuration | default({}) | combine({'CLOUD_ORCHESTRATOR': orchestrator if orchestrator is defined else 'openstack', 'ANALYTICS_API_SSL_ENABLE': no}) }}"
       when: contrail_configuration is not defined or contrail_configuration.CLOUD_ORCHESTRATOR is not defined
     - name: Expose instances
       set_fact:
