@@ -8,7 +8,7 @@ This set of commands will configure the instance and install AIO contrail with k
 ```
 ssh-copy-id 192.168.1.100
 yum install -y ansible-2.4.2.0
-#For Contrail R5.0 use 
+#For Contrail R5.0 use
 git clone -b R5.0 http://github.com/Juniper/contrail-ansible-deployer
 #For master branch use
 git clone http://github.com/Juniper/contrail-ansible-deployer
