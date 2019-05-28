@@ -76,3 +76,17 @@
     roles: "{{ roles | extract_roles(item) }}"
   when: item.value.roles is defined
   with_dict: "{{ instances }}"
+
+- set_fact:
+    tsn_haproxy_config: {}
+- name: construct tsn ip and ovs port list for redundat toragent pairs in tsn_haproxy_config dict
+  set_fact:
+    tsn_haproxy_config: "{{ tsn_haproxy_config | calculate_tsn_haproxy_config(instances) }}"
+
+- set_fact:
+    tsn_haproxy_ip_list: []
+    tsn_haproxy_port_list: []
+- name: Get tsn_haproxy_ip_list and tsn_haproxy_ip_list used by tsn_haproxy container
+  set_fact:
+    tsn_haproxy_ip_list: "{{ tsn_haproxy_config['tsn_haproxy_ip_list'] }}"
+    tsn_haproxy_port_list: "{{ tsn_haproxy_config['tsn_haproxy_port_list'] }}"

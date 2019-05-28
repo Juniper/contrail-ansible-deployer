@@ -79,6 +79,8 @@
     - {'name': 'TSN_NODES', 'nodes': "{{tsn_nodes_list}}"}
     - {'name': 'KUBERNETES_API_NODES', 'nodes': "{{k8s_master_nodes_list}}"}
     - {'name': 'KUBEMANAGER_NODES', 'nodes': "{{kubemanager_nodes_list}}"}
+    - {'name': 'TSN_HA_IP_LIST', 'nodes': "{{tsn_haproxy_ip_list}}"}
+    - {'name': 'TSN_HA_PORT_LIST', 'nodes': "{{tsn_haproxy_port_list}}"}
 
 - set_fact:
     contrail_configuration: "{{ contrail_configuration | combine({'ANALYTICSDB_ENABLE': False}) }}"
