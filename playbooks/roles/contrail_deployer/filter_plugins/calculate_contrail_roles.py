@@ -10,7 +10,6 @@ import requests
 import urllib, urllib2
 import json
 
-
 class FilterModule(object):
 
     keystone_auth_host = ""
@@ -102,7 +101,8 @@ class FilterModule(object):
         return {
             'calculate_contrail_roles': self.calculate_contrail_roles,
             'extract_roles': self.extract_roles,
-            'calculate_deleted_toragent_roles': self.calculate_deleted_toragent_roles
+            'calculate_deleted_toragent_roles': self.calculate_deleted_toragent_roles,
+            'calculate_tsn_haproxy_config': self.calculate_tsn_haproxy_config
         }
 
     def get_ks_auth_token(self, contrail_config):
@@ -388,3 +388,85 @@ class FilterModule(object):
         return str({"node_roles_dict": node_roles_dict,
                     "deleted_nodes_dict": deleted_nodes_dict,
                     "api_server_ip": cluster_roles_dict["api_server_ip"]})
+
+    # Get a list of nodes on which tor agents are running and check if
+    # tsn_haproxy is present in cluster
+    def get_toragent_nodes(self, instances):
+        node_list = []
+        tsn_haproxy_enabled = False
+        for host in instances.keys():
+            roles_dict = instances[host].get('roles', None)
+            if roles_dict:
+                if [ role for role in roles_dict.keys() if 'toragent' in role]:
+                    node_list.append(host)
+                elif 'tsn_haproxy' in roles_dict.keys():
+                    tsn_haproxy_enabled = True
+        return (node_list, tsn_haproxy_enabled)
+    #end get_toragent_nodes
+
+    # Given a host_string and tor_name, return the standby tor-agent info
+    # identified by indexed toragent role and host-string of where role is installed
+    def get_standby_info(self, skip_host, match_tor_name, instances):
+        tor_agent_host_list, tsn_haproxy_enabled = self.get_toragent_nodes(instances)
+        for host in tor_agent_host_list:
+            if host == skip_host:
+                continue
+            for role in instances[host]['roles'].keys():
+                if 'toragent' in role:
+                    tor_name= instances[host]['roles'][role].get('TOR_NAME', None)
+                    if tor_name == match_tor_name:
+                        return (role, host)
+        return (None, None)
+    #end get_standby_info
+
+    def make_key(self, tsn1, tsn2):
+        if tsn1 < tsn2:
+            return tsn1 + "-" + tsn2
+        return tsn2 + "-" + tsn1
+
+    # Get HA proxy configuration for all TOR agents
+    def calculate_tsn_haproxy_config(self, tsn_haproxy_config, instances):
+
+        tor_agent_host_list, tsn_haproxy_enabled = self.get_toragent_nodes(instances)
+        # Return empty tsn haproxy config if tsn_haproxy role is not present in cluster
+        if not tsn_haproxy_enabled:
+            return str({"tsn_haproxy_ip_list": [],
+                        "tsn_haproxy_port_list": []})
+
+        master_standby_dict = {}
+        tsn_haproxy_ip_list = []
+        tsn_haproxy_port_list = []
+
+        for host in tor_agent_host_list:
+            for role in instances[host]['roles'].keys():
+                if 'toragent' in role:
+                    tor_name= instances[host]['roles'][role].get('TOR_NAME', None)
+                    tsn1 = instances[host]['roles'][role].get('TOR_TSN_IP', None)
+                    port1 = instances[host]['roles'][role].get('TOR_OVS_PORT', None)
+                    standby_tor_idx, standby_host = self.get_standby_info(host, tor_name, instances)
+                    key = tsn1
+                    if (standby_tor_idx != None and standby_host != None):
+                        tsn2 = instances[standby_host]['roles'][standby_tor_idx].get('TOR_TSN_IP', None)
+                        port2 = instances[standby_host]['roles'][standby_tor_idx].get('TOR_OVS_PORT', None)
+                        if port1 == port2:
+                            key = self.make_key(tsn1, tsn2)
+                        else:
+                            raise Exception("Tor Agents (%s, %s) and (%s, %s) \
+                                   are configured as redundant agents but don't  \
+                                   have same ovs_port" \
+                                   %(host, role, standby_host, standby_tor_idx))
+                    if not key in master_standby_dict:
+                        master_standby_dict[key] = []
+                    if not port1 in master_standby_dict[key]:
+                        master_standby_dict[key].append(port1)
+
+        for key in master_standby_dict.keys():
+            tsn1 = key.split('-')[0]
+            tsn2 = key.split('-')[1]
+            for ovs_port in master_standby_dict[key]:
+                tsn_haproxy_port_list.append(ovs_port)
+                tsn_haproxy_ip_list.append(tsn1)
+                tsn_haproxy_ip_list.append(tsn2)
+
+        return str({"tsn_haproxy_ip_list": tsn_haproxy_ip_list,
+                   "tsn_haproxy_port_list": tsn_haproxy_port_list})
