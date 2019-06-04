@@ -21,6 +21,18 @@
     path: "/etc/contrail/tsn_haproxy.env"
     state: touch
 
+- name: "populate pod specific tsn_haproxy.env with IP_LIST calculated by haproxy filter"
+  lineinfile: dest=/etc/contrail/tsn_haproxy.env regexp='^{{ 'IP_LIST' }}=.*' line="{{ 'IP_LIST' }}={{ contrail_configuration.TSN_HA_IP_LIST | join(',') }}" state=present
+  when:
+    - contrail_configuration.TSN_HA_IP_LIST is defined
+    - contrail_configuration.TSN_HA_IP_LIST | length > 0
+
+- name: "populate pod specific tsn_haproxy.env with PORT_LIST calculated by haproxy filter"
+  lineinfile: dest=/etc/contrail/tsn_haproxy.env regexp='^{{ 'PORT_LIST' }}=.*' line="{{ 'PORT_LIST' }}={{ contrail_configuration.TSN_HA_PORT_LIST | join(',') }}" state=present
+  when:
+    - contrail_configuration.TSN_HA_PORT_LIST is defined
+    - contrail_configuration.TSN_HA_PORT_LIST | length > 0
+
 - name: "populate global tsn_haproxy.env"
   lineinfile: dest=/etc/contrail/tsn_haproxy.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value }}" state=present
   with_dict: "{{ contrail_configuration }}"
@@ -36,7 +48,16 @@
 - name: "populate pod specific tsn_haproxy.env"
   lineinfile: dest=/etc/contrail/tsn_haproxy.env regexp='^{{ item.key }}=.*' line="{{ item.key }}={{ item.value | string }}" state=present
   with_dict:
-    "{{ roles[instance_name].tsn_haproxy }}"
+    "{{ roles[instance_name].tsn_haproxy | default({}) }}"
+  when: roles[instance_name].tsn_haproxy is defined
+  ignore_errors: yes
+  no_log: True
+
+- name: "populate pod specific tsn_haproxy.env with PORT_LIST calculated by haproxy filter"
+  lineinfile: dest=/etc/contrail/tsn_haproxy.env regexp='^{{ 'PORT_LIST' }}=.*' line="{{ 'PORT_LIST' }}={{ contrail_configuration.TSN_HA_PORT_LIST | join(',') }}" state=present
+  when:
+    - contrail_configuration.TSN_HA_PORT_LIST is defined
+    - contrail_configuration.TSN_HA_PORT_LIST | length > 0
 
 - name: "update image"
   shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"

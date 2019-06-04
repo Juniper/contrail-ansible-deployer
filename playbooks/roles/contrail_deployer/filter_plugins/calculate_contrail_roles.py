@@ -9,7 +9,7 @@ for all the nodes in the instances file.
 import requests
 import urllib, urllib2
 import json
-
+from sys import exit
 
 class FilterModule(object):
 
@@ -102,7 +102,8 @@ class FilterModule(object):
         return {
             'calculate_contrail_roles': self.calculate_contrail_roles,
             'extract_roles': self.extract_roles,
-            'calculate_deleted_toragent_roles': self.calculate_deleted_toragent_roles
+            'calculate_deleted_toragent_roles': self.calculate_deleted_toragent_roles,
+            'calculate_tsn_haproxy_config': self.calculate_tsn_haproxy_config
         }
 
     def get_ks_auth_token(self, contrail_config):
@@ -388,3 +389,76 @@ class FilterModule(object):
         return str({"node_roles_dict": node_roles_dict,
                     "deleted_nodes_dict": deleted_nodes_dict,
                     "api_server_ip": cluster_roles_dict["api_server_ip"]})
+
+    # Get value for env variable for a role on a given host
+    def get_env_value_for_role(self, host, role, instances, contrail_configuration, key):
+        if instances[host]['roles'][role].get(key, None):
+            return instances[host]['roles'][role].get(key)
+        elif (instances[host]['contrail_configuration'] and
+              instances[host]['contrail_configuration'].get(key, None)):
+            return instances[host]['contrail_configuration'].get(key)
+        elif contrail_configuration:
+            return contrail_configuration.get(key, None)
+
+        return None 
+ 
+    # Given a host_string and tor_name, return the standby tor-agent info
+    # identified by indexed toragent role and host-string of where role is installed
+    def get_standby_info(self, skip_host, match_tor_name, instances, contrail_configuration, toragent_nodes_list):
+        for host in toragent_nodes_list:
+            if host == skip_host:
+                continue
+            for role in instances[host]['roles'].keys():
+                if 'toragent' not in role:
+                    continue
+                tor_name = self.get_env_value_for_role(host, role, instances, contrail_configuration, 'TOR_NAME')
+                if tor_name == match_tor_name:
+                    return (role, host)
+        return (None, None)
+    #end get_standby_info
+
+    def make_key(self, tsn1, tsn2):
+        if tsn1 < tsn2:
+            return tsn1 + "-" + tsn2
+        return tsn2 + "-" + tsn1
+
+    # Get HA proxy configuration for all TOR agents
+    def calculate_tsn_haproxy_config(self, tsn_haproxy_config, toragent_nodes_list, instances, contrail_configuration):
+        import epdb;epdb.set_trace()
+        master_standby_dict = {}
+        tsn_haproxy_ip_list = []
+        tsn_haproxy_port_list = []
+
+        for host in toragent_nodes_list:
+            for role in instances[host]['roles'].keys():
+                if 'toragent' not in role:
+                    continue
+                tor_name= self.get_env_value_for_role(host, role, instances, contrail_configuration, 'TOR_NAME')
+                tsn1 = self.get_env_value_for_role(host, role, instances, contrail_configuration, 'TOR_TSN_IP')
+                port1 = self.get_env_value_for_role(host, role, instances, contrail_configuration, 'TOR_OVS_PORT')
+                standby_tor_idx, standby_host = self.get_standby_info(host, tor_name, instances, contrail_configuration, toragent_nodes_list)
+                key = tsn1
+                if (standby_tor_idx != None and standby_host != None):
+                    tsn2 = self.get_env_value_for_role(standby_host, standby_tor_idx, instances, contrail_configuration, 'TOR_TSN_IP')
+                    port2 = self.get_env_value_for_role(standby_host, standby_tor_idx, instances, contrail_configuration, 'TOR_OVS_PORT')
+                    if port1 == port2:
+                        key = self.make_key(tsn1, tsn2)
+                    else:
+                        raise Exception("Tor Agents (%s, %s) and (%s, %s) \
+                                        are configured as redundant agents but don't  \
+                                        have same ovs_port" \
+                                        %(host, role, standby_host, standby_tor_idx))
+                if not key in master_standby_dict:
+                    master_standby_dict[key] = []
+                if not port1 in master_standby_dict[key]:
+                    master_standby_dict[key].append(port1)
+        for key in master_standby_dict.keys():
+            tsn1 = key.split('-')[0]
+            tsn2 = key.split('-')[1]
+            for ovs_port in master_standby_dict[key]:
+                tsn_haproxy_port_list.append(ovs_port)
+                tsn_haproxy_ip_list.append(tsn1)
+                tsn_haproxy_ip_list.append(tsn2)
+
+        return str({"tsn_haproxy_ip_list": tsn_haproxy_ip_list,
+                   "tsn_haproxy_port_list": tsn_haproxy_port_list})
