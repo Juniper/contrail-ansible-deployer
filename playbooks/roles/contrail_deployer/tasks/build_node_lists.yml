@@ -188,3 +188,13 @@
     - item.value.roles.vrouter.TSN_EVPN_MODE is defined
     - item.value.roles.vrouter.TSN_EVPN_MODE | bool
   with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
+    toragent_nodes_list: []
+- name: add toragent nodes to the list
+  set_fact:
+    toragent_nodes_list: "{{ toragent_nodes_list + [ item.key ] }}"
+  when:
+    - item.value.roles is defined
+    - ( item.value.roles.keys() | select('search','toragent') | list | count > 0 )
+  with_dict: "{{ hostvars['localhost']['instances'] }}"

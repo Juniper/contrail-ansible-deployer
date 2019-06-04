@@ -164,3 +164,41 @@
     - always
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+
+- set_fact:
+    tsn_haproxy_enable: False
+- name: check if tsn haproxy is enabled
+  set_fact:
+     tsn_haproxy_enable: "{{ True | bool }}"
+  when:
+    - toragent_nodes_list | length > 0
+    - item.value.roles is defined
+    - ( 'tsn_haproxy' in item.value.roles.keys() )
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
+    tsn_haproxy_config: {}
+- name: construct tsn ip and ovs port list for redundat toragent pairs in tsn_haproxy_config dict
+  set_fact:
+    tsn_haproxy_config: "{{ tsn_haproxy_config | calculate_tsn_haproxy_config(toragent_nodes_list, instances, contrail_configuration) }}"
+  when:
+    - tsn_haproxy_enable | bool
+    - toragent_nodes_list | length > 0
+
+- set_fact:
+    tsn_haproxy_ip_list: []
+    tsn_haproxy_port_list: []
+- name: Get tsn_haproxy_ip_list and tsn_haproxy_ip_list used by tsn_haproxy container
+  set_fact:
+    tsn_haproxy_ip_list: "{{ tsn_haproxy_config['tsn_haproxy_ip_list'] }}"
+    tsn_haproxy_port_list: "{{ tsn_haproxy_config['tsn_haproxy_port_list'] }}"
+  when:
+    - toragent_nodes_list | length > 0
+    - tsn_haproxy_config.keys() | length > 0
+
+- name: add tsn haproxy parameters to contrail configuration
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'TSN_HA_IP_LIST': tsn_haproxy_ip_list, 'TSN_HA_PORT_LIST': tsn_haproxy_port_list}) }}"
+  when:
+    - tsn_haproxy_ip_list | length > 0
+    - tsn_haproxy_port_list | length > 0
