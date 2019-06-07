@@ -17,8 +17,6 @@ instances:
       webui:
       openstack:
       tsn_haproxy:
-         IP_LIST: "192.168.1.2,192.168.1.4"
-         PORT_LIST: "4321"
   bms2:
     provider: bms
     ip: 192.168.1.2
