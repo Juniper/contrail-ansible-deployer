@@ -76,6 +76,15 @@
   set_fact:
     mastertoken: "{{ output.stdout }}"
 
+- name: Get token ca cert
+  shell: "openssl x509 -in /etc/kubernetes/pki/ca.crt -noout -pubkey |
+         openssl rsa -pubin -outform DER 2>/dev/null | sha256sum | cut -d' ' -f1"
+  register: output
+
+- name: Set token ca cert
+  set_fact:
+    token_ca_cert: "{{ output.stdout }}"
+
 - name: get nodes
   shell: kubectl get nodes -o yaml |grep "\- address:" |awk '{print $3}'
   register: nodes_list_output

@@ -51,5 +51,7 @@
     msg: "master token: {{ hostvars[k8s_master_name].mastertoken }}"
 
 - name: join k8s cluster
-  shell: "kubeadm join --token {{ hostvars[k8s_master_name].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ k8s_master_ip }}:6443"
+  shell: "kubeadm join --token {{ hostvars[k8s_master_name].mastertoken }}
+         --discovery-token-ca-cert-hash sha256:{{ hostvars[k8s_master_name].token_ca_cert }}
+         {{ k8s_master_ip }}:6443"
   when: node_exists == false
