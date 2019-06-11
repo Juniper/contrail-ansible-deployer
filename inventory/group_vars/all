@@ -1,0 +1,3 @@
+---
+kolla_dir: "{{ playbook_dir }}/../../contrail-kolla-ansible"
+

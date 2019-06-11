@@ -10,7 +10,6 @@ openstack_sku: >-
       {{ default_openstack_sku }}
     {%- endif -%}
 
-kolla_dir: "{{ playbook_dir }}/../../contrail-kolla-ansible"
 force_clone: >-
     {%- if kolla_config.kolla_globals is defined and kolla_config.kolla_globals.force_clone is defined -%}
       {{ kolla_config.kolla_globals.force_clone }}
