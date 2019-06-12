@@ -45,11 +45,17 @@ class OpenStackParams:
     ks_admin_tenant = ""
     ks_admin_user   = ""
     ks_auth_url_version = "/v3" # default for openstack queens is "/v3"
+    ks_auth_proto = "http://"
     auth_token = None
     aaa_mode = None
 
-    def __init__(self, contrail_config):
+    def __init__(self, contrail_config, kolla_config, hv):
         self.ks_auth_host = contrail_config.get("KEYSTONE_AUTH_HOST", None)
+        if kolla_config is not None and kolla_config.get("kolla_globals"):
+            self.ks_auth_host = kolla_config["kolla_globals"].get("kolla_external_vip_address",
+                    self.ks_auth_host)
+            if kolla_config["kolla_globals"].get("kolla_enable_tls_external", None):
+                self.ks_auth_proto = "https://"
         self.ks_admin_user = contrail_config.get(
             "KEYSTONE_AUTH_ADMIN_USER", "admin")
         self.ks_admin_password = contrail_config.get(
@@ -62,15 +68,17 @@ class OpenStackParams:
         ks_tokens_url = self.ks_auth_url_endpoint_dict.get(self.ks_auth_url_version,
                 self.ks_auth_url_endpoint_dict["/v3"])
 
-        # TODO: Add support for https and non-default port
+        # TODO: Add support for non-default port
         if self.ks_auth_host:
-            self.ks_auth_url = 'http://' + str(self.ks_auth_host) + \
-                ':35357/v3' +\
+            self.ks_auth_url = str(self.ks_auth_proto) + str(self.ks_auth_host) + \
+                ':5000/v3' +\
                 str(ks_tokens_url)
-            self.os_endpoints_url = 'http://' + str(self.ks_auth_host) + \
-                                    ':35357' + str(self.ks_auth_url_version) \
+            self.os_endpoints_url = str(self.ks_auth_proto) + \
+                                    str(self.ks_auth_host) + \
+                                    ':5000' + str(self.ks_auth_url_version) \
                                     + '/endpoints'
-            self.os_hypervisors_url = 'http://' + str(self.ks_auth_host) + \
+            self.os_hypervisors_url = str(self.ks_auth_proto) + \
+                                str(self.ks_auth_host) + \
                                 ':8774/v2.1/os-hypervisors/detail'
 
         if contrail_config.get("CLOUD_ORCHESTRATOR") == "openstack":
@@ -168,12 +176,13 @@ class OpenstackCluster(object):
     ]
 
 
-    def __init__(self, instances, contrail_configuration):
+    def __init__(self, instances, contrail_configuration, kolla_config, hv):
         # Initialize the openstack params
-        self.os_params = OpenStackParams(contrail_configuration)
+        self.os_params = OpenStackParams(contrail_configuration, kolla_config,
+                hv)
         self.instances_dict = instances
 
-    def discover_openstack_roles(self):
+    def discover_openstack_roles(self, hv):
         instances_nodes_dict = {}
         deleted_nodes_dict = {}
         valid_cluster_node_lists = "yes"
@@ -197,7 +206,7 @@ class OpenstackCluster(object):
         try:
             instances_nodes_dict, deleted_nodes_dict = \
                 self.discover_openstack_computes(instances_nodes_dict,
-                                                 deleted_nodes_dict)
+                                                 deleted_nodes_dict, hv)
             #instances_nodes_dict, deleted_nodes_dict = \
             #    self.discover_openstack_controllers(instances_nodes_dict,
             #                                        deleted_nodes_dict)
@@ -243,8 +252,23 @@ class OpenstackCluster(object):
     def get_ops_hostname(self, ip_address):
         return "fqdn"
 
+    # node_ip_name_map containes ip address to host name mappings built from the
+    # instances dict. service_ip could be either ctrl-data or mgmt (that is
+    # given under 'ip' field of the instances entry. This function goes through
+    # all the IP addresses for a host and if an address matching the IP is
+    # found, then the corresponding mgmt ip is used to index into the
+    # node_ip_name_map dict to get the server name
+    def get_instance_name(self, service_ip, hv):
+        for i in hv.keys():
+            if service_ip in hv[i].get('ansible_all_ipv4_addresses',[]):
+                for ip in hv[i]['ansible_all_ipv4_addresses']:
+                    if ip in self.node_ip_name_map:
+                        return ip, self.node_ip_name_map[ip]
+        return service_ip, None
+
+
     def discover_openstack_computes(self,instances_nodes_dict,
-                                    deleted_nodes_dict):
+                                    deleted_nodes_dict, hv):
         # Read Openstack Computes
         try:
             response = self.os_params.get_os_hypervisors()
@@ -254,8 +278,9 @@ class OpenstackCluster(object):
             response_dict = response.json()
             if "hypervisors" in response_dict:
                 for hyp in response_dict["hypervisors"]:
-                    if hyp["host_ip"] in self.node_ip_name_map:
-                        server_name = self.node_ip_name_map[hyp["host_ip"]]
+                    server_ip, server_name = \
+                            self.get_instance_name(hyp["host_ip"], hv)
+                    if server_name:
                         if "existing_roles" not \
                                 in instances_nodes_dict[server_name]:
                             instances_nodes_dict[server_name][
@@ -264,7 +289,9 @@ class OpenstackCluster(object):
                             'existing_roles'].append("openstack_compute")
                     else:
                         hostname = hyp["hypervisor_hostname"].split('.')[0]
-                        deleted_nodes_dict[hostname] = hyp["host_ip"]
+                        deleted_nodes_dict[hostname] = \
+                                self.instances_dict[hostname]['ip']
+
             return instances_nodes_dict, deleted_nodes_dict
 
     def discover_openstack_controllers(self, instances_nodes_dict,
@@ -315,7 +342,8 @@ class FilterModule(object):
         }
 
     def calculate_openstack_roles(self, existing_dict,
-            instances_dict, global_configuration, contrail_configuration):
+            instances_dict, global_configuration, contrail_configuration,
+            kolla_config, hv):
         # don't calculate anything if global_configuration.ENABLE_DESTROY is not set
         empty_result = {"node_roles_dict": dict(),
                         "deleted_nodes_dict": dict()}
@@ -325,9 +353,10 @@ class FilterModule(object):
         if not enable_destroy:
             return str(empty_result)
 
-        self.os_roles = OpenstackCluster(instances_dict, contrail_configuration)
+        self.os_roles = OpenstackCluster(instances_dict, contrail_configuration,
+                kolla_config, hv)
         instances_nodes_dict, deleted_nodes_dict = \
-                self.os_roles.discover_openstack_roles()
+                self.os_roles.discover_openstack_roles(hv)
         if self.os_roles.e is not None:
             return str({"Exception": self.os_roles.e})
 
