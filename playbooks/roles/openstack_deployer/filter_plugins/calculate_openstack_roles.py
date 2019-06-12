@@ -45,11 +45,17 @@ class OpenStackParams:
     ks_admin_tenant = ""
     ks_admin_user   = ""
     ks_auth_url_version = "/v3" # default for openstack queens is "/v3"
+    ks_auth_proto = "http://"
     auth_token = None
     aaa_mode = None
 
-    def __init__(self, contrail_config):
+    def __init__(self, contrail_config, kolla_config):
         self.ks_auth_host = contrail_config.get("KEYSTONE_AUTH_HOST", None)
+        if kolla_config is not None and kolla_config.get("kolla_globals"):
+            self.ks_auth_host = kolla_config["kolla_globals"].get("kolla_external_vip_address",
+                    self.ks_auth_host)
+            if kolla_config["kolla_globals"].get("kolla_enable_tls_external", None):
+                self.ks_auth_proto = "https://"
         self.ks_admin_user = contrail_config.get(
             "KEYSTONE_AUTH_ADMIN_USER", "admin")
         self.ks_admin_password = contrail_config.get(
@@ -62,15 +68,17 @@ class OpenStackParams:
         ks_tokens_url = self.ks_auth_url_endpoint_dict.get(self.ks_auth_url_version,
                 self.ks_auth_url_endpoint_dict["/v3"])
 
-        # TODO: Add support for https and non-default port
+        # TODO: Add support for non-default port
         if self.ks_auth_host:
-            self.ks_auth_url = 'http://' + str(self.ks_auth_host) + \
-                ':35357/v3' +\
+            self.ks_auth_url = str(self.ks_auth_proto) + str(self.ks_auth_host) + \
+                ':5000/v3' +\
                 str(ks_tokens_url)
-            self.os_endpoints_url = 'http://' + str(self.ks_auth_host) + \
-                                    ':35357' + str(self.ks_auth_url_version) \
+            self.os_endpoints_url = str(self.ks_auth_proto) + \
+                                    str(self.ks_auth_host) + \
+                                    ':5000' + str(self.ks_auth_url_version) \
                                     + '/endpoints'
-            self.os_hypervisors_url = 'http://' + str(self.ks_auth_host) + \
+            self.os_hypervisors_url = str(self.ks_auth_proto) + \
+                                str(self.ks_auth_host) + \
                                 ':8774/v2.1/os-hypervisors/detail'
 
         if contrail_config.get("CLOUD_ORCHESTRATOR") == "openstack":
@@ -168,9 +176,9 @@ class OpenstackCluster(object):
     ]
 
 
-    def __init__(self, instances, contrail_configuration):
+    def __init__(self, instances, contrail_configuration, kolla_config):
         # Initialize the openstack params
-        self.os_params = OpenStackParams(contrail_configuration)
+        self.os_params = OpenStackParams(contrail_configuration, kolla_config)
         self.instances_dict = instances
 
     def discover_openstack_roles(self):
@@ -315,7 +323,8 @@ class FilterModule(object):
         }
 
     def calculate_openstack_roles(self, existing_dict,
-            instances_dict, global_configuration, contrail_configuration):
+            instances_dict, global_configuration, contrail_configuration,
+            kolla_config):
         # don't calculate anything if global_configuration.ENABLE_DESTROY is not set
         empty_result = {"node_roles_dict": dict(),
                         "deleted_nodes_dict": dict()}
@@ -325,7 +334,8 @@ class FilterModule(object):
         if not enable_destroy:
             return str(empty_result)
 
-        self.os_roles = OpenstackCluster(instances_dict, contrail_configuration)
+        self.os_roles = OpenstackCluster(instances_dict, contrail_configuration,
+                kolla_config)
         instances_nodes_dict, deleted_nodes_dict = \
                 self.os_roles.discover_openstack_roles()
         if self.os_roles.e is not None:
