@@ -13,6 +13,7 @@
     --host_name {{ item.key }}
     --host_ip {{ item.value }}
     --api_server_ip {{ api_server }}
+    --api_server_use_ssl {{ contrail_configuration.SSL_ENABLE | default(False) }}
     --oper del
   when:
     - config_api_name.stdout
@@ -27,6 +28,7 @@
     --host_name {{ item.key }}
     --host_ip {{ item.value }}
     --api_server_ip {{ api_server }}
+    --api_server_use_ssl {{ contrail_configuration.SSL_ENABLE | default(False) }}
     --oper del
     --admin_user {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_USER }}
     --admin_tenant_name {{ contrail_configuration.KEYSTONE_AUTH_ADMIN_TENANT }}

@@ -4,7 +4,7 @@
 
 - name: Calculate Existing Roles
   set_fact:
-    cluster_roles_dict: "{{ cluster_roles_dict | calculate_contrail_roles(config_nodes_list, instances, global_configuration, contrail_configuration) }}"
+    cluster_roles_dict: "{{ cluster_roles_dict | calculate_contrail_roles(config_nodes_list, instances, global_configuration, contrail_configuration, kolla_config | default(None), hostvars) }}"
 
 - name: build deleted toragent roles
   set_fact:
