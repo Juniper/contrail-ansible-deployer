@@ -75,6 +75,8 @@
   hosts: localhost
   connection: local
   gather_facts: no
+  vars:
+    - kolla_config: "{{ hostvars['localhost'].get(kolla_config, None) }}"
   pre_tasks:
     - name: Import group variables
       include_vars:
