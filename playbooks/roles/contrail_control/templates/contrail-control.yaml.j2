@@ -35,6 +35,8 @@ services:
   control:
     image: "{{ container_registry }}/contrail-controller-control-control:{{ contrail_version_tag }}"
     network_mode: "host"
+    cap_add:
+      - NET_ADMIN
     env_file: /etc/contrail/common_control.env
     volumes_from:
       - node-init
@@ -52,8 +54,9 @@ services:
   named:
     image: "{{ container_registry }}/contrail-controller-control-named:{{ contrail_version_tag }}"
     network_mode: "host"
+    cap_add:
+      - NET_ADMIN
     env_file: /etc/contrail/common_control.env
-    privileged: true
     pid: host
     volumes_from:
       - node-init
