@@ -69,8 +69,7 @@ class FilterModule(object):
         self.contrail_roles = ContrailCluster(instances_dict,
                 contrail_configuration, kolla_config, hv)
         instances_nodes_dict, deleted_nodes_dict, api_server_ip = \
-                self.contrail_roles.discover_contrail_roles(instances_dict,
-                contrail_configuration, hv)
+                self.contrail_roles.discover_contrail_roles()
 
         if self.contrail_roles.e is not None:
             return str({"Exception": self.contrail_roles.e})
@@ -442,6 +441,9 @@ class ContrailCluster(object):
     api_server_port = "8082"
     os_params = None
     instances_dict = {}
+    cc_dict = {}
+    kolla_dict = {}
+    hv = {}
     node_name_ip_map = {}
     node_ip_name_map = {}
     existing_tor_agents = {}
@@ -474,8 +476,11 @@ class ContrailCluster(object):
                    "analytics", "analytics_alarm", "analytics_snmp", "vrouter"]
 
     def __init__(self, instances, contrail_config, kolla_config, hv):
-        #self.os_params = OpenStackParams(contrail_config, kolla_config, hv)
+        self.os_params = OpenStackParams(contrail_config, kolla_config, hv)
         self.instances_dict = instances
+        self.cc_dict = contrail_config
+        self.kolla_dict = kolla_config
+        self.hv = hv
         sslenable = contrail_config.get('SSL_ENABLE', False)
         if str(sslenable) in ['True', 'TRUE', 'yes', 'YES', 'Yes']:
             self.proto = 'https://'
@@ -606,12 +611,15 @@ class ContrailCluster(object):
         return instances_nodes_dict, deleted_nodes_dict
 
 
-    def discover_contrail_roles(self, instances_dict, contrail_configuration, hv):
+    def discover_contrail_roles(self):
         instances_nodes_dict = {}
         deleted_nodes_dict = {}
         invalid_role = None
         cluster_role_set = set()
 
+        instances_dict = self.instances_dict
+        contrail_configuration = self.cc_dict
+        hv = self.hv
         for instance_name, instance_config in instances_dict.iteritems():
             instances_nodes_dict[instance_name] = {}
             self.node_name_ip_map[instance_name] = instance_config["ip"]
@@ -679,3 +687,174 @@ class ContrailCluster(object):
                     deleted_nodes_dict[server] = self.existing_tor_agents[toragent]['toragent_ip']
 
         return instances_nodes_dict, deleted_nodes_dict, self.api_server_ip
+
+
+# Unit tests for the deleted nodes calculation algorithm
+
+import unittest
+import mock
+
+class MyTests(unittest.TestCase):
+
+    def setUp(self):
+        self.instances_dict_test_add = {
+            'srvr1' : {
+                'ip': '10.84.22.71',
+                'roles': {
+                    'openstack': None,
+                    'analytics': None,
+                    'analytics_database': None,
+                    'config': None,
+                    'config_database': None,
+                    'control': None,
+                    'webui': None
+                }
+            },
+            'srvr2' : {
+                'ip': '10.84.22.72',
+                'roles': {
+                    'openstack_compute': None,
+                    'vrouter': None
+                }
+            },
+            'srvr3' : {
+                'ip': '10.84.22.73',
+                'roles': {
+                    'openstack_compute': None,
+                    'vrouter': None
+                }
+            }
+        }
+        self.instances_dict_test_delete = {
+            'srvr1' : {
+                'ip': '10.84.22.71',
+                'roles': {
+                    'openstack': None,
+                    'analytics': None,
+                    'analytics_database': None,
+                    'config': None,
+                    'config_database': None,
+                    'control': None,
+                    'webui': None
+                }
+            },
+            'srvr2' : {
+                'ip': '10.84.22.72',
+                'roles': {
+                    'openstack_compute': None,
+                    'vrouter': None
+                }
+            },
+            'srvr3' : {
+                'ip': '10.84.22.73',
+                'roles': {
+                }
+            }
+        }
+        self.global_configuration = { 'ENABLE_DESTROY': True }
+        self.contrail_configuration = { 'CONFIG_NODES': '10.84.22.71',
+                                        'CLOUD_ORCHESTRATOR': 'openstack',
+                                        'KEYSTONE_AUTH_HOST': '10.84.22.71'}
+        self.hv = {
+            '10.84.22.71': { 'ansible_all_ipv4_addresses': ['10.84.22.71'] },
+            '10.84.22.72': { 'ansible_all_ipv4_addresses': ['10.84.22.72'] },
+            '10.84.22.73': { 'ansible_all_ipv4_addresses': ['10.84.22.73'] }
+        }
+
+
+    def my_token(self, cc):
+        #print("Got TOKEN")
+        return
+
+    def my_os_hypervisors_add(self):
+        from requests.models import Response
+        os_hypervisors_test_add = {
+                'hypervisors': [
+                    {
+                        'status': 'enabled',
+                        'service': {
+                            'host': 'b2s43-vm2','disabled_reason': None, 'id': 8
+                        },
+                        'vcpus_used': 0, 'hypervisor_type': 'QEMU', 'id': 1,
+                        'local_gb_used': 0, 'state': 'up',
+                        'hypervisor_hostname': 'b2s43-vm2.englab.juniper.net',
+                        'host_ip': '10.84.22.72'
+                    } ]
+                }
+        the_response = Response()
+        the_response.status_code = 200
+        the_response._content = json.dumps(os_hypervisors_test_add)
+        return the_response
+
+    def my_os_hypervisors_del(self):
+        from requests.models import Response
+        os_hypervisors_test_delete = {
+                'hypervisors': [
+                    {
+                        'status': 'enabled',
+                        'service': {
+                            'host': 'b2s43-vm2','disabled_reason': None, 'id': 8
+                        },
+                        'vcpus_used': 0, 'hypervisor_type': 'QEMU', 'id': 1,
+                        'local_gb_used': 0, 'state': 'up',
+                        'hypervisor_hostname': 'b2s43-vm2.englab.juniper.net',
+                        'host_ip': '10.84.22.72'
+                    },
+                    {
+                        'status': 'enabled',
+                        'service': {
+                            'host': 'b2s43-vm3','disabled_reason': None, 'id': 9
+                        },
+                        'vcpus_used': 0, 'hypervisor_type': 'QEMU', 'id': 2,
+                        'local_gb_used': 0, 'state': 'up',
+                        'hypervisor_hostname': 'b2s43-vm3.englab.juniper.net',
+                        'host_ip': '10.84.22.73'
+                    }]
+                }
+        the_response = Response()
+        the_response.status_code = 200
+        the_response._content = json.dumps(os_hypervisors_test_delete)
+        return the_response
+
+    @mock.patch.object(OpenStackParams, 'get_ks_auth_token', my_token)
+    def test_os_params(self):
+        os_par = OpenStackParams(self.contrail_configuration, None, self.hv)
+        assert "http://" in os_par.ks_auth_proto
+        kc = {'kolla_globals': {'kolla_enable_tls_external': True}}
+        os_par_new = OpenStackParams(self.contrail_configuration, kc, self.hv)
+        assert "https://" in os_par_new.ks_auth_proto
+
+    @mock.patch.object(OpenStackParams, 'get_ks_auth_token', my_token)
+    @mock.patch.object(OpenStackParams, 'get_os_hypervisors', my_os_hypervisors_del)
+    def test_calculate_deleted_os_nodes_dict(self):
+        os_cluster = OpenstackCluster(self.instances_dict_test_delete,
+                self.contrail_configuration, {}, self.hv)
+        inst_nodes, del_nodes = os_cluster.discover_openstack_roles(self.hv)
+        assert 'srvr3' in del_nodes
+        assert inst_nodes['srvr3']['deleted_roles'] == ['openstack_compute']
+        assert inst_nodes['srvr3']['existing_roles'] == ['openstack_compute']
+        assert not inst_nodes['srvr3']['instance_roles']
+
+    @mock.patch.object(OpenStackParams, 'get_ks_auth_token', my_token)
+    @mock.patch.object(OpenStackParams, 'get_os_hypervisors', my_os_hypervisors_add)
+    def test_calculate_added_os_nodes_dict(self):
+        os_cluster = OpenstackCluster(self.instances_dict_test_add,
+                self.contrail_configuration, {}, self.hv)
+        inst_nodes, del_nodes = os_cluster.discover_openstack_roles(self.hv)
+        assert not del_nodes
+        assert not inst_nodes['srvr3']['deleted_roles']
+        assert inst_nodes['srvr3']['new_roles'] == ['openstack_compute']
+
+    def test_contrail_params(self):
+        cc = ContrailCluster(self.instances_dict_test_delete,
+                self.contrail_configuration, {}, self.hv)
+        assert "http://" in cc.proto
+        self.contrail_configuration.update({'SSL_ENABLE': True})
+        cc2 = ContrailCluster(self.instances_dict_test_delete,
+                self.contrail_configuration, {},
+                self.hv)
+        assert "https://" in cc2.proto
+
+if __name__ == '__main__':
+    unittest.main()
+
