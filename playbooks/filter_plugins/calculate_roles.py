@@ -69,8 +69,7 @@ class FilterModule(object):
         self.contrail_roles = ContrailCluster(instances_dict,
                 contrail_configuration, kolla_config, hv)
         instances_nodes_dict, deleted_nodes_dict, api_server_ip = \
-                self.contrail_roles.discover_contrail_roles(instances_dict,
-                contrail_configuration, hv)
+                self.contrail_roles.discover_contrail_roles()
 
         if self.contrail_roles.e is not None:
             return str({"Exception": self.contrail_roles.e})
@@ -442,6 +441,9 @@ class ContrailCluster(object):
     api_server_port = "8082"
     os_params = None
     instances_dict = {}
+    cc_dict = {}
+    kolla_dict = {}
+    hv = {}
     node_name_ip_map = {}
     node_ip_name_map = {}
     existing_tor_agents = {}
@@ -474,8 +476,11 @@ class ContrailCluster(object):
                    "analytics", "analytics_alarm", "analytics_snmp", "vrouter"]
 
     def __init__(self, instances, contrail_config, kolla_config, hv):
-        #self.os_params = OpenStackParams(contrail_config, kolla_config, hv)
+        self.os_params = OpenStackParams(contrail_config, kolla_config, hv)
         self.instances_dict = instances
+        self.cc_dict = contrail_config
+        self.kolla_dict = kolla_config
+        self.hv = hv
         sslenable = contrail_config.get('SSL_ENABLE', False)
         if str(sslenable) in ['True', 'TRUE', 'yes', 'YES', 'Yes']:
             self.proto = 'https://'
@@ -606,12 +611,15 @@ class ContrailCluster(object):
         return instances_nodes_dict, deleted_nodes_dict
 
 
-    def discover_contrail_roles(self, instances_dict, contrail_configuration, hv):
+    def discover_contrail_roles(self):
         instances_nodes_dict = {}
         deleted_nodes_dict = {}
         invalid_role = None
         cluster_role_set = set()
 
+        instances_dict = self.instances_dict
+        contrail_configuration = self.cc_dict
+        hv = self.hv
         for instance_name, instance_config in instances_dict.iteritems():
             instances_nodes_dict[instance_name] = {}
             self.node_name_ip_map[instance_name] = instance_config["ip"]
