@@ -175,7 +175,6 @@
   include_role:
     name: contrail_vcenter_fabric_manager
   when:
-    - contrail_configuration.CLOUD_ORCHESTRATOR == 'vcenter'
     - roles[instance_name].vcenter_fabric_manager is defined
   tags:
     - vcenter
