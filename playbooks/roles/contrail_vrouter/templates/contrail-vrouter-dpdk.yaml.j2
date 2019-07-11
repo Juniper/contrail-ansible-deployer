@@ -107,6 +107,7 @@ services:
       - /bin:/host/bin
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
       - /dev:/dev
+      - /etc/resolv.conf:/etc/resolv.conf
     volumes_from:
       - node-init
     depends_on:

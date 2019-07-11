@@ -63,6 +63,7 @@ services:
       - /etc/sysconfig/network-scripts:/etc/sysconfig/network-scripts
 {% endif %}
       - /dev/log:/dev/log
+      - /etc/resolv.conf:/etc/resolv.conf
     volumes_from:
       - node-init
     depends_on:
