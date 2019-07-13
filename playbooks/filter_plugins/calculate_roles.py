@@ -457,7 +457,8 @@ class ContrailCluster(object):
         "bgp-routers": "control",
         "analytics-nodes": "analytics",
         "analytics-alarm-nodes": "analytics_alarm",
-        "analytics-snmp-nodes": "analytics_snmp"
+        "analytics-snmp-nodes": "analytics_snmp",
+        "stats-nodes": "stats"
     }
 
     ip_role_map = {
@@ -467,13 +468,14 @@ class ContrailCluster(object):
         "bgp-routers": "bgp_router_parameters.address",
         "analytics-nodes": "analytics_node_ip_address",
         "analytics-alarm-nodes": "analytics_alarm_node_ip_address",
-        "analytics-snmp-nodes": "analytics_snmp_node_ip_address"
+        "analytics-snmp-nodes": "analytics_snmp_node_ip_address",
+        "stats-nodes": "stats_node_ip_address"
     }
 
 
 
-    valid_roles = ["config", "control", "analytics_database",
-                   "analytics", "analytics_alarm", "analytics_snmp", "vrouter"]
+    valid_roles = ["config", "control", "analytics_database", "analytics",
+                   "analytics_alarm", "analytics_snmp", "vrouter", "stats"]
 
     def __init__(self, instances, contrail_config, kolla_config, hv):
         self.os_params = OpenStackParams(contrail_config, kolla_config, hv)
