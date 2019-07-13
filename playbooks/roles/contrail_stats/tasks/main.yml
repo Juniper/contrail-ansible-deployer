@@ -1,0 +1,22 @@
+---
+- name: create /etc/contrail/stats
+  file:
+    path: /etc/contrail/stats
+    state: directory
+    recurse: yes
+
+- name: update contrail-stats image
+  shell: "docker pull {{ container_registry }}/{{ item }}:{{ contrail_version_tag }}"
+  with_items:
+    - contrail-node-init
+    - contrail-nodemgr
+    - contrail-stats
+
+- name: create contrail stats docker-compose file
+  template:
+    src: contrail-stats.yaml.j2
+    dest: /etc/contrail/stats/docker-compose.yaml
+
+- name: start contrail stats
+  docker_service:
+    project_src: /etc/contrail/stats
