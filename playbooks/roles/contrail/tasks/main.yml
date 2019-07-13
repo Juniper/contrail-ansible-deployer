@@ -94,6 +94,14 @@
     - analytics
     - analytics_snmp
 
+- name: create contrail stats
+  include_role:
+    name: contrail_stats
+  when:
+    - roles[instance_name].stats is defined
+  tags:
+    - stats
+
 - name: create k8s cni
   include_role:
     name: contrail_k8s_cni

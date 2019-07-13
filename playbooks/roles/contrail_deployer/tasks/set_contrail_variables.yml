@@ -75,6 +75,7 @@
     - {'name': 'ANALYTICS_SNMP_NODES', 'nodes': "{{analytics_snmp_nodes_list}}"}
     - {'name': 'ANALYTICS_ALARM_NODES', 'nodes': "{{analytics_alarm_nodes_list}}"}
     - {'name': 'ANALYTICSDB_NODES', 'nodes': "{{analyticsdb_nodes_list}}"}
+    - {'name': 'STATS_NODES', 'nodes': "{{stats_nodes_list}}"}
     - {'name': 'WEBUI_NODES', 'nodes': "{{webui_nodes_list}}"}
     - {'name': 'TSN_NODES', 'nodes': "{{tsn_nodes_list}}"}
     - {'name': 'KUBERNETES_API_NODES', 'nodes': "{{k8s_master_nodes_list}}"}
@@ -108,6 +109,16 @@
   when:
     - item.value.roles is defined
     - item.value.roles.analytics_snmp is defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'STATS_ENABLE': False}) }}"
+- name: check stats presence
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'STATS_ENABLE': True}) }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.stats is defined
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - name: explicitly set OpenStack variables for Contrail

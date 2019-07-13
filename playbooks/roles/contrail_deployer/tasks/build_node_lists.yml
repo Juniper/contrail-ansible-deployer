@@ -77,6 +77,17 @@
   with_dict: "{{ hostvars['localhost']['instances'] }}"
 
 - set_fact:
+    stats_nodes_list: []
+- name: add stats nodes to the list
+  set_fact:
+    stats_nodes_list: "{{ stats_nodes_list + [ item.value.private_ip | default(item.value.ip) ] }}"
+  when:
+    - item.value.roles is defined
+    - item.value.roles.stats is defined
+    - contrail_configuration.CONTROLLER_NODES is not defined
+  with_dict: "{{ hostvars['localhost']['instances'] }}"
+
+- set_fact:
     webui_nodes_list: []
 - name: add webui nodes to the list
   set_fact:
