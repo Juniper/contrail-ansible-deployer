@@ -171,6 +171,14 @@
   tags:
     - vcenter
 
+- name: create contrail vcenter-fabric-manager
+  include_role:
+    name: contrail_vcenter_fabric_manager
+  when:
+    - roles[instance_name].vcenter_fabric_manager is defined
+  tags:
+    - vcenter
+
 - name: create win cnm plugin
   include_role:
     name: contrail_cnm_windows
