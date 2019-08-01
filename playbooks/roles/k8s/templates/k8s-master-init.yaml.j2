@@ -1,0 +1,17 @@
+kind: MasterConfiguration
+apiVersion: kubeadm.k8s.io/v1alpha1
+{%- if listen_ip is defined %}
+api:
+  advertiseAddress: {{ listen_ip }}
+{% endif %}
+kubernetesVersion: {{ k8s_version }}
+clusterName: ${K8S_CLUSTER_NAME}
+{%- if provider in ['aws', 'gce'] %}
+cloudProvider: provider
+{% endif %}
+tokenTTL: 0s
+kubeProxy:
+  config:
+    clusterCIDR: {{ kube_pod_subnet }}
+networking:
+  podSubnet: {{ kube_pod_subnet }}

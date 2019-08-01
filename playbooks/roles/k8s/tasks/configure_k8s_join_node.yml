@@ -8,20 +8,6 @@
     node_exists: true
   when: ansible_hostname.lower() in hostvars[k8s_master_name].node_list
 
-- name: docker info for getting cgroup driver
-  shell: docker info 2>/dev/null |grep "Cgroup Driver" |awk '{print $3}'
-  register: docker_info
-
-- name: get cgroup driver
-  set_fact:
-    cgroup_driver: "{{ docker_info.stdout }}"
-
-- name: set cgroup driver to cgroupfs
-  lineinfile:
-    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-    regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
-    line: 'Environment="KUBELET_CGROUP_ARGS=--cgroup-driver={{ cgroup_driver }}"'
-
 - name: get listen interface
   shell: ip route get {{ k8s_master_ip }} | grep -o "dev.*" | awk '{print $2}'
   register: listen_nic
@@ -31,12 +17,8 @@
     listen_ip: "{{ hostvars[inventory_hostname]['ansible_%s' % listen_nic.stdout].ipv4.address }}"
   when: listen_nic is defined
 
-- name: set InternalIP to listen_ip
-  lineinfile:
-    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-    regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
-    line: 'Environment="KUBELET_EXTRA_ARGS=--node-ip={{ listen_ip }}"'
-  when: listen_ip is defined
+- name: Configure kubelet
+  include: configure_kubelet.yml
 
 - name: enable kubelet service
   systemd:
@@ -51,5 +33,5 @@
     msg: "master token: {{ hostvars[k8s_master_name].mastertoken }}"
 
 - name: join k8s cluster
-  shell: "kubeadm join --token {{ hostvars[k8s_master_name].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ k8s_master_ip }}:6443"
+  shell: "kubeadm join --ignore-preflight-errors=cri --token {{ hostvars[k8s_master_name].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ k8s_master_ip }}:6443"
   when: node_exists == false
