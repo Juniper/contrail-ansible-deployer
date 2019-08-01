@@ -44,6 +44,17 @@
     line: 'Environment="KUBELET_EXTRA_ARGS=--node-ip={{ listen_ip }}"'
   when: listen_ip is defined
 
+- name: get cloud provider
+  set_fact:
+    provider: instances[hostvars[inventory_hostname].instance_name].provider
+
+- name: set cloud provider
+  lineinfile:
+    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    regexp: '^Environment="KUBELET_KUBECONFIG_ARGS='
+    line: 'Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --cloud-provider={{ provider }}"'
+  when: provider in ['aws', 'gce']
+
 - name: enable kubelet service
   systemd:
     name: kubelet
@@ -52,21 +63,18 @@
     enabled: True
   when: master_running == false
 
-- name: initialize k8s master with listen ip
-  shell: |
-      kubeadm init --token-ttl 0 --kubernetes-version v{{ k8s_version }} --apiserver-advertise-address {{ listen_ip }} --pod-network-cidr {{ kube_pod_subnet }} &&
-      mkdir -p $HOME/.kube &&
-      cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
-      chown -R $(id -u):$(id -g) $HOME/.kube
-  when: listen_ip is defined and master_running == false
+- name: create k8 master init yaml
+  template:
+    src: k8s-master-init.yaml.j2
+    dest: /tmp/k8s-master-init.yaml
 
-- name: initialize k8s master without listen ip
+- name: initialize k8s master
   shell: |
-      kubeadm init --token-ttl 0 --kubernetes-version v{{ k8s_version }} --pod-network-cidr {{ kube_pod_subnet }} &&
+      kubeadm init --ignore-preflight-errors=cri --config /tmp/k8s-master-init.yaml &&
       mkdir -p $HOME/.kube &&
       cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
       chown -R $(id -u):$(id -g) $HOME/.kube
-  when: listen_ip is undefined and master_running == false
+  when: master_running == false
 
 - name: get master token
   shell: kubeadm token list |grep "system:bootstrappers:kubeadm:default-node-token" |grep "forever" |awk '{print $1}'

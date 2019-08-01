@@ -38,6 +38,17 @@
     line: 'Environment="KUBELET_EXTRA_ARGS=--node-ip={{ listen_ip }}"'
   when: listen_ip is defined
 
+- name: get cloud provider
+  set_fact:
+    provider: instances[hostvars[inventory_hostname].instance_name].provider
+
+- name: set cloud provider
+  lineinfile:
+    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    regexp: '^Environment="KUBELET_KUBECONFIG_ARGS='
+    line: 'Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --cloud-provider={{ provider }}"'
+  when: provider in ['aws', 'gce']
+
 - name: enable kubelet service
   systemd:
     name: kubelet
@@ -51,5 +62,5 @@
     msg: "master token: {{ hostvars[k8s_master_name].mastertoken }}"
 
 - name: join k8s cluster
-  shell: "kubeadm join --token {{ hostvars[k8s_master_name].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ k8s_master_ip }}:6443"
+  shell: "kubeadm join --ignore-preflight-errors=cri --token {{ hostvars[k8s_master_name].mastertoken }} --discovery-token-unsafe-skip-ca-verification {{ k8s_master_ip }}:6443"
   when: node_exists == false
