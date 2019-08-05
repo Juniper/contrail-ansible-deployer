@@ -1,0 +1,46 @@
+---
+
+- name: docker info for getting cgroup driver
+  shell: docker info 2>/dev/null |grep "Cgroup Driver" |awk '{print $3}'
+  register: docker_info
+
+- name: get cgroup driver
+  set_fact:
+    cgroup_driver: "{{ docker_info.stdout }}"
+
+- name: detect kubelet config file path
+  block:
+    # this path is present in Ubuntu and in CentOS for old versions of k8s
+    - name: check if kubelet config is present in common place
+      stat:
+        path: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+      register: st_etc
+    # this path is in CentOS for new versions of k8s
+    - name: check if kubelet config is present in new place
+      stat:
+        path: "/usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf"
+      register: st_usr
+    - name:
+      set_fact:
+        kubelet_config_file: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+      when: st_etc.stat.exists | default(false)
+    - name:
+      set_fact:
+        kubelet_config_file: "/usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf"
+      when: kubelet_config_file is not defined and st_usr.stat.exists | default(false)
+    - fail:
+        msg: "Config file for kubelet couldn't be found. Please update code."
+      when: kubelet_config_file is not defined
+
+- name: set cgroup driver to cgroupfs
+  lineinfile:
+    path: "{{ kubelet_config_file }}"
+    regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
+    line: 'Environment="KUBELET_CGROUP_ARGS=--cgroup-driver={{ cgroup_driver }}"'
+
+- name: set InternalIP to listen_ip
+  lineinfile:
+    path: "{{ kubelet_config_file }}"
+    regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
+    line: 'Environment="KUBELET_EXTRA_ARGS=--node-ip={{ listen_ip }}"'
+  when: listen_ip is defined

@@ -15,20 +15,6 @@
   when: (master_state is undefined) or
         (master_state is defined and master_state.rc == 1)
 
-- name: docker info for getting cgroup driver
-  shell: docker info 2>/dev/null |grep "Cgroup Driver" |awk '{print $3}'
-  register: docker_info
-
-- name: get cgroup driver
-  set_fact:
-    cgroup_driver: "{{ docker_info.stdout }}"
-
-- name: set cgroup driver to cgroupfs
-  lineinfile:
-    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-    regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
-    line: 'Environment="KUBELET_CGROUP_ARGS=--cgroup-driver={{ cgroup_driver }}"'
-
 - name: get controller ip from all ips
   set_fact:
     listen_ip: "{{ item[0] }}"
@@ -37,12 +23,8 @@
     - "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses }}"
     - "{{ contrail_configuration.KUBERNETES_API_NODES }}"
 
-- name: set InternalIP to listen_ip
-  lineinfile:
-    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-    regexp: '^Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=.*"'
-    line: 'Environment="KUBELET_EXTRA_ARGS=--node-ip={{ listen_ip }}"'
-  when: listen_ip is defined
+- name: Configure kubelet
+  include: configure_kubelet.yml
 
 - name: enable kubelet service
   systemd:
