@@ -88,6 +88,14 @@ Please note that the below components in analytics are optional
 
 Please check [Optional Contrail Analytics Components](https://github.com/Juniper/contrail-ansible-deployer/blob/master/README.md#optional-contrail-analytics-component
 
+There may be one more role ```appformix_flows``` configured as a role for a node.
+In that case, in contrail vrouter agent configuration file,
+```sample_destination``` gets changed to ```collector syslog``` from
+```collector``` and environment variable XFLOW_NODE_IP gets set with the node IP
+where ```appformix_flows``` is configured in case of single xflow deployment and
+```xflow_configuration.keepalived_shared_ip``` in case of multi xflow
+deployment.
+
 ## Prerequisites
 
 - CentOS 7.4 (kernel >= 3.10.0-693.17.1)

@@ -42,6 +42,10 @@ control_log_driver: "{{ contrail_configuration.CONTROL_LOG_DRIVER|default(defaul
 control_log_max_size: "{{ contrail_configuration.CONTROL_LOG_MAX_SIZE|default(default_log_max_size) }}"
 control_log_max_file: "{{ contrail_configuration.CONTROL_LOG_MAX_FILE|default(default_log_max_file) }}"
 
+rsyslogd_log_driver: "{{ contrail_configuration.RSYSLOGD_LOG_DRIVER|default(default_log_driver) }}"
+rsyslogd_log_max_size: "{{ contrail_configuration.RSYSLOGD_LOG_MAX_SIZE|default(default_log_max_size) }}"
+rsyslogd_log_max_file: "{{ contrail_configuration.RSYSLOGD_LOG_MAX_FILE|default(default_log_max_file) }}"
+
 win_container_artifacts_dir: C:\artifacts\
 win_host_artifacts_dir: "{{ win_container_artifacts_dir }}"
 win_agent_config_path: C:\ProgramData\Contrail\etc\contrail\contrail-vrouter-agent.conf
