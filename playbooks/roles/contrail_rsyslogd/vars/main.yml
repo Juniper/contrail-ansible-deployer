@@ -1,0 +1,5 @@
+rsyslogd_ommon_volumes:
+  - "/var/run:/var/run"
+
+rsyslogd_volumes: "{{ common_volumes + rsyslogd_ommon_volumes }}"
+

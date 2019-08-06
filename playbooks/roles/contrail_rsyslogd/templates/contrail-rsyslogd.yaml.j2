@@ -1,0 +1,14 @@
+version: '2'
+services:
+  rsyslogd:
+    image: "{{ container_registry }}/contrail-external-rsyslogd:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    network_mode: "host"
+    volumes:
+      {{ rsyslogd_volumes | to_yaml | indent(width=6) }}
+    logging:
+      driver: "{{ rsyslogd_log_driver }}"
+      options:
+        max-size: "{{ rsyslogd_log_max_size }}"
+        max-file: "{{ rsyslogd_log_max_file }}"
+    restart: always
