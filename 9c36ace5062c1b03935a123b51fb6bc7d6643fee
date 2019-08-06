@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "993a1ba9_2aaa7bee",
+        "filename": "playbooks/roles/contrail_deployer/tasks/set_contrail_variables.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-08-06T06:05:43Z",
+      "side": 1,
+      "message": "Have space around the var.",
+      "range": {
+        "startLine": 182,
+        "startChar": 42,
+        "endLine": 182,
+        "endChar": 58
+      },
+      "revId": "9c36ace5062c1b03935a123b51fb6bc7d6643fee",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
