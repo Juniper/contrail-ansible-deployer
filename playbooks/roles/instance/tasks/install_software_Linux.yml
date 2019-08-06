@@ -33,17 +33,6 @@
 - name: OS specific package install
   include: "{{ ansible_os_family }}.yml"
 
-- name: install rsyslogd
-  package:
-    name: rsyslog
-    state: present
-  when:
-    - instance_data.roles is defined
-    - instance_data.roles.vrouter is defined
-  register: res
-  retries: 5
-  until: res | success
-
 - name: Set up ntp
   include: ntp.yml
   when: provider_data.ntpserver is defined
