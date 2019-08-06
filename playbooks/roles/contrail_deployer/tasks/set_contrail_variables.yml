@@ -164,3 +164,19 @@
     - always
   when:
     - contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack'
+
+- name: add keepalived_shared_ip as xflow node ip in contrail_configuration
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({'XFLOW_NODES': xflow_configuration.keepalived_shared_ip }) }}"
+  when:
+    - xflow_configuration is defined and xflow_configuration.keepalived_shared_ip is defined
+
+
+- name: add xflow node ip in contrail_configuration from appformix_flows role
+  set_fact:
+    contrail_configuration: "{{ contrail_configuration | combine({item.name: item.nodes|join(',')}) }}"
+  when:
+    - contrail_configuration.get(item.name, 0) == 0 and item.nodes | length > 0
+    - not (xflow_configuration is defined and xflow_configuration.keepalived_shared_ip is defined)
+  with_items:
+    - {'name': 'XFLOW_NODES', 'nodes': "{{ xflow_nodes_list }}"}

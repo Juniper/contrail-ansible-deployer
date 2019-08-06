@@ -132,10 +132,7 @@
     state: directory
     recurse: yes
 
-- name: "configure rsyslogd"
-  shell: "echo '$AddUnixListenSocket /var/log/contrail/lbaas/haproxy.log.sock' > /etc/rsyslog.d/contrail-lbaas-haproxy.conf"
-
 - name: "restart rsyslogd"
   service:
     name: rsyslog
-    state: restarted
+    state: "stopped"
