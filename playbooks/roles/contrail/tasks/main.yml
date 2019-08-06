@@ -136,6 +136,14 @@
   tags:
     - vrouter
 
+- name: create contrail rsyslogd for Linux
+  include_role:
+    name: contrail_rsyslogd
+  when: roles[instance_name].vrouter is defined and ansible_system == 'Linux'
+  tags:
+    - vrouter
+    - rsyslogd
+
 - name: create contrail vrouter for Win32NT
   include_role:
     name: contrail_vrouter_windows
