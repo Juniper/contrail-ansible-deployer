@@ -16,6 +16,23 @@
       "revId": "c7968359a801acfc6bf976e8bbffe9a822965b60",
       "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6f1143ae_bddcc3e2",
+        "filename": "playbooks/roles/instance/tasks/install_software_Linux.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 382
+      },
+      "writtenOn": "2019-08-11T11:07:42Z",
+      "side": 0,
+      "message": "retries must be stay here.",
+      "revId": "c7968359a801acfc6bf976e8bbffe9a822965b60",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
     }
   ]
 }
