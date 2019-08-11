@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7d98adc6_4636cc47",
+        "filename": "playbooks/roles/instance/tasks/install_software_Linux.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-08-11T08:24:52Z",
+      "side": 0,
+      "message": "Is that possible that it breaks non-contrail functionality of other software on the host?",
+      "revId": "c7968359a801acfc6bf976e8bbffe9a822965b60",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ed94826_3b13eae6",
+        "filename": "playbooks/roles/contrail_rsyslogd/templates/contrail-rsyslogd.yaml.j2",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-08-11T08:24:52Z",
+      "side": 1,
+      "message": "1) Why not to use common volumes list like other does:\n    volumes:\n      {{ common_volumes | to_yaml | indent(width\u003d6) }}\n\n2) Take into account that having:\n  - binding /var/run:/var/run \n  - network mode \u0027host\nmay lead to conflicts with the rsyslog on the host because of the same ports and socket paths like /run/systemd/journal/syslog",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 43
+      },
+      "revId": "3f6763ea5393b4e20c43d3e37edcabacedd84bcc",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
