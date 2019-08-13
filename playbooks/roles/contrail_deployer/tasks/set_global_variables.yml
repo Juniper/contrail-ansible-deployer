@@ -26,24 +26,6 @@
     contrail_version_tag: "{{ contrail_configuration.CONTRAIL_VERSION | default('latest') }}"
   tags:
    - always
-- name: add openstack version tag if defined
-  set_fact:
-    contrail_version_tag: "{{ contrail_configuration.OPENSTACK_VERSION }}-{{ contrail_version_tag }}"
-  when:
-    - contrail_configuration.OPENSTACK_VERSION is defined
-    - contrail_configuration.CONTRAIL_VERSION is defined
-    - contrail_configuration.CONTRAIL_VERSION != 'latest'
-  tags:
-    - always
-- name: add linux distr tag if defined
-  set_fact:
-    contrail_version_tag: "{{ contrail_configuration.LINUX_DISTR }}-{{ contrail_version_tag }}"
-  when:
-    - contrail_configuration.LINUX_DISTR is defined
-    - contrail_configuration.CONTRAIL_VERSION is defined
-    - contrail_configuration.CONTRAIL_VERSION != 'latest'
-  tags:
-   - always
 
 - name: add specific contrail version tag if defined
   set_fact:
