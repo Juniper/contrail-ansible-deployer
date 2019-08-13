@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "515db8fa_bd345f97",
+        "filename": "playbooks/roles/contrail_deployer/tasks/set_global_variables.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 382
+      },
+      "writtenOn": "2019-08-13T09:25:54Z",
+      "side": 1,
+      "message": "please revert lines 48-54",
+      "revId": "fdd969017fdadbb8e145e2e6819b1e0263bc972f",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
