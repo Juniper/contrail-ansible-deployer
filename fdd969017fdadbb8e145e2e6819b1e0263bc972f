@@ -16,6 +16,24 @@
       "revId": "fdd969017fdadbb8e145e2e6819b1e0263bc972f",
       "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8646ba85_97a1c9d6",
+        "filename": "playbooks/roles/contrail_deployer/tasks/set_global_variables.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 16
+      },
+      "writtenOn": "2019-08-13T14:55:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "515db8fa_bd345f97",
+      "revId": "fdd969017fdadbb8e145e2e6819b1e0263bc972f",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": false
     }
   ]
 }
