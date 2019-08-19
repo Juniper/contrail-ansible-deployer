@@ -27,6 +27,7 @@ default_kolla_globals:
   customize_etc_hosts: no
   enable_swift: yes
   openstack_release: "{{ openstack_sku }}"
+  enable_opencontrail_trunk: yes
   enable_opencontrail_rbac: "{{ 'yes' if contrail_configuration.AAA_MODE is defined and contrail_configuration.AAA_MODE == 'rbac' else 'no' }}"
   opencontrail_api_server_ip: "{{ contrail_configuration.CONFIG_NODES | default(contrail_configuration.CONTROLLER_NODES | default(config_nodes_list | join(','))) | replace (',', ' ') }}"
   opencontrail_collector_ip: "{{ contrail_configuration.ANALYTICS_NODES | default(contrail_configuration.CONTROLLER_NODES | default(analytics_nodes_list | join(','))) | replace (',', ' ') }}"
