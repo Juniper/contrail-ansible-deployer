@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9b02513a_0c32ce3e",
+        "filename": "playbooks/roles/instance/tasks/install_software_Linux.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 49
+      },
+      "writtenOn": "2019-08-20T09:22:48Z",
+      "side": 0,
+      "message": "rsyslogd is being used by contrail-vrouter-agent currently. if for some other non-contrail functionality, people can use rsyslogd container for custom app. But I am not sure if any customer deployment, anyone uses rsyslogd as installed on host.",
+      "parentUuid": "7d98adc6_4636cc47",
+      "revId": "c7968359a801acfc6bf976e8bbffe9a822965b60",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6f1143ae_bddcc3e2",
         "filename": "playbooks/roles/instance/tasks/install_software_Linux.yml",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2019-08-11T11:07:42Z",
       "side": 0,
       "message": "retries must be stay here.",
+      "revId": "c7968359a801acfc6bf976e8bbffe9a822965b60",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "37259ba2_acfa0e54",
+        "filename": "playbooks/roles/instance/tasks/install_software_Linux.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 49
+      },
+      "writtenOn": "2019-08-20T09:22:48Z",
+      "side": 0,
+      "message": "Will do.",
+      "parentUuid": "6f1143ae_bddcc3e2",
       "revId": "c7968359a801acfc6bf976e8bbffe9a822965b60",
       "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
       "unresolved": true
