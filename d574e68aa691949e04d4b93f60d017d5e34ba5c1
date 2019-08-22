@@ -22,6 +22,30 @@
       "revId": "d574e68aa691949e04d4b93f60d017d5e34ba5c1",
       "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7d862b22_8f5e2c72",
+        "filename": "playbooks/roles/contrail_rsyslogd/vars/main.yml",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 49
+      },
+      "writtenOn": "2019-08-22T15:17:30Z",
+      "side": 1,
+      "message": "Changed to common",
+      "parentUuid": "e46888fd_3416666e",
+      "range": {
+        "startLine": 1,
+        "startChar": 9,
+        "endLine": 1,
+        "endChar": 14
+      },
+      "revId": "d574e68aa691949e04d4b93f60d017d5e34ba5c1",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
     }
   ]
 }
