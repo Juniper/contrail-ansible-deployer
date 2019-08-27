@@ -70,6 +70,10 @@
   lineinfile: dest=/etc/contrail/common_control.env regexp='^BGP_ASN=.*' line="BGP_ASN={{ remote_locations[location].BGP_ASN }}" state=present
   when: location is defined
 
+- name: add ENABLE_4BYTE_AS if location is defined
+  lineinfile: dest=/etc/contrail/common_control.env regexp='^ENABLE_4BYTE_AS=.*' line="ENABLE_4BYTE_AS={{ remote_locations[location].ENABLE_4BYTE_AS }}" state=present
+  when: location is defined
+
 - name: add SUBCLUSTER name if location is defined and subcluster name is defined
   lineinfile: dest=/etc/contrail/common_control.env regexp='^SUBCLUSTER=.*' line="SUBCLUSTER={{ remote_locations[location].SUBCLUSTER }}" state=present
   when: location is defined and remote_locations[location].SUBCLUSTER is defined
