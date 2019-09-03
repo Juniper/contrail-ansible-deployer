@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a07e0d9_a960aa89",
+        "filename": "README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 382
+      },
+      "writtenOn": "2019-09-03T12:15:46Z",
+      "side": 1,
+      "message": "i think that it\u0027s better to use get-pip:\ncurl https://bootstrap.pypa.io/get-pip.py -o get-pip.py\n\ni don\u0027t epel-release )",
+      "revId": "b4ebb9eb01780e3465da8f5fac6ceee1827c9c52",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
