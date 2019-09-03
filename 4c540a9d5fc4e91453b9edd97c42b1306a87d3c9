@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d06a77a8_af8088a0",
+        "filename": "README.md",
+        "patchSetId": 7
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-09-03T22:24:14Z",
+      "side": 1,
+      "message": "Please reword this.",
+      "revId": "4c540a9d5fc4e91453b9edd97c42b1306a87d3c9",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "93883c53_6de1cba0",
+        "filename": "playbooks/roles/instance/tasks/install_software_Linux.yml",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-09-03T22:24:14Z",
+      "side": 1,
+      "message": "Should we remove retries since its uninstall.",
+      "revId": "4c540a9d5fc4e91453b9edd97c42b1306a87d3c9",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
