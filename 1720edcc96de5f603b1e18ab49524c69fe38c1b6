@@ -16,6 +16,24 @@
       "revId": "1720edcc96de5f603b1e18ab49524c69fe38c1b6",
       "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c29023ac_50f63bf6",
+        "filename": "playbooks/roles/contrail_config/templates/contrail-config.yaml.j2",
+        "patchSetId": 3
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 733
+      },
+      "writtenOn": "2019-09-14T13:49:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08fbf5e8_e26609a5",
+      "revId": "1720edcc96de5f603b1e18ab49524c69fe38c1b6",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": false
     }
   ]
 }
