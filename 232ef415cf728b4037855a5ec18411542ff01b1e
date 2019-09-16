@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f8ca24a6_b4cf8925",
+        "filename": "README.md",
+        "patchSetId": 8
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 382
+      },
+      "writtenOn": "2019-09-16T08:01:39Z",
+      "side": 1,
+      "message": "how it\u0027s applicable for these two pictures?",
+      "revId": "232ef415cf728b4037855a5ec18411542ff01b1e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "80ff8e2f_a255744a",
+        "filename": "README.md",
+        "patchSetId": 8
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 382
+      },
+      "writtenOn": "2019-09-16T08:01:39Z",
+      "side": 1,
+      "message": "what is appformix? where this all stuff is defined from community prospective???",
+      "range": {
+        "startLine": 95,
+        "startChar": 30,
+        "endLine": 95,
+        "endChar": 45
+      },
+      "revId": "232ef415cf728b4037855a5ec18411542ff01b1e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
