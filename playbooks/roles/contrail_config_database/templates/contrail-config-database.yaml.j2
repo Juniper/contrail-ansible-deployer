@@ -70,7 +70,6 @@ services:
     volumes:
      - /etc/hosts:/etc/hosts
      - config_zookeeper:/data
-     - config_zookeeper:/datalog
     logging:
       driver: "{{ config_db_log_driver }}"
       options:
