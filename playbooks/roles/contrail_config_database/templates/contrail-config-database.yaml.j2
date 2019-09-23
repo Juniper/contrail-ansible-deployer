@@ -1,7 +1,8 @@
 version: '2'
 volumes:
  config_cassandra:
- config_zookeeper:
+ config_zookeeper_data:
+ config_zookeeper_datalog:
 services:
   node-init:
     image: "{{ container_registry }}/contrail-node-init:{{ contrail_version_tag }}"
@@ -69,8 +70,8 @@ services:
      - NODE_TYPE=config-database
     volumes:
      - /etc/hosts:/etc/hosts
-     - config_zookeeper:/data
-     - config_zookeeper:/datalog
+     - config_zookeeper_data:/data
+     - config_zookeeper_datalog:/datalog
     logging:
       driver: "{{ config_db_log_driver }}"
       options:
