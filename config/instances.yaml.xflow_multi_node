@@ -1,0 +1,47 @@
+provider_config:
+  bms:
+    ssh_pwd: c0ntrail123
+    ssh_user: root
+    ntpserver: 10.84.5.100
+    domainsuffix: local
+instances:
+  bms1:
+    provider: bms
+    ip: 10.84.13.36
+    roles:
+      config_database:
+      config:
+      control:
+      analytics_database:
+      analytics:
+      analytics_snmp:
+      analytics_alarm:
+      webui:
+      vrouter:
+      openstack:
+      openstack_compute:
+      appformix_flows:
+  bms2:
+    provider: bms
+    ip: 10.84.13.35
+    roles:
+      compute:
+      openstack_compute:
+      appformix_flows:
+contrail_configuration:
+   AUTH_MODE: keystone
+   KEYSTONE_AUTH_URL_VERSION: /v3
+   CONTRAIL_VERSION: master-835
+global_configuration:
+   CONTAINER_REGISTRY: ci-repo.englab.juniper.net:5010
+   REGISTRY_PRIVATE_INSECURE: True
+kolla_config:
+  kolla_globals:
+    enable_haproxy: no
+    enable_ironic: "no"
+    enable_swift: "no"
+  kolla_passwords:
+    keystone_admin_password: c0ntrail123
+xflow_configuration:
+  keepalived_shared_ip: 10.84.13.37
+

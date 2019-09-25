@@ -126,16 +126,8 @@
   when: roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
   ignore_errors: yes
 
-- name: "create /var/log/contrail/lbaas"
+- name: "create /var/run/contrail/loadbalancer"
   file:
-    path: /var/log/contrail/lbaas
+    path: /var/run/contrail/loadbalancer
     state: directory
     recurse: yes
-
-- name: "configure rsyslogd"
-  shell: "echo '$AddUnixListenSocket /var/log/contrail/lbaas/haproxy.log.sock' > /etc/rsyslog.d/contrail-lbaas-haproxy.conf"
-
-- name: "restart rsyslogd"
-  service:
-    name: rsyslog
-    state: restarted
