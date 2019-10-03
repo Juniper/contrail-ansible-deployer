@@ -86,6 +86,12 @@
     dest: "/etc/contrail/vrouter/docker-compose.yaml"
   when: roles[instance_name].vrouter.AGENT_MODE is undefined or roles[instance_name].vrouter.AGENT_MODE != 'dpdk'
 
+- name: "create /var/run/contrail/loadbalancer"
+  file:
+    path: /var/run/contrail/loadbalancer
+    state: directory
+    recurse: yes
+
 - name: "start contrail vrouter"
   docker_service:
     project_src: /etc/contrail/vrouter
@@ -125,9 +131,3 @@
   shell: "docker restart nova_compute"
   when: roles[instance_name].vrouter.AGENT_MODE is defined and roles[instance_name].vrouter.AGENT_MODE == 'dpdk'
   ignore_errors: yes
-
-- name: "create /var/run/contrail/loadbalancer"
-  file:
-    path: /var/run/contrail/loadbalancer
-    state: directory
-    recurse: yes
