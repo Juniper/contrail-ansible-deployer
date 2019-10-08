@@ -4,8 +4,8 @@ localhost:
       config_file: ../config/instances.yaml
       connection: local
       ansible_connection: local
-      python_interpreter: python
-      ansible_python_interpreter: python
+      python_interpreter: python3
+      ansible_python_interpreter: python3
 #container_hosts:
 #  hosts:
 #    192.168.1.100:

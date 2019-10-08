@@ -10,7 +10,7 @@
     recurse: yes
 
 - name: Getting PYTHONPATH
-  shell: python -c "import sys; paths = [path for path in sys.path if 'packages' in path] ; print(paths[-1])"
+  shell: python3 -c "import sys; paths = [path for path in sys.path if 'packages' in path] ; print(paths[-1])"
   register: pythonpath
 
 - name: update image

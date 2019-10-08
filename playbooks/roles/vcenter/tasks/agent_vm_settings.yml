@@ -1,6 +1,6 @@
 ---
 - name: Update AgentVM settings of the esxi host
-  shell: "python ./agent_vm_settings.py \
+  shell: "./agent_vm_settings.py \
           --host \"{{ esxi_host.vcenter_server.hostname }}\" \
           --port {{ esxi_host.vcenter_server.port | default(vcenter_port) }} \
           --user \"{{ esxi_host.vcenter_server.username }}\" \
