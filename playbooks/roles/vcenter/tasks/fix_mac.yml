@@ -11,9 +11,9 @@
     loop_var: x
 
 - name: Fix mac address assignment type
-  vars: 
+  vars:
     vmname: "ContrailVM-{{ esxi_host.vcenter_server.datacentername }}-{{ esxi_host.name }}"
-  shell: "python ./fix_mac.py \
+  shell: "./fix_mac.py \
           --host \"{{ esxi_host.vcenter_server.hostname }}\" \
           --port {{ esxi_host.vcenter_server.port | default(vcenter_port) }} \
           --user \"{{ esxi_host.vcenter_server.username }}\" \

@@ -1,8 +1,8 @@
 ---
 - name: Create contrail vm in the esxi host
-  vars: 
+  vars:
     vmname: "ContrailVM-{{ esxi_host.vcenter_server.datacentername }}-{{ esxi_host.name }}"
-  shell: "python ./deploy_contrail_vm.py \
+  shell: "./deploy_contrail_vm.py \
           --host \"{{ esxi_host.vcenter_server.hostname }}\" \
           --port {{ esxi_host.vcenter_server.port | default(vcenter_port) }} \
           --user \"{{ esxi_host.vcenter_server.username }}\" \
