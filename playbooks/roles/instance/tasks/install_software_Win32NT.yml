@@ -1,5 +1,9 @@
 ---
 - name: set Windows Server version var
+  f 20
+  Prev
+  Up
+
   set_fact:
     windows_server_version: "{{ ansible_distribution | regex_findall('Windows Server (\\d{4})') | first }}"
 
@@ -62,10 +66,10 @@
   win_shell: |
     choco feature disable --name="useEnhancedExitCodes"
 
-- name: install python 2.7.13
+- name: install python 2.7.3
   win_chocolatey:
     name: python2
-    version: 2.7.13
+    version: 2.7.3
     state: present
 
 - name: install NSSM

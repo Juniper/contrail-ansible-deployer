@@ -1,6 +1,6 @@
 ---
 - name: Copy ContrailVM MAC to esxi host
-  shell: "python ./copy_vm_vars_to_esxi.py \
+  shell: "./copy_vm_vars_to_esxi.py \
           --host \"{{ esxi_host.name }}\" \
           --user \"{{ esxi_host.username }}\" \
           --password \"{{ esxi_host.password }}\" \
