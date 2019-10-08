@@ -7,7 +7,7 @@
     loop_var: cluster
 
 - name: Create ContrailVM in the esxi host
-  shell: "python ./eam_deploy_vm.py \
+  shell: "./eam_deploy_vm.py \
           --host \"{{ server.hostname }}\" \
           --port {{ server.port | default(vcenter_port) }} \
           --user \"{{ server.username }}\" \
