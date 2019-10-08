@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 class FilterModule(object):
 
     openstack_role_groups = {
