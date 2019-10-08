@@ -1,7 +1,5 @@
 ---
 - name: set Windows Server version var
-  set_fact:
-    windows_server_version: "{{ ansible_distribution | regex_findall('Windows Server (\\d{4})') | first }}"
 
 - name: install feature Windows-Containers
   win_feature:

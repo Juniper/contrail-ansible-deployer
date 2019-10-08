@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from pyVmomi import vim, eam, VmomiSupport, SoapStubAdapter
 from pyVim import connect
