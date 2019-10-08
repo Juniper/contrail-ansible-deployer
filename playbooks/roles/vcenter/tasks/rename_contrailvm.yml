@@ -2,7 +2,7 @@
 - name: Fix mac address assignment type
   vars:
     vmname: "ContrailVM-{{ esxi_host.vcenter_server.datacentername }}-{{ esxi_host.name }}"
-  shell: "python ./rename_contrailvm.py \
+  shell: "./rename_contrailvm.py \
           --host \"{{ esxi_host.vcenter_server.hostname }}\" \
           --port {{ esxi_host.vcenter_server.port | default(vcenter_port) }} \
           --user \"{{ esxi_host.vcenter_server.username }}\" \
