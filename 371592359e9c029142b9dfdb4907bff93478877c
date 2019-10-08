@@ -1,0 +1,159 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7d0268c4_60848986",
+        "filename": "inventory/hosts",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-08T16:43:01Z",
+      "side": 1,
+      "message": "it is just a variable.\nif it is not used lets just remove it at all",
+      "range": {
+        "startLine": 7,
+        "startChar": 6,
+        "endLine": 7,
+        "endChar": 33
+      },
+      "revId": "371592359e9c029142b9dfdb4907bff93478877c",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a3ebcb42_fa875f86",
+        "filename": "playbooks/roles/contrail_vrouter/tasks/deregister.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-08T16:43:01Z",
+      "side": 1,
+      "message": "Missed leading /",
+      "revId": "371592359e9c029142b9dfdb4907bff93478877c",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "601e5ad5_d2c77f9a",
+        "filename": "playbooks/roles/instance/tasks/RedHat.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-08T16:43:01Z",
+      "side": 1,
+      "message": "it will use \u0027#!/usr/bin/env python\u0027\nIt might be we have to have here\npython3 /tmp/get-pip.py",
+      "range": {
+        "startLine": 46,
+        "startChar": 13,
+        "endLine": 46,
+        "endChar": 28
+      },
+      "revId": "371592359e9c029142b9dfdb4907bff93478877c",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "345b4491_faa09212",
+        "filename": "playbooks/roles/instance/tasks/install_software_Win32NT.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-08T16:43:01Z",
+      "side": 1,
+      "message": "do we need exact ver here?",
+      "range": {
+        "startLine": 65,
+        "startChar": 24,
+        "endLine": 65,
+        "endChar": 28
+      },
+      "revId": "371592359e9c029142b9dfdb4907bff93478877c",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "33759a77_f192ca17",
+        "filename": "playbooks/roles/vcenter/tasks/add_pci_nics.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-08T16:43:01Z",
+      "side": 1,
+      "message": "playbooks/roles/vcenter/tools/add_pci_sriov_nics.py\n1. add +x for this file\n2. edit this file to use python3",
+      "range": {
+        "startLine": 16,
+        "startChar": 12,
+        "endLine": 16,
+        "endChar": 33
+      },
+      "revId": "371592359e9c029142b9dfdb4907bff93478877c",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e91afcbd_4ce79b73",
+        "filename": "playbooks/roles/vcenter/tasks/agent_vm_settings.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-08T16:43:01Z",
+      "side": 1,
+      "message": "check the tools here:\n.//playbooks/roles/vcenter/tools/",
+      "range": {
+        "startLine": 3,
+        "startChar": 12,
+        "endLine": 3,
+        "endChar": 32
+      },
+      "revId": "371592359e9c029142b9dfdb4907bff93478877c",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3eb5830c_7e33b789",
+        "filename": "unit_tests/tox.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-08T16:43:01Z",
+      "side": 1,
+      "message": "-needs to add +x to the file\n- there is python reference inside of that file",
+      "range": {
+        "startLine": 8,
+        "startChar": 11,
+        "endLine": 8,
+        "endChar": 29
+      },
+      "revId": "371592359e9c029142b9dfdb4907bff93478877c",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
