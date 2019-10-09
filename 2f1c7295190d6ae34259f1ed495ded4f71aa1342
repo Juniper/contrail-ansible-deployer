@@ -62,6 +62,29 @@
       "revId": "2f1c7295190d6ae34259f1ed495ded4f71aa1342",
       "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0dbb1b1b_09c45bf7",
+        "filename": "unit_tests/tox.ini",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-09T14:02:25Z",
+      "side": 1,
+      "message": "py36",
+      "range": {
+        "startLine": 2,
+        "startChar": 9,
+        "endLine": 2,
+        "endChar": 14
+      },
+      "revId": "2f1c7295190d6ae34259f1ed495ded4f71aa1342",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
     }
   ]
 }
