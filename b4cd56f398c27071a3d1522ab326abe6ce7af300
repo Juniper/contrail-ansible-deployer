@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bd5e903d_dfe878d8",
+        "filename": "playbooks/roles/instance/tasks/install_software_Win32NT.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-09T13:28:59Z",
+      "side": 0,
+      "message": "Does it prevent python3 support somehow?\nIt looks is in use below..",
+      "range": {
+        "startLine": 3,
+        "startChar": 0,
+        "endLine": 4,
+        "endChar": 107
+      },
+      "revId": "b4cd56f398c27071a3d1522ab326abe6ce7af300",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}

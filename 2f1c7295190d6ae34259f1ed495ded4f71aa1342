@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6aa35fa4_208a0c3d",
+        "filename": "playbooks/roles/vcenter/tasks/create_contrail_vm.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-09T13:28:59Z",
+      "side": 1,
+      "message": "remove space",
+      "range": {
+        "startLine": 3,
+        "startChar": 7,
+        "endLine": 3,
+        "endChar": 8
+      },
+      "revId": "2f1c7295190d6ae34259f1ed495ded4f71aa1342",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dfea7d22_b069c19c",
+        "filename": "playbooks/roles/vcenter/tasks/fix_mac.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-09T13:28:59Z",
+      "side": 1,
+      "message": "remove space",
+      "range": {
+        "startLine": 14,
+        "startChar": 7,
+        "endLine": 14,
+        "endChar": 8
+      },
+      "revId": "2f1c7295190d6ae34259f1ed495ded4f71aa1342",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
