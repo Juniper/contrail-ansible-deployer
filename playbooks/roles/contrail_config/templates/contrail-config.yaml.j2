@@ -108,7 +108,7 @@ services:
         max-size: "{{ config_log_max_size }}"
         max-file: "{{ config_log_max_file }}"
   dnsmasq:
-    image: "{{ container_registry }}/contrail-external-dnsmasq:{{ contrail_version_tag }}"
+    image: "{{ container_registry }}/contrail-controller-config-dnsmasq:{{ contrail_version_tag }}"
     network_mode: "host"
     cap_add:
       - NET_ADMIN
