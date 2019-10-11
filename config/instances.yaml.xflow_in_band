@@ -1,0 +1,57 @@
+global_configuration:
+  CONTAINER_REGISTRY: ci-repo.englab.juniper.net:5010
+  REGISTRY_PRIVATE_INSECURE: True
+contrail_configuration:
+   AUTH_MODE: keystone
+   KEYSTONE_AUTH_URL_VERSION: /v3
+   CONTRAIL_VERSION: master-latest
+provider_config:
+  bms:
+    ssh_user: root
+    ssh_pwd: c0ntrail123
+    ntpserver: 10.84.5.100
+instances:
+  bms1:
+    ip: 10.84.30.201
+    roles:
+      config_database:
+      config:
+      control:
+      analytics:
+      analytics_alarm:
+      analytics_database:
+      analytics_snmp:
+      webui:
+      vrouter:
+      openstack:
+      openstack_compute:
+  bms2:
+    ip: 10.84.30.21
+    provider: bms
+    roles:
+      appformix_flows:
+        telemetry_in_band_interface_name: "eth0"
+        inband_telemetry_collector_ip: 50.1.1.3
+  bms2:
+    ip: 10.84.30.22
+    provider: bms
+    roles:
+      appformix_flows:
+        telemetry_in_band_interface_name: "eth0"
+        inband_telemetry_collector_ip: 50.1.1.4
+  bms3:
+    ip: 10.84.30.23
+    provider: bms
+    roles:
+      appformix_flows:
+        telemetry_in_band_interface_name: "eth1"
+        inband_telemetry_collector_ip: 50.1.1.5
+kolla_config:
+  kolla_passwords:
+    keystone_admin_password: contrail_keystone123
+xflow_configuration:
+  clickhouse_retention_period_secs: 7200
+  clickhouse_retention_size_bytes: 0
+  telemetry_in_band_subnet: 50.1.1.0/24
+  inband_management_vip: 10.84.30.200
+  keepalived_shared_ip: 50.1.1.200
