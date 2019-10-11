@@ -1,0 +1,147 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ff31a8e_8327de11",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-10-11T23:05:19Z",
+      "side": 1,
+      "message": "typo telemetry",
+      "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b466bf1_6a63d2fb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-10-11T23:05:19Z",
+      "side": 1,
+      "message": "mandatory",
+      "range": {
+        "startLine": 15,
+        "startChar": 47,
+        "endLine": 15,
+        "endChar": 55
+      },
+      "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "193dd71a_6dfd2851",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-10-11T23:05:19Z",
+      "side": 1,
+      "message": "Could you add explanation under 1, 2, 3 etc so that reviewers know how many items are covered under these changes/explanation.",
+      "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68a06106_68367ea4",
+        "filename": "config/instances.yaml.xflow_in_band",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-10-11T23:05:19Z",
+      "side": 1,
+      "message": "This would not be present here. Only the subnet would be present here.",
+      "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cadf6831_a990847a",
+        "filename": "config/instances.yaml.xflow_in_band",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-10-11T23:05:19Z",
+      "side": 1,
+      "message": "server-name to be incremented.",
+      "range": {
+        "startLine": 35,
+        "startChar": 2,
+        "endLine": 35,
+        "endChar": 6
+      },
+      "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "480cd39e_60eed045",
+        "filename": "config/instances.yaml.xflow_in_band",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-10-11T23:05:19Z",
+      "side": 1,
+      "message": "inband_management_vip: Can we rename it to management_vip since it will be present for in-band \u0026 out of band cases.\n  keepalived_shared_ip: Can we rename it to inband_vip",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 34
+      },
+      "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "32401b6d_9affc620",
+        "filename": "playbooks/roles/contrail_deployer/tasks/set_contrail_variables.yml",
+        "patchSetId": 2
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-10-11T23:05:19Z",
+      "side": 1,
+      "message": "Use calculate or evaluate since \"compute\" is a keyword in contrail.",
+      "range": {
+        "startLine": 174,
+        "startChar": 8,
+        "endLine": 174,
+        "endChar": 15
+      },
+      "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
