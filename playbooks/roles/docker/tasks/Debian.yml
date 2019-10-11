@@ -21,26 +21,11 @@
     repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
     state: present
 
-# trusty, xenial, artful versions have next package version
-- name: install docker for xenial
+- name: install docker
   apt:
-    name: docker-ce=18.03.1~ce-0~ubuntu
+    name: "docker-ce=18.06.3~ce~3-0~ubuntu"
     state: present
     update_cache: yes
-  when: ansible_distribution_release in ('trusty', 'xenial', 'artful')
-  register: res
-  retries: 5
-  until: res | success
-
-# all other releases don't have 18.x at all
-
-# bionic has another package version
-- name: install docker for bionic
-  apt:
-    name: docker-ce=18.03.1~ce~3-0~ubuntu
-    state: present
-    update_cache: yes
-  when: ansible_distribution_release == 'bionic'
   register: res
   retries: 5
   until: res | success
