@@ -171,15 +171,10 @@
   when:
     - xflow_configuration is defined and xflow_configuration.keepalived_shared_ip is defined
 
-- fail:
-    msg: Set loadbalancer ip when there are multiple xflow nodes
-  when:
-    - xflow_nodes_list | length > 1
-    - not (xflow_configuration is defined and xflow_configuration.keepalived_shared_ip is defined)
-
-- name: add xflow node ip in contrail_configuration from appformix_flows role
+- name: evaluate and add xflow node ip from telemetry_in_band_cidr when keepalived_shared_ip is not defined
   set_fact:
-    contrail_configuration: "{{ contrail_configuration | combine({'XFLOW_NODE_IP': xflow_nodes_list[0]}) }}"
+    contrail_configuration: "{{ contrail_configuration | combine({'XFLOW_NODE_IP': xflow_configuration.telemetry_in_band_cidr | ipaddr('network/prefix') | next_nth_usable(3) }) }}"
   when:
-    - not (xflow_configuration is defined and xflow_configuration.keepalived_shared_ip is defined)
-    - xflow_nodes_list | length > 0
+    - xflow_configuration is defined
+    - xflow_configuration.keepalived_shared_ip is not defined
+    - xflow_configuration.telemetry_in_band_cidr is defined
