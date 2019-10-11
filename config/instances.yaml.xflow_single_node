@@ -35,4 +35,5 @@ kolla_config:
     enable_swift: "no"
   kolla_passwords:
     keystone_admin_password: c0ntrail123
-
+xflow_configuration:
+  keepalived_shared_ip: 10.84.13.41
