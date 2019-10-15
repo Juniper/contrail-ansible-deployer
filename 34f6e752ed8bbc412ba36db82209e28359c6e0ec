@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "35b6be49_fb22d2a3",
+        "filename": "inventory/hosts",
+        "patchSetId": 6
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-15T11:07:01Z",
+      "side": 1,
+      "message": "remove spaces",
+      "range": {
+        "startLine": 6,
+        "startChar": 31,
+        "endLine": 6,
+        "endChar": 37
+      },
+      "revId": "34f6e752ed8bbc412ba36db82209e28359c6e0ec",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bbbea435_54e0f9b9",
+        "filename": "playbooks/roles/kolla_deployer/tasks/install_kolla_dependencies.yml",
+        "patchSetId": 6
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-15T11:07:01Z",
+      "side": 1,
+      "message": "It looks the right module is\npython3-libselinux",
+      "range": {
+        "startLine": 49,
+        "startChar": 10,
+        "endLine": 49,
+        "endChar": 25
+      },
+      "revId": "34f6e752ed8bbc412ba36db82209e28359c6e0ec",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2132cdeb_c664b92c",
+        "filename": "playbooks/roles/vcenter/tasks/add_pci_nics.yml",
+        "patchSetId": 6
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-15T11:07:01Z",
+      "side": 1,
+      "message": "remove space",
+      "range": {
+        "startLine": 6,
+        "startChar": 31,
+        "endLine": 6,
+        "endChar": 32
+      },
+      "revId": "34f6e752ed8bbc412ba36db82209e28359c6e0ec",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "616b36f0_f7285a8c",
+        "filename": "playbooks/roles/vcenter/tasks/add_pci_nics.yml",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 437
+      },
+      "writtenOn": "2019-10-15T11:07:01Z",
+      "side": 1,
+      "message": "remove space",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 18
+      },
+      "revId": "34f6e752ed8bbc412ba36db82209e28359c6e0ec",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
