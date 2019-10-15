@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "74566cfd_af5611ba",
+        "filename": "config/instances.yaml.xflow_in_band",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-10-15T22:40:23Z",
+      "side": 1,
+      "message": "This is not related to in-band functioning. It should no be called in-band.",
+      "range": {
+        "startLine": 53,
+        "startChar": 2,
+        "endLine": 53,
+        "endChar": 20
+      },
+      "revId": "3f4bdcddfdc38967f0ec5e2091833b5549cfa52c",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "510752d6_edb69998",
+        "filename": "config/instances.yaml.xflow_in_band",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-10-15T22:40:23Z",
+      "side": 1,
+      "message": "As discussed, please document what is the final name for these fields and add the link to the doc here.",
+      "range": {
+        "startLine": 54,
+        "startChar": 2,
+        "endLine": 54,
+        "endChar": 22
+      },
+      "revId": "3f4bdcddfdc38967f0ec5e2091833b5549cfa52c",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
