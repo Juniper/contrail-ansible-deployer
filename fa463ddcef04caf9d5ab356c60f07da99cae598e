@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5d883a0c_65dbcf96",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 49
+      },
+      "writtenOn": "2019-10-15T06:15:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8ff31a8e_8327de11",
+      "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b466bf1_6a63d2fb",
         "filename": "/COMMIT_MSG",
         "patchSetId": 2
@@ -59,6 +77,48 @@
     },
     {
       "key": {
+        "uuid": "33527358_cf6e3e3f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 49
+      },
+      "writtenOn": "2019-10-15T06:15:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "193dd71a_6dfd2851",
+      "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "943885ad_64cbf209",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 49
+      },
+      "writtenOn": "2019-10-15T06:15:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1b466bf1_6a63d2fb",
+      "range": {
+        "startLine": 15,
+        "startChar": 47,
+        "endLine": 15,
+        "endChar": 55
+      },
+      "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "68a06106_68367ea4",
         "filename": "config/instances.yaml.xflow_in_band",
         "patchSetId": 2
@@ -70,6 +130,24 @@
       "writtenOn": "2019-10-11T23:05:19Z",
       "side": 1,
       "message": "This would not be present here. Only the subnet would be present here.",
+      "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "db63dc55_32457931",
+        "filename": "config/instances.yaml.xflow_in_band",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 49
+      },
+      "writtenOn": "2019-10-15T06:15:00Z",
+      "side": 1,
+      "message": "Good catch. Will remove this one.",
+      "parentUuid": "68a06106_68367ea4",
       "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
       "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
       "unresolved": true
@@ -99,6 +177,30 @@
     },
     {
       "key": {
+        "uuid": "3b305b70_b88d0ed7",
+        "filename": "config/instances.yaml.xflow_in_band",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 49
+      },
+      "writtenOn": "2019-10-15T06:15:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cadf6831_a990847a",
+      "range": {
+        "startLine": 35,
+        "startChar": 2,
+        "endLine": 35,
+        "endChar": 6
+      },
+      "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "480cd39e_60eed045",
         "filename": "config/instances.yaml.xflow_in_band",
         "patchSetId": 2
@@ -110,6 +212,30 @@
       "writtenOn": "2019-10-11T23:05:19Z",
       "side": 1,
       "message": "inband_management_vip: Can we rename it to management_vip since it will be present for in-band \u0026 out of band cases.\n  keepalived_shared_ip: Can we rename it to inband_vip",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 34
+      },
+      "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "abd3705d_b5d4c95d",
+        "filename": "config/instances.yaml.xflow_in_band",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 49
+      },
+      "writtenOn": "2019-10-15T06:15:00Z",
+      "side": 1,
+      "message": "inband_management_vip -\u003e telemetry_in_band_management_vip",
+      "parentUuid": "480cd39e_60eed045",
       "range": {
         "startLine": 55,
         "startChar": 0,
@@ -142,6 +268,30 @@
       "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
       "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1dbdde8_697383fb",
+        "filename": "playbooks/roles/contrail_deployer/tasks/set_contrail_variables.yml",
+        "patchSetId": 2
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 49
+      },
+      "writtenOn": "2019-10-15T06:15:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "32401b6d_9affc620",
+      "range": {
+        "startLine": 174,
+        "startChar": 8,
+        "endLine": 174,
+        "endChar": 15
+      },
+      "revId": "fa463ddcef04caf9d5ab356c60f07da99cae598e",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": false
     }
   ]
 }
