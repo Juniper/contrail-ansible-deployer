@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "823bf01a_461b1309",
+        "filename": "config/instances.yaml.xflow_in_band",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 49
+      },
+      "writtenOn": "2019-10-17T06:28:54Z",
+      "side": 1,
+      "message": "This is for in-band functioning only.",
+      "parentUuid": "74566cfd_af5611ba",
+      "range": {
+        "startLine": 53,
+        "startChar": 2,
+        "endLine": 53,
+        "endChar": 20
+      },
+      "revId": "3f4bdcddfdc38967f0ec5e2091833b5549cfa52c",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "510752d6_edb69998",
         "filename": "config/instances.yaml.xflow_in_band",
         "patchSetId": 3
