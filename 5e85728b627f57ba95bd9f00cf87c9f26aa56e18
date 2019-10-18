@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a0e2652_d6e630f1",
+        "filename": "config/instances.yaml.xflow_single_node",
+        "patchSetId": 6
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-10-18T19:22:28Z",
+      "side": 1,
+      "message": "field to be renamed.",
+      "range": {
+        "startLine": 39,
+        "startChar": 2,
+        "endLine": 39,
+        "endChar": 22
+      },
+      "revId": "5e85728b627f57ba95bd9f00cf87c9f26aa56e18",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b8b4a160_d1c71aed",
+        "filename": "config/instances.yaml.xflow_single_node",
+        "patchSetId": 6
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-10-18T19:22:28Z",
+      "side": 1,
+      "message": "keep it \"37\" to match with xflow_multi_node sample file. Helps with comparison.",
+      "range": {
+        "startLine": 39,
+        "startChar": 33,
+        "endLine": 39,
+        "endChar": 35
+      },
+      "revId": "5e85728b627f57ba95bd9f00cf87c9f26aa56e18",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e48d5163_bce216a7",
+        "filename": "playbooks/roles/contrail_deployer/tasks/set_contrail_variables.yml",
+        "patchSetId": 6
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 257
+      },
+      "writtenOn": "2019-10-18T19:22:28Z",
+      "side": 1,
+      "message": "Put this on 2nd line for clarity.",
+      "range": {
+        "startLine": 172,
+        "startChar": 37,
+        "endLine": 172,
+        "endChar": 60
+      },
+      "revId": "5e85728b627f57ba95bd9f00cf87c9f26aa56e18",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
