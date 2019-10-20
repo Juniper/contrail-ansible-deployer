@@ -3,17 +3,17 @@
   set_fact:
     pci_nics: ""
 
-- name: Create pci devices list 
+- name: Create pci devices list
   set_fact:
     pci_nics: "{{ pci_nics | default () + nic + ',' }}"
   with_items: "{{ esxi_host.contrail_vm.pci_devices }}"
   loop_control:
-    loop_var: nic 
+    loop_var: nic
 
 - name: Add pci nics
   vars:
     vmname: "ContrailVM-{{ esxi_host.vcenter_server.datacentername }}-{{ esxi_host.name }}"
-  shell: "python ./add_pci_sriov_nics.py \
+  shell: "./add_pci_sriov_nics.py \
           --host \"{{ esxi_host.vcenter_server.hostname }}\" \
           --port {{ esxi_host.vcenter_server.port | default(vcenter_port) }} \
           --user \"{{ esxi_host.vcenter_server.username }}\" \

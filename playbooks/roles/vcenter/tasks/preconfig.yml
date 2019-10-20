@@ -21,7 +21,7 @@
 
 - name: Run preconfig script
   #shell: "python /opt/contrail/server_manager/client/preconfig.py \
-  shell: "python ./preconfig.py \
+  shell: "./preconfig.py \
           --server-json {{filename.path}} --server-manager-ip {{smipstr.stdout}}"
   args:
     chdir: "{{role_path}}/tools"
