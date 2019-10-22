@@ -380,9 +380,22 @@ ansible-playbook -i inventory/ -e config_file=/config/instances_gce.yml playbook
 
 yaml and json formats are supported.
 
+# Accessing the Kubernetes dashboard
+
+If the orchestrator chosen is Kubernetes, the dashboard will be available on
+port number 8443. A token will be necessary to access the dashboard, which by
+default will be available in the file /root/k8s_dashboard_token.txt
+
+If you want to override default file, you can define the path where you want
+to store the token, which can be specified in the instances.yaml file as
+
+```
+global_configuration:
+  K8S_DASHBORD_TOKEN_PATH: "absolute path"
+```
+
 # Structure of the repo
 
 This repository contains several playbooks which are to be involved separately and various roles which are named acccording to the following:
 1. XXX_deployer roles (contrail_deployer, aws_deployer, kolla_deployer, ...) are the roles which are to be run on the deployment machine (the one running ansible_deployer) and to affect the whole cluster. They prepare global variables, initialize kolla or k8s cluster, etc. They are named after ansible_deployer and could've been named contrail_ansible_deployer, aws_ansible_deployer, etc.
 2. XXX roles (contrail, k8s, vcenter, ...) are the roles to be assigned to particular nodes - computes, controllers, analytics_databases and such.
- 
