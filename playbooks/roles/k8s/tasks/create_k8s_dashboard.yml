@@ -11,5 +11,19 @@
   shell: kubectl -n kube-system get secret | grep namespace-controller-token | awk '{print $1}'
   register: privileged_token_output
 
+- name: setting custom k8s dashboard token file
+  set_fact: 
+      k8s_dashboard_token_path: "{{ contrail_configuration.K8S_DASHBORD_TOKEN_PATH }}"
+  when: contrail_configuration.K8S_DASHBORD_TOKEN_PATH is defined
+
+- name: setting default k8s dashboard token file 
+  set_fact:
+      k8s_dashboard_token_path: "/root/k8s_dashboard_token.txt"
+  when: contrail_configuration.K8S_DASHBORD_TOKEN_PATH is undefined
+
+- name: printing token file path
+  debug:
+    msg: "{{ k8s_dashboard_token_path }}"
+
 - name: store privileged token for full k8s dashboard access
-  shell: kubectl describe secret {{ privileged_token_output.stdout }} -n kube-system | grep "token:" | awk '{print $2}' > /root/k8s_dashboard_token.txt
+  shell: kubectl describe secret {{ privileged_token_output.stdout }} -n kube-system | grep "token:" | awk '{print $2}' > {{ k8s_dashboard_token_path }}

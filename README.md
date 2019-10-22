@@ -388,6 +388,20 @@ ansible-playbook -i inventory/ -e config_file=/config/instances_gce.yml playbook
 
 yaml and json formats are supported.
 
+#Accessing the Kubernetes dashboard
+
+If the orchestrator chosen is Kubernetes, the dashboard will be available on
+port number 8443. A token will be necessary to access the dashboard, which by
+default will be available in the file /root/k8s_dashboard_token.txt
+
+If you want to override default file, you can define the path where you want
+to store the token, which can be specified in the instances.yaml file as
+
+```
+contrail_configuration:
+  K8S_DASHBORD_TOKEN_PATH = "absolute path"
+```
+
 # Structure of the repo
 
 This repository contains several playbooks which are to be involved separately and various roles which are named acccording to the following:
