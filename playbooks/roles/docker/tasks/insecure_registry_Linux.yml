@@ -30,7 +30,7 @@
   block:
     - name: insert updated insecure-registries to docker daemon
       set_fact:
-        docker_daemon: "{{ docker_daemon | combine({ 'insecure-registries': insecure_registries + [docker_registry] }) }}"
+        docker_daemon: "{{ docker_daemon | combine({ 'insecure-registries': insecure_registries + [docker_registry.split('/')[0]] }) }}"
 
     - name: write config to daemon.json
       copy:
