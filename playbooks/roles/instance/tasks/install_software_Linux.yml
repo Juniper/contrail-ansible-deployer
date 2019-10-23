@@ -30,6 +30,14 @@
   - cloud-config
   ignore_errors: yes
 
+- name: Install python3
+  package:
+    name: python3
+    state: present
+  register: res
+  retries: 5
+  until: res | success
+
 - name: OS specific package install
   include: "{{ ansible_os_family }}.yml"
 
