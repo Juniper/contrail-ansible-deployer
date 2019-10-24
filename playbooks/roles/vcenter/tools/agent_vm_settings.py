@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 from os import system, path
 from sys import exit
 from threading import Thread

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import paramiko
 import os
 from argparse import ArgumentParser

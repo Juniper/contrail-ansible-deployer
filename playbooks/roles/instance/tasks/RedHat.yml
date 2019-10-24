@@ -43,7 +43,7 @@
         url: https://bootstrap.pypa.io/get-pip.py
         dest: /tmp/get-pip.py
     - name: Install pip
-      shell: python3 /tmp/get-pip.py
+      shell: python /tmp/get-pip.py
       register: rc
       retries: 5
       until: rc | success
