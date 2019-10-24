@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 from sys import exit
 from time import sleep
 from argparse import ArgumentParser
