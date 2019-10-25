@@ -3,6 +3,11 @@
   include: RedHat.yml
   when: ansible_os_family == 'RedHat'
 
+- name: install git to operate on kolla branches
+  package:
+    name: git
+    state: present
+
 - name: check if pip present
   shell: pip --version
   ignore_errors: true

@@ -1,10 +1,11 @@
-- name: create kolla playbooks
-  include: create_kolla_playbooks.yml
-  tags:
-    - kolla
+---
 
 - name: install_kolla_dependencies
   include: install_kolla_dependencies.yml
   tags:
     - kolla
 
+- name: create kolla playbooks
+  include: create_kolla_playbooks.yml
+  tags:
+    - kolla
