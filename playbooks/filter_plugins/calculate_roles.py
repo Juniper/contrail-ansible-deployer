@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 """
 This filter plugin script takes api_server_list and instances file as input and
