@@ -16,6 +16,14 @@
     gpgcheck: no
   when: docker_mirror_url is defined
 
+# docker-ce-18 requries pigz which is available starting from rhel8
+# so, use epel
+- name: configure epel
+  yum:
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm
+  when: ansible_distribution_major_version|int < 8
+
 - name: install docker
   yum:
     name: docker-ce-18.03.1.ce
+
