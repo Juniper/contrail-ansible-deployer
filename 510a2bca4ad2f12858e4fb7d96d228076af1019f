@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0c1118b0_8414cba1",
+        "filename": "README.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 382
+      },
+      "writtenOn": "2019-11-04T12:03:12Z",
+      "side": 1,
+      "message": "\u0027 \u003d \u0027 -\u003e \u0027: \u0027",
+      "range": {
+        "startLine": 394,
+        "startChar": 25,
+        "endLine": 394,
+        "endChar": 28
+      },
+      "revId": "510a2bca4ad2f12858e4fb7d96d228076af1019f",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
