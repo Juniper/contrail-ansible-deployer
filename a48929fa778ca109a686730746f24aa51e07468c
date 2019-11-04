@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ab84554_0ce4469c",
+        "filename": "playbooks/roles/k8s/tasks/create_k8s_dashboard.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 382
+      },
+      "writtenOn": "2019-11-04T09:45:37Z",
+      "side": 1,
+      "message": "i would prefer to put into global_configuration",
+      "range": {
+        "startLine": 16,
+        "startChar": 36,
+        "endLine": 16,
+        "endChar": 58
+      },
+      "revId": "a48929fa778ca109a686730746f24aa51e07468c",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
