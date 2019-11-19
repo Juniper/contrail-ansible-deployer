@@ -7,6 +7,7 @@
   package:
     name: git
     state: present
+  become: yes
 
 - name: check if pip present
   shell: pip --version
