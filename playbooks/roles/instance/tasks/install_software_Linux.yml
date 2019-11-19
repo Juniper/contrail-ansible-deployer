@@ -54,6 +54,7 @@
 - name: install python compose
   pip:
     name: docker-compose
+    version: "1.24.1"
 
 - name: Manage /etc/hosts
   include: manage_etc_hosts.yml
