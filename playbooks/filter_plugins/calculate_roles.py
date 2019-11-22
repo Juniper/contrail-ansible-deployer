@@ -7,7 +7,6 @@ for all the nodes in the instances file.
 """
 
 import requests
-import urllib, urllib2
 import json
 
 class FilterModule(object):
@@ -83,7 +82,7 @@ class FilterModule(object):
         if not instance_data["value"]["roles"]:
             return existing_roles
 
-        for role, data in instance_data["value"]["roles"].iteritems():
+        for role, data in instance_data["value"]["roles"].items():
             ix_name = next((s for s in self.indexed_roles if s in role), None)
             if not ix_name:
                 existing_roles[instance_data["key"]][role] = data
@@ -100,7 +99,7 @@ class FilterModule(object):
         deleted_nodes_dict = cluster_roles_dict['deleted_nodes_dict']
         instance_roles = []
         if instance_data["value"]["roles"]:
-           instance_roles = instance_data["value"]["roles"].keys()
+           instance_roles = set(instance_data["value"]["roles"].keys())
 
         for role in node_roles_dict[instance_data['key']]['existing_roles']:
             if isinstance(role, dict):
@@ -138,7 +137,7 @@ class OpenstackCluster(object):
         invalid_role = None
         cluster_role_set = set()
 
-        for instance_name, instance_config in self.instances_dict.iteritems():
+        for instance_name, instance_config in self.instances_dict.items():
             instances_nodes_dict[instance_name] = {}
             self.node_name_ip_map[instance_name] = instance_config["ip"]
             self.node_ip_name_map[instance_config["ip"]] = instance_name
@@ -164,7 +163,7 @@ class OpenstackCluster(object):
 
         for server in instances_nodes_dict:
             for role_list, list_of_roles in \
-                    instances_nodes_dict[server].iteritems():
+                    instances_nodes_dict[server].items():
                 if len(list_of_roles) and "openstack" in list_of_roles:
                     list_of_roles.remove("openstack")
                     list_of_roles += self.os_params.openstack_controller_roles
@@ -208,7 +207,7 @@ class OpenstackCluster(object):
     # found, then the corresponding mgmt ip is used to index into the
     # node_ip_name_map dict to get the server name
     def get_instance_name(self, service_ip, hv):
-        for i in hv.keys():
+        for i in hv:
             if service_ip in hv[i].get('ansible_all_ipv4_addresses',[]):
                 for ip in hv[i]['ansible_all_ipv4_addresses']:
                     if ip in self.node_ip_name_map:
@@ -282,7 +281,7 @@ class OpenstackCluster(object):
 
 # class that handles parameters required to talk to openstack and detect
 # existing roles
-class OpenStackParams:
+class OpenStackParams(object):
 
     # static params
     endpoint_port_role_map = {
@@ -540,7 +539,7 @@ class ContrailCluster(object):
                                  ':' + str(self.api_server_port) + '/'
 
         for contrail_object, contrail_role in \
-            self.contrail_object_map.iteritems():
+            self.contrail_object_map.items():
 
             contrail_object_url = self.contrail_api_url + str(contrail_object)
             response = self.get_rest_api_response(contrail_object_url,
@@ -624,7 +623,7 @@ class ContrailCluster(object):
         instances_dict = self.instances_dict
         contrail_configuration = self.cc_dict
         hv = self.hv
-        for instance_name, instance_config in instances_dict.iteritems():
+        for instance_name, instance_config in instances_dict.items():
             instances_nodes_dict[instance_name] = {}
             self.node_name_ip_map[instance_name] = instance_config["ip"]
             self.node_ip_name_map[instance_config["ip"]] = instance_name
@@ -680,12 +679,12 @@ class ContrailCluster(object):
             ))
 
         if self.existing_tor_agents:
-            for toragent in self.existing_tor_agents.keys():
+            for toragent in self.existing_tor_agents:
                 server = toragent.split('-')[0]
                 tor_agent_id = toragent.split('-')[-1]
                 toragent_roles = {}
                 toragent_roles[('toragent_' + str(tor_agent_id))] = self.existing_tor_agents[toragent]
-                if server in instances_nodes_dict.keys():
+                if server in instances_nodes_dict:
                     instances_nodes_dict[server]['existing_roles'].append(toragent_roles)
                 elif server not in deleted_nodes_dict:
                     deleted_nodes_dict[server] = self.existing_tor_agents[toragent]['toragent_ip']
