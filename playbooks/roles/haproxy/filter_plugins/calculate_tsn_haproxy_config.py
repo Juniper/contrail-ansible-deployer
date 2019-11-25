@@ -33,7 +33,7 @@ class FilterModule(object):
         for host in self.toragent_hosts_list:
             if host == skip_host:
                 continue
-            for role in self.instances[host]['roles'].keys():
+            for role in self.instances[host]['roles']:
                 if 'toragent' not in role:
                     continue
                 tor_name = self.get_env_value_for_role(host, role, 'TOR_NAME')
@@ -57,7 +57,7 @@ class FilterModule(object):
         tsn_haproxy_port_list = []
 
         for host in toragent_hosts_list:
-            for role in instances[host]['roles'].keys():
+            for role in instances[host]['roles']:
                 if 'toragent' not in role:
                     continue
                 tor_name= self.get_env_value_for_role(host, role, 'TOR_NAME')
@@ -79,7 +79,7 @@ class FilterModule(object):
                     master_standby_dict[key] = []
                 if not port1 in master_standby_dict[key]:
                     master_standby_dict[key].append(port1)
-        for key in master_standby_dict.keys():
+        for key in master_standby_dict:
             tsn1 = key.split('-')[0]
             tsn2 = key.split('-')[1]
             for ovs_port in master_standby_dict[key]:

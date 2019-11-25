@@ -3,11 +3,11 @@
 # Additional options can be found in the
 # 'kolla-ansible/ansible/group_vars/all.yml' file.
 
-{% for key, value in final_kolla_globals.iteritems() %}
+{% for key, value in final_kolla_globals.items() %}
 {% if value is mapping %}
 {% print '\n' %}
 {{ key }}:
-{% for k, v in value.iteritems() %}
+{% for k, v in value.items() %}
   {{ k }}: {{ v }}
 {% endfor %}
 {% print '\n' %}
