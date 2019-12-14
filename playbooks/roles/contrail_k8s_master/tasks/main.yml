@@ -5,13 +5,17 @@
     state: directory
     recurse: yes
 
+- name: set kube_cluster_name
+  set_fact:
+    kube_cluster_name: "{{ contrail_configuration.get('KUBERNETES_CLUSTER_NAME', 'k8s') }}"
+
 - name: create contrail kubemanager serviceaccount yaml
   template:
     src: contrail-kubemanager-serviceaccount.yaml.j2
-    dest: /etc/contrail/contrail-kubemanager-serviceaccount.yaml
+    dest: /etc/contrail/contrail-kubemanager-serviceaccount_{{ kube_cluster_name }}.yaml
 
 - name: excute contrail kubemanager serviceaccount yaml
-  shell: kubectl apply -f /etc/contrail/contrail-kubemanager-serviceaccount.yaml
+  shell: kubectl apply -f /etc/contrail/contrail-kubemanager-serviceaccount_{{ kube_cluster_name }}.yaml
 
 # in some situation kubectl needs some time to get answer with non-empty token
 - name: get kubemanager token name from serviceaccount
