@@ -46,6 +46,7 @@
     - contrail-nodemgr
     - contrail-analytics-api
     - contrail-analytics-collector
+    - contrail-provisioner
   when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 
 - name: create contrail analytics file
