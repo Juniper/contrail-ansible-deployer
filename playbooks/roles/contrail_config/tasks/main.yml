@@ -50,6 +50,7 @@
     - contrail-controller-config-schema
     - contrail-controller-config-devicemgr
     - contrail-controller-config-stats
+    - contrail-provisioner
   when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 
 - name: initialize use_external_tftp variable

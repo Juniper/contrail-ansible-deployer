@@ -49,6 +49,7 @@
     - contrail-external-cassandra
     - contrail-external-zookeeper
     - contrail-external-rabbitmq
+    - contrail-provisioner
   when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 
 - name: create contrail config database compose file
