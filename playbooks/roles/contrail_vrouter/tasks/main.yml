@@ -74,6 +74,7 @@
   with_items:
     - contrail-node-init
     - contrail-nodemgr
+    - contrail-provisioner
     - "{{ vrouter_kernel_init_img_name }}"
     - contrail-vrouter-agent
   when:
@@ -102,6 +103,7 @@
   with_items:
     - contrail-node-init
     - contrail-nodemgr
+    - contrail-provisioner
     - contrail-vrouter-kernel-init-dpdk
     - contrail-vrouter-agent-dpdk
     - contrail-vrouter-agent

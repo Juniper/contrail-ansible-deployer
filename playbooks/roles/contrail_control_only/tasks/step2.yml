@@ -75,6 +75,7 @@
   with_items:
     - contrail-node-init
     - contrail-nodemgr
+    - contrail-provisioner
     - contrail-controller-control-control
   when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 

@@ -22,6 +22,7 @@
     - contrail-nodemgr
     - contrail-analytics-query-engine
     - contrail-external-cassandra
+    - contrail-provisioner
   when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 
 - name: create contrail analytics database compose file
