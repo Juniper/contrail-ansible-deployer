@@ -12,6 +12,7 @@
     - contrail-nodemgr
     - contrail-analytics-snmp-topology
     - contrail-analytics-snmp-collector
+    - contrail-provisioner
 
 - name: create contrail analytics_snmp docker-compose file
   template:

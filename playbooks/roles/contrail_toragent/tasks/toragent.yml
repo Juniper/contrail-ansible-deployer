@@ -45,6 +45,7 @@
     - contrail-node-init
     - contrail-nodemgr
     - contrail-tor-agent
+    - contrail-provisioner
   when: contrail_configuration.UPDATE_IMAGES is undefined or contrail_configuration.UPDATE_IMAGES != false
 
 - name: create contrail {{ toragent_name }} compose file
