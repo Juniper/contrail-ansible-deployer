@@ -30,6 +30,24 @@ services:
       options:
         max-size: "{{ compute_log_max_size }}"
         max-file: "{{ compute_log_max_file }}"
+  provisioner:
+    image: "{{ container_registry }}/contrail-provisioner:{{ contrail_version_tag }}"
+    env_file: "/etc/contrail/{{ toragent_name }}.env"
+    environment:
+      - NODE_TYPE=toragent
+    network_mode: "host"
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ compute_log_driver }}"
+      options:
+        max-size: "{{ compute_log_max_size }}"
+        max-file: "{{ compute_log_max_file }}" 
   toragent:
     image: "{{ container_registry }}/contrail-tor-agent:{{ contrail_version_tag }}"
     network_mode: host

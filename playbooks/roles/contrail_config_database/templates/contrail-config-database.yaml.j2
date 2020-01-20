@@ -35,6 +35,24 @@ services:
       options:
         max-size: "{{ config_db_log_max_size }}"
         max-file: "{{ config_db_log_max_file }}"
+  provisioner:
+    image: "{{ container_registry }}/contrail-provisioner:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common.env
+    environment:
+      - NODE_TYPE=config-database
+    network_mode: "host"
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ config_db_log_driver }}"
+      options:
+        max-size: "{{ config_db_log_max_size }}"
+        max-file: "{{ config_db_log_max_file }}" 
   cassandra:
     image: "{{ container_registry }}/contrail-external-cassandra:{{ contrail_version_tag }}"
     env_file: /etc/contrail/common.env

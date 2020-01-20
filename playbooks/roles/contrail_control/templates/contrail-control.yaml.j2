@@ -32,6 +32,24 @@ services:
       options:
         max-size: "{{ control_log_max_size }}"
         max-file: "{{ control_log_max_file }}"
+  provisioner:
+    image: "{{ container_registry }}/contrail-provisioner:{{ contrail_version_tag }}"
+    env_file: /etc/contrail/common_control.env
+    environment:
+      - NODE_TYPE=control
+    network_mode: "host"
+    volumes_from:
+      - node-init
+    depends_on:
+      - node-init
+    restart: always
+    stdin_open: {{ contrail_configuration.STDIN_OPEN }}
+    tty: {{ contrail_configuration.TTY }}
+    logging:
+      driver: "{{ control_log_driver }}"
+      options:
+        max-size: "{{ control_log_max_size }}"
+        max-file: "{{ control_log_max_file }}" 
   control:
     image: "{{ container_registry }}/contrail-controller-control-control:{{ contrail_version_tag }}"
     network_mode: "host"
