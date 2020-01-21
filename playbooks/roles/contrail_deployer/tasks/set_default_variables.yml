@@ -1,0 +1,12 @@
+- name: set contrail configuration param
+  set_fact:
+    default_configuration: {}
+  when: default_configuration is undefined
+  tags:
+   - always
+
+- name: set orchestrator param
+  set_fact:
+    default_configuration: "{{ default_configuration }}"
+  tags:
+   - always
