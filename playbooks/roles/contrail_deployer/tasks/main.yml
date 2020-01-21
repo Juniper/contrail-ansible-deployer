@@ -13,6 +13,11 @@
   tags:
     - always
 
+- name: set default variables
+  include: set_default_variables.yml
+  tags:
+    - always
+
 - name: set contrail variables
   include: set_contrail_variables.yml
   tags:
