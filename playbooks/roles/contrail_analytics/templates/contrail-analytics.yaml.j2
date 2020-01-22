@@ -32,7 +32,9 @@ services:
         max-file: "{{ analytics_log_max_file }}"
   provisioner:
     image: "{{ container_registry }}/contrail-provisioner:{{ contrail_version_tag }}"
-    env_file: /etc/contrail/common_analytics.env
+    env_file: 
+      - /etc/contrail/common_analytics.env
+      - /etc/contrail/defaults.env
     environment:
       - NODE_TYPE=analytics
     network_mode: "host"
