@@ -202,6 +202,14 @@ RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT=${RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT:-true}
 AGENT_MODE=${AGENT_MODE:-'kernel'}
 DPDK_UIO_DRIVER=${DPDK_UIO_DRIVER:-'uio_pci_generic'}
 CPU_CORE_MASK=${CPU_CORE_MASK:-'0x01'}
+<<<<<<< HEAD   (5f3905 Fix docker-compose version 1.24.1)
+=======
+# - service threads pinning
+SERVICE_CORE_MASK=${SERVICE_CORE_MASK:-}
+# - dkpk control threads pinning
+DPDK_CTRL_THREAD_MASK=${DPDK_CTRL_THREAD_MASK:-}
+
+>>>>>>> CHANGE (14a7fc Added option DPDK_CTRL_THREAD_MASK for dpdk tuning)
 HUGE_PAGES=${HUGE_PAGES:-1024}
 HUGE_PAGES_DIR=${HUGE_PAGES_DIR:-'/dev/hugepages'}
 DPDK_MEM_PER_SOCKET=${DPDK_MEM_PER_SOCKET:-1024}
