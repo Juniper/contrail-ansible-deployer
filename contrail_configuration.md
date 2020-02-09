@@ -206,6 +206,8 @@ DPDK_UIO_DRIVER=${DPDK_UIO_DRIVER:-'uio_pci_generic'}
 CPU_CORE_MASK=${CPU_CORE_MASK:-'0x01'}
 # - service threads pinning
 SERVICE_CORE_MASK=${SERVICE_CORE_MASK:-}
+# - dkpk control threads pinning
+DPDK_CTRL_THREAD_MASK=${DPDK_CTRL_THREAD_MASK:-}
 
 HUGE_PAGES=${HUGE_PAGES:-1024}
 HUGE_PAGES_DIR=${HUGE_PAGES_DIR:-'/dev/hugepages'}
