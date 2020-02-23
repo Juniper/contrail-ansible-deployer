@@ -40,6 +40,13 @@
 - name: OS specific kernel install, grub modifications, reboot
   include: "{{ ansible_os_family }}_kernel.yml"
 
+# due to some reasons package enum34 can be broken here - it's better to re-install it
+# https://contrail-jws.atlassian.net/browse/CEM-12948
+- name: reinstall enum34
+  pip:
+    name: enum34
+    state: forcereinstall
+
 - name: install python compose
   pip:
     name: docker-compose
