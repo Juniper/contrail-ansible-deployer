@@ -47,4 +47,4 @@
         name: docker
         state: restarted
 
-  when: docker_registry not in insecure_registries
+  when: docker_registry.split('/')[0] not in insecure_registries
