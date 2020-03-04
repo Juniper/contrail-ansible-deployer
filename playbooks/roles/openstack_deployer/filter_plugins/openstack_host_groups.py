@@ -17,7 +17,7 @@ class FilterModule(object):
         "collectd": ['compute'],
         "grafana": [ "monitoring"],
         "etcd": [ "control"],
-        "influxd": [ "monitoring"],
+        "influxdb": [ "monitoring"],
         "karbor": [ "control"],
         "kibana": [ "control"],
         "telegraf": [ "compute","control","monitoring","network", "storage"],
@@ -56,12 +56,14 @@ class FilterModule(object):
         "tempest": ["control"],
         "senlin": ["control"],
         "vmtp": ["control"],
+        "vitrage": ["control"],
         "watcher": ["control"],
         "rally": ["control"],
         "searchlight": ["control"],
         "octavia": ["control"],
         "designate": ["control"],
         "placement": ["control"],
+        "redis": ["redis"],
         "glance-api": ["glance"],
         "glance-registry": ["glance"],
         "nova-api": ["nova"],
@@ -81,6 +83,9 @@ class FilterModule(object):
         "neutron-metadata-agent": ["neutron"],
         "neutron-vpnaas-agent": ["neutron"],
         "neutron-bgp-dragent": ["neutron"],
+        "ceph-mds": ["ceph"],
+        "ceph-mgr": ["ceph"],
+        "ceph-nfs": ["ceph"],
         "ceph-mon": ["ceph"],
         "ceph-rgw": ["ceph"],
         "ceph-osd": ["storage"],
@@ -167,7 +172,11 @@ class FilterModule(object):
         "designate-sink": ["designate"],
         "designate-backend-bind9": ["designate"],
         "placement-api": ["placement"],
-
+        "vitrage-api": ["vitrage"],
+        "vitrage-notifier": ["vitrage"],
+        "vitrage-graph": ["vitrage"],
+        "vitrage-collector": ["vitrage"],
+        "vitrage-ml": ["vitrage"]
     }
 
     def filters(self):
