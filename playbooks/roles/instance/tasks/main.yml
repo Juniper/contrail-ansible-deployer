@@ -1,6 +1,6 @@
 ---
 - name: set contrail configuration to empty if absent
-  set_fact:
+  set_factt:
    contrail_configuration: {}
   when: contrail_configuration is undefined
   tags:
