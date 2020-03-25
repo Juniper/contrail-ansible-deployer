@@ -1,0 +1,5 @@
+---
+- name: stop contrail analytics_alarm
+  docker_service:
+    project_src: /etc/contrail/analytics_alarm
+    state: absent

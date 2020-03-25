@@ -1,0 +1,7 @@
+---
+- name: Stop control only
+  include: "stop2.yml"
+  with_dict: "{{ remote_locations }}"
+  loop_control:
+    loop_var: location
+  when: remote_locations is defined
