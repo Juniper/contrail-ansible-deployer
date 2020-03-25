@@ -1,0 +1,119 @@
+---
+- name: Create container host group and evaluate variables for Contrail
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  pre_tasks:
+    - name: Expose instances
+      set_fact:
+          instances: "{{ instances }}"
+      when: hostvars['localhost']['instances'] is undefined
+    - name: Expose global configuration
+      set_fact:
+          global_configuration: "{{ global_configuration | default({}) }}"
+      when: hostvars['localhost']['global_configuration'] is undefined
+    - name: Expose remote_locations configuration
+      set_fact:
+          remote_locations: "{{ remote_locations | default({}) }}"
+      when: hostvars['localhost']['remote_locations'] is undefined
+    - name: Expose provider config
+      set_fact:
+          provider_config: "{{ provider_config | default({}) }}"
+      when: hostvars['localhost']['provider_config'] is undefined
+  roles:
+    - contrail_deployer
+    - k8s_deployer
+  vars_files:
+    - "{{ config_file }}"
+  tags: always
+  environment:
+    - "{{ contrail_ansible_environment | default({})}}"
+
+- name: Configure instance(s)
+  hosts: container_hosts
+  gather_facts: yes
+  roles:
+    - instance
+    - docker
+    - contrail_deployer
+  vars_files:
+    - "{{ hostvars['localhost'].config_file }}"
+  environment:
+    - https_proxy: "{{ contrail_configuration.HTTPS_PROXY | default('') }}"
+    - http_proxy: "{{ contrail_configuration.HTTP_PROXY | default('') }}"
+
+- name: ZIU stage 1 stop services
+  hosts: container_hosts
+  gather_facts: yes
+  tasks:
+    - include_vars:
+        dir: "{{ playbook_dir }}/roles/contrail/defaults"
+        extensions: ['yml']
+    - include_role:
+        name: contrail_config
+        tasks_from: stop
+    - include_role:
+        name: contrail_webui
+        tasks_from: stop
+    - include_role:
+        name: contrail_redis
+        tasks_from: stop
+    - include_role:
+        name: contrail_analytics
+        tasks_from: stop
+    - include_role:
+        name: contrail_analytics_alarm
+        tasks_from: stop
+    - include_role:
+        name: contrail_analytics_snmp
+        tasks_from: stop
+  vars_files:
+    - "{{ hostvars['localhost'].config_file }}"
+
+- name: ZIU stage 2 start services
+  hosts: container_hosts
+  gather_facts: yes
+  roles:
+    - contrail_config
+    - contrail_webui
+    - contrail_redis
+    - contrail_analytics
+    - contrail_analytics_alarm
+    - contrail_analytics_snmp
+  vars_files:
+    - "{{ hostvars['localhost'].config_file }}"
+
+- name: ZIU stage 3 stop and start control sequently
+  hosts: container_hosts
+  serial: 1
+  gather_facts: yes
+  tasks:
+    - include_role:
+        name: contrail_control
+        tasks_from: stop
+    - include_role:
+        name: contrail_control_only
+        tasks_from: stop
+    - include_role:
+        name: contrail_control
+    - include_role:
+        name: contrail_control_only
+  vars_files:
+    - "{{ hostvars['localhost'].config_file }}"
+
+- name: ZIU stage 4 stop and start databases
+  hosts: container_hosts
+  gather_facts: yes
+  tasks:
+    - include_role:
+        name: contrail_config_database
+        tasks_from: stop
+    - include_role:
+        name: contrail_analytics_database
+        tasks_from: stop
+    - include_role:
+        name: contrail_config_database
+    - include_role:
+        name: contrail_analytics_database
+  vars_files:
+    - "{{ hostvars['localhost'].config_file }}"
