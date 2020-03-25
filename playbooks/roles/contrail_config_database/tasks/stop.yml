@@ -1,0 +1,5 @@
+---
+- name: stop contrail config database
+  docker_service:
+    project_src: /etc/contrail/config_database
+    state: absent
