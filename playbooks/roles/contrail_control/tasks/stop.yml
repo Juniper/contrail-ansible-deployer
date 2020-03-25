@@ -1,0 +1,5 @@
+---
+- name: "Stop contrail control"
+  docker_service:
+    project_src: /etc/contrail/control
+    state: absent
