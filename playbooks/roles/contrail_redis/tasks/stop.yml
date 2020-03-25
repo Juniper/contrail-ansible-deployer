@@ -1,0 +1,5 @@
+---
+- name: "stop redis"
+  docker_service:
+    project_src: /etc/contrail/redis
+    state: absent

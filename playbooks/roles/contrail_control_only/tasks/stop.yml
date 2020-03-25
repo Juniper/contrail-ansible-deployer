@@ -1,0 +1,9 @@
+---
+- name: Stop control only
+  docker_service:
+    project_src: "/etc/contrail/control_only_{{ location.key }}"
+    state: absent
+  with_dict: "{{ remote_locations }}"
+  loop_control:
+    loop_var: location
+  when: remote_locations is defined
