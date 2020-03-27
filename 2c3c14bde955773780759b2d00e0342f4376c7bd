@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3221fa1b_5b42d337",
+        "filename": "playbooks/ziu.yml",
+        "patchSetId": 6
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 382
+      },
+      "writtenOn": "2020-03-27T11:28:14Z",
+      "side": 1,
+      "message": "please add \u0027serial: 1\u0027 here also",
+      "revId": "2c3c14bde955773780759b2d00e0342f4376c7bd",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
