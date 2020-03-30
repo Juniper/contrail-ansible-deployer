@@ -5,7 +5,7 @@
     host_intf_dict: "{{ host_intf_dict | combine({item.value['ip'] : hostvars[item.value['ip']]['network_interface_detected']}) }}"
   with_dict: "{{ instances }}"
   when:
-    - item.value['ip'] in groups['rabbitmq']
+    - item.value.get('ip') in groups['rabbitmq']
     - inventory_hostname in groups['rabbitmq']
 
 - name: "Build hosts file with ctrl-data and domain suffix when provided"
