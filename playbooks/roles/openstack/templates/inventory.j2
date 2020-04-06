@@ -59,6 +59,12 @@ control
 [influxdb:children]
 monitoring
 
+[prometheus:children]
+monitoring
+
+[kafka:children]
+control
+
 [karbor:children]
 control
 
@@ -78,13 +84,42 @@ control
 [haproxy:children]
 network
 
+[hyperv]
+#hyperv_host
+
+[hyperv:vars]
+#ansible_user=user
+#ansible_password=password
+#ansible_port=5986
+#ansible_connection=winrm
+#ansible_winrm_server_cert_validation=ignore
+
 [mariadb:children]
 control
 
 [rabbitmq:children]
 control
 
-[mongodb:children]
+[outward-rabbitmq:children]
+control
+
+[qdrouterd:children]
+control
+
+[monasca-agent:children]
+compute
+control
+monitoring
+network
+storage
+
+[monasca:children]
+monitoring
+
+[storm:children]
+monitoring
+
+mongodb:children]
 control
 
 [keystone:children]
@@ -97,6 +132,14 @@ control
 control
 
 [neutron:children]
+network
+
+[openvswitch:children]
+network
+compute
+manila-share
+
+[opendaylight:children]
 network
 
 [cinder:children]
@@ -138,6 +181,9 @@ control
 [magnum:children]
 control
 
+[qinling:children]
+control
+
 [sahara:children]
 control
 
@@ -152,6 +198,10 @@ control
 
 [aodh:children]
 control
+
+[cyborg:children]
+control
+compute
 
 [congress:children]
 control
@@ -178,6 +228,9 @@ control
 [vmtp:children]
 control
 
+[vitrage:children]
+control
+
 [watcher:children]
 control
 
@@ -194,6 +247,24 @@ control
 control
 
 [placement:children]
+control
+
+[bifrost:children]
+deployment
+
+[zookeeper:children]
+control
+
+[zun:children]
+control
+
+[skydive:children]
+monitoring
+
+[redis:children]
+control
+
+[blazar:children]
 control
 
 # Additional control implemented here. These groups allow you to control which
@@ -215,6 +286,9 @@ glance
 nova
 
 [nova-conductor:children]
+nova
+
+[nova-super-conductor:children]
 nova
 
 [nova-consoleauth:children]
@@ -245,7 +319,10 @@ neutron
 [neutron-l3-agent:children]
 neutron
 
-[ironic-neutron-agent:children]
+[neutron-metadata-agent:children]
+neutron
+
+[neutron-bgp-dragent:children]
 neutron
 
 [neutron-lbaas-agent:children]
@@ -254,13 +331,25 @@ neutron
 [neutron-infoblox-ipam-agent:children]
 neutron
 
-[neutron-metadata-agent:children]
+[neutron-metering-agent:children]
 neutron
 
 [neutron-vpnaas-agent:children]
 neutron
 
+[ironic-neutron-agent:children]
+neutron
+
 # Ceph
+[ceph-mds:children]
+ceph
+
+[ceph-mgr:children]
+ceph
+
+[ceph-nfs:children]
+ceph
+
 [ceph-mon:children]
 ceph
 
@@ -294,10 +383,14 @@ cloudkitty
 [freezer-api:children]
 freezer
 
+[freezer-scheduler:children]
+freezer
+
 # iSCSI
 [iscsid:children]
 compute
 storage
+ironic
 ironic-conductor
 
 [tgtd:children]
@@ -366,6 +459,50 @@ murano
 [murano-engine:children]
 murano
 
+# Monasca
+[monasca-agent-collector:children]
+monasca-agent
+
+[monasca-agent-forwarder:children]
+monasca-agent
+
+[monasca-agent-statsd:children]
+monasca-agent
+
+[monasca-api:children]
+monasca
+
+[monasca-grafana:children]
+monasca
+
+[monasca-log-api:children]
+monasca
+
+[monasca-log-transformer:children]
+monasca
+
+[monasca-log-persister:children]
+monasca
+
+[monasca-log-metrics:children]
+monasca
+
+[monasca-thresh:children]
+monasca
+
+[monasca-notification:children]
+monasca
+
+[monasca-persister:children]
+monasca
+
+# Storm
+[storm-worker:children]
+storm
+
+[storm-nimbus:children]
+storm
+
 # Ironic
 [ironic-api:children]
 ironic
@@ -389,6 +526,13 @@ magnum
 [magnum-conductor:children]
 magnum
 
+# Qinling
+[qinling-api:children]
+qinling
+
+[qinling-engine:children]
+qinling
+
 # Sahara
 [sahara-api:children]
 sahara
@@ -409,6 +553,12 @@ solum
 [solum-conductor:children]
 solum
 
+[solum-application-deployment:children]
+solum
+
+[solum-image-builder:children]
+solum
+
 # Mistral
 [mistral-api:children]
 mistral
@@ -417,6 +567,9 @@ mistral
 mistral
 
 [mistral-engine:children]
+mistral
+
+[mistral-event-engine:children]
 mistral
 
 # Ceilometer
@@ -435,6 +588,9 @@ ceilometer
 [ceilometer-compute:children]
 compute
 
+[ceilometer-ipmi:children]
+compute
+
 # Aodh
 [aodh-api:children]
 aodh
@@ -447,6 +603,16 @@ aodh
 
 [aodh-notifier:children]
 aodh
+
+# Cyborg
+[cyborg-api:children]
+cyborg
+
+[cyborg-agent:children]
+compute
+
+[cyborg-conductor:children]
+cyborg
 
 # Congress
 [congress-api:children]
@@ -485,6 +651,7 @@ trove
 # Multipathd
 [multipathd:children]
 compute
+storage
 
 # Watcher
 [watcher-api:children]
@@ -530,8 +697,11 @@ designate
 [designate-central:children]
 designate
 
-[designate-mdns:children]
+[designate-producer:children]
 designate
+
+[designate-mdns:children]
+network
 
 [designate-worker:children]
 designate
@@ -545,3 +715,93 @@ designate
 # Placement
 [placement-api:children]
 placement
+
+# Zun
+[zun-api:children]
+zun
+
+[zun-wsproxy:children]
+zun
+
+[zun-compute:children]
+compute
+
+# Skydive
+[skydive-analyzer:children]
+skydive
+
+[skydive-agent:children]
+compute
+network
+
+# Tacker
+[tacker-server:children]
+tacker
+
+[tacker-conductor:children]
+tacker
+
+# Vitrage
+[vitrage-api:children]
+vitrage
+
+[vitrage-notifier:children]
+vitrage
+
+[vitrage-graph:children]
+vitrage
+
+[vitrage-ml:children]
+vitrage
+
+# Blazar
+[blazar-api:children]
+blazar
+
+[blazar-manager:children]
+blazar
+
+# Prometheus
+[prometheus-node-exporter:children]
+monitoring
+control
+compute
+network
+storage
+
+[prometheus-mysqld-exporter:children]
+mariadb
+
+[prometheus-haproxy-exporter:children]
+haproxy
+
+[prometheus-memcached-exporter:children]
+memcached
+
+[prometheus-cadvisor:children]
+monitoring
+control
+compute
+network
+storage
+
+[prometheus-alertmanager:children]
+monitoring
+
+[prometheus-openstack-exporter:children]
+monitoring
+
+[prometheus-elasticsearch-exporter:children]
+elasticsearch
+
+[prometheus-blackbox-exporter:children]
+monitoring
+
+[masakari-api:children]
+control
+
+[masakari-engine:children]
+control
+
+[masakari-monitors:children]
+compute
