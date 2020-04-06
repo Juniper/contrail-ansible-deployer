@@ -96,7 +96,7 @@
   when: external_interface_detected is not defined
 
 # set default internal_address
-- name: Set firs openstack node as default for internal_address
+- name: Set first openstack node as default for internal_address
   set_fact:
     internal_address_detected: "{{ openstack_nodes_list | first }}"
   when:

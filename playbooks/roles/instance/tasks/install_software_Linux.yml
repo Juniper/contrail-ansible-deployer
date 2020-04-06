@@ -33,6 +33,10 @@
 - name: OS specific package install
   include: "{{ ansible_os_family }}.yml"
 
+- name: Include pip installattion
+  include_role:
+    name: pip
+
 - name: Set up ntp
   include: ntp.yml
   when: provider_data.ntpserver is defined
