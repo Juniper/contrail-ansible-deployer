@@ -32,3 +32,9 @@
     dest: "/etc/kolla/config/{{ item.key }}"
     content: "{{ item.value }}"
   with_dict: "{{ kolla_config.customize | default({}) }}"
+
+- name: install kolla libraries
+  shell: "python setup.py install --force"
+  no_log: true
+  args:
+    chdir: "{{ kolla_dir }}"
