@@ -1,0 +1,47 @@
+---
+
+# we have to remove python-requests and pyyaml installed by distutils
+# cause python-requests conflicts with requests lib installed by pip during docker-compose install
+# and pyyaml conflicts with oslo.config that is used for kolla-deployer
+- name: remove packages installed by distutils on RedHat families
+  package:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - python-requests
+    - PyYAML
+  register: res
+  retries: 5
+  until: res | success
+  when: ansible_os_family == 'RedHat'
+
+# NOTE: Do not use easy_install for RedHat. There is a bug that might cause
+# easy_install to hang:
+# https://github.com/ansible/ansible/issues/15769
+# https://bugzilla.redhat.com/show_bug.cgi?id=1702797
+# Use shell to intall pip for RedHat to work around the bug
+
+- name: check if pip present
+  shell: pip2 --version
+  ignore_errors: true
+  register: pip_check
+
+- name: Install pip
+  block:
+    - name: Download pip
+      get_url:
+        url: "{{ get_pip_url }}"
+        dest: /tmp/get-pip.py
+        mode: 0400
+    - name: Install pip
+      shell: "python /tmp/get-pip.py"
+      become: yes
+  when:
+    - pip_check.rc != 0
+
+# if pip was already there then it should be updated if it's version is less than 10.0
+# (it doesn't support python2/3 metadata)
+- name: upgrade pip
+  pip:
+    name: pip>10
+  become: yes
