@@ -33,6 +33,38 @@
 - name: OS specific package install
   include: "{{ ansible_os_family }}.yml"
 
+- name: check if pip present
+  shell: pip --version
+  ignore_errors: true
+  register: pip_check
+
+# NOTE: Do not use easy_install for RedHat. There is a bug that might cause
+# easy_install to hang:
+# https://github.com/ansible/ansible/issues/15769
+# https://bugzilla.redhat.com/show_bug.cgi?id=1702797
+# Use shell to intall pip for RedHat to work around the bug
+- name: Install pip
+  block:
+    - name: Get pip installer
+      get_url:
+        url: "{{ get_pip_url }}"
+        dest: /tmp/get-pip.py
+        mode: 0400
+    - name: Install pip
+      shell: "python /tmp/get-pip.py"
+      register: rc
+      retries: 5
+      until: rc | success
+      become: yes
+  when:
+    - pip_check.rc != 0
+
+- name: upgrade pip
+  pip:
+    name: pip
+    extra_args: --upgrade
+  become: yes
+
 - name: Set up ntp
   include: ntp.yml
   when: provider_data.ntpserver is defined

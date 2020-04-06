@@ -14,40 +14,33 @@
   ignore_errors: true
   register: pip_check
 
-- name: Install pip on RedHat family
+- name: Install pip
   block:
-    - name: install easy_install
-      package:
-        name: python-setuptools
-        state: present
-    - name: install pip package required by kolla playbooks
-      easy_install:
-        name: pip
-        state: latest
+    - name: Download pip
+      get_url:
+        url: "{{ get_pip_url }}"
+        dest: /tmp/get-pip.py
+        mode: 0400
+    - name: Install pip
+      shell: "python /tmp/get-pip.py"
+      become: yes
   when:
     - pip_check.rc != 0
-    - ansible_os_family == 'RedHat'
 
-- name: Install pip on Debian family
-  block:
-    - name: install package
-      apt:
-        name: "{{ item }}"
-        state: present
-      register: res
-      retries: 5
-      until: res | success
-      with_items:
-        - python-setuptools
-        - python-pip
-  when:
-    - pip_check.rc != 0
-    - ansible_os_family == 'Debian'
-
-- name: install right version of jinja2 for kolla
+- name: upgrade pip
   pip:
-    name: jinja2
+    name: pip
     extra_args: --upgrade
+  become: yes
+
+- name: install right versions of kollas' deps
+  pip:
+    name: "{{ item }}"
+    extra_args: --upgrade
+  with_items:
+    - jinja2
+    - setuptools
+    - jmespath
   become: yes
 
 - name: install packages used to generate passwords

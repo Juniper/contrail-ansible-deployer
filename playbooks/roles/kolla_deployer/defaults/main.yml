@@ -1,4 +1,6 @@
 ---
+
+get_pip_url: "https://bootstrap.pypa.io/get-pip.py"
 kolla_config: {}
 default_openstack_sku: queens
 openstack_sku: >-
