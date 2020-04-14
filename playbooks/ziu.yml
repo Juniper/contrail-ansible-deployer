@@ -21,6 +21,8 @@
             provider_config: "{{ provider_config | default({}) }}"
         when: hostvars['localhost']['provider_config'] is undefined
     roles:
+      - pip
+      - { role: kolla_deployer, when: contrail_configuration.CLOUD_ORCHESTRATOR == 'openstack' }
       - contrail_deployer
       - k8s_deployer
     vars_files:
