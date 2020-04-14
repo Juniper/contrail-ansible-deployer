@@ -22,7 +22,9 @@
 - name: Value of k8s version
   debug:
     var: k8s_version
-
+- name: global_configuration
+  debug:
+    var: global_configuration
 
 # dashboard has own set of versions https://github.com/kubernetes/dashboard/tags
 # and K8S_VERSION can't be used directly
