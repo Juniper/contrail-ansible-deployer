@@ -16,6 +16,13 @@
   when:
     - global_configuration is defined
     - global_configuration.K8S_VERSION is defined
+- name: Value of k8s version gc
+  debug:
+    var: global_configuration.K8S_VERSION
+- name: Value of k8s version
+  debug:
+    var: k8s_version
+
 
 # dashboard has own set of versions https://github.com/kubernetes/dashboard/tags
 # and K8S_VERSION can't be used directly
