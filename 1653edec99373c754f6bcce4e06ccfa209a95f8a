@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "83b0c9bc_16495ac4",
+        "filename": "playbooks/ziu.yml",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 382
+      },
+      "writtenOn": "2020-04-14T15:26:13Z",
+      "side": 1,
+      "message": "it should be after contrail_deployer",
+      "revId": "1653edec99373c754f6bcce4e06ccfa209a95f8a",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
