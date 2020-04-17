@@ -26,6 +26,10 @@
   ignore_errors: true
   register: pip_check
 
+- name: Print pip_check parameters
+  debug:
+    var: pip_check
+    
 - name: Install pip
   block:
     - name: Download pip
