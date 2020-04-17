@@ -9,7 +9,7 @@
     state: absent
   with_items:
     - python-requests
-    - pyyaml
+    - PyYAML
   register: res
   retries: 5
   until: res | success
