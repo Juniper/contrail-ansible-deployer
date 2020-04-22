@@ -2,6 +2,8 @@
 
 This set of playbooks installs Contrail Networking using a microservices architecture.
 
+
+
 # quick start for the impatient (requires a CentOS7 instance)...
 
 This set of commands will configure the instance and install AIO contrail with k8s on the instance:
