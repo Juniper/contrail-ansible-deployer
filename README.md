@@ -399,3 +399,6 @@ global_configuration:
 This repository contains several playbooks which are to be involved separately and various roles which are named acccording to the following:
 1. XXX_deployer roles (contrail_deployer, aws_deployer, kolla_deployer, ...) are the roles which are to be run on the deployment machine (the one running ansible_deployer) and to affect the whole cluster. They prepare global variables, initialize kolla or k8s cluster, etc. They are named after ansible_deployer and could've been named contrail_ansible_deployer, aws_ansible_deployer, etc.
 2. XXX roles (contrail, k8s, vcenter, ...) are the roles to be assigned to particular nodes - computes, controllers, analytics_databases and such.
+
+# Known issues
+- If you use as a registry docker.io not set up param `docker_registry` in `instances.yaml` file. Due to unknown bugs in ansible/docker module it can't find image with registry docker.io even if it can pull it.
