@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c443a924_44591b94",
+        "filename": "playbooks/roles/k8s/tasks/main.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 382
+      },
+      "writtenOn": "2020-04-29T08:21:51Z",
+      "side": 1,
+      "message": "what about this version?",
+      "range": {
+        "startLine": 24,
+        "startChar": 4,
+        "endLine": 24,
+        "endChar": 25
+      },
+      "revId": "7decfd1c703b380b69280cc47c1b4b9c44b60935",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
