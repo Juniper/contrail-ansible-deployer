@@ -1,5 +1,0 @@
----
-- name: stop contrail config service
-  docker_service:
-    project_src: /etc/contrail/config
-    state: absent

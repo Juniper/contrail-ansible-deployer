@@ -1,9 +1,0 @@
----
-
-- name: install RedHat/CentOS packages required by kolla playbooks
-  yum:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - python-devel
-    - gcc
