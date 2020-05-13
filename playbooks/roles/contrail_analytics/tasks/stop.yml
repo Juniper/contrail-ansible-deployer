@@ -1,5 +1,0 @@
----
-- name: stop contrail analytics
-  docker_service:
-    project_src: /etc/contrail/analytics
-    state: absent
