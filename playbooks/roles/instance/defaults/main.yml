@@ -1,2 +1,0 @@
-win_docker_config_dir: C:\ProgramData\docker\config
-win_docker_daemon_file: "{{ win_docker_config_dir }}\\daemon.json"

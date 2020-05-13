@@ -1,7 +1,0 @@
----
-- hosts:
-  - localhost
-  tasks:
-  - include_role:
-      name: vcenter
-      vars_from: vcenter_vars.yml

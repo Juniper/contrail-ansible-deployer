@@ -1,4 +1,0 @@
-- name: Create GCE instance
-  include: build_gce_instances.yml
-  when: item.value.provider=='gce'
-  with_dict: "{{ instances }}"

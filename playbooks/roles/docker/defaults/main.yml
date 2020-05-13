@@ -1,8 +1,0 @@
-win_docker_config_directory: C:\ProgramData\Docker\config
-nix_docker_config_directory: /etc/docker
-
-win_docker_config_file: "{{ win_docker_config_directory }}\\daemon.json"
-nix_docker_config_file: "{{ nix_docker_config_directory }}/daemon.json"
-
-win_docker_certs_directory: C:\ProgramData\Docker\certs.d
-nix_docker_certs_directory: /etc/docker/certs.d
