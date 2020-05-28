@@ -30,7 +30,7 @@ The build/controller server is installed with Centos 7.4. Here are the preparati
 yum update -y
 yum install -y yum-plugin-priorities https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 yum install -y python-pip git gcc python-devel sshpass
-pip install "ansible==2.5.0" pyvmomi
+pip install "ansible==2.7.18" pyvmomi
 ```
 
 Next, get the contrail-ansible-deployer from https://www.juniper.net/support/downloads/?p=contrail#sw:

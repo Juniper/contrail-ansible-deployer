@@ -11,7 +11,7 @@ ssh-copy-id 192.168.1.100
 #curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 #chmod +x ./get-pip.py
 #./get-pip.py
-pip install ansible==2.5.2.0
+pip install ansible==2.7.18
 #For Contrail R5.0 use 
 git clone -b R5.0 http://github.com/Juniper/contrail-ansible-deployer
 #For master branch use
@@ -95,7 +95,7 @@ Please check [Optional Contrail Analytics Components](https://github.com/Juniper
 ## Prerequisites
 
 - CentOS 7.4 (kernel >= 3.10.0-693.17.1)
-- Ansible (==2.5.2.0)
+- Ansible (==2.7.18)
 - working name resolution through either DNS or host file for long and short hostnames of the cluster nodes
 - docker engine (tested with 17.03.1-ce)
 - docker-compose (tested with 1.17.0) installed
