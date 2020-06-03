@@ -72,6 +72,7 @@ services:
       - /etc/hosts:/etc/hosts
       - config_cassandra:/var/lib/cassandra/data
       - /etc/contrail/ssl:/etc/contrail/ssl
+      - /var/log/contrail/config-database:/var/log/cassandra
     network_mode: "host"
     logging:
       driver: "{{ config_db_log_driver }}"
@@ -90,6 +91,7 @@ services:
     volumes:
      - /etc/hosts:/etc/hosts
      - config_zookeeper:/data
+     - /var/log/contrail/zookeeper:/var/log/zookeeper
     logging:
       driver: "{{ config_db_log_driver }}"
       options:
@@ -106,6 +108,7 @@ services:
      - NODE_TYPE=config-database
     volumes:
      - /etc/contrail/ssl:/etc/contrail/ssl
+     - /var/log/contrail/rabbitmq:/var/log/rabbitmq
     logging:
       driver: "{{ config_db_log_driver }}"
       options:
