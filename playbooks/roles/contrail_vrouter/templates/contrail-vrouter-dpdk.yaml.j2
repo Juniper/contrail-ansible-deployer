@@ -18,6 +18,7 @@ services:
     network_mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/contrail/loadbalancer:/var/lib/contrail/loadbalancer
     volumes_from:
       - node-init
     depends_on:
