@@ -14,3 +14,11 @@
 - name: make cache to import gpg keys
   command: "yum -q makecache -y --disablerepo='*' --enablerepo='Kubernetes'"
   when: k8s_package_version is defined
+
+# disable obsolete packages to avoid issue in kubernetes repos
+# https://github.com/kubernetes/kubernetes/issues/92242#issuecomment-646588615
+- name: Set obsoletes to 0
+  lineinfile:
+    path: /etc/yum.conf
+    regexp: '^obsoletes=1'
+    line: obsoletes=0
