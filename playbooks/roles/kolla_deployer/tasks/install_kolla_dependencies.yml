@@ -54,6 +54,7 @@
     name: "{{ item }}"
     state: latest
   with_items:
+    - 'stevedore<3.0.0'
     - pycrypto
     - oslo.config
     - oslo.utils
