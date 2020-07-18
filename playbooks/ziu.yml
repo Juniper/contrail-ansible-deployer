@@ -83,6 +83,9 @@
     gather_facts: yes
     tasks:
       - include_role:
+          name: contrail
+          tasks_from: "common_{{ ansible_system }}"
+      - include_role:
           name: contrail_config
         when: roles[instance_name].config is defined
       - include_role:
