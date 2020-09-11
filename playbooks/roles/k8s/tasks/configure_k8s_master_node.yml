@@ -41,6 +41,9 @@
       cp -u /etc/kubernetes/admin.conf $HOME/.kube/config &&
       chown -R $(id -u):$(id -g) $HOME/.kube
   when: listen_ip is defined and master_running == false
+  register: res
+  retries: 5
+  until: res | success
 
 - name: initialize k8s master without listen ip
   shell: |
