@@ -50,6 +50,7 @@
     state: latest
   with_items:
     - pycrypto
-    - oslo.config
-    - oslo.utils
+    - "stevedore<3.0.0"
+    - "oslo.config==7.0.0"
+    - "oslo.utils==3.42.1"
   become: yes
