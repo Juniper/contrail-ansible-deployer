@@ -47,9 +47,11 @@
 - name: install packages used to generate passwords
   pip:
     name: "{{ item }}"
-    state: latest
   with_items:
     - pycrypto
-    - oslo.config
-    - oslo.utils
+    - "stevedore<3.0.0"
+    - "oslo.config==7.0.0"
+    - "oslo.utils==3.42.1"
+    - "requests==2.23.0"
+    - "cryptography==2.8"
   become: yes
