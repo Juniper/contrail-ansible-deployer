@@ -21,7 +21,7 @@
         state: present
     - name: install pip package required by kolla playbooks
       easy_install:
-        name: pip
+        name: "pip==20.1"
         state: latest
   when:
     - pip_check.rc != 0
