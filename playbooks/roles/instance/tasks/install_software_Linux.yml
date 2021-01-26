@@ -45,6 +45,11 @@
     name: docker-compose
     version: "1.24.1"
 
+- name: Hack for CE-10135 install docker-py with older version 
+  pip:
+    name: docker-py
+    version: "1.10.3"
+
 - name: Manage /etc/hosts
   include: manage_etc_hosts.yml
   when: provider_data.manage_etc_hosts | default("True") | bool
