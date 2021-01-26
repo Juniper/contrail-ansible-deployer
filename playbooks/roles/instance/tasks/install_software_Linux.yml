@@ -45,6 +45,11 @@
     name: docker-compose
     version: "1.24.1"
 
+- name: Hack for CE-10135 install docker with older version as per https://github.com/ansible/ansible/issues/38840
+  pip:
+    name: docker
+    version: "2.7.0"
+
 - name: Manage /etc/hosts
   include: manage_etc_hosts.yml
   when: provider_data.manage_etc_hosts | default("True") | bool
