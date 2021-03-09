@@ -1,3 +1,7 @@
 ---
 
+<<<<<<< HEAD   (0cfd02 Adding R1912.L3.1 branch to CI)
 get_pip_url: "https://bootstrap.pypa.io/get-pip.py"
+=======
+get_pip_url: "https://bootstrap.pypa.io/pip/2.7/get-pip.py"
+>>>>>>> CHANGE (f94016 fix url for get-pip.py)
