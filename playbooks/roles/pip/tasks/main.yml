@@ -32,6 +32,7 @@
       get_url:
         url: "{{ get_pip_url }}"
         dest: /tmp/get-pip.py
+        force: yes
         mode: 0400
     - name: Install pip
       shell: "python /tmp/get-pip.py"
