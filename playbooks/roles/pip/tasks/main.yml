@@ -35,7 +35,7 @@
         force: yes
         mode: 0400
     - name: Install pip
-      shell: "python /tmp/get-pip.py"
+      shell: "python /tmp/get-pip.py 'pip==20.1'"
       become: yes
   when:
     - pip_check.rc != 0
@@ -44,5 +44,5 @@
 # (it doesn't support python2/3 metadata)
 - name: upgrade pip
   pip:
-    name: pip>10
+    name: 'pip>=19,<21.0'
   become: yes
